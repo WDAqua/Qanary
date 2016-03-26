@@ -43,7 +43,7 @@
         </plugins>
     </build>
 
-    <artifactId>pipeline</artifactId>
+    <artifactId>qa.pipeline</artifactId>
     <dependencyManagement>
     	<dependencies>
     		<dependency>
