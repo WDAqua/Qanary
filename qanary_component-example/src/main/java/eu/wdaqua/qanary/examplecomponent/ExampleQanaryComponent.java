@@ -39,16 +39,4 @@ public class ExampleQanaryComponent implements QanaryComponent {
 		return myQanaryMessage;
 	}
 
-	/**
-	 * main method will start the web server
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-
-		Properties p = new Properties();
-		new SpringApplicationBuilder(QanaryService.class).properties(p).run(args);
-
-	}
-
 }
