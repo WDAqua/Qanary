@@ -1,6 +1,6 @@
 package eu.wdaqua.qanary.component;
 
-import eu.wdaqua.qanary.QanaryMessage;
+import eu.wdaqua.qanary.message.QanaryMessage;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology

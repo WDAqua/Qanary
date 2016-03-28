@@ -2,7 +2,7 @@ package eu.wdaqua.qanary.component;
 
 import org.springframework.stereotype.Component;
 
-import eu.wdaqua.qanary.QanaryMessage;
+import eu.wdaqua.qanary.message.QanaryMessage;
 
 /**
  * represents a trivial Qanary component, not doing anything (can be removed at
