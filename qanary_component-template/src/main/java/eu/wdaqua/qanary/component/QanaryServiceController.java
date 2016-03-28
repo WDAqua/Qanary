@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.wdaqua.qanary.QanaryMessage;
+import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.config.QanaryConfiguration;
 
 @Controller
