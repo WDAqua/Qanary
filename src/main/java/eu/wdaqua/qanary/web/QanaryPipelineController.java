@@ -1,8 +1,10 @@
-package eu.wdaqua.qanary;
+package eu.wdaqua.qanary.web;
 
 import java.net.URL;
 
+import eu.wdaqua.qanary.business.QanaryConfigurator;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,8 +14,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class QanaryPipelineController {
 
+	private QanaryConfigurator qanaryConfigurator;
+
 	/**
-	 * get some information about your pipeline using the fancy HTML template
+	 * get some information about your business using the fancy HTML template
 	 * description.html
 	 * 
 	 * @return
@@ -55,7 +59,7 @@ public class QanaryPipelineController {
 
 		// TODO: execute the QA process: for each of your components call
 		// /annotatequestion by passing a QanaryMessage to them, OPEN ISSUE:
-		// execute the alignment on pipeline or component side?
+		// execute the alignment on business or component side?
 
 		// TODO: return the answer RDF object
 		return null;

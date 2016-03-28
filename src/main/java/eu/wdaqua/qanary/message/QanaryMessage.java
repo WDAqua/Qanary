@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary;
+package eu.wdaqua.qanary.message;
 
 import java.net.MalformedURLException;
 import java.net.URL;
