@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import eu.wdaqua.qanary.QanaryMessage;
+import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryService;
 import eu.wdaqua.qanary.component.QanaryServiceController;
 import eu.wdaqua.qanary.config.QanaryConfiguration;
