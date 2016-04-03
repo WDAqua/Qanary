@@ -6,6 +6,7 @@ import de.codecentric.boot.admin.event.ClientApplicationEvent;
 import de.codecentric.boot.admin.event.ClientApplicationRegisteredEvent;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import de.codecentric.boot.admin.config.EnableAdminServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -31,7 +34,8 @@ public class QanaryPipeline {
         SpringApplication.run(QanaryPipeline.class, args);
     }
 
-    private QanaryConfigurator configurator;
+    @Autowired
+    public QanaryConfigurator configurator;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -39,15 +43,21 @@ public class QanaryPipeline {
     }
 
     @Bean
-    public Map<String,Integer> componentsToIndexMap(@Value("'${qanary.components}'.split(',')")List<String> components){
-        int i =0;
-        Map<String,Integer> componentsToIndexMap = Maps.newHashMap();
-        for(String component:components){
-            componentsToIndexMap.put(component,i);
+    public Map<String, Integer> componentsToIndexMap(@Value("'${qanary.components}'.split(',')") List<String> components) {
+        int i = 0;
+        Map<String, Integer> componentsToIndexMap = Maps.newHashMap();
+        for (String component : components) {
+            componentsToIndexMap.put(component, i);
             i++;
         }
         return componentsToIndexMap;
     }
+
+    @Bean
+    public QanaryConfigurator configurator(@Value("'${qanary.components}'.split(',')") List<String> components){
+        return new QanaryConfigurator(restTemplate(),componentsToIndexMap(components));
+    }
+
 
     @EventListener(ClientApplicationRegisteredEvent.class)
     public void addComponent(ClientApplicationEvent event) {
