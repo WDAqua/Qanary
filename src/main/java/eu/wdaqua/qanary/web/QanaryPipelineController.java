@@ -1,18 +1,39 @@
 package eu.wdaqua.qanary.web;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.UUID;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.message.QanaryQuestionCreated;
+
 @Controller
 public class QanaryPipelineController {
+
+	private static final Logger logger = LoggerFactory.getLogger(QanaryPipelineController.class);
+
+	// TODO: define directory in config
+	String directoryForSotringQuestionRawData = "/tmp";
 
 	private QanaryConfigurator qanaryConfigurator;
 
@@ -51,35 +72,81 @@ public class QanaryPipelineController {
 	 * 
 	 * @param questionstring
 	 */
-	@RequestMapping(value = "/question", headers = "Accept=application/rdf+xml", method = RequestMethod.POST, produces = {
-			"text/plain;charset=UTF-8" })
+	@RequestMapping(value = "/question", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public URL createQuestion(@RequestParam(value = "question", required = true) String questionstring) {
+	public ResponseEntity<QanaryQuestionCreated> createQuestion(
+			@RequestParam(value = "question", required = true) String questionstring) {
+
+		logger.info("add received question: " + questionstring);
+
+		// store the received question in a file
+		String filename = UUID.randomUUID().toString();
+		String filepath = Paths.get(this.directoryForSotringQuestionRawData, "question_" + filename).toString();
+
+		// Save the file locally
+		try {
+			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)));
+			stream.write(questionstring.getBytes(Charset.defaultCharset()));
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
 		// TODO: insert the question into triplestore
 
-		// TODO: execute the QA process: for each of your components call
+		// TODO: execute? the QA process: for each of your components call
 		// /annotatequestion by passing a QanaryMessage to them, OPEN ISSUE:
 		// execute the alignment on business or component side?
 
-		// TODO: return the answer RDF object
-		return null;
+		QanaryQuestionCreated responseMessage;
+		try {
+			URI uriOfQuestion = new URI("http://localhost:8080/question/" + filename);
+			logger.info("uriOfQuestion: " + uriOfQuestion);
+			responseMessage = new QanaryQuestionCreated(uriOfQuestion);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		// send a HTTP 201 CREATED message back
+		return new ResponseEntity<QanaryQuestionCreated>(responseMessage, HttpStatus.CREATED);
 	}
 
 	/**
-	 * fetch all triples about a given question
+	 * question for a given id, raw return of the data
 	 * 
 	 * @param questionstring
 	 */
-	@RequestMapping(value = "/question/{question}", headers = "Accept=application/rdf+xml", method = RequestMethod.GET, produces = {
-			"text/turtle;charset=UTF-8" })
+	@RequestMapping(value = "/question/{questionid}", method = RequestMethod.GET, produces = MediaType.ALL_VALUE)
 	@ResponseBody
-	public String getQuestion(@PathVariable URL questionuri) {
-		// TODO: fetch the triples about the question from the triplestore
+	public String getQuestion(@PathVariable String questionid) {
 
-		// note: do NOT start QA process
+		// TODO: move outside of this class
+		String filename = Paths.get(this.directoryForSotringQuestionRawData, "question_" + questionid).toString();
+		String content = null;
+		File file = new File(filename);
+		FileReader reader = null;
+		try {
+			reader = new FileReader(file);
+			char[] chars = new char[(int) file.length()];
+			reader.read(chars);
+			content = new String(chars);
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 
-		// TODO: return the complete RDF object
-		return null;
+		return content;
 	}
 
 	/**
