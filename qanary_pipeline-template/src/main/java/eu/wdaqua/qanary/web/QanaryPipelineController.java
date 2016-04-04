@@ -105,14 +105,14 @@ public class QanaryPipelineController {
 	 * @param sparqlquerystring
 	 * @return
 	 */
-	@RequestMapping(value = "/sparql", headers = "Accept=application/rdf+xml", method = RequestMethod.POST, produces = {
-			"text/turtle;charset=UTF-8" })
-	@ResponseBody
-	public String executeSparqlQuery(@RequestParam(value = "query", required = true) String sparqlquerystring) {
-		// TODO: execute the query
-
-		// TODO: return fetched triples
-		return null;
-	}
+//	@RequestMapping(value = "/sparql", headers = "Accept=application/rdf+xml", method = RequestMethod.POST, produces = {
+//			"text/turtle;charset=UTF-8" })
+//	@ResponseBody
+//	public String executeSparqlQuery(@RequestParam(value = "query", required = true) String sparqlquerystring) {
+//		// TODO: execute the query
+//
+//		// TODO: return fetched triples
+//		return null;
+//	}
 
 }

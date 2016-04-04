@@ -9,12 +9,16 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 import de.codecentric.boot.admin.config.EnableAdminServer;
+import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import org.springframework.cloud.netflix.zuul.EnableZuulServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -23,11 +27,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-@SpringBootApplication
+
 @EnableAdminServer
-@EnableDiscoveryClient // registers itself as client for the admin server,
+//@EnableDiscoveryClient // registers itself as client for the admin server,
 // removeable
 @ComponentScan({"eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web"})
+@EnableZuulProxy
+@SpringBootApplication
+@Configuration
 public class QanaryPipeline {
 
     public static void main(String[] args) {
@@ -56,6 +63,11 @@ public class QanaryPipeline {
     @Bean
     public QanaryConfigurator configurator(@Value("'${qanary.components}'.split(',')") List<String> components){
         return new QanaryConfigurator(restTemplate(),componentsToIndexMap(components));
+    }
+
+    @Bean
+    public SimpleFilter simpleFilter() {
+        return new SimpleFilter();
     }
 
 
