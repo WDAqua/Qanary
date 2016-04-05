@@ -24,11 +24,14 @@ public class QanaryMessage extends HashMap<URL, URL> {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryMessage.class);
 
-	// the property URI (key) for accessing the endpoint
+	// the property URI (key) for accessing the endpoint, TODO: move to
+	// QanaryConfiguration
 	public static final String endpointKey = "http://qanary/#endpoint";
-	// the property URI (key) for accessing the input data at the endpoint
+	// the property URI (key) for accessing the input data at the endpoint TODO:
+	// move to QanaryConfiguration
 	public static final String inGraph = "http://qanary/#inGraph";
-	// the property URI (key) for inserting the output into the endpoint
+	// the property URI (key) for inserting the output into the endpoint TODO:
+	// move to QanaryConfiguration
 	public static final String outGraph = "http://qanary/#outGraph";
 
 	/**
@@ -46,21 +49,21 @@ public class QanaryMessage extends HashMap<URL, URL> {
 		URL outGraphKeyURL = new URL(outGraph);
 
 		// just for debugging
-		URL endpointvalue = new URL((String) json.get(endpointKeyURL.toString()));
-		logger.info("construct endpoint: {}={}", endpointKeyURL, endpointvalue);
+		URL endpointValueURL = new URL((String) json.get(endpointKeyURL.toString()));
+		logger.info("construct endpoint: {}={}", endpointKeyURL, endpointValueURL);
 
-		// assign enpoint value to internal map
+		// assign endpoint value to internal map
 		this.put(endpointKeyURL, new URL((String) json.get(endpointKeyURL.toString())));
 		logger.info("construct put endpoint value: {}", this.get(endpointKeyURL));
 
 		// assign inGraph value to internal map
 		this.put(inGraphKeyURL, new URL((String) json.get(inGraphKeyURL.toString())));
 		logger.info("construct put inGraph value: {}", this.get(inGraphKeyURL));
-		
+
 		// assign outGraph value to internal map
 		this.put(outGraphKeyURL, new URL((String) json.get(outGraphKeyURL.toString())));
 		logger.info("construct put outGraph value: {}", this.get(outGraphKeyURL));
-		
+
 	}
 
 	public String asJsonString() {
