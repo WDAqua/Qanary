@@ -27,9 +27,9 @@ public class QanaryMessage extends HashMap<URL, URL> {
 	// the property URI (key) for accessing the endpoint
 	public static final String endpointKey = "http://qanary/#endpoint";
 	// the property URI (key) for accessing the input data at the endpoint
-	public static final String inGraph = "http://qanary/#endpoint";
+	public static final String inGraph = "http://qanary/#inGraph";
 	// the property URI (key) for inserting the output into the endpoint
-	public static final String outGraph = "http://qanary/#endpoint";
+	public static final String outGraph = "http://qanary/#outGraph";
 
 	/**
 	 * default constructor needed for post communication
@@ -42,17 +42,25 @@ public class QanaryMessage extends HashMap<URL, URL> {
 		JSONObject json = JSONObject.fromObject(jsonString);
 
 		URL endpointKeyURL = new URL(endpointKey);
+		URL inGraphKeyURL = new URL(inGraph);
+		URL outGraphKeyURL = new URL(outGraph);
 
 		// just for debugging
 		URL endpointvalue = new URL((String) json.get(endpointKeyURL.toString()));
 		logger.info("construct endpoint: {}={}", endpointKeyURL, endpointvalue);
 
-		// assign value to internal map
+		// assign enpoint value to internal map
 		this.put(endpointKeyURL, new URL((String) json.get(endpointKeyURL.toString())));
-		logger.info("construct put endpoint value: {}", new URL((String) json.get(endpointKeyURL.toString())));
+		logger.info("construct put endpoint value: {}", this.get(endpointKeyURL));
 
-		// TODO: add input graph
-		// TODO: add output graph
+		// assign inGraph value to internal map
+		this.put(inGraphKeyURL, new URL((String) json.get(inGraphKeyURL.toString())));
+		logger.info("construct put inGraph value: {}", this.get(inGraphKeyURL));
+		
+		// assign outGraph value to internal map
+		this.put(outGraphKeyURL, new URL((String) json.get(outGraphKeyURL.toString())));
+		logger.info("construct put outGraph value: {}", this.get(outGraphKeyURL));
+		
 	}
 
 	public String asJsonString() {
