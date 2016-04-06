@@ -12,11 +12,12 @@ import eu.wdaqua.qanary.message.QanaryMessage;
  *
  */
 @Component
-public class QanaryComponentImpl implements QanaryComponent {
+public class QanaryComponentImpl extends QanaryComponent {
 
 	/**
 	 * default processor of a QanaryMessage
 	 */
+	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
 		return myQanaryMessage;
 	}
