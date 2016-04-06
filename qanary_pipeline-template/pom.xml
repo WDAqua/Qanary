@@ -42,6 +42,12 @@
 			<artifactId>json-lib-ext-spring</artifactId>
 			<version>1.0.2</version>
 		</dependency>
+		<dependency>
+  			<groupId>org.apache.jena</groupId>
+  			<artifactId>apache-jena-libs</artifactId>
+  			<type>pom</type>
+  			<version>2.12.1</version>
+    		</dependency>
 	</dependencies>
 
 	<properties>
