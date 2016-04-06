@@ -52,18 +52,6 @@ public class QanaryPipelineController {
 	}
 
 	/**
-	 * get some information about your business using the fancy HTML template
-	 * description.html
-	 * 
-	 * @return
-	 */
-	@RequestMapping("/description")
-	public String description() {
-		// TODO: take from config "1st Qanary test service"
-		return "description";
-	}
-
-	/**
 	 * register the URL of a service, optionally by calling via HTTP
 	 * 
 	 * @param questionstring
@@ -137,6 +125,8 @@ public class QanaryPipelineController {
 	@RequestMapping(value = "/question/{questionid}", method = RequestMethod.DELETE, produces = "application/json")
 	@ResponseBody
 	public String deleteQuestion(@PathVariable String questionid) throws HttpRequestMethodNotSupportedException {
+		// TODO: please implement deletion of file if and only if they are in
+		// this question directory (security!)
 		throw new HttpRequestMethodNotSupportedException("not yet implemented");
 	}
 
