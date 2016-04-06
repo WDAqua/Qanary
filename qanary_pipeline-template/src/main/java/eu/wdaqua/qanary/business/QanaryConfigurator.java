@@ -26,6 +26,7 @@ public class QanaryConfigurator {
     private final RestTemplate restTemplate;
     private List<QanaryComponent> components;
     private final Map<String, Integer> componentsToIndexMap;
+    private final String port="8080";
 
     public QanaryConfigurator(RestTemplate restTemplate, Map<String, Integer> componentsToIndexMap) {
         this.restTemplate = restTemplate;
@@ -64,6 +65,11 @@ public class QanaryConfigurator {
                 qanaryComponent -> qanaryComponent.getName().equals(application.getName()
                 )
         );
+    }
+    
+    // TODO: Implement set by configuration
+    public String getPort(){
+    	return this.port;
     }
 
 }
