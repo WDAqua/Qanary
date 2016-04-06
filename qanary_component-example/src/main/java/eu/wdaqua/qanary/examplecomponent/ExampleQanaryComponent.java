@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryComponent;
+import eu.wdaqua.qanary.message.QanaryMessage;
 
 @Component
-public class ExampleQanaryComponent implements QanaryComponent {
+public class ExampleQanaryComponent extends QanaryComponent {
 	private static final Logger logger = LoggerFactory.getLogger(ExampleQanaryComponent.class);
 
 	/**
