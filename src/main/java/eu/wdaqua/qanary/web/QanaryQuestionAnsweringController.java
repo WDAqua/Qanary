@@ -59,24 +59,11 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/questionanswering", method = RequestMethod.POST)
 	@ResponseBody
 	public String questionanswering(@RequestParam(value = "question", required = true) URL questionUri) {
-
-		System.out.println("question: " + questionUri);
-		System.out.println("host: " + qanaryConfigurator.getHost());
-		System.out.println("port: " + qanaryConfigurator.getPort());
-		System.out.println("endpoint: " + qanaryConfigurator.getEndpoint());
-
-		UUID runID = UUID.randomUUID();
-
-		// Create a new graph with this UUID
-
 		// Create the name of a new named graph
+		UUID runID = UUID.randomUUID();
 		String namedGraph = runID.toString();
-
-		// TODO: add address of the triplestore
-		String triplestore = "????";
-
 		this.initGraphInTripelStore(namedGraph, questionUri);
-
+		
 		// TODO: call all defined components
 
 		return runID.toString();
