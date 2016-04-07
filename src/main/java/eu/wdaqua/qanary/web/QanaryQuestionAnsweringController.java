@@ -1,10 +1,15 @@
 package eu.wdaqua.qanary.web;
 
+import java.net.URL;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
@@ -23,7 +28,29 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 
 @Controller
 public class QanaryQuestionAnsweringController {
-	private QanaryConfigurator qanaryConfigurator;
+
+	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
+
+	private final QanaryConfigurator qanaryConfigurator;
+
+	/**
+	 * inject QanaryConfigurator
+	 */
+	@Autowired
+	public QanaryQuestionAnsweringController(QanaryConfigurator qanaryConfigurator) {
+		this.qanaryConfigurator = qanaryConfigurator;
+	}
+
+	/**
+	 * a simple HTML input form for starting a question answering processs
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/startquestionanswering", method = RequestMethod.GET)
+	public String startquestionanswering() {
+		return "startquestionanswering";
+	}
+
 	/**
 	 * start a configured process
 	 * 
@@ -31,63 +58,24 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/questionanswering", method = RequestMethod.POST)
 	@ResponseBody
-	public String questionanswering() {
+	public String questionanswering(@RequestParam(value = "question", required = true) URL questionUri) {
+
+		System.out.println("question: " + questionUri);
+		System.out.println("host: " + qanaryConfigurator.getHost());
+		System.out.println("port: " + qanaryConfigurator.getPort());
+		System.out.println("endpoint: " + qanaryConfigurator.getEndpoint());
 
 		UUID runID = UUID.randomUUID();
-		
-		
-		//Create a new graph with this UUID
-		
-		//Create the name of a new named graph
-		String namedGraph=runID.toString();
-		//TODO add here blablabla/raw
-		String uriQuestion="???";
-		String q="";
-		//TODO: add address of the triplestore
-		String triplestore="????";
-		
-	    //Load the Open Annotation Ontology
-		// TODO: store this locally for performance issues
-	    q="LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH "+ namedGraph;
-	    loadTripleStore(q, triplestore);
-		
-	    System.out.println("UPDATED");
-	    
-	    // TODO: load ontology into graph
-		//Load the QAontology
-		q="LOAD <http://localhost:"+qanaryConfigurator.getPort()+"/QAOntology_raw.ttl> INTO GRAPH "+ namedGraph;
-		loadTripleStore(q, triplestore);
-		
-	    //Prepare the question, answer and dataset objects
-	    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-	      "INSERT DATA {GRAPH "+namedGraph+"{ <"+uriQuestion+"> a qa:Question}}";
-	    loadTripleStore(q, triplestore);
-	   
-	    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-  	      "INSERT DATA {GRAPH "+namedGraph+"{<http://localhost:"+qanaryConfigurator.getPort()+"/Answer> a qa:Answer}}";
-	    loadTripleStore(q, triplestore);
-  	    
-	  	q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-  		  "INSERT DATA {GRAPH "+namedGraph+"{<http://localhost:"+qanaryConfigurator.getPort()+"/Dataset> a qa:Dataset}}";
-	  	loadTripleStore(q, triplestore);
-	  	
-	  	//Make the first two annotations
-	  	q="PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-	  	 +"PREFIX qa: <http://www.wdaqua.eu/qa#> "
-	  	 +"INSERT DATA { "
-	  	 +"GRAPH "+namedGraph+"{ "
-	  	 +"<anno1> a  oa:AnnotationOfQuestion; "
-		 +"   oa:hasTarget <"+uriQuestion+"> ;"
-		 +"   oa:hasBody   <URIAnswer>   ."
-		 +"<anno2> a  oa:AnnotationOfQuestion;"
-		 +"   oa:hasTarget <"+uriQuestion+"> ;"
-		 +"   oa:hasBody   <URIDataset> "
-		 +"}}";  
-		loadTripleStore(q, triplestore);
-		
-		
 
-		
+		// Create a new graph with this UUID
+
+		// Create the name of a new named graph
+		String namedGraph = runID.toString();
+
+		// TODO: add address of the triplestore
+		String triplestore = "????";
+
+		this.initGraphInTripelStore(namedGraph, questionUri);
 
 		// TODO: call all defined components
 
@@ -95,14 +83,72 @@ public class QanaryQuestionAnsweringController {
 	}
 
 	/**
+	 * init the grpah in the triplestore (c.f., applicationproperties)
+	 * 
+	 * @param namedGraph
+	 * @param questionUri
+	 */
+	private void initGraphInTripelStore(String namedGraph, URL questionUri) {
+		URL triplestore = qanaryConfigurator.getEndpoint();
+
+		// Load the Open Annotation Ontology
+		// TODO: store this locally for performance issues
+		String sparqlquery = "";
+		sparqlquery = "LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH " + namedGraph;
+		loadTripleStore(sparqlquery, triplestore);
+
+		logger.debug("UPDATED");
+
+		// TODO: load ontology into graph
+		// Load the QAontology
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/QAOntology_raw.ttl> INTO GRAPH "
+				+ namedGraph;
+		loadTripleStore(sparqlquery, triplestore);
+
+		// Prepare the question, answer and dataset objects
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{ <"
+				+ questionUri.toString() + "> a qa:Question}}";
+		loadTripleStore(sparqlquery, triplestore);
+
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph
+				+ "{" + this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		loadTripleStore(sparqlquery, triplestore);
+
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{"
+				+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
+		loadTripleStore(sparqlquery, triplestore);
+
+		// Make the first two annotations
+		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+				+ "INSERT DATA { " + "GRAPH " + namedGraph //
+				+ "{ " //
+				+ "<anno1> a  oa:AnnotationOfQuestion; " //
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
+				+ "   oa:hasBody   <URIAnswer>   ." //
+				+ "<anno2> a  oa:AnnotationOfQuestion;" //
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
+				+ "   oa:hasBody   <URIDataset> " + "}}";
+		loadTripleStore(sparqlquery, triplestore);
+	}
+
+	/**
 	 * executes a SPARQL INSERT into the triplestore
+	 * 
 	 * @param query
 	 * @return map
 	 */
-	public static void loadTripleStore(String sparqlQuery, String endpoint){
-		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
-		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);	
+	public static void loadTripleStore(String sparqlQuery, URL endpoint) {
+		UpdateRequest request = UpdateFactory.create(sparqlQuery);
+		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint.toString());
 		proc.execute();
 	}
-	
+
+	/**
+	 * returns a valid URL (string) of configured properties
+	 * 
+	 */
+	private String getQuestionAnsweringHostUrlString() {
+		return this.qanaryConfigurator.getHost() + ":" + this.qanaryConfigurator.getPort() + "/";
+	}
 }
