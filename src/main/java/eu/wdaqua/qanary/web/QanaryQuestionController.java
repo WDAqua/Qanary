@@ -102,12 +102,6 @@ public class QanaryQuestionController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
-		// TODO: insert the question into triplestore
-
-		// TODO: execute? the QA process: for each of your components call
-		// /annotatequestion by passing a QanaryMessage to them, OPEN ISSUE:
-		// execute the alignment on business or component side?
-
 		QanaryQuestionCreated responseMessage;
 		try {
 			URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
@@ -173,10 +167,11 @@ public class QanaryQuestionController {
 	 * question for a given id, raw return of the data
 	 * 
 	 * @param questionstring
+	 * @throws IOException
 	 */
 	@RequestMapping(value = "/question/{questionid}/raw", method = RequestMethod.GET, produces = MediaType.ALL_VALUE)
 	@ResponseBody
-	public String getQuestionRawData(@PathVariable String questionid) {
+	public String getQuestionRawData(@PathVariable String questionid) throws IOException {
 
 		// TODO: move outside of this class
 		String filename = Paths.get(this.getDirectoryForStoringQuestionRawData(), questionid).toString();
@@ -188,7 +183,6 @@ public class QanaryQuestionController {
 			char[] chars = new char[(int) file.length()];
 			reader.read(chars);
 			content = new String(chars);
-			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -196,8 +190,8 @@ public class QanaryQuestionController {
 				try {
 					reader.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					throw e;
 				}
 			}
 		}
