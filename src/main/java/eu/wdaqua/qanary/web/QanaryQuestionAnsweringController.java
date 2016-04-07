@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.web;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
 
@@ -20,12 +21,12 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 
 /**
- * controller for processing
+ * controller for processing questions, i.e., related to the question answering
+ * process
  * 
  * @author AnBo
  *
  */
-
 @Controller
 public class QanaryQuestionAnsweringController {
 
@@ -63,7 +64,7 @@ public class QanaryQuestionAnsweringController {
 		UUID runID = UUID.randomUUID();
 		String namedGraph = runID.toString();
 		this.initGraphInTripelStore(namedGraph, questionUri);
-		
+
 		// TODO: call all defined components
 
 		return runID.toString();
@@ -76,7 +77,7 @@ public class QanaryQuestionAnsweringController {
 	 * @param questionUri
 	 */
 	private void initGraphInTripelStore(String namedGraph, URL questionUri) {
-		URL triplestore = qanaryConfigurator.getEndpoint();
+		URI triplestore = qanaryConfigurator.getEndpoint();
 
 		// Load the Open Annotation Ontology
 		// TODO: store this locally for performance issues
@@ -97,8 +98,8 @@ public class QanaryQuestionAnsweringController {
 				+ questionUri.toString() + "> a qa:Question}}";
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph
-				+ "{" + this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{"
+				+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
 		loadTripleStore(sparqlquery, triplestore);
 
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{"
@@ -125,7 +126,7 @@ public class QanaryQuestionAnsweringController {
 	 * @param query
 	 * @return map
 	 */
-	public static void loadTripleStore(String sparqlQuery, URL endpoint) {
+	public static void loadTripleStore(String sparqlQuery, URI endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint.toString());
 		proc.execute();
