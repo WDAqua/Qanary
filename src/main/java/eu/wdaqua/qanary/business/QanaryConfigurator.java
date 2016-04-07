@@ -1,6 +1,6 @@
 package eu.wdaqua.qanary.business;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,10 +27,10 @@ public class QanaryConfigurator {
 	private final Map<String, Integer> componentsToIndexMap;
 	private final int port;
 	private final String host;
-	private final URL endpoint;
+	private final URI endpoint;
 
 	public QanaryConfigurator(RestTemplate restTemplate, Map<String, Integer> componentsToIndexMap, String host,
-			int port, URL endpoint) {
+			int port, URI endpoint) {
 		this.restTemplate = restTemplate;
 		this.componentsToIndexMap = Maps.newHashMap();
 
@@ -80,7 +80,7 @@ public class QanaryConfigurator {
 		return this.host;
 	}
 
-	public URL getEndpoint() {
+	public URI getEndpoint() {
 		return this.endpoint;
 	}
 
