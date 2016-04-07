@@ -78,11 +78,13 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private void initGraphInTripelStore(String namedGraph, URL questionUri) {
 		URI triplestore = qanaryConfigurator.getEndpoint();
+		namedGraph = "<urn:graph:" + namedGraph + ">";
 
 		// Load the Open Annotation Ontology
 		// TODO: store this locally for performance issues
 		String sparqlquery = "";
 		sparqlquery = "LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH " + namedGraph;
+		System.out.println("\n ++++++++++++++++\n" + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		logger.debug("UPDATED");
