@@ -1,6 +1,6 @@
 package eu.wdaqua.qanary;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +58,7 @@ public class QanaryPipeline {
 	@Bean
 	public QanaryConfigurator configurator(@Value("'${qanary.components}'.split(',')") List<String> components,
 			@Value("${server.host}") @NotNull String host, @Value("${server.port}") @NotNull int port,
-			@Value("${qanary.triplestore}") @NotNull URL endpoint) {
+			@Value("${qanary.triplestore}") @NotNull URI endpoint) {
 		return new QanaryConfigurator(restTemplate(), componentsToIndexMap(components), host, port, endpoint);
 	}
 
