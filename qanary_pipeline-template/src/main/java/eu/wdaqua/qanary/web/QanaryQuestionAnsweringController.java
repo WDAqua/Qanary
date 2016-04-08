@@ -13,6 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateProcessor;
@@ -35,11 +42,18 @@ public class QanaryQuestionAnsweringController {
 	private final QanaryConfigurator qanaryConfigurator;
 
 	/**
+	 * Jena model
+	 */
+	private final Model model;
+
+	/**
 	 * inject QanaryConfigurator
 	 */
 	@Autowired
 	public QanaryQuestionAnsweringController(QanaryConfigurator qanaryConfigurator) {
 		this.qanaryConfigurator = qanaryConfigurator;
+
+		model = ModelFactory.createDefaultModel();
 	}
 
 	/**
@@ -85,7 +99,8 @@ public class QanaryQuestionAnsweringController {
 		String sparqlquery = "";
 		sparqlquery = "LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH " + namedGraph;
 		System.out.println("\n ++++++++++++++++\n" + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		insertSparqlIntoTriplestore(sparqlquery); // fail
+		// loadTripleStore(sparqlquery, triplestore);
 
 		logger.debug("UPDATED");
 
@@ -120,6 +135,20 @@ public class QanaryQuestionAnsweringController {
 				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
 				+ "   oa:hasBody   <URIDataset> " + "}}";
 		loadTripleStore(sparqlquery, triplestore);
+	}
+
+	/**
+	 * insert into local Jena triplestore
+	 * 
+	 * TODO: needs to be extracted
+	 * 
+	 * @param sparqlQuery
+	 */
+	public void insertSparqlIntoTriplestore(String sparqlQuery) {
+
+		Query qry = QueryFactory.create(sparqlQuery);
+		QueryExecution qe = QueryExecutionFactory.create(qry, this.model);
+		ResultSet rs = qe.execSelect();
 	}
 
 	/**
