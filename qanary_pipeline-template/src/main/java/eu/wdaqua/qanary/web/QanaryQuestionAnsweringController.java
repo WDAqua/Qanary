@@ -1,9 +1,15 @@
 package eu.wdaqua.qanary.web;
 
-import java.net.URI;
-import java.net.URL;
-import java.util.UUID;
-
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.core.DatasetImpl;
+import com.hp.hpl.jena.sparql.core.Quad;
+import com.hp.hpl.jena.sparql.graph.GraphFactory;
+import com.hp.hpl.jena.sparql.modify.GraphStoreBasic;
+import com.hp.hpl.jena.sparql.util.NodeUtils;
+import com.hp.hpl.jena.update.*;
+import eu.wdaqua.qanary.business.QanaryConfigurator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.core.DatasetImpl;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.graph.GraphFactory;
-import com.hp.hpl.jena.sparql.modify.GraphStoreBasic;
-import com.hp.hpl.jena.sparql.util.NodeUtils;
-import com.hp.hpl.jena.update.GraphStore;
-import com.hp.hpl.jena.update.UpdateExecutionFactory;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateProcessor;
-import com.hp.hpl.jena.update.UpdateRequest;
-
-import eu.wdaqua.qanary.business.QanaryConfigurator;
+import java.net.URI;
+import java.net.URL;
+import java.util.UUID;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -167,7 +161,7 @@ public class QanaryQuestionAnsweringController {
 	 */
 	public void insertSparqlIntoTriplestore(final String sparqlQuery) {
 		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
-		final UpdateProcessor updateProcessor = UpdateExecutionFactory.create(sparqlQuery, inMemoryStore);
+		final UpdateProcessor updateProcessor = UpdateExecutionFactory.create(request, inMemoryStore);
 		updateProcessor.execute();
 	}
 

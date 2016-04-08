@@ -2,6 +2,9 @@ package eu.wdaqua.qanary.sparql;
 
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.shared.JenaException;
+import com.hp.hpl.jena.sparql.graph.GraphFactory;
+import com.hp.hpl.jena.sparql.util.NodeUtils;
 import com.hp.hpl.jena.update.*;
 
 /**
@@ -32,8 +35,16 @@ public class SparqlInMemoryStore implements SparqlConnector {
 
     @Override
     public void update(final String query) {
-        final UpdateRequest update = UpdateFactory.create(query);
-        final UpdateProcessor processor = UpdateExecutionFactory.create(update, store);
-        processor.execute();
+        try {
+            final UpdateRequest update = UpdateFactory.create(query);
+            final UpdateProcessor processor = UpdateExecutionFactory.create(update, store);
+            processor.execute();
+        } catch (final JenaException e) {
+            if (e.getMessage().startsWith("No such graph")) {
+                final String graph = e.getMessage().replace("No such graph: ", "");
+                store.addGraph(NodeUtils.asNode(graph), GraphFactory.createGraphMem());
+                update(query);
+            }
+        }
     }
 }
