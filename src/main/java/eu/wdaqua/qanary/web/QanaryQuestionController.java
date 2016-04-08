@@ -1,14 +1,9 @@
 package eu.wdaqua.qanary.web;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.message.QanaryQuestionInformation;
-import eu.wdaqua.qanary.sparql.SparqlConnector;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -41,8 +35,6 @@ public class QanaryQuestionController {
 
     private final QanaryConfigurator qanaryConfigurator;
 
-    private final SparqlConnector sparqlConnector;
-
     // TODO: define directory in config
     String directoryForStoringQuestionRawData = "/tmp/questions";
 
@@ -50,10 +42,8 @@ public class QanaryQuestionController {
      * inject QanaryConfigurator
      */
     @Autowired
-    public QanaryQuestionController(final QanaryConfigurator qanaryConfigurator,
-            final SparqlConnector sparqlConnector) {
+    public QanaryQuestionController(final QanaryConfigurator qanaryConfigurator) {
         this.qanaryConfigurator = qanaryConfigurator;
-        this.sparqlConnector = sparqlConnector;
     }
 
     /**
@@ -212,15 +202,6 @@ public class QanaryQuestionController {
         // TODO: fetch the processing status of the given question URL
         // TODO: OR return the complete RDF object
         return null;
-    }
-
-    @RequestMapping(value = "/sparql")
-    public void sparql(final String query, final HttpServletResponse response) throws IOException {
-        if (StringUtils.containsIgnoreCase(query, "select")) {
-            final ResultSet result = sparqlConnector.select(query);
-            ResultSetFormatter.output(response.getOutputStream(), result, ResultsFormat.FMT_RDF_TURTLE);
-
-        }
     }
 
 }
