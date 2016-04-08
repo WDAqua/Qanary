@@ -92,8 +92,8 @@ public class QanaryQuestionAnsweringController {
 
         // Load the Open Annotation Ontology
         // TODO: store this locally for performance issues
-//        String sparqlquery = "";
-//        sparqlquery = "LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH " + namedGraph;
+        String sparqlquery = "";
+        //        sparqlquery = "LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH " + namedGraph;
 
         // Using local jean store to store the data
         //TODO: is this step needed on every execution or should it no be an init step?
