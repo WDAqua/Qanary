@@ -6,7 +6,7 @@ import org.springframework.boot.orm.jpa.EntityScan;
 
 /**
  * message object send back to client by /question endpoint in
- * {@link QanaryPipelineController}
+ * {@link QanarySparqlController}
  * 
  * @author AnBo
  *
