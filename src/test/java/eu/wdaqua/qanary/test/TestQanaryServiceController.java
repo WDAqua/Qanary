@@ -8,7 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
@@ -100,7 +101,7 @@ public class TestQanaryServiceController {
 		QanaryMessage requestMessage;
 		try {
 			requestMessage = new QanaryMessage(jsonObject.toJSONString());
-		} catch (MalformedURLException e) {
+		} catch (URISyntaxException e) {
 			fail(e.getMessage());
 			return;
 		}
@@ -131,8 +132,8 @@ public class TestQanaryServiceController {
 			return;
 		}
 
-		for (Entry<URL, URL> entry : requestMessage.entrySet()) {
-			URL key = entry.getKey();
+		for (Entry<URI, URI> entry : requestMessage.entrySet()) {
+			URI key = entry.getKey();
 			int compareResult = entry.getValue().toString().compareTo(resultMessage.get(key).toString());
 			assertTrue("check result vs. request: " + key, compareResult == 0);
 		}
@@ -161,15 +162,15 @@ public class TestQanaryServiceController {
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URL endpointKeyUrlFromMessage = message.get(new URL(QanaryMessage.endpointKey));
+			URI endpointKeyUrlFromMessage = message.get(new URI(QanaryMessage.endpointKey));
 			Assert.notNull(endpointKeyUrlFromMessage);
 
-			URL endpointKeyUrlFromHere = new URL(testEndPoint);
+			URI endpointKeyUrlFromHere = new URI(testEndPoint);
 
 			// TODO: more tests to ensure mechanism
 			assertTrue(endpointKeyUrlFromHere.toString().compareTo(endpointKeyUrlFromMessage.toString()) == 0);
 
-		} catch (MalformedURLException e) {
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
