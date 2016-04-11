@@ -14,15 +14,20 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -61,6 +66,40 @@ public class QanaryQuestionAnsweringController {
 	public String startquestionanswering() {
 		return "startquestionanswering";
 	}
+	
+	
+	/**
+	 * exposing the oa vocabulary
+	 *
+	 * @return
+	 */
+	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
+	@ResponseBody
+	public FileSystemResource getFile1() {
+	    return new FileSystemResource("src/main/resources/oa.owl"); 
+	}
+	
+	/**
+	 * exposing the qanary ontology
+	 *
+	 * @return
+	 */
+	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
+	@ResponseBody
+	public FileSystemResource getFile2() {
+	    return new FileSystemResource("src/main/resources/qanaryOntology.ttl"); 
+	}
+
+	
+	/*
+	 @ResponseBody
+	public String plaintext(HttpServletResponse response) {
+	    response.setContentType("text/turtle");
+	    response.setCharacterEncoding("UTF-8");
+	    return "qanaryOntology";
+	}
+	 * 
+	 */
 
 	/**
 	 * start a configured process
@@ -94,15 +133,12 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private void initGraphInTripelStore(String namedGraph, final URL questionUri) {
 		final URI triplestore = qanaryConfigurator.getEndpoint();
+		logger.info("Triplestore "+triplestore);
 		namedGraph = "<urn:graph:" + namedGraph + ">";
-
-		// Load the Open Annotation Ontology
-		// TODO: store this locally for performance issues
 		 String sparqlquery = "";
-		// sparqlquery = "LOAD
-		// <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH
-		// " + namedGraph;
-
+		 
+		/*
+		// TODO: please look if this code is still necessary. PS: I really would prefer as a triplesotre and external service and not an internal one. It is easier to debug.
 		// Using local jean store to store the data
 		// TODO: is this step needed on every execution or should it no be an
 		// init step?
@@ -116,39 +152,48 @@ public class QanaryQuestionAnsweringController {
 		System.out.println("\n ++++++++++++++++\n" + sparqlquery);
 		insertSparqlIntoTriplestore(sparqlquery); // fail
 		// loadTripleStore(sparqlquery, triplestore);
+		 */
 
-		logger.debug("UPDATED");
-
-		// TODO: load ontology into graph
-		// Load the QAontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/QAOntology_raw.ttl> INTO GRAPH "
-				+ namedGraph;
+		// Load the Open Annotation Ontology
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "+ namedGraph;
+		logger.info("Sparql query "+sparqlquery);
+		loadTripleStore(sparqlquery, triplestore);
+		
+		// Load the Qanary Ontology
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "+ namedGraph;
+		logger.info("Sparql query "+sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Prepare the question, answer and dataset objects
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{ <"
-				+ questionUri.toString() + "> a qa:Question}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+					+ "INSERT DATA {GRAPH " + namedGraph + " { <"+ questionUri.toString() + "> a qa:Question}}";
+		logger.info("Sparql query "+sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{"
-				+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>"
+					+ "INSERT DATA {GRAPH " + namedGraph +
+					" {<"+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		logger.info("Sparql query "+sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + "{"
-				+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>"
+					+ "INSERT DATA {GRAPH " + namedGraph 
+					+ " {<"+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
+		logger.info("Sparql query "+sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Make the first two annotations
-		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA { " + "GRAPH " + namedGraph //
-				+ "{ " //
-				+ "<anno1> a  oa:AnnotationOfQuestion; " //
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
-				+ "   oa:hasBody   <URIAnswer>   ." //
-				+ "<anno2> a  oa:AnnotationOfQuestion;" //
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
+		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+				+ "INSERT DATA { " + "GRAPH " + namedGraph +" "
+				+ "{ "
+				+ "<anno1> a  oa:AnnotationOfQuestion; " 
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ;"
+				+ "   oa:hasBody   <URIAnswer>   . "
+				+ "<anno2> a  oa:AnnotationOfQuestion; "
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ; "
 				+ "   oa:hasBody   <URIDataset> " + "}}";
+		logger.info("Sparql query "+sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 	}
 
