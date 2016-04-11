@@ -43,7 +43,7 @@ public class QanaryComponentStanfordNER implements QanaryComponent {
 			
 			//STEP1: Retrive the named graph end the endpoint
 			String endpoint=QanaryMessage.get(new URL(QanaryMessage.endpointKey)).toString();
-			String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraph)).toString();
+			String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraphKey)).toString();
 			logger.info("store data at endpoint {}", QanaryMessage.get(new URL(QanaryMessage.endpointKey)));
 			logger.info("store data in graph {}", namedGraph);
 			
