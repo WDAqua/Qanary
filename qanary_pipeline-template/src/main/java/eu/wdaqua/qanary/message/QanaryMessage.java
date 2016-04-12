@@ -120,6 +120,10 @@ public class QanaryMessage extends HashMap<URI, URI> {
 		this.setValues(endpointValue, inGraphValue, outGraphValue);
 	}
 
+	public QanaryMessage(URI endpoint, String namedGraph) {
+		// TODO Auto-generated constructor stub
+	}
+
 	public String asJsonString() {
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
