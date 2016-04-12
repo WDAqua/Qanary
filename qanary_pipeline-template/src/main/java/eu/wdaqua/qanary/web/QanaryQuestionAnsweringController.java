@@ -1,16 +1,10 @@
 package eu.wdaqua.qanary.web;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.core.DatasetImpl;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.graph.GraphFactory;
-import com.hp.hpl.jena.sparql.modify.GraphStoreBasic;
-import com.hp.hpl.jena.sparql.util.NodeUtils;
-import com.hp.hpl.jena.update.*;
-import eu.wdaqua.qanary.business.QanaryConfigurator;
-import org.apache.jena.riot.RDFDataMgr;
+import java.net.URI;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +15,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.UUID;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.core.DatasetImpl;
+import com.hp.hpl.jena.sparql.modify.GraphStoreBasic;
+import com.hp.hpl.jena.update.GraphStore;
+import com.hp.hpl.jena.update.UpdateExecutionFactory;
+import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.update.UpdateProcessor;
+import com.hp.hpl.jena.update.UpdateRequest;
 
-import javax.servlet.http.HttpServletResponse;
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
+import eu.wdaqua.qanary.message.QanaryMessage;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -66,8 +65,7 @@ public class QanaryQuestionAnsweringController {
 	public String startquestionanswering() {
 		return "startquestionanswering";
 	}
-	
-	
+
 	/**
 	 * exposing the oa vocabulary
 	 *
@@ -76,9 +74,9 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
 	@ResponseBody
 	public FileSystemResource getFile1() {
-	    return new FileSystemResource("src/main/resources/oa.owl"); 
+		return new FileSystemResource("src/main/resources/oa.owl");
 	}
-	
+
 	/**
 	 * exposing the qanary ontology
 	 *
@@ -87,17 +85,13 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
 	public FileSystemResource getFile2() {
-	    return new FileSystemResource("src/main/resources/qanaryOntology.ttl"); 
+		return new FileSystemResource("src/main/resources/qanaryOntology.ttl");
 	}
 
-	
 	/*
-	 @ResponseBody
-	public String plaintext(HttpServletResponse response) {
-	    response.setContentType("text/turtle");
-	    response.setCharacterEncoding("UTF-8");
-	    return "qanaryOntology";
-	}
+	 * @ResponseBody public String plaintext(HttpServletResponse response) {
+	 * response.setContentType("text/turtle");
+	 * response.setCharacterEncoding("UTF-8"); return "qanaryOntology"; }
 	 * 
 	 */
 
@@ -105,22 +99,24 @@ public class QanaryQuestionAnsweringController {
 	 * start a configured process
 	 *
 	 * @return
+	 * @throws QanaryComponentNotAvailableException
 	 */
 	@RequestMapping(value = "/questionanswering", method = RequestMethod.POST)
 	@ResponseBody
-	public String questionanswering(@RequestParam(value = "question", required = true) final URL questionUri) {
+	public String questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
+			@RequestParam(value = "componentlist") final LinkedList<String> componentsToBeCalled)
+					throws QanaryComponentNotAvailableException {
 		// Create the name of a new named graph
 		final UUID runID = UUID.randomUUID();
 		final String namedGraph = runID.toString();
-		this.initGraphInTripelStore(namedGraph, questionUri);
+		URI endpoint = this.initGraphInTripelStore(namedGraph, questionUri);
 
-		// TODO: call all defined components
-		// FOREACH component in component execution list DO
-		// // CALL the service endpoint QanaryConfiguration.annotateQuestion of
-		// // the component passing a qanaryMessage object where
-		// // // endpoint = HOST_OF_THIS_PIPELINE + PORT + /sparql
-		// // // inGraph = namedGraph
-		// // // outGraph = namedGraph
+		QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
+
+		// execute synchronous calls to all components with the same message
+		for (String componentName : componentsToBeCalled) {
+			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+		}
 
 		return runID.toString();
 	}
@@ -131,70 +127,67 @@ public class QanaryQuestionAnsweringController {
 	 * @param namedGraph
 	 * @param questionUri
 	 */
-	private void initGraphInTripelStore(String namedGraph, final URL questionUri) {
+	private URI initGraphInTripelStore(String namedGraph, final URL questionUri) {
 		final URI triplestore = qanaryConfigurator.getEndpoint();
-		logger.info("Triplestore "+triplestore);
+		logger.info("Triplestore " + triplestore);
 		namedGraph = "<urn:graph:" + namedGraph + ">";
-		 String sparqlquery = "";
-		 
-		/*
-		// TODO: please look if this code is still necessary. PS: I really would prefer as a triplesotre and external service and not an internal one. It is easier to debug.
-		// Using local jean store to store the data
-		// TODO: is this step needed on every execution or should it no be an
-		// init step?
-		final Node graphName = NodeUtils.asNode(namedGraph);
-		inMemoryStore.addGraph(graphName, GraphFactory.createGraphMem());
-		final Model model = RDFDataMgr.loadModel("http://www.openannotation.org/spec/core/20130208/oa.ow");
-		model.listStatements().forEachRemaining(statement -> {
-			inMemoryStore.add(new Quad(graphName, statement.asTriple()));
-		});
+		String sparqlquery = "";
 
-		System.out.println("\n ++++++++++++++++\n" + sparqlquery);
-		insertSparqlIntoTriplestore(sparqlquery); // fail
-		// loadTripleStore(sparqlquery, triplestore);
+		/*
+		 * // TODO: please look if this code is still necessary. PS: I really
+		 * would prefer as a triplesotre and external service and not an
+		 * internal one. It is easier to debug. // Using local jean store to
+		 * store the data // TODO: is this step needed on every execution or
+		 * should it no be an // init step? final Node graphName =
+		 * NodeUtils.asNode(namedGraph); inMemoryStore.addGraph(graphName,
+		 * GraphFactory.createGraphMem()); final Model model =
+		 * RDFDataMgr.loadModel(
+		 * "http://www.openannotation.org/spec/core/20130208/oa.ow");
+		 * model.listStatements().forEachRemaining(statement -> {
+		 * inMemoryStore.add(new Quad(graphName, statement.asTriple())); });
+		 * 
+		 * System.out.println("\n ++++++++++++++++\n" + sparqlquery);
+		 * insertSparqlIntoTriplestore(sparqlquery); // fail //
+		 * loadTripleStore(sparqlquery, triplestore);
 		 */
 
 		// Load the Open Annotation Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "+ namedGraph;
-		logger.info("Sparql query "+sparqlquery);
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH " + namedGraph;
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
-		
+
 		// Load the Qanary Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "+ namedGraph;
-		logger.info("Sparql query "+sparqlquery);
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "
+				+ namedGraph;
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Prepare the question, answer and dataset objects
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-					+ "INSERT DATA {GRAPH " + namedGraph + " { <"+ questionUri.toString() + "> a qa:Question}}";
-		logger.info("Sparql query "+sparqlquery);
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " + "INSERT DATA {GRAPH " + namedGraph + " { <"
+				+ questionUri.toString() + "> a qa:Question}}";
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>"
-					+ "INSERT DATA {GRAPH " + namedGraph +
-					" {<"+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
-		logger.info("Sparql query "+sparqlquery);
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + " {<"
+				+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>"
-					+ "INSERT DATA {GRAPH " + namedGraph 
-					+ " {<"+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
-		logger.info("Sparql query "+sparqlquery);
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + " {<"
+				+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Make the first two annotations
 		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "INSERT DATA { " + "GRAPH " + namedGraph +" "
-				+ "{ "
-				+ "<anno1> a  oa:AnnotationOfQuestion; " 
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ;"
-				+ "   oa:hasBody   <URIAnswer>   . "
-				+ "<anno2> a  oa:AnnotationOfQuestion; "
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ; "
-				+ "   oa:hasBody   <URIDataset> " + "}}";
-		logger.info("Sparql query "+sparqlquery);
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " + "INSERT DATA { " + "GRAPH " + namedGraph + " " + "{ "
+				+ "<anno1> a  oa:AnnotationOfQuestion; " + "   oa:hasTarget <" + questionUri.toString() + "> ;"
+				+ "   oa:hasBody   <URIAnswer>   . " + "<anno2> a  oa:AnnotationOfQuestion; " + "   oa:hasTarget <"
+				+ questionUri.toString() + "> ; " + "   oa:hasBody   <URIDataset> " + "}}";
+		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
+
+		return triplestore;
 	}
 
 	/**
