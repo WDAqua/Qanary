@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.StanfordNER;
+package eu.wdaqua.qanary.dbpediaspotter;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -218,6 +218,7 @@ public class SpotlightWrapper extends QanaryComponent {
 			
 			logger.info("apply vocabulary alignment on outgraph");
 			*/
+			SpotlightWrapper qaw = new SpotlightWrapper();
 			
 			List<String > stEn = new ArrayList<String>();
 			stEn  = qaw.getResults(question);
