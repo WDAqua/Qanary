@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.component.QanaryComponent;
-import eu.wdaqua.qanary.message.QanaryMessage;
+import eu.wdaqua.qanary.component.QanaryMessage;
 
 @Component
 public class ExampleQanaryComponent extends QanaryComponent {
