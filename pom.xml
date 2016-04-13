@@ -9,5 +9,6 @@
     <module>qanary_component-template</module>
     <module>qanary_component-example</module>
     <module>qanary_component-stanford-NER</module>
+    <module>batmanquestion.annotator</module>
   </modules>
 </project>
