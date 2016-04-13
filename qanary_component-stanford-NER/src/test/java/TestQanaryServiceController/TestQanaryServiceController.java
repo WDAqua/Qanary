@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.test;
+package TestQanaryServiceController;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -7,10 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
@@ -31,10 +29,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import eu.wdaqua.qanary.message.QanaryMessage;
+import eu.wdaqua.qanary.component.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryService;
 import eu.wdaqua.qanary.component.QanaryServiceController;
-import eu.wdaqua.qanary.config.QanaryConfiguration;
+import eu.wdaqua.qanary.component.config.QanaryConfiguration;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -87,7 +85,7 @@ public class TestQanaryServiceController {
 	 */
 	@Test
 	public void testMessageReceiveAndSend() {
-		String testEndPoint = "http://admin:admin@104.155.21.91:5820/question/query";
+		String testEndPoint = "http://qanary.test/endpoint";
 		String testInGraph = "http://qanary.test/graph/in";
 		String testOutGraph = "http://qanary.test/graph/out";
 
@@ -95,8 +93,8 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put("ingraph", testInGraph);
+		jsonObject.put("outgraph", testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
@@ -115,7 +113,7 @@ public class TestQanaryServiceController {
 							post(QanaryConfiguration.annotatequestion) //
 									.content(requestMessage.asJsonString()) //
 									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().is2xxSuccessful()) //
+					.andExpect(status().isOk()) // ok
 					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
 					.andReturn();
 		} catch (Exception e) {
@@ -155,8 +153,8 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put("ingraph", testInGraph);
+		jsonObject.put("outgraph", testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
