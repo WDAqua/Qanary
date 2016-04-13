@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map.Entry;
@@ -33,7 +32,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import eu.wdaqua.qanary.component.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryService;
 import eu.wdaqua.qanary.component.QanaryServiceController;
-import eu.wdaqua.qanary.config.QanaryConfiguration;
+import eu.wdaqua.qanary.component.config.QanaryConfiguration;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
