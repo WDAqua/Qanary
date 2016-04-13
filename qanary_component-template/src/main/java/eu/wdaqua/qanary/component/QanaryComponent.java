@@ -11,7 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import eu.wdaqua.qanary.config.QanaryConfiguration;
-import eu.wdaqua.qanary.message.QanaryMessage;
+
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
@@ -40,7 +40,7 @@ public abstract class QanaryComponent {
 	 * @throws IOException
 	 */
 	public String getQuestionRawData() throws ClientProtocolException, IOException {
-
+		/*
 		@SuppressWarnings("deprecation")
 		HttpClient client = new DefaultHttpClient();
 		HttpGet request = new HttpGet(questionUrl + QanaryConfiguration.questionRawDataUrlSuffix);
@@ -54,7 +54,8 @@ public abstract class QanaryComponent {
 		while ((line = rd.readLine()) != null) {
 			rawText.concat(line);
 		}
-
+		 */
+		String rawText = "";
 		return rawText;
 	}
 
