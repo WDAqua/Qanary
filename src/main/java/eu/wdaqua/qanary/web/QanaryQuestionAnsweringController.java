@@ -106,7 +106,9 @@ public class QanaryQuestionAnsweringController {
 	public String questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
 			@RequestParam(value = "componentlist") final LinkedList<String> componentsToBeCalled)
 					throws QanaryComponentNotAvailableException {
-		// Create the name of a new named graph
+		logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
+
+		// Create a new named graph and insert it into the triplestore
 		final UUID runID = UUID.randomUUID();
 		final String namedGraph = runID.toString();
 		URI endpoint = this.initGraphInTripelStore(namedGraph, questionUri);
@@ -114,15 +116,13 @@ public class QanaryQuestionAnsweringController {
 		QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
 
 		// execute synchronous calls to all components with the same message
-		for (String componentName : componentsToBeCalled) {
-			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
-		}
+		qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
 
 		return runID.toString();
 	}
 
 	/**
-	 * init the grpah in the triplestore (c.f., applicationproperties)
+	 * init the graph in the triplestore (c.f., applicationproperties)
 	 *
 	 * @param namedGraph
 	 * @param questionUri
