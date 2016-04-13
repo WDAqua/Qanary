@@ -180,10 +180,14 @@ public class QanaryQuestionAnsweringController {
 
 		// Make the first two annotations
 		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " + "INSERT DATA { " + "GRAPH " + namedGraph + " " + "{ "
-				+ "<anno1> a  oa:AnnotationOfQuestion; " + "   oa:hasTarget <" + questionUri.toString() + "> ;"
-				+ "   oa:hasBody   <URIAnswer>   . " + "<anno2> a  oa:AnnotationOfQuestion; " + "   oa:hasTarget <"
-				+ questionUri.toString() + "> ; " + "   oa:hasBody   <URIDataset> " + "}}";
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+				+ "INSERT DATA { " + "GRAPH " + namedGraph + " { " //
+				+ "<anno1> a  oa:AnnotationOfQuestion; " //
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
+				+ "   oa:hasBody   <URIAnswer>   . " //
+				+ "<anno2> a  oa:AnnotationOfQuestion; " //
+				+ "   oa:hasTarget <" + questionUri.toString() + "> ; " //
+				+ "   oa:hasBody   <URIDataset> " + "}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
