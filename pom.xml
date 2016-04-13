@@ -10,5 +10,6 @@
     <module>qanary_component-example</module>
     <module>qanary_component-stanford-NER</module>
     <module>qanary_component-alchemy</module>
+    <module>batmanquestion.annotator</module>
   </modules>
 </project>
