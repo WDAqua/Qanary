@@ -14,9 +14,9 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan("eu.wdaqua.qanary.component")
-public class BatmanQuesrtionAnnotatorApplication {
+public class BatmanQuestionAnnotatorApplication {
 
 	public static void main(String... args) {
-		SpringApplication.run(BatmanQuesrtionAnnotatorApplication.class, args);
+		SpringApplication.run(BatmanQuestionAnnotatorApplication.class, args);
 	}
 }
