@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.business;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class QanaryConfigurator {
 	 * @param myComponents
 	 * @param message
 	 * @return
+	 * @throws URISyntaxException
 	 */
 	public QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message) {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
@@ -61,9 +63,24 @@ public class QanaryConfigurator {
 
 		for (QanaryComponent component : myComponents) {
 			HttpEntity<QanaryMessage> request = new HttpEntity<QanaryMessage>(message);
-			logger.debug("POST request will be performed to " + component.getUrl());
-			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(component.getUrl(), HttpMethod.POST,
-					request, QanaryMessage.class);
+			URI myURI;
+			try {
+				myURI = new URI(component.getUrl().toString() + "/annotatequestion");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				return result;
+			}
+			logger.debug("POST request will be performed to " + myURI);
+			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(myURI, HttpMethod.POST, request,
+					QanaryMessage.class);
+
+			// HttpHeaders headers = new HttpHeaders();
+			// headers.setContentType(MediaType.APPLICATION_JSON);
+			//
+			// HttpEntity<String> entity = new HttpEntity<String>(message,
+			// headers);
+			// restTemplate.put(uRL, entity);
+
 			result.appendProtocol(component);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				message = responseEntity.getBody();
