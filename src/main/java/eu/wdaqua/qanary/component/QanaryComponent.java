@@ -1,17 +1,8 @@
 package eu.wdaqua.qanary.component;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import eu.wdaqua.qanary.config.QanaryConfiguration;
-
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
@@ -41,19 +32,16 @@ public abstract class QanaryComponent {
 	 */
 	public String getQuestionRawData() throws ClientProtocolException, IOException {
 		/*
-		@SuppressWarnings("deprecation")
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(questionUrl + QanaryConfiguration.questionRawDataUrlSuffix);
-		HttpResponse response = client.execute(request);
-
-		// Get the response
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-		String rawText = "";
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			rawText.concat(line);
-		}
+		 * @SuppressWarnings("deprecation") HttpClient client = new
+		 * DefaultHttpClient(); HttpGet request = new HttpGet(questionUrl +
+		 * QanaryConfiguration.questionRawDataUrlSuffix); HttpResponse response
+		 * = client.execute(request);
+		 * 
+		 * // Get the response BufferedReader rd = new BufferedReader(new
+		 * InputStreamReader(response.getEntity().getContent()));
+		 * 
+		 * String rawText = ""; String line = ""; while ((line = rd.readLine())
+		 * != null) { rawText.concat(line); }
 		 */
 		String rawText = "";
 		return rawText;
