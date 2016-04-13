@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.sf.json.JSONObject;
 
+// TODO: needs to be moved to pipeline project
 public class QanaryMessage extends HashMap<URI, URI> {
 
 	/**
