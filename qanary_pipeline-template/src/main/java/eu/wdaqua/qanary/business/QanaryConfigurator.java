@@ -4,8 +4,9 @@ import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
  */
 public class QanaryConfigurator {
 
+	private static final Logger logger = LoggerFactory.getLogger(QanaryConfigurator.class);
 	private final RestTemplate restTemplate;
 	private List<QanaryComponent> components;
 	private final Map<String, Integer> componentsToIndexMap;
@@ -56,18 +58,19 @@ public class QanaryConfigurator {
 	public QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message) {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
-		List<QanaryComponent> componentsToUse = myComponents.stream()
-				.filter(qanaryComponent -> qanaryComponent.isUsed()).collect(Collectors.toList());
 
-		for (QanaryComponent component : componentsToUse) {
+		for (QanaryComponent component : myComponents) {
 			HttpEntity<QanaryMessage> request = new HttpEntity<QanaryMessage>(message);
+			logger.debug("POST request will be performed to " + component.getUrl());
 			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(component.getUrl(), HttpMethod.POST,
 					request, QanaryMessage.class);
+			result.appendProtocol(component);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				message = responseEntity.getBody();
 			}
 		}
 		result.endQuestionAnswering();
+		logger.info("callServices finished: {}", result);
 		return result;
 	}
 
@@ -93,7 +96,7 @@ public class QanaryConfigurator {
 			} catch (Exception e) {
 				throw new QanaryComponentNotAvailableException(componentName
 						+ " (currently) not available. Please check the name and that the component is still online.\n"
-						+ e.getMessage());
+						+ e + "\nplease take only one of the following list: " + this.getComponentNames().toString());
 			}
 		}
 
@@ -116,11 +119,29 @@ public class QanaryConfigurator {
 	}
 
 	public void addComponent(Application application) {
+		logger.info("addComponent: id={} name={}", application.getId(), application.getName());
 		if (componentsToIndexMap.containsKey(application.getName())) {
 			Integer index = Math.min(components.size(), componentsToIndexMap.get(application.getName()));
 			components.add(index, new QanaryComponent(application, true));
 		}
 		components.add(new QanaryComponent(application, false));
+		logger.info("availableComponents: {}", this.getComponentNames());
+	}
+
+	/**
+	 * delivers a list of all components currently been available in the
+	 * pipeline
+	 * 
+	 * @return
+	 */
+	public List<String> getComponentNames() {
+		List<String> componentsNames = new LinkedList<>();
+
+		for (QanaryComponent qanaryComponent : this.components) {
+			componentsNames.add(qanaryComponent.getName());
+		}
+
+		return componentsNames;
 	}
 
 	/**
@@ -130,8 +151,13 @@ public class QanaryConfigurator {
 	 * @return
 	 */
 	public QanaryComponent getComponent(String componentName) {
-		int componentIndex = componentsToIndexMap.get(componentName);
-		return components.get(componentIndex);
+		for (QanaryComponent qanaryComponent : this.components) {
+			if (qanaryComponent.getName().compareTo(componentName) == 0) {
+				logger.info("found component: " + componentName);
+				return qanaryComponent;
+			}
+		}
+		return null;
 	}
 
 	public void removeComponent(Application application) {
