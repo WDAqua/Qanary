@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.component;
+package eu.wdaqua.qanary.StanfordNER;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -6,20 +6,28 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import eu.wdaqua.qanary.message.QanaryMessage;
+import eu.wdaqua.qanary.component.QanaryComponent;
+import eu.wdaqua.qanary.component.QanaryMessage;
 
 /**
  * represents a wrapper of the Stanford NER tool used here as a spotter
@@ -29,8 +37,8 @@ import eu.wdaqua.qanary.message.QanaryMessage;
  */
 
 @Component
-public class QanaryComponentStanfordNER implements QanaryComponent {
-	private static final Logger logger = LoggerFactory.getLogger(QanaryComponentStanfordNER.class);
+public class StanfordNERComponent extends QanaryComponent {
+	private static final Logger logger = LoggerFactory.getLogger(StanfordNERComponent.class);
 	/**
 	 * default processor of a QanaryMessage
 	 */
@@ -41,19 +49,32 @@ public class QanaryComponentStanfordNER implements QanaryComponent {
 		
 		try {
 			
-			//STEP1: Retrive the named graph end the endpoint
+			//STEP1: Retrive the named graph and the endpoint
 			String endpoint=QanaryMessage.get(new URL(QanaryMessage.endpointKey)).toString();
 			String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraphKey)).toString();
-			logger.info("store data at endpoint {}", QanaryMessage.get(new URL(QanaryMessage.endpointKey)));
+			logger.info("store data at endpoint {}", endpoint);
 			logger.info("store data in graph {}", namedGraph);
 			
 			//STEP2: Retrive information that are needed for the computations
 			//TODO when "/question" is properly implemented and all things are loaded into the named graph 
 			// - The question
+			//String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
+			//				+"SELECT ?questionuri "
+			//				+"FROM "+namedGraph+" "
+			//				+"WHERE {?questionuri a qa:Question}";
+			//ResultSet result=selectTripleStore(sparql,endpoint);
+			//String uriQuestion =result.next().getResource("questionuri").toString();
+			//logger.info("uri of the question {}", uriQuestion);
+			
+			//RestTemplate restTemplate = new RestTemplate();
+			//ResponseEntity<String> responseEntity =  restTemplate.getForEntity(questionuri, String.class);
+			//String question=responseEntity.getBody();
+			//logger.info("question {}", question);
+			
 			String uriQuestion="http://wdaqua.eu/dummy";
 			String question="Brooklyn Bridge was designed by Alfred";
 			
-			//STEP3: Pass the informations to the component and execute it	
+			//STEP3: Pass the information to the component and execute it	
 			//TODO: ATTENTION: This should be done only ones when the component is started 
 				//Define the properties needed for the pipeline of the Stanford parser
 				Properties props = new Properties();
@@ -63,12 +84,11 @@ public class QanaryComponentStanfordNER implements QanaryComponent {
 			
 			//Create an empty annotation just with the given text
 			Annotation document = new Annotation(question);
-			//Ru the annotator on question
+			//Run the stanford annotator on question
 			pipeline.annotate(document);
 			
-			
 			//Identify which parts of the question is tagged by the NER tool
-			//Go ones though the question, 
+			//Go ones through the question, 
 			ArrayList<Selection> selections = new ArrayList<Selection>();
 			CoreLabel startToken=null; //stores the last token with non-zero tag, if it does not exist set to null
 			CoreLabel endToken=null; //stores the last found token with non-zero tag, if it does not exist set to null
@@ -154,9 +174,16 @@ public class QanaryComponentStanfordNER implements QanaryComponent {
 	    proc.execute() ;
 	}
 	
+	public ResultSet selectTripleStore(String sparqlQuery, String endpoint){
+		Query query = QueryFactory.create(sparqlQuery);
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
+		return qExe.execSelect();
+	}
+	
 	class Selection {
 		public int begin;
 		public int end;
 	}
 	
 }
+
