@@ -163,18 +163,21 @@ public class QanaryQuestionAnsweringController {
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Prepare the question, answer and dataset objects
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " + "INSERT DATA {GRAPH " + namedGraph + " { <"
-				+ questionUri.toString() + "> a qa:Question}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+				+ "INSERT DATA {GRAPH " + namedGraph + " { <" + questionUri.toString() + "> a qa:Question}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + " {<"
-				+ this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
+				+ "INSERT DATA {GRAPH " + namedGraph + " { " //
+				+ "<" + this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" + "INSERT DATA {GRAPH " + namedGraph + " {<"
-				+ qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset}}";
+		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
+				+ "INSERT DATA {GRAPH " + namedGraph + " { " //
+				+ "  <" + qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset} " //
+				+ "}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
