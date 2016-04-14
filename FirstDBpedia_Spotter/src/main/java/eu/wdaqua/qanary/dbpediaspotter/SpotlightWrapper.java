@@ -48,7 +48,7 @@ import eu.wdaqua.qanary.component.QanaryMessage;
 
 @Component
 public class SpotlightWrapper extends QanaryComponent {
-	private static final Logger logger = LoggerFactory.getLogger(StanfordNERComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(SpotlightWrapper.class);
 	/**
 	 * default processor of a QanaryMessage
 	 */
