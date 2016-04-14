@@ -3,6 +3,7 @@ package eu.wdaqua.qanary.message;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.sf.json.JSONObject;
 
-public class QanaryMessage extends HashMap<URI, URI> {
+// TODO: needs to be moved to pipeline project
+public class QanaryMessage {
 
 	/**
 	 * The serialization runtime associates with each serializable class a
@@ -33,6 +35,8 @@ public class QanaryMessage extends HashMap<URI, URI> {
 	// the property URI (key) for inserting the output into the endpoint TODO:
 	// move to QanaryConfiguration
 	public static final String outGraphKey = "http://qanary/#outGraph";
+
+	private Map<URI, URI> values;
 
 	/**
 	 * constructor fulfilling the communication requirements
@@ -65,14 +69,16 @@ public class QanaryMessage extends HashMap<URI, URI> {
 	 * @throws URISyntaxException
 	 */
 	public void setValues(URI endpoint, URI inGraph, URI outGraph) throws URISyntaxException {
+		this.values = new HashMap<>();
+
 		URI keyEndpoint = new URI(endpointKey);
-		this.put(keyEndpoint, endpoint);
+		this.values.put(keyEndpoint, endpoint);
 
 		URI keyInGraph = new URI(inGraphKey);
-		this.put(keyInGraph, inGraph);
+		this.values.put(keyInGraph, inGraph);
 
 		URI keyOutGraph = new URI(outGraphKey);
-		this.put(keyOutGraph, outGraph);
+		this.values.put(keyOutGraph, outGraph);
 	}
 
 	public URI getEndpoint() {
@@ -95,7 +101,7 @@ public class QanaryMessage extends HashMap<URI, URI> {
 	 */
 	private URI getValue(String key) {
 		try {
-			return this.get(new URI(key));
+			return this.values.get(new URI(key));
 		} catch (URISyntaxException e) {
 			// should never ever happen or the whole Qanary pipeline is broken
 			e.printStackTrace();
@@ -120,9 +126,13 @@ public class QanaryMessage extends HashMap<URI, URI> {
 		this.setValues(endpointValue, inGraphValue, outGraphValue);
 	}
 
-	public QanaryMessage(URI endpoint, String namedGraph) {
-		// TODO Auto-generated constructor stub
+	public QanaryMessage(URI endpoint, String namedGraph) throws URISyntaxException {
+		this.setValues(endpoint, new URI(namedGraph), new URI(namedGraph));
 	}
+
+	// public QanaryMessage(Object x) throws URISyntaxException {
+	// this.setValues(new URI("urn:x"), new URI("urn:y"), new URI("urn:z"));
+	// }
 
 	public String asJsonString() {
 		try {
@@ -132,6 +142,10 @@ public class QanaryMessage extends HashMap<URI, URI> {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public Map<URI, URI> getValues() {
+		return this.values;
 	}
 
 }
