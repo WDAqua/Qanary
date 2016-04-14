@@ -36,6 +36,12 @@ public class QanaryMessage extends HashMap<URI, URI> {
 	public static final String outGraphKey = "http://qanary/#outGraph";
 
 	/**
+	 * default constructor needed for post communication
+	 */
+	public QanaryMessage() {
+	}
+	
+	/**
 	 * constructor fulfilling the communication requirements
 	 * 
 	 * @throws URISyntaxException
