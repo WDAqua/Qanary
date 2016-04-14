@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 //import eu.wdaqua.qanary.business.QanaryConfigurator;
 
 @SpringBootApplication
-//@EnableAutoConfiguration
-//@RestController
+@EnableAutoConfiguration
+@RestController
 public class QanaryService {
 
 	//@Autowired
@@ -28,9 +28,9 @@ public class QanaryService {
 	public static void main(String[] args) {
 
 			
-		//Properties p = new Properties();
-		//new SpringApplicationBuilder(QanaryService.class).properties(p);//.run(args);
-		SpringApplication.run(QanaryService.class, args);
+		Properties p = new Properties();
+		new SpringApplicationBuilder(QanaryService.class).properties(p).run(args);
+		//SpringApplication.run(QanaryService.class, args);
 	}
 
 }
