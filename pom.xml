@@ -9,6 +9,7 @@
     <module>qanary_component-template</module>
     <module>qanary_component-example</module>
     <module>qanary_component-stanford-NER</module>
+    <module>FirstDBpedia_Spotter</module>
     <module>batmanquestion.annotator</module>
   </modules>
 </project>
