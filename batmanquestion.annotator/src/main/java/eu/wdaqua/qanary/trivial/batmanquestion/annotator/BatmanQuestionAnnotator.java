@@ -15,6 +15,7 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 	 * implement this method encapsulating the functionality of your Qanary
 	 * component
 	 */
+	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
 
 		logger.info("process: {}", myQanaryMessage);
@@ -30,7 +31,7 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 		// e.printStackTrace();
 		// }
 
-		logger.info("apply vocabulary alignment on outgraph");
+		logger.info("apply vocabulary alignment on outgraph for the Batman question");
 		// TODO: implement this (custom for every component)
 
 		return myQanaryMessage;
