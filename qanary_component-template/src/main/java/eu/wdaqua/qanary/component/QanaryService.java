@@ -1,11 +1,16 @@
 package eu.wdaqua.qanary.component;
 
+import java.util.Properties;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @EnableAutoConfiguration
+@RestController
 public class QanaryService {
 
 	/**
@@ -14,7 +19,8 @@ public class QanaryService {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SpringApplication.run(QanaryService.class, args);
+		Properties p = new Properties();
+		new SpringApplicationBuilder(QanaryService.class).properties(p).run(args);
+		//SpringApplication.run(QanaryService.class, args);
 	}
-
 }
