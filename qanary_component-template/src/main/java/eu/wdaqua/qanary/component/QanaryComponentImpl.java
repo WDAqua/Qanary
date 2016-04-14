@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,11 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class QanaryComponentImpl extends QanaryComponent {
 
+	private static final Logger logger = LoggerFactory.getLogger(QanaryComponentImpl.class);
+
 	/**
 	 * default processor of a QanaryMessage
 	 */
 	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
+		logger.warn("QanaryComponentImpl was just for test and presentation not for actual use in pipeline.");
 		return myQanaryMessage;
 	}
 
