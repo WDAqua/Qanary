@@ -33,7 +33,7 @@ public class QanaryServiceController {
 	 * @return
 	 */
 	@RequestMapping(value = QanaryConfiguration.description, produces = { "text/html" })
-	public String description() {
+	public @ResponseBody String description() {
 		return "description";
 	}
 

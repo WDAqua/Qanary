@@ -104,18 +104,17 @@ public class TestQanaryServiceController {
 			fail(e.getMessage());
 			return;
 		}
-		
-		
+
 		// check the response
 		MvcResult res;
 		try {
 			res = mockMvc
-					.perform( 
-							post(QanaryConfiguration.annotatequestion) 
-									.content(requestMessage.asJsonString()) 
+					.perform( //
+							post(QanaryConfiguration.annotatequestion) //
+									.content(requestMessage.asJsonString()) //
 									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()) 
-					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) 
+					.andExpect(status().isOk()) // ok
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
 					.andReturn();
 		} catch (Exception e) {
 			fail(e.getMessage());
