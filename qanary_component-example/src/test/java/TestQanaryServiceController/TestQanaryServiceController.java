@@ -93,8 +93,8 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
+		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
@@ -104,17 +104,18 @@ public class TestQanaryServiceController {
 			fail(e.getMessage());
 			return;
 		}
-
+		
+		
 		// check the response
 		MvcResult res;
 		try {
 			res = mockMvc
-					.perform( //
-							post(QanaryConfiguration.annotatequestion) //
-									.content(requestMessage.asJsonString()) //
+					.perform( 
+							post(QanaryConfiguration.annotatequestion) 
+									.content(requestMessage.asJsonString()) 
 									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()) // ok
-					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
+					.andExpect(status().isOk()) 
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) 
 					.andReturn();
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -153,8 +154,8 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
+		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
