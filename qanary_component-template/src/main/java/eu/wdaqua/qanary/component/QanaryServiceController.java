@@ -15,14 +15,16 @@ import eu.wdaqua.qanary.component.config.QanaryConfiguration;
 
 @Controller
 public class QanaryServiceController {
-	
-	 private static final Logger logger = LoggerFactory.getLogger(QanaryServiceController.class);
-	 QanaryComponent qanaryComponent;
-	 
-	 @Inject public QanaryServiceController(QanaryComponent qanaryComponent) {
-		 this.qanaryComponent = qanaryComponent; 
-	 	logger.info("qanaryComponent: {}", this.qanaryComponent); 
-	 }
+
+	private static final Logger logger = LoggerFactory.getLogger(QanaryServiceController.class);
+
+	QanaryComponent qanaryComponent;
+
+	@Inject
+	public QanaryServiceController(QanaryComponent qanaryComponent) {
+		this.qanaryComponent = qanaryComponent;
+		logger.info("qanaryComponent: {}", this.qanaryComponent);
+	}
 
 	/**
 	 * provides a description HTML page of the component, replace
@@ -43,12 +45,13 @@ public class QanaryServiceController {
 	 * @param myQanaryMessage
 	 * @return
 	 */
+	@RequestMapping(value = QanaryConfiguration.annotatequestion, consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
+	@ResponseBody
+	public QanaryMessage annotatequestion(@RequestBody QanaryMessage myQanaryMessage) {
 
-	 @RequestMapping(value = QanaryConfiguration.annotatequestion, consumes ={"application/json"}, produces = {"application/json"}, method =RequestMethod.POST)
-	 public @ResponseBody QanaryMessage annotatequestion(@RequestBody QanaryMessage myQanaryMessage) {
-		 logger.info("message: {}", myQanaryMessage);
-		 this.qanaryComponent.process(myQanaryMessage);
-		 return myQanaryMessage;
-	 }
+		this.qanaryComponent.process(myQanaryMessage);
+
+		return myQanaryMessage;
+	}
 
 }
