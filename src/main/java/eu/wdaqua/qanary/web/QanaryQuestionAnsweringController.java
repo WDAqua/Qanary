@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.web;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -100,17 +101,19 @@ public class QanaryQuestionAnsweringController {
 	 *
 	 * @return
 	 * @throws QanaryComponentNotAvailableException
+	 * @throws URISyntaxException
 	 */
 	@RequestMapping(value = "/questionanswering", method = RequestMethod.POST)
 	@ResponseBody
 	public String questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
 			@RequestParam(value = "componentlist") final LinkedList<String> componentsToBeCalled)
-					throws QanaryComponentNotAvailableException {
+					throws QanaryComponentNotAvailableException, URISyntaxException {
 		logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
 
 		// Create a new named graph and insert it into the triplestore
 		final UUID runID = UUID.randomUUID();
-		final String namedGraph = runID.toString();
+		URI namedGraph = new URI("urn:graph:" + runID.toString());
+
 		URI endpoint = this.initGraphInTripelStore(namedGraph, questionUri);
 
 		QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
@@ -127,11 +130,11 @@ public class QanaryQuestionAnsweringController {
 	 * @param namedGraph
 	 * @param questionUri
 	 */
-	private URI initGraphInTripelStore(String namedGraph, final URL questionUri) {
+	private URI initGraphInTripelStore(URI namedGraph, final URL questionUri) {
 		final URI triplestore = qanaryConfigurator.getEndpoint();
 		logger.info("Triplestore " + triplestore);
-		namedGraph = "<urn:graph:" + namedGraph + ">";
 		String sparqlquery = "";
+		String namedGraphMarker = "<" + namedGraph.toString() + ">";
 
 		/*
 		 * // TODO: please look if this code is still necessary. PS: I really
@@ -152,30 +155,31 @@ public class QanaryQuestionAnsweringController {
 		 */
 
 		// Load the Open Annotation Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH " + namedGraph;
+		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "
+				+ namedGraphMarker;
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Load the Qanary Ontology
 		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "
-				+ namedGraph;
+				+ namedGraphMarker;
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		// Prepare the question, answer and dataset objects
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA {GRAPH " + namedGraph + " { <" + questionUri.toString() + "> a qa:Question}}";
+				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { <" + questionUri.toString() + "> a qa:Question}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraph + " { " //
+				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
 				+ "<" + this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
 
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraph + " { " //
+				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
 				+ "  <" + qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset} " //
 				+ "}";
 		logger.info("Sparql query " + sparqlquery);
@@ -184,7 +188,7 @@ public class QanaryQuestionAnsweringController {
 		// Make the first two annotations
 		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA { " + "GRAPH " + namedGraph + " { " //
+				+ "INSERT DATA { " + "GRAPH " + namedGraphMarker + " { " //
 				+ "<anno1> a  oa:AnnotationOfQuestion; " //
 				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
 				+ "   oa:hasBody   <URIAnswer>   . " //

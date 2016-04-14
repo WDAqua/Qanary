@@ -9,8 +9,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,8 +63,10 @@ public class QanaryConfigurator {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
 
+		logger.info(message.asJsonString());
+
 		for (QanaryComponent component : myComponents) {
-			HttpEntity<QanaryMessage> request = new HttpEntity<QanaryMessage>(message);
+
 			URI myURI;
 			try {
 				myURI = new URI(component.getUrl().toString() + "/annotatequestion");
@@ -70,12 +74,14 @@ public class QanaryConfigurator {
 				e.printStackTrace();
 				return result;
 			}
-			logger.debug("POST request will be performed to " + myURI);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
+
+			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
 			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(myURI, HttpMethod.POST, request,
 					QanaryMessage.class);
 
-			// HttpHeaders headers = new HttpHeaders();
-			// headers.setContentType(MediaType.APPLICATION_JSON);
 			//
 			// HttpEntity<String> entity = new HttpEntity<String>(message,
 			// headers);
