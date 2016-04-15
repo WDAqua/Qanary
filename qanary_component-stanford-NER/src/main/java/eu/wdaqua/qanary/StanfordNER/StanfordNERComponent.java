@@ -43,17 +43,13 @@ public class StanfordNERComponent extends QanaryComponent {
 		logger.info("process: {}", myQanaryMessage);
 		// TODO: implement processing of question
 
-		// STEP1: Retrive the named graph and the endpoint
+		// STEP1: Retrieve the named graph and the endpoint
 		String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
 		String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
-		// String endpoint = myQanaryMessage.get(new
-		// URL(QanaryMessage.endpointKey)).toString();
-		// String namedGraph = myQanaryMessage.get(new
-		// URL(QanaryMessage.inGraphKey)).toString();
 		logger.info("store data at endpoint {}", endpoint);
 		logger.info("store data in graph {}", namedGraph);
 
-		// STEP2: Retrive information that are needed for the computations
+		// STEP2: Retrieve information that are needed for the computations
 		// TODO when "/question" is properly implemented and all things are
 		// loaded into the named graph
 		// - The question
