@@ -108,13 +108,20 @@ public class SpotlightWrapper2 extends QanaryComponent {
 	
 	public List<String> getResults(String input)
 	{
+		/*String SpotterService = "http://spotlight.sztaki.hu:2222/rest/spot";
+		UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(SpotterService)
+		        .queryParam("text", qns);
+		logger.info("Service request "+service);
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> response = restTemplate.exchange(service.build().encode().toUri(), HttpMethod.GET, null, String.class);
+		logger.info("Xml document from alchemy api {}", response.getBody());
+		*/
 		
 		String madeUrlFromInput = "http://spotlight.sztaki.hu:2222/rest/spot?text=";
 		String qns[] = input.split(" ");
 		String append = String.join("%20", qns);
 		madeUrlFromInput += append;//+"&executeSparqlQuery=on&relationExtractorType=Semantic";
 		List<String> retLst = new ArrayList<String>();
-		
 		{
 			
 			System.out.println("URL is: "+madeUrlFromInput);
@@ -123,10 +130,6 @@ public class SpotlightWrapper2 extends QanaryComponent {
 		
 		return retLst;
 	}
-	
-	
-	
-	
 	
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
 		//org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
@@ -139,6 +142,8 @@ public class SpotlightWrapper2 extends QanaryComponent {
 			//String endpoint=QanaryMessage.get(new URL(QanaryMessage.endpointKey)).toString();
 			//String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraphKey)).toString();
 			String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
+		endpoint= "http://admin:admin@104.155.21.91:5820/qanary/query";
+		//http://admin:admin@localhost:5820/qanary/query
 			String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
 			logger.info("store data at endpoint {}", endpoint);
 			logger.info("store data in graph {}", namedGraph);
