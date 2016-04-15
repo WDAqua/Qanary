@@ -1,9 +1,10 @@
 package eu.wdaqua.qanary.web;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public class QanaryQuestionAnsweringController {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 
 	private final QanaryConfigurator qanaryConfigurator;
+	private final QanaryQuestionController qanaryQuestionController;
 
 	/**
 	 * Jena model
@@ -59,14 +61,49 @@ public class QanaryQuestionAnsweringController {
 	 * inject QanaryConfigurator
 	 */
 	@Autowired
-	public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator) {
+	public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator,
+			final QanaryQuestionController qanaryQuestionController) {
 		this.qanaryConfigurator = qanaryConfigurator;
+		this.qanaryQuestionController = qanaryQuestionController;
 
 		inMemoryStore = new GraphStoreBasic(new DatasetImpl(ModelFactory.createDefaultModel()));
 	}
 
 	/**
-	 * a simple HTML input form for starting a question answering processs
+	 * a simple HTML input form for starting a question answering process with a
+	 * QuestionURI
+	 *
+	 * @return
+	 */
+	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
+	public String startquestionansweringwithtextquestion() {
+		return "startquestionansweringwithtextquestion";
+	}
+
+	/**
+	 * start a process directly with a textual question
+	 *
+	 * @return
+	 * @throws QanaryComponentNotAvailableException
+	 * @throws URISyntaxException
+	 * @throws QanaryExceptionServiceCallNotOk
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> startquestionansweringwithtextquestion(
+			@RequestParam(value = "question", required = true) final String question,
+			@RequestParam(value = "componentlist") final List<String> componentsToBeCalled) throws URISyntaxException,
+					QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk, IOException {
+
+		URI questionUri = qanaryQuestionController.storeQuestion(question);
+
+		return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
+	}
+
+	/**
+	 * a simple HTML input form for starting a question answering process with a
+	 * QuestionURI
 	 *
 	 * @return
 	 */
@@ -121,7 +158,7 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
-			@RequestParam(value = "componentlist") final LinkedList<String> componentsToBeCalled)
+			@RequestParam(value = "componentlist") final List<String> componentsToBeCalled)
 					throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 		logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
 
