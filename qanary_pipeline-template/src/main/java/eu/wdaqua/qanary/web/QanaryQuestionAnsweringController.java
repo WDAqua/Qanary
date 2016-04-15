@@ -10,7 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +30,9 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
+import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryMessage;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -37,6 +42,9 @@ import eu.wdaqua.qanary.message.QanaryMessage;
  */
 @Controller
 public class QanaryQuestionAnsweringController {
+
+	// the string used for the endpoints w.r.t. the question answering process
+	public static final String QUESTIONANSWERING = "/questionanswering";
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 
@@ -96,18 +104,25 @@ public class QanaryQuestionAnsweringController {
 	 * 
 	 */
 
+	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> questionanswering(@PathVariable(value = "runId") final UUID runId) throws Exception {
+		throw new Exception("not yet implemented");
+	}
+
 	/**
 	 * start a configured process
 	 *
 	 * @return
 	 * @throws QanaryComponentNotAvailableException
 	 * @throws URISyntaxException
+	 * @throws QanaryExceptionServiceCallNotOk
 	 */
-	@RequestMapping(value = "/questionanswering", method = RequestMethod.POST)
+	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public String questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
+	public ResponseEntity<?> questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
 			@RequestParam(value = "componentlist") final LinkedList<String> componentsToBeCalled)
-					throws QanaryComponentNotAvailableException, URISyntaxException {
+					throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 		logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
 
 		// Create a new named graph and insert it into the triplestore
@@ -119,9 +134,11 @@ public class QanaryQuestionAnsweringController {
 		QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
 
 		// execute synchronous calls to all components with the same message
+		// TODO: execute asynchronously
 		qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
 
-		return runID.toString();
+		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, qanaryConfigurator);
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
 	}
 
 	/**
@@ -203,7 +220,7 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * insert into local Jena triplestore
-	 * <p>
+	 * 
 	 * TODO: needs to be extracted
 	 *
 	 * @param sparqlQuery

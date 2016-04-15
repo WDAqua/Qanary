@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.component;
 
+import java.net.URISyntaxException;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -44,10 +46,16 @@ public class QanaryServiceController {
 	 * 
 	 * @param myQanaryMessage
 	 * @return
+	 * @throws URISyntaxException
 	 */
 	@RequestMapping(value = QanaryConfiguration.annotatequestion, consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
 	@ResponseBody
-	public QanaryMessage annotatequestion(@RequestBody QanaryMessage myQanaryMessage) {
+	// public QanaryMessage annotatequestion(@RequestBody QanaryMessage
+	// myQanaryMessage) {
+	public QanaryMessage annotatequestion(@RequestBody String message) throws URISyntaxException {
+		logger.info("annotatequestion: {}", message);
+
+		QanaryMessage myQanaryMessage = new QanaryMessage(message);
 
 		this.qanaryComponent.process(myQanaryMessage);
 
