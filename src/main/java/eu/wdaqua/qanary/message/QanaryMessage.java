@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.sf.json.JSONObject;
-
 // TODO: needs to be moved to pipeline project
 public class QanaryMessage {
 
@@ -37,6 +35,12 @@ public class QanaryMessage {
 	public static final String outGraphKey = "http://qanary/#outGraph";
 
 	private Map<URI, URI> values;
+
+	/**
+	 * dummy constructor needed for communication
+	 */
+	public QanaryMessage() {
+	}
 
 	/**
 	 * constructor fulfilling the communication requirements
@@ -117,11 +121,12 @@ public class QanaryMessage {
 	 */
 	public QanaryMessage(String jsonString) throws URISyntaxException {
 		logger.info("construct QanaryMessage: {}", jsonString);
-		JSONObject json = JSONObject.fromObject(jsonString);
+		org.json.JSONObject json = new org.json.JSONObject(jsonString);
+		logger.info("constructed json: {}", json.toString());
 
-		URI endpointValue = new URI((String) json.get(endpointKey));
-		URI inGraphValue = new URI((String) json.get(inGraphKey));
-		URI outGraphValue = new URI((String) json.get(outGraphKey));
+		URI endpointValue = new URI((String) json.getJSONObject("values").get(endpointKey));
+		URI inGraphValue = new URI((String) json.getJSONObject("values").get(inGraphKey));
+		URI outGraphValue = new URI((String) json.getJSONObject("values").get(outGraphKey));
 
 		this.setValues(endpointValue, inGraphValue, outGraphValue);
 	}
