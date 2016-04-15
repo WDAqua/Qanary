@@ -104,19 +104,15 @@ public class TestQanaryServiceController {
 			fail(e.getMessage());
 			return;
 		}
-		
-		
+
 		// check the response
 		MvcResult res;
 		try {
 			res = mockMvc
-					.perform( 
-							post(QanaryConfiguration.annotatequestion) 
-									.content(requestMessage.asJsonString()) 
-									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()) 
-					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) 
-					.andReturn();
+					.perform(post(QanaryConfiguration.annotatequestion).content(requestMessage.asJsonString())
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).andReturn();
 		} catch (Exception e) {
 			fail(e.getMessage());
 			return;
@@ -132,9 +128,9 @@ public class TestQanaryServiceController {
 			return;
 		}
 
-		for (Entry<URI, URI> entry : requestMessage.entrySet()) {
+		for (Entry<URI, URI> entry : requestMessage.getValues().entrySet()) {
 			URI key = entry.getKey();
-			int compareResult = entry.getValue().toString().compareTo(resultMessage.get(key).toString());
+			int compareResult = entry.getValue().toString().compareTo(resultMessage.getValues().get(key).toString());
 			assertTrue("check result vs. request: " + key, compareResult == 0);
 		}
 
@@ -162,7 +158,7 @@ public class TestQanaryServiceController {
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URI endpointKeyUrlFromMessage = message.get(new URI(QanaryMessage.endpointKey));
+			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryMessage.endpointKey));
 			Assert.notNull(endpointKeyUrlFromMessage);
 
 			URI endpointKeyUrlFromHere = new URI(testEndPoint);

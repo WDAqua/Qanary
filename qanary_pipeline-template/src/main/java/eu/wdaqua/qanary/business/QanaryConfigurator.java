@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 
 import de.codecentric.boot.admin.model.Application;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
+import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 
@@ -57,9 +58,11 @@ public class QanaryConfigurator {
 	 * @param myComponents
 	 * @param message
 	 * @return
+	 * @throws QanaryExceptionServiceCallNotOk
 	 * @throws URISyntaxException
 	 */
-	public QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message) {
+	public QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message)
+			throws QanaryExceptionServiceCallNotOk {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
 
@@ -82,15 +85,15 @@ public class QanaryConfigurator {
 			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(myURI, HttpMethod.POST, request,
 					QanaryMessage.class);
 
-			//
-			// HttpEntity<String> entity = new HttpEntity<String>(message,
-			// headers);
-			// restTemplate.put(uRL, entity);
-
 			result.appendProtocol(component);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				message = responseEntity.getBody();
+				logger.debug("received: {}", message);
+			} else {
+				logger.error("call to {} return HTTP {}", component.getName(), responseEntity.getStatusCode());
+				throw new QanaryExceptionServiceCallNotOk(component.getName(), responseEntity.getStatusCode());
 			}
+
 		}
 		result.endQuestionAnswering();
 		logger.info("callServices finished: {}", result);
@@ -133,9 +136,10 @@ public class QanaryConfigurator {
 	 * @param message
 	 * @return
 	 * @throws QanaryComponentNotAvailableException
+	 * @throws QanaryExceptionServiceCallNotOk
 	 */
 	public QanaryQuestionAnsweringFinished callServicesByName(List<String> myComponentNames, QanaryMessage message)
-			throws QanaryComponentNotAvailableException {
+			throws QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
 
 		List<QanaryComponent> qanaryComponents = this.getComponentsByName(myComponentNames);
 		return this.callServices(qanaryComponents, message);
