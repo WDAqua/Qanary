@@ -1,21 +1,21 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head> 
-    <title>Qanary Helper: Start question answering with the given values</title> 
+    <title>Qanary Helper: Start question answering with a new textual question</title> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<style>
 	input[type=text] { width:50%; display:block; }
 	</style>
 </head>
 <body>
-	<h1>Start a QA process</h1>
+	<h1>Start a QA process with a new textual question</h1>
 	<ul>
-		<li>input an available question</li>
+		<li>input a textual question</li>
 		<li>input the component to be executed</li>
 	</ul>
-	<form action="/questionanswering" method="POST">
+	<form action="/startquestionansweringwithtextquestion" method="POST">
 		<div>
-			Question URI: <input type="text" name="question" id="question" />
+			Question string: <input type="text" name="question" id="question" />
 		</div>
 		<div>
 			Name of component: <input type="text" name="componentlist" id="componentlist" />	
