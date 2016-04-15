@@ -14,7 +14,9 @@ import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
@@ -39,37 +41,31 @@ public class StanfordNERComponent extends QanaryComponent {
 	 * default processor of a QanaryMessage
 	 */
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
-		// org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
-		logger.info("process: {}", myQanaryMessage);
-		// TODO: implement processing of question
+		long startTime = System.currentTimeMillis();
+		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
+		logger.info("Qanary Message: {}", myQanaryMessage);
 
 		// STEP1: Retrieve the named graph and the endpoint
 		String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
 		String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
-		logger.info("store data at endpoint {}", endpoint);
-		logger.info("store data in graph {}", namedGraph);
+		logger.info("Endpoint: {}", endpoint);
+		logger.info("InGraph: {}", namedGraph);
 
 		// STEP2: Retrieve information that are needed for the computations
-		// TODO when "/question" is properly implemented and all things are
-		// loaded into the named graph
-		// - The question
-		// String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-		// +"SELECT ?questionuri "
-		// +"FROM "+namedGraph+" "
-		// +"WHERE {?questionuri a qa:Question}";
-		// ResultSet result=selectTripleStore(sparql,endpoint);
-		// String uriQuestion
-		// =result.next().getResource("questionuri").toString();
-		// logger.info("uri of the question {}", uriQuestion);
-
-		// RestTemplate restTemplate = new RestTemplate();
-		// ResponseEntity<String> responseEntity =
-		// restTemplate.getForEntity(questionuri, String.class);
-		// String question=responseEntity.getBody();
-		// logger.info("question {}", question);
-
-		String uriQuestion = "http://wdaqua.eu/dummy";
-		String question = "Brooklyn Bridge was designed by Alfred";
+		//Retrive the uri where the question is exposed 
+		String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
+						+"SELECT ?questionuri "
+						+"FROM <"+namedGraph+"> "
+						+"WHERE {?questionuri a qa:Question}";
+		ResultSet result=selectTripleStore(sparql,endpoint);
+		String uriQuestion=result.next().getResource("questionuri").toString();
+		logger.info("Uri of the question: {}", uriQuestion);
+		//Retrive the question itself
+		RestTemplate restTemplate = new RestTemplate();
+		//TODO: pay attention to "/raw" maybe change that
+		ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion+"/raw", String.class);
+		String question=responseEntity.getBody();
+		logger.info("Question: {}", question);
 
 		// STEP3: Pass the information to the component and execute it
 		// TODO: ATTENTION: This should be done only ones when the component
@@ -80,12 +76,10 @@ public class StanfordNERComponent extends QanaryComponent {
 		props.put("annotators", "tokenize, ssplit, pos, lemma, ner");
 		// Create a new pipline
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
 		// Create an empty annotation just with the given text
 		Annotation document = new Annotation(question);
 		// Run the stanford annotator on question
 		pipeline.annotate(document);
-
 		// Identify which parts of the question is tagged by the NER tool
 		// Go ones through the question,
 		ArrayList<Selection> selections = new ArrayList<Selection>();
@@ -97,7 +91,7 @@ public class StanfordNERComponent extends QanaryComponent {
 									// set to null
 		// Iterate over the tags
 		for (CoreLabel token : document.get(TokensAnnotation.class)) {
-			logger.info("tagged question {}", token.toString() + token.get(NamedEntityTagAnnotation.class));
+			logger.info("Tagged question (token ---- tag): {}", token.toString() + "  ----  " +token.get(NamedEntityTagAnnotation.class));
 			// System.out.println(token.get(NamedEntityTagAnnotation.class));
 			if (token.get(NamedEntityTagAnnotation.class).equals("O") == false) {
 				if (startToken == null) {
@@ -132,12 +126,10 @@ public class StanfordNERComponent extends QanaryComponent {
 			selections.add(s);
 		}
 
-		logger.info("apply vocabulary alignment on outgraph");
-
 		// STEP4: Push the result of the component to the triplestore
-		long startTime = System.currentTimeMillis();
+		logger.info("Apply vocabulary alignment on outgraph");
 		for (Selection s : selections) {
-			String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+			sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 					+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + namedGraph + "> { "
 					+ "  ?a a qa:AnnotationOfNamedEntity . " + "  ?a oa:hasTarget [ "
@@ -151,7 +143,7 @@ public class StanfordNERComponent extends QanaryComponent {
 			loadTripleStore(sparql, endpoint);
 		}
 		long estimatedTime = System.currentTimeMillis() - startTime;
-		logger.info("Time {}", estimatedTime);
+		logger.info("Time: {}", estimatedTime);
 
 		return myQanaryMessage;
 	}

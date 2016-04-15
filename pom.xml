@@ -9,6 +9,7 @@
     <module>qanary_component-template</module>
     <module>qanary_component-example</module>
     <module>qanary_component-stanford-NER</module>
+    <module>qanary_component-AGDISTIS</module>
     <module>FirstDBpedia_Spotter</module>
     <module>qanary_component-spotter</module>
     <module>qanary_component-alchemy</module>

@@ -1,4 +1,4 @@
-package TestQanaryServiceController;
+package eu.wdaqua.qanary.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -93,13 +93,14 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
+		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
 		try {
 			requestMessage = new QanaryMessage(jsonObject.toJSONString());
+			logger.info("Message {}"+requestMessage);
 		} catch (URISyntaxException e) {
 			fail(e.getMessage());
 			return;
@@ -113,7 +114,7 @@ public class TestQanaryServiceController {
 							post(QanaryConfiguration.annotatequestion) //
 									.content(requestMessage.asJsonString()) //
 									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()) // ok
+					.andExpect(status().is2xxSuccessful()) //
 					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
 					.andReturn();
 		} catch (Exception e) {
@@ -153,8 +154,8 @@ public class TestQanaryServiceController {
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
+		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
