@@ -25,7 +25,7 @@ public class ExampleQanaryComponent extends QanaryComponent {
 		// TODO: implement processing of question
 
 		try {
-			logger.info("store data in graph {}", myQanaryMessage.get(new URL(QanaryMessage.endpointKey)));
+			logger.info("store data in graph {}", myQanaryMessage.getValues().get(new URL(QanaryMessage.endpointKey)));
 			// TODO: insert data in QanaryMessage.outgraph
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
