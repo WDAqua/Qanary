@@ -128,18 +128,23 @@ public class SpotlightWrapper extends QanaryComponent {
 	
 	
 	
-	public QanaryMessage process(QanaryMessage QanaryMessage) {
+	public QanaryMessage process(QanaryMessage myQanaryMessage) {
 		//org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
-		logger.info("process: {}", QanaryMessage);
+		logger.info("process: {}", myQanaryMessage);
 		// TODO: implement processing of question
 		
 		try {
 			
 			//STEP1: Retrive the named graph and the endpoint
-			String endpoint=QanaryMessage.get(new URL(QanaryMessage.endpointKey)).toString();
-			String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraphKey)).toString();
+			//String endpoint=QanaryMessage.get(new URL(QanaryMessage.endpointKey)).toString();
+			//String namedGraph=QanaryMessage.get(new URL(QanaryMessage.inGraphKey)).toString();
+			String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
+			String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
 			logger.info("store data at endpoint {}", endpoint);
 			logger.info("store data in graph {}", namedGraph);
+
+			//logger.info("store data at endpoint {}", endpoint);
+			//logger.info("store data in graph {}", namedGraph);
 			
 			//STEP2: Retrive information that are needed for the computations
 			//TODO when "/question" is properly implemented and all things are loaded into the named graph 
@@ -262,24 +267,38 @@ public class SpotlightWrapper extends QanaryComponent {
 			long estimatedTime = System.currentTimeMillis() - startTime;
 			logger.info("Time {}", estimatedTime);		
 
-		} catch (MalformedURLException e) {
+		} catch (Exception e) {//MalformedURLException e) {
 			e.printStackTrace();
 		}
 
-		return QanaryMessage;
+		return myQanaryMessage;
 	}
 	
-	public void loadTripleStore(String sparqlQuery, String endpoint){
-		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
+	
+	public void loadTripleStore(String sparqlQuery, String endpoint) {
+	    UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-	    proc.execute() ;
+	    proc.execute();
 	}
-	
+	/*
 	public ResultSet selectTripleStore(String sparqlQuery, String endpoint){
 		Query query = QueryFactory.create(sparqlQuery);
-		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();
 	}
+	
+	public void loadTripleStore(String sparqlQuery, String endpoint) {
+		UpdateRequest request = UpdateFactory.create(sparqlQuery);
+		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
+		proc.execute();
+	}*/
+
+	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+		Query query = QueryFactory.create(sparqlQuery);
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+		return qExe.execSelect();
+	}
+
 	
 	class Selection {
 		public int begin;
