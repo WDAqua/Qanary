@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.component;
+package eu.wdaqua.qanary.agdistis;
 
 import java.io.IOException;
 
@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -59,45 +61,35 @@ import eu.wdaqua.qanary.component.QanaryMessage;
 public class Agdistis extends QanaryComponent {
 	private String agdistisService="http://139.18.2.164:8080/AGDISTIS";
 	private static final Logger logger = LoggerFactory.getLogger(Agdistis.class);
-	/**
-	 * default processor of a QanaryMessage
-	 */
+	
 	public QanaryMessage process(QanaryMessage QanaryMessage) {
-		logger.info("process: {}", QanaryMessage);
-		
 		try {
+			long startTime = System.currentTimeMillis();
+			logger.info("process: {}", QanaryMessage);
 			
 			//STEP1: Retrive the named graph and the endpoint
-			String endpoint=QanaryMessage.get(new URI(QanaryMessage.endpointKey)).toString();
-			endpoint="http://admin:admin@localhost:5820/question/query";
-			String namedGraph=QanaryMessage.get(new URI(QanaryMessage.inGraphKey)).toString();
-			namedGraph="bbbbbbb";
-			logger.info("store data at endpoint {}", endpoint);
-			logger.info("store data in graph {}", namedGraph);
+			String endpoint=QanaryMessage.getEndpoint().toASCIIString();
+			String namedGraph=QanaryMessage.getInGraph().toASCIIString();
+			logger.info("Endpoint: {}", endpoint);
+			logger.info("InGraph: {}", namedGraph);
 			
-			//STEP2: Retrive information that are needed for the computations
-			//TODO when "/question" is properly implemented and all things are loaded into the named graph 
-			// - The question
-			//String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-			//				+"SELECT ?questionuri "
-			//				+"FROM "+namedGraph+" "
-			//				+"WHERE {?questionuri a qa:Question}";
-			//ResultSet result=selectTripleStore(sparql,endpoint);
-			//String uriQuestion =result.next().getResource("questionuri").toString();
-			//logger.info("uri of the question {}", uriQuestion);
-			
-			//RestTemplate restTemplate = new RestTemplate();
-			//ResponseEntity<String> responseEntity =  restTemplate.getForEntity(uriQuestion, String.class);
-			//String question=responseEntity.getBody();
-			//logger.info("question {}", question);
-			
-			String uriQuestion="http://wdaqua.eu/dummy";
-			String question="Who meet Barack Obama and Michelle Obama?";
-			logger.info("question {}", question);
-			
+			// STEP2: Retrieve information that are needed for the computations
+			//Retrieve the uri where the question is exposed 
+			String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
+							+"SELECT ?questionuri "
+							+"FROM <"+namedGraph+"> "
+							+"WHERE {?questionuri a qa:Question}";
+			ResultSet result=selectTripleStore(sparql,endpoint);
+			String uriQuestion=result.next().getResource("questionuri").toString();
+			logger.info("Uri of the question: {}", uriQuestion);
+			//Retrieve the question itself
+			RestTemplate restTemplate = new RestTemplate();
+			//TODO: pay attention to "/raw" maybe change that
+			ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion+"/raw", String.class);
+			String question=responseEntity.getBody();
+			logger.info("Question: {}", question);
 			//Retrieves the spots from the knowledge graph
-			/*
-			String sparql="PREFIX qa: <http://www.wdaqua.eu/qa#> "
+			sparql="PREFIX qa: <http://www.wdaqua.eu/qa#> "
 						+"PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " 
 						+"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
 						+"SELECT ?start ?end "
@@ -116,8 +108,6 @@ public class Agdistis extends QanaryComponent {
 				        +"oa:annotatedBy ?annotator "
 						+"} "
 						+"ORDER BY ?start ";
-			
-			
 			ResultSet r=selectTripleStore(sparql,endpoint);
 			ArrayList<Spot> spots = new ArrayList<Spot>();
 			while (r.hasNext()){
@@ -125,51 +115,43 @@ public class Agdistis extends QanaryComponent {
 				Spot spot = new Spot();
 				spot.begin=s.getLiteral("start").getInt();
 				spot.end=s.getLiteral("end").getInt();
+				logger.info("Spot: {}-{}", spot.begin, spot.end);
 				spots.add(spot);
 			}
 			
-			String xml=question;
-			Integer offset=0;
-			for (Spot spot : spots){
-				xml=xml.substring(0,spot.begin+offset)+"</entity>"+xml.substring(spot.begin+offset,spot.end+offset)+"</entity>"+xml.substring(spot.end+offset,xml.length()+offset);
-				offset+=2*"</entity>".length();
-			}
-			*/
-
-			String input="The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>.";
-
 			//STEP3: Call the AGDISTIS service
 			//Informations about the AGDISTIS API can be found here: https://github.com/AKSW/AGDISTIS/wiki/2-Asking-the-webservice
 			//curl --data-urlencode "text='The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>.'" -d type='agdistis' http://139.18.2.164:8080/AGDISTIS
+			//Match the format "The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>."
+			String input=question;
+			Integer offset=0;
+			for (Spot spot : spots){
+				input=input.substring(0,spot.begin+offset)+"<entity>"+input.substring(spot.begin+offset,spot.end+offset)+"</entity>"+input.substring(spot.end+offset,input.length());
+				offset+="<entity>".length()+"</entity>".length();
+			}
+			//String input="The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>.";
+			logger.info("Input to Agdistis: "+input);
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(agdistisService);
 			logger.info("Service request "+service);
-			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-			map.add("type", "agdistis");
-			map.add("text", input);
-			
-			RestTemplate restTemplate = new RestTemplate();
-			String response = restTemplate.postForObject(service.build().encode().toUri(), map, String.class);
-			logger.info("Xml document from alchemy api {}", response);
-			
+			String body="type=agdistis&"+"text='"+URLEncoder.encode(input, "UTF-8")+"'";
+			//RestTemplarestTemplate = new RestTemplate();
+			String response = restTemplate.postForObject(service.build().encode().toUri(), body, String.class);
+			logger.info("JSON document from Agdistis api {}", response);
+			//Extract entities
 			ArrayList<Link> links=new ArrayList<Link>();
-			
-			
 			JSONArray arr = new JSONArray(response);
 			for (int i = 0; i < arr.length(); i++){
-				System.out.println("Here");
 			    Link l=new Link();
 				l.link = arr.getJSONObject(i).getString("disambiguatedURL");
-				l.begin = arr.getJSONObject(i).getInt("start");
-				l.end = arr.getJSONObject(i).getInt("start")+arr.getJSONObject(i).getInt("offset");
+				l.begin = arr.getJSONObject(i).getInt("start")-1;
+				l.end = arr.getJSONObject(i).getInt("start")-1+arr.getJSONObject(i).getInt("offset");
 				links.add(l);
 			}
 			
-			logger.info("apply vocabulary alignment on outgraph");
-			
 			//STEP4: Push the result of the component to the triplestore
-			long startTime = System.currentTimeMillis();
+			logger.info("Apply vocabulary alignment on outgraph");
 			for (Link l: links){
-				String sparql="prefix qa: <http://www.wdaqua.eu/qa#> "
+				sparql="prefix qa: <http://www.wdaqua.eu/qa#> "
 						 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 						 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
 						 +"INSERT { "
@@ -196,13 +178,10 @@ public class Agdistis extends QanaryComponent {
 				loadTripleStore(sparql, endpoint);
 			}
 			long estimatedTime = System.currentTimeMillis() - startTime;
-			logger.info("Time {}", estimatedTime);		
-
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
+			logger.info("Time {}", estimatedTime);
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-
 		return QanaryMessage;
 	}
 	
