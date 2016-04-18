@@ -98,6 +98,9 @@ public class QanaryQuestionAnsweringController {
 
 		URI questionUri = qanaryQuestionController.storeQuestion(question);
 
+		// TODO: address of triplestore, outGraph
+		// TODO: question URI
+
 		return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
 	}
 
@@ -171,10 +174,11 @@ public class QanaryQuestionAnsweringController {
 		QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
 
 		// execute synchronous calls to all components with the same message
-		// TODO: execute asynchronously
+		// TODO: execute asynchronously?
 		qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
 
-		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, qanaryConfigurator);
+		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, questionUri.toURI(), endpoint,
+				namedGraph, qanaryConfigurator);
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
 	}
 
