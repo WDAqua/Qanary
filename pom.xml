@@ -8,6 +8,7 @@
     <module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
     <module>qanary_component-example</module>
+     <module>qanary_component-DBpediaNED</module>
     <module>qanary_component-stanford-NER</module>
     <module>qanary_component-AGDISTIS</module>
     <module>FirstDBpedia_Spotter</module>

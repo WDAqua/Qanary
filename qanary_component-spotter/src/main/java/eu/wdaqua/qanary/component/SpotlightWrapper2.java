@@ -52,8 +52,6 @@ public class SpotlightWrapper2 extends QanaryComponent {
 		String urladdress = "";
 		List<String> retLst = new ArrayList<String>();
 		try {
-
-			
 			
 			URL url = new URL(urladd);
 			URLConnection urlConnection = url.openConnection();
