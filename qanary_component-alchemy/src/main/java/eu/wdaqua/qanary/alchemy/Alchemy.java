@@ -1,13 +1,7 @@
 package eu.wdaqua.qanary.alchemy;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Properties;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.List;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -18,6 +12,11 @@ import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.io.SAXReader;
+import org.dom4j.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -25,23 +24,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
 
 /**
- * represents a wrapper of the Alchemy API
+ * represents a wrapper of the Alchemy API as a Entity Linking Tool
  * 
  * @author Dennis Diefenbach
  *
@@ -61,7 +49,7 @@ public class Alchemy extends QanaryComponent {
 			long startTime = System.currentTimeMillis();
 			org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 			logger.info("Qanary Message: {}", myQanaryMessage);
-	
+			
 			// STEP1: Retrieve the named graph and the endpoint
 			String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
 			String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
@@ -84,7 +72,6 @@ public class Alchemy extends QanaryComponent {
 			String question=responseEntity.getBody();
 			logger.info("Question: {}", question);
 	
-			// STEP3: Pass the information to the component and execute it
 			//STEP3: Call the alchemy service
 			//Informations about the Alchemy API can be found here: http://www.alchemyapi.com/api/entity/proc.html
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(alchemyService)
@@ -93,36 +80,29 @@ public class Alchemy extends QanaryComponent {
 			logger.info("Service request "+service);
 			ResponseEntity<String> response = restTemplate.exchange(service.build().encode().toUri(), HttpMethod.GET, null, String.class);
 			logger.info("Xml document from alchemy api {}", response.getBody());
-			
+			//Parse the output
 			ArrayList<Selection> selections=new ArrayList<Selection>();
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder;
-			
-				dBuilder = dbFactory.newDocumentBuilder();
-			
-			InputSource is = new InputSource(new StringReader(response.getBody()));
-			Document doc = dBuilder.parse(is);
-			System.out.println(doc.toString());
-			doc.getDocumentElement().normalize();
-			NodeList nList = doc.getElementsByTagName("entity");
-			for (int temp = 0; temp < nList.getLength(); temp++) {
-				Node nNode = nList.item(temp);
-				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-					Element eElement = (Element) nNode;
-					String entity = eElement.getElementsByTagName("text").item(0).getTextContent();
-					System.out.println(entity);
-					for (int i = -1; (i = question.indexOf(entity, i + 1)) != -1; ) {
-					    Selection s = new Selection();
-						s.begin=i;
-					    s.end=i+entity.length();
-					    selections.add(s);
+			Document document = DocumentHelper.parseText(response.getBody() );
+			List<Node> nodes = document.selectNodes("/results/entities/entity");
+			for (Node node : nodes) {
+				if (node.selectSingleNode("disambiguated")!=null){
+					if (node.selectSingleNode("disambiguated").selectSingleNode("dbpedia")!=null){
+						Selection s = new Selection();
+						String text = node.selectSingleNode("text").getText();
+						System.out.println(text);
+						for (int i = -1; (i = question.indexOf(text, i + 1)) != -1; ) {
+							s.begin=i;
+						    s.end=i+text.length();
+						    selections.add(s);
+						}
+						s.uri=node.selectSingleNode("disambiguated").selectSingleNode("dbpedia").getText();
+						System.out.println(s.uri);
 					}
 				}
 			}
-			
-			logger.info("apply vocabulary alignment on outgraph");
-			
+
 			//STEP4: Push the result of the component to the triplestore
+			logger.info("apply vocabulary alignment on outgraph");
 			for (Selection s: selections){
 				sparql="prefix qa: <http://www.wdaqua.eu/qa#> "
 						 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
@@ -138,7 +118,8 @@ public class Alchemy extends QanaryComponent {
 						 +"                    oa:start \""+s.begin+"\"^^xsd:nonNegativeInteger ; "
 						 +"                    oa:end  \""+s.end+"\"^^xsd:nonNegativeInteger  "
 						 +"           ] "
-						 +"  ] ; "
+						 +"  ] . "
+						 +"  ?a oa:hasBody <"+s.uri+"> ;"
 						 +"     oa:annotatedBy <http://www.alchemyapi.com> ; "
 						 +"	    oa:AnnotatedAt ?time  "
 						 +"}} "
@@ -151,13 +132,7 @@ public class Alchemy extends QanaryComponent {
 			}
 			long estimatedTime = System.currentTimeMillis() - startTime;
 			logger.info("Time: {}", estimatedTime);
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (DocumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -179,6 +154,7 @@ public class Alchemy extends QanaryComponent {
 	class Selection {
 		public int begin;
 		public int end;
+		public String uri;
 	}
 
 }
