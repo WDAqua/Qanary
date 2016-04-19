@@ -84,7 +84,7 @@ public abstract class QanaryComponent {
 	 * @return
 	 */
 	public ResultSet selectTripleStore(String sparqlQuery, QanaryMessage qanaryMessage) {
-		return this.selectTripleStore(sparqlQuery, qanaryMessage.getEndpoint().toString());
+		return this.selectFromTripleStore(sparqlQuery, qanaryMessage.getEndpoint().toString());
 	}
 
 	/**
@@ -94,7 +94,7 @@ public abstract class QanaryComponent {
 	 * @param endpoint
 	 * @return
 	 */
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
 		logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
@@ -110,7 +110,7 @@ public abstract class QanaryComponent {
 	 * @throws Exception
 	 */
 	public URI getQuestion(QanaryMessage myQanaryMessage) throws Exception {
-		ResultSet resultset = this.selectTripleStore(
+		ResultSet resultset = this.selectFromTripleStore(
 				"SELECT ?question FROM <" + myQanaryMessage.getInGraph()
 						+ "> {?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>}",
 				myQanaryMessage.getEndpoint().toString());
