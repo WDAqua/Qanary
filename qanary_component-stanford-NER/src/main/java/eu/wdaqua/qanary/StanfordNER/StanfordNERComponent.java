@@ -66,7 +66,7 @@ public class StanfordNERComponent extends QanaryComponent {
 		ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion+"/raw", String.class);
 		String question=responseEntity.getBody();
 		logger.info("Question: {}", question);
-
+		
 		// STEP3: Pass the information to the component and execute it
 		// TODO: ATTENTION: This should be done only ones when the component
 		// is started
@@ -106,6 +106,7 @@ public class StanfordNERComponent extends QanaryComponent {
 						s.end = endToken.endPosition();
 						selections.add(s);
 						startToken = token;
+						endToken = token;
 					}
 				}
 			} else {
@@ -123,8 +124,14 @@ public class StanfordNERComponent extends QanaryComponent {
 			Selection s = new Selection();
 			s.begin = startToken.beginPosition();
 			s.end = endToken.endPosition();
+			System.out.println("end"+s.begin+"---"+s.end);
 			selections.add(s);
 		}
+
+		for (Selection s: selections){
+			System.out.println(s.begin+"---"+s.end);
+		}
+		
 
 		// STEP4: Push the result of the component to the triplestore
 		logger.info("Apply vocabulary alignment on outgraph");
