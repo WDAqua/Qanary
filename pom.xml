@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot</artifactId>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -31,16 +31,16 @@
 			<artifactId>json-path-assert</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--			<dependency> -->
-		<!--	<groupId>org.springframework.boot</groupId> -->
-		<!--	<artifactId>spring-boot-starter-thymeleaf</artifactId> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-thymeleaf</artifactId> -->
 		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -84,9 +84,9 @@
 			<artifactId>javax.inject</artifactId>
 		</dependency>
 		<!-- <dependency> -->
-		<!--	<groupId>eu.wdaqua.qanary</groupId> -->
-		<!--	<artifactId>qa.pipeline</artifactId> -->
-		<!--	<version>0.1.0</version> -->
+		<!-- <groupId>eu.wdaqua.qanary</groupId> -->
+		<!-- <artifactId>qa.pipeline</artifactId> -->
+		<!-- <version>0.1.0</version> -->
 		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -96,6 +96,14 @@
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 		</dependency>
+		<!-- 
+ 		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<type>pom</type>
+			<version>3.0.0</version>
+		</dependency> 
+		//-->
 	</dependencies>
 
 	<properties>
