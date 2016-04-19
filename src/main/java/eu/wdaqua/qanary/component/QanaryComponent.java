@@ -1,8 +1,14 @@
 package eu.wdaqua.qanary.component;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 //import org.apache.jena.query.Query;
 //import org.apache.jena.query.QueryExecution;
 //import org.apache.jena.query.QueryExecutionFactory;
@@ -71,21 +77,30 @@ public abstract class QanaryComponent {
 	}
 
 	/**
+	 * wrapper for selectTripleStore
+	 * 
+	 * @param sparqlQuery
+	 * @param qanaryMessage
+	 * @return
+	 */
+	public ResultSet selectTripleStore(String sparqlQuery, QanaryMessage qanaryMessage) {
+		return this.selectTripleStore(sparqlQuery, qanaryMessage.getEndpoint().toString());
+	}
+
+	/**
 	 * query a SPARQL endpoint with a given query
 	 * 
 	 * @param sparqlQuery
 	 * @param endpoint
 	 * @return
 	 */
-	// public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
-	// logger.debug("selectTripleStore on {} execute {}", endpoint,
-	// sparqlQuery);
-	// Query query = QueryFactory.create(sparqlQuery);
-	// QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint,
-	// query);
-	// ResultSet resultset = qExe.execSelect();
-	// return resultset;
-	// }
+	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+		logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
+		Query query = QueryFactory.create(sparqlQuery);
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+		ResultSet resultset = qExe.execSelect();
+		return resultset;
+	}
 
 	/**
 	 * get the question URI from the pipeline endpoint
@@ -94,37 +109,33 @@ public abstract class QanaryComponent {
 	 * @return
 	 * @throws Exception
 	 */
-	// public URI getQuestion(QanaryMessage myQanaryMessage) throws Exception {
-	// ResultSet resultset = this.selectTripleStore(
-	// "SELECT ?question FROM <" + myQanaryMessage.getInGraph()
-	// + "> {?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
-	// <http://www.wdaqua.eu/qa#Question>}",
-	// myQanaryMessage.getEndpoint().toString());
-	//
-	// int i = 0;
-	// String question = null;
-	// while (resultset.hasNext()) {
-	// question = resultset.next().get("question").asResource().getURI();
-	// logger.debug("{}: qa#Question = {}", i++, question);
-	// }
-	// if (i > 1) {
-	// throw new Exception("More than 1 question (count: " + i + ") in graph " +
-	// myQanaryMessage.getInGraph()
-	// + " at " + myQanaryMessage.getEndpoint());
-	// } else if (i == 0) {
-	// throw new Exception("No question available in graph " +
-	// myQanaryMessage.getInGraph() + " at "
-	// + myQanaryMessage.getEndpoint());
-	// }
-	//
-	// URI questionUri = new URI(question);
-	//
-	// logger.info("question {} found in {} at {}", question,
-	// myQanaryMessage.getInGraph(),
-	// myQanaryMessage.getEndpoint());
-	//
-	// return questionUri;
-	//
-	// }
+	public URI getQuestion(QanaryMessage myQanaryMessage) throws Exception {
+		ResultSet resultset = this.selectTripleStore(
+				"SELECT ?question FROM <" + myQanaryMessage.getInGraph()
+						+ "> {?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>}",
+				myQanaryMessage.getEndpoint().toString());
+
+		int i = 0;
+		String question = null;
+		while (resultset.hasNext()) {
+			question = resultset.next().get("question").asResource().getURI();
+			logger.debug("{}: qa#Question = {}", i++, question);
+		}
+		if (i > 1) {
+			throw new Exception("More than 1 question (count: " + i + ") in graph " + myQanaryMessage.getInGraph()
+					+ " at " + myQanaryMessage.getEndpoint());
+		} else if (i == 0) {
+			throw new Exception("No question available in graph " + myQanaryMessage.getInGraph() + " at "
+					+ myQanaryMessage.getEndpoint());
+		}
+
+		URI questionUri = new URI(question);
+
+		logger.info("question {} found in {} at {}", question, myQanaryMessage.getInGraph(),
+				myQanaryMessage.getEndpoint());
+
+		return questionUri;
+
+	}
 
 }
