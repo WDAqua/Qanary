@@ -28,7 +28,7 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 		// TODO: implement this (custom for every component)
 
 		// TODO: wait for the fully working implementation in QanaryComponent
-		// this.getQuestion(myQanaryMessage);
+		this.getQuestion(myQanaryMessage);
 
 		logger.info("apply vocabulary alignment on outgraph for the Batman question");
 
