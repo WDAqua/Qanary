@@ -141,11 +141,13 @@ public class Agdistis extends QanaryComponent {
 			ArrayList<Link> links=new ArrayList<Link>();
 			JSONArray arr = new JSONArray(response);
 			for (int i = 0; i < arr.length(); i++){
-			    Link l=new Link();
-				l.link = arr.getJSONObject(i).getString("disambiguatedURL");
-				l.begin = arr.getJSONObject(i).getInt("start")-1;
-				l.end = arr.getJSONObject(i).getInt("start")-1+arr.getJSONObject(i).getInt("offset");
-				links.add(l);
+				if (arr.getJSONObject(i).isNull("disambiguatedURL")==false){
+					Link l=new Link();
+					l.link = arr.getJSONObject(i).getString("disambiguatedURL");
+					l.begin = arr.getJSONObject(i).getInt("start")-1;
+					l.end = arr.getJSONObject(i).getInt("start")-1+arr.getJSONObject(i).getInt("offset");
+					links.add(l);
+				}
 			}
 			
 			//STEP4: Push the result of the component to the triplestore
