@@ -76,12 +76,6 @@
             <version>0.8.1</version>
             <scope>test</scope>
         </dependency>
-       <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>apache-jena-libs</artifactId>
-            <type>pom</type>
-            <version>3.0.0</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
