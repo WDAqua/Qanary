@@ -3,6 +3,8 @@ package eu.wdaqua.qanary.LuceneSpotter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,8 +43,8 @@ import eu.wdaqua.qanary.component.QanaryMessage;
  */
 
 @Component
-public class LuceneSpotter extends QanaryComponent {
-	private static final Logger logger = LoggerFactory.getLogger(LuceneSpotter.class);
+public class LuceneLinker extends QanaryComponent {
+	private static final Logger logger = LoggerFactory.getLogger(LuceneLinker.class);
 
 	/**
 	 * default processor of a QanaryMessage
@@ -53,7 +55,6 @@ public class LuceneSpotter extends QanaryComponent {
 		logger.info("Qanary Message: {}", myQanaryMessage);
 
 		try {
-		/*
 			// STEP1: Retrieve the named graph and the endpoint
 			String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
 			String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
@@ -75,12 +76,10 @@ public class LuceneSpotter extends QanaryComponent {
 			ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion+"/raw", String.class);
 			String question=responseEntity.getBody();
 			logger.info("Question: {}", question);
-	*/
+
 			// STEP3: Pass the information to the component and execute it
-			
-			String question="What is the Population of New York?";
-			
 			//Tokenize the question using the lucene tokenizer
+			ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList(new String[]{"give", "me", "is", "are", "was", "were", "has", "have", "had", "do", "does", "did", "of", "the", "a", "in", "by", "to", "me", "all", "with", "from", "for", "and", "who"}));
 			Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
 			TokenStream tokenStream = analyzer.tokenStream(null, new StringReader(question));
 			tokenStream.reset();
@@ -102,59 +101,102 @@ public class LuceneSpotter extends QanaryComponent {
 				int k=1;
 				List<String> candidates = new ArrayList<String>();
 				while (found==true){
+					System.out.println("SEARCH"+search);
 					List<String> tmp=index.query("\""+search+"\"");
+					
+					for (String s: tmp){
+						System.out.println(s);
+					}
+					
 					//If no matches found add the previews ones if they exist 
 					if (tmp.size()==0){
 						found=false;
+						System.out.println("Here1 k:"+k);
 						for (String uri:candidates){
-							int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
-							int end=tokens.get(i+k-1).getAttribute(OffsetAttribute.class).endOffset();
-							annotations.add(new Annotation(begin,end,uri));
+							if (uri.equals("http://dbpedia.org/")==false){
+								int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
+								int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
+								System.out.println(question.substring(begin, end));
+        						System.out.println(uri);
+								annotations.add(new Annotation(begin,end,uri));
+							}
 						}
 					} else{
 						if (candidates.size()>0){
+							System.out.println("Here3");
 							for (String uri:candidates){
-								int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
-								int end=tokens.get(i+k-1).getAttribute(OffsetAttribute.class).endOffset();
-								annotations.add(new Annotation(begin,end,uri));
+								if (uri.equals("http://dbpedia.org/")==false){
+									int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
+									int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
+									System.out.println(question.substring(begin, end));
+	        						System.out.println(uri);
+									annotations.add(new Annotation(begin,end,uri));
+								}
 							}
-	                                        
-							//candidates=new ArrayList<String>(Arrays.asList(tmp));
-							candidates=tmp;
-							if (i+k<tokens.size()){
-								search += " "+tokens.get(i+k);
-								k++;
-							} else{
-								found = false;
-	                           	for (String uri:candidates){
+						}                    
+						//candidates=new ArrayList<String>(Arrays.asList(tmp));
+						candidates=tmp;
+						if (i+k<tokens.size()){
+							search += " "+tokens.get(i+k).getAttribute(CharTermAttribute.class).toString();
+							k++;
+						} else{
+							found = false;
+                           	for (String uri:candidates){
+                           		if (uri.equals("http://dbpedia.org/")==false){
 	                           		int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
-	        						int end=tokens.get(i+k).getAttribute(OffsetAttribute.class).endOffset();
+	        						int end=tokens.get(i+k-1).getAttribute(OffsetAttribute.class).endOffset();
+	        						System.out.println(question.substring(begin, end));
+	        						System.out.println(uri);
 	        						annotations.add(new Annotation(begin,end,uri));
-	       						}
-							}
-						}	
+                           		}
+       						}
+						}
 					}
 				}
 			}
-		/*	
+
+			Iterator<Annotation> it = annotations.iterator();
+			while(it.hasNext()){
+				Annotation a = it.next();
+				System.out.println(question.substring(a.begin, a.end));
+				if (stopWords.contains(question.substring(a.begin, a.end).toLowerCase())){
+					it.remove();
+				}
+			}
+
+			for (Annotation a : annotations){
+				System.out.println(a.uri);
+			}
+			
 			// STEP4: Push the result of the component to the triplestore
 			logger.info("Apply vocabulary alignment on outgraph");
+		
 			for (Annotation a : annotations) {
 				sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 						+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-						+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + namedGraph + "> { "
-						+ "  ?a a qa:AnnotationOfNamedEntity . " + "  ?a oa:hasTarget [ "
-						+ "           a    oa:SpecificResource; " + "           oa:hasSource    <" + uriQuestion + ">; "
-						+ "           oa:hasSelector  [ " + "                    a oa:TextPositionSelector ; "
-						+ "                    oa:start \"" + a.begin + "\"^^xsd:nonNegativeInteger ; "
-						+ "                    oa:end  \"" + a.end + "\"^^xsd:nonNegativeInteger  " + "           ] "
-						+ "  ] ; " + "     oa:annotatedBy <http://nlp.stanford.edu/software/CRF-NER.shtml> ; "
-						+ "	    oa:AnnotatedAt ?time  " + "}} " + "WHERE { " + "BIND (IRI(str(RAND())) AS ?a) ."
+						+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " 
+						+ "INSERT { " 
+						+ "GRAPH <" + namedGraph + "> { "
+						+ "  ?a a qa:AnnotationOfNamedEntity . " 
+						+ "  ?a oa:hasTarget [ "
+						+ "           a    oa:SpecificResource; " 
+						+ "           oa:hasSource    <" + uriQuestion + ">; "
+						+ "           oa:hasSelector  [ " 
+						+ "                    a oa:TextPositionSelector ; "
+						+ "                    oa:start \""+ a.begin + "\"^^xsd:nonNegativeInteger ; "
+						+ "                    oa:end  \"" + a.end + "\"^^xsd:nonNegativeInteger  " 
+						+ "           ] "
+						+ "  ] . " 
+						+ "  ?a oa:hasBody <"+a.uri+"> ;"
+						+ "     oa:annotatedBy <http://nlp.stanford.edu/software/CRF-NER.shtml> ; "
+						+ "	    oa:AnnotatedAt ?time  " 
+						+ "}} " 
+						+ "WHERE { " 
+						+ "BIND (IRI(str(RAND())) AS ?a) ."
 						+ "BIND (now() as ?time) " + "}";
 				loadTripleStore(sparql, endpoint);
-
 			}
-*/		} catch (IOException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {

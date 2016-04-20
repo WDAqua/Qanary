@@ -10,7 +10,7 @@
     <properties>
         <java.version>1.8</java.version>
     </properties>
-    <artifactId>qa.lucene_spotter</artifactId>
+    <artifactId>qa.lucene-linker</artifactId>
     <dependencies>
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
