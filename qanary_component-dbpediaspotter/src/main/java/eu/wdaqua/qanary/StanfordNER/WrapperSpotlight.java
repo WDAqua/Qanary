@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -108,11 +109,13 @@ public class WrapperSpotlight extends QanaryComponent {
 		ResponseEntity<String> response = restTemplate.exchange(service.build().encode().toUri(), HttpMethod.GET, null, String.class);
 		logger.info("Xml document from alchemy api {}", response.getBody());
 		*/
-		
+	
 		String madeUrlFromInput = "http://spotlight.sztaki.hu:2222/rest/spot?text=";
-		String qns[] = input.split(" ");
-		String append = String.join("%20", qns);
-		madeUrlFromInput += append;//+"&executeSparqlQuery=on&relationExtractorType=Semantic";
+		/*String qns[] = input.split(" ");
+		String append = String.join("%20", qns);*/
+		try{
+		madeUrlFromInput += URLEncoder.encode(input, "UTF-8");;//+"&executeSparqlQuery=on&relationExtractorType=Semantic";
+		}catch(Exception e){}
 		List<String> retLst = new ArrayList<String>();
 		{
 			
