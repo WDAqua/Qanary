@@ -23,7 +23,7 @@ public class Application {
 	 */
 	@Bean
 	public QanaryComponent qanaryComponent() {
-		return new LuceneSpotter();
+		return new LuceneLinker();
 	}
 
 	public static void main(String[] args) {
