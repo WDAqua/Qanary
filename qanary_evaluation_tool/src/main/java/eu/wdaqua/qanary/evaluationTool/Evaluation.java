@@ -41,14 +41,19 @@ public class Evaluation {
 	public void qald6_test() {
 		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		String uriServer="http://localhost:8080/startquestionansweringwithtextquestion";
-		String components="alchemy";
+		//String components="alchemy";
 		//String components="StanfordNER ,agdistis";
-		
+		String components="luceneLinker";
 		long startTime = System.currentTimeMillis();
 		
 		try {
+			//Considers all questions
 			Double globalPrecision=0.0;
 			Double globalRecall=0.0;
+			Double globalFMeasure=0.0;
+			int countPrecision=0; //stores for how many questions the precision can be computed, i.e. do not divide by zero
+			int countRecall=0;	//analogusly to countPrecision
+			int countFMeasure=0; //analogusly to countRecall
 			int count=0;
 			String path = Evaluation.class.getResource("/qald-6-train-multilingual.json").getPath();
 			File file = new File(path);
@@ -97,7 +102,7 @@ public class Evaluation {
 				if (questionObject.getJSONObject("query").has("sparql")){
 					String query=questionObject.getJSONObject("query").get("sparql").toString();
 					System.out.println(query);
-					Pattern pattern=Pattern.compile("<.*?>");
+					Pattern pattern=Pattern.compile("<http://dbpedia.org/resource/.*?>");
 				    Matcher matcher = pattern.matcher(query);
 				    while (matcher.find()){
 				    	//System.out.println(matcher.group().toString());
@@ -109,30 +114,38 @@ public class Evaluation {
 				}
 				
 				//Compute precision and recall
-				int correctRetrived = 0;
+				int correctRetrieved = 0;
 				for (String s:systemAnswers){
 					if (expectedAnswers.contains(s)){
-						correctRetrived++;
+						correctRetrieved++;
 					}
 				}
-				System.out.println("Correct retrived"+correctRetrived);
+				System.out.println("Correct retrived"+correctRetrieved);
 				
-				Double precision = (double)correctRetrived/systemAnswers.size();
-				Double recall = (double)correctRetrived/expectedAnswers.size();
-				if (precision.isNaN()){
-					precision=0.0;
+				if (systemAnswers.size()!=0){
+					Double precision = (double)correctRetrieved/systemAnswers.size();
+					logger.info("PRECISION {} ",precision);
+					globalPrecision+=precision;
+					countPrecision++;
 				}
-				if (recall.isNaN()){
-					recall=0.0;
+				if (expectedAnswers.size()!=0){
+					Double recall = (double)correctRetrieved/expectedAnswers.size();
+					logger.info("RECALL {} ",recall);
+					globalRecall+=recall;
+					countRecall++;
 				}
-				logger.info("PRECISION {} ",precision);
-				logger.info("RECALL {} ",recall);
-				globalPrecision+=precision;
-				globalRecall+=recall;
-				count++;
+				if (systemAnswers.size()!=0 && expectedAnswers.size()!=0 && correctRetrieved!=0){
+					Double precision = (double)correctRetrieved/systemAnswers.size();
+					Double recall = (double)correctRetrieved/expectedAnswers.size();
+					Double fMeasure = (2*precision*recall)/(precision+recall);
+					logger.info("F-MEASURE {} ",fMeasure);
+					globalFMeasure+=fMeasure;
+					countFMeasure++;
+				}	
 			}
-			System.out.println("GlobalPrecision="+(double)globalPrecision/count);
-			System.out.println("GlobalRecall="+(double)globalRecall/count);
+			System.out.println("Global Precision="+(double)globalPrecision/countPrecision);
+			System.out.println("Global Recall="+(double)globalRecall/countRecall);
+			System.out.println("Global F-measure="+(double)globalFMeasure/countFMeasure);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
