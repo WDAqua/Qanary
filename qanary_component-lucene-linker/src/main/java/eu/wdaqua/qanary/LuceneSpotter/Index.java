@@ -47,7 +47,7 @@ public class Index {
 		dump="/Users/Dennis/Desktop/dump.ttl";
 		index = FSDirectory.open(Paths.get("/tmp/lucene"));
 		if (DirectoryReader.indexExists(index)==false){
-			index();
+			//index();
 		}
 	}
     
@@ -60,15 +60,21 @@ public class Index {
 		IndexWriter w_instances = new IndexWriter(index, config);
 		System.out.println(dump);
 		PipedRDFIterator<Triple> iter = parse(dump);
+		int count = 0;
 		while (iter.hasNext()) {
-			Triple next = iter.next();
-			if (next.getPredicate().toString().equals("http://www.w3.org/2000/01/rdf-schema#label")){
-					if ( next.getObject().getLiteralLanguage().toString().equals("en")){
-						addDoc(w_instances, next.getSubject().toString(), next.getObject().getLiteralValue().toString());
-					}
-			}
+				Triple next = iter.next();
+				if (next.getPredicate().toString().equals("http://www.w3.org/2000/01/rdf-schema#label")){
+						if ( next.getObject().getLiteralLanguage().toString().equals("en")){
+							addDoc(w_instances, next.getSubject().toString(), next.getObject().getLiteralValue().toString());
+						}
+				}
+				count++;
+	        	if (count % 10000 == 0){
+	        		System.out.println(count);
+	        	}
         	}
         	w_instances.close();
+        	
 	}
     
 	private static void addDoc(IndexWriter w, String resource, String lexicalization) throws IOException {
