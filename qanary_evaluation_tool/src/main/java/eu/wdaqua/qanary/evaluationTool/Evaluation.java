@@ -43,7 +43,9 @@ public class Evaluation {
 		String uriServer="http://localhost:8080/startquestionansweringwithtextquestion";
 		//String components="alchemy";
 		//String components="StanfordNER ,agdistis";
-		String components="luceneLinker";
+		//String components="luceneLinker";
+		String components="DBpediaSpotlightSpotter ,agdistis";
+		
 		long startTime = System.currentTimeMillis();
 		
 		try {
@@ -106,7 +108,7 @@ public class Evaluation {
 				    Matcher matcher = pattern.matcher(query);
 				    while (matcher.find()){
 				    	//System.out.println(matcher.group().toString());
-				    	if (expectedAnswers.contains(matcher.group().toString())==false){
+				    	if (expectedAnswers.contains(matcher.group().toString().replace("<", "").replace(">", ""))==false){
 				    		expectedAnswers.add(matcher.group().toString().replace("<", "").replace(">", ""));
 				    		logger.info("Expected Answers {} ", matcher.group().toString().replace("<", "").replace(">", ""));
 				    	}

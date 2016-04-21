@@ -16,5 +16,6 @@
     <module>qanary_component-alchemy</module>
     <module>qanary_component-lucene-linker</module>
     <module>batmanquestion.annotator</module>
+    <module>qanary_evaluation_tool</module>
   </modules>
 </project>
