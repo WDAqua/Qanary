@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.StanfordNER;
+package eu.wdaqua.qanary.DbpediaSpotlightSpotter;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -134,8 +134,8 @@ public class WrapperSpotlight extends QanaryComponent {
 			//STEP1: Retrive the named graph and the endpoint
 			
 			//String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
-		//endpoint= "http://admin:admin@104.155.21.91:5820/qanary/query";
-		//http://admin:admin@localhost:5820/qanary/query
+			//endpoint= "http://admin:admin@104.155.21.91:5820/qanary/query";
+			//http://admin:admin@localhost:5820/qanary/query
 			//String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
 			//logger.info("store data at endpoint {}", endpoint);
 			//logger.info("store data in graph {}", namedGraph);
@@ -231,7 +231,6 @@ public class WrapperSpotlight extends QanaryComponent {
 		return qExe.execSelect();
 	}
 
-	
 	class Selection {
 		public int begin;
 		public int end;
