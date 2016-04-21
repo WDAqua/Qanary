@@ -43,8 +43,8 @@ public class Evaluation {
 		String uriServer="http://localhost:8080/startquestionansweringwithtextquestion";
 		//String components="alchemy";
 		//String components="StanfordNER ,agdistis";
-		//String components="luceneLinker";
-		String components="DBpediaSpotlightSpotter ,agdistis";
+		String components="luceneLinker";
+		//String components="DBpediaSpotlightSpotter ,agdistis";
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -57,7 +57,7 @@ public class Evaluation {
 			int countRecall=0;	//analogusly to countPrecision
 			int countFMeasure=0; //analogusly to countRecall
 			int count=0;
-			String path = Evaluation.class.getResource("/qald-6-train-multilingual.json").getPath();
+			String path = Evaluation.class.getResource("/qald-benchmark/qald6-train-questions.json").getPath();
 			File file = new File(path);
 			String content=FileUtils.readFileToString(file);
 			JSONObject json = new JSONObject(content);
@@ -66,7 +66,7 @@ public class Evaluation {
 				JSONObject questionObject = tests.getJSONObject(i);
 				JSONArray questions = questionObject.getJSONArray("question");
 				String question=questions.getJSONObject(0).get("string").toString();
-	
+				
 				logger.info("Question "+question);
 				
 				//Send the question
