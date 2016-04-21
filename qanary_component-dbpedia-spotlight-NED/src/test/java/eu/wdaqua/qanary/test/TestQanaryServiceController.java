@@ -32,7 +32,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import eu.wdaqua.qanary.component.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryServiceController;
 import eu.wdaqua.qanary.component.config.QanaryConfiguration;
-import eu.wdaqua.qanary.agdistis.Application;
+import eu.wdaqua.qanary.spotlightNED.Application;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)

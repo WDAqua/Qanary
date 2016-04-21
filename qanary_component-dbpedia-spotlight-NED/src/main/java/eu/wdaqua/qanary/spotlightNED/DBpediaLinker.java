@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.agdistis;
+package eu.wdaqua.qanary.spotlightNED;
 
 import java.io.IOException;
 

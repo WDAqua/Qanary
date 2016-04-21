@@ -10,7 +10,7 @@
     <properties>
         <java.version>1.8</java.version>
     </properties>
-    <artifactId>qa.dbpedialinker</artifactId>
+    <artifactId>qa.dbpedia-spotlight-NED</artifactId>
     <dependencies>
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
