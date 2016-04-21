@@ -45,6 +45,7 @@ public class Evaluation {
 		//String components="StanfordNER ,agdistis";
 		String components="luceneLinker";
 		//String components="DBpediaSpotlightSpotter ,agdistis";
+		//String components="DBpediaSpotlightSpotter ,DBpediaSpotlightNED";
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -69,6 +70,9 @@ public class Evaluation {
 				
 				logger.info("Question "+question);
 				
+				//question="Which volcanos in Japan erupted since 2000?";
+				//question="In which country does the Ganges start?";
+				//question="What is the official website of Tom Cruise?";
 				//Send the question
 				RestTemplate restTemplate = new RestTemplate();
 				UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
