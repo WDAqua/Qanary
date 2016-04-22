@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.LuceneSpotter;
+package eu.wdaqua.qanary.LuceneLinker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
