@@ -15,6 +15,7 @@
     <module>qanary_component-lucene-linker</module>
     <module>qanary_component-dbpedia-spotlight-NED</module>
     <module>qanary_component-dbpediaspotter</module>
+    <module>qanary_component-FOX</module>
     <module>batmanquestion.annotator</module>
     <module>qanary_evaluation_tool</module>
   </modules>
