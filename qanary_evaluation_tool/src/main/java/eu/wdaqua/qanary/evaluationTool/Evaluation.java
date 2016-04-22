@@ -29,7 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 /**
- * represents a wrapper of the Stanford NER tool used here as a spotter
+ * evaluation tool for the EL problem over QALD
  * 
  * @author Dennis Diefenbach & Kuldeep Singh
  *
@@ -43,9 +43,11 @@ public class Evaluation {
 		String uriServer="http://localhost:8080/startquestionansweringwithtextquestion";
 		//String components="alchemy";
 		//String components="StanfordNER ,agdistis";
-		String components="luceneLinker";
+		//String components="StanfordNER ,DBpediaSpotlightNED";
+		//String components="luceneLinker";
 		//String components="DBpediaSpotlightSpotter ,agdistis";
 		//String components="DBpediaSpotlightSpotter ,DBpediaSpotlightNED";
+		String components="FOX ,agdistis";
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -54,9 +56,6 @@ public class Evaluation {
 			Double globalPrecision=0.0;
 			Double globalRecall=0.0;
 			Double globalFMeasure=0.0;
-			int countPrecision=0; //stores for how many questions the precision can be computed, i.e. do not divide by zero
-			int countRecall=0;	//analogusly to countPrecision
-			int countFMeasure=0; //analogusly to countRecall
 			int count=0;
 			String path = Evaluation.class.getResource("/qald-benchmark/qald6-train-questions.json").getPath();
 			File file = new File(path);
@@ -73,7 +72,8 @@ public class Evaluation {
 				//question="Which volcanos in Japan erupted since 2000?";
 				//question="In which country does the Ganges start?";
 				//question="What is the official website of Tom Cruise?";
-				//Send the question
+				
+				//Send the question to startquestionansweringwithtextquestion
 				RestTemplate restTemplate = new RestTemplate();
 				UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
 				
@@ -120,38 +120,19 @@ public class Evaluation {
 				}
 				
 				//Compute precision and recall
-				int correctRetrieved = 0;
-				for (String s:systemAnswers){
-					if (expectedAnswers.contains(s)){
-						correctRetrieved++;
-					}
-				}
-				System.out.println("Correct retrived"+correctRetrieved);
-				
-				if (systemAnswers.size()!=0){
-					Double precision = (double)correctRetrieved/systemAnswers.size();
-					logger.info("PRECISION {} ",precision);
-					globalPrecision+=precision;
-					countPrecision++;
-				}
-				if (expectedAnswers.size()!=0){
-					Double recall = (double)correctRetrieved/expectedAnswers.size();
-					logger.info("RECALL {} ",recall);
-					globalRecall+=recall;
-					countRecall++;
-				}
-				if (systemAnswers.size()!=0 && expectedAnswers.size()!=0 && correctRetrieved!=0){
-					Double precision = (double)correctRetrieved/systemAnswers.size();
-					Double recall = (double)correctRetrieved/expectedAnswers.size();
-					Double fMeasure = (2*precision*recall)/(precision+recall);
-					logger.info("F-MEASURE {} ",fMeasure);
-					globalFMeasure+=fMeasure;
-					countFMeasure++;
-				}	
+				Metrics m = new Metrics();
+				m.compute(expectedAnswers,systemAnswers);
+				logger.info("PRECISION {} ",m.precision);
+				logger.info("RECALL {} ",m.recall);
+				logger.info("F-MEASURE {} ",m.fMeasure);
+				globalPrecision+=m.precision;
+				globalRecall+=m.recall;
+				globalFMeasure+=m.fMeasure;
+				count++;
 			}
-			System.out.println("Global Precision="+(double)globalPrecision/countPrecision);
-			System.out.println("Global Recall="+(double)globalRecall/countRecall);
-			System.out.println("Global F-measure="+(double)globalFMeasure/countFMeasure);
+			System.out.println("Global Precision="+(double)globalPrecision/count);
+			System.out.println("Global Recall="+(double)globalRecall/count);
+			System.out.println("Global F-measure="+(double)globalFMeasure/count);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -161,6 +142,49 @@ public class Evaluation {
 		}
 	}
 
+	class Metrics{
+		private Double precision=0.0;
+		private Double recall=0.0;
+		private Double fMeasure=0.0;
+		
+		
+		public void compute(List<String> expectedAnswers, List<String> systemAnswers){
+			//Compute the number of retrieved answers
+			int correctRetrieved = 0;
+			for (String s:systemAnswers){
+				if (expectedAnswers.contains(s)){
+					correctRetrieved++;
+				}
+			}
+			
+			//Compute precision and recall following the evaluation metrics of QALD
+			if (expectedAnswers.size()==0){
+				if (systemAnswers.size()==0){
+					recall=1.0;
+					precision=1.0;
+					fMeasure=1.0;
+				} else {
+					recall=0.0;
+					precision=0.0;
+					fMeasure=0.0;
+				}
+			} else {
+				if (systemAnswers.size()==0){
+					recall=0.0;
+					precision=1.0;
+				} else {
+					precision = (double)correctRetrieved/systemAnswers.size();
+					recall = (double)correctRetrieved/expectedAnswers.size();
+				}
+				if (precision==0 && recall==0){
+					fMeasure=0.0;
+				} else {
+					fMeasure = (2*precision*recall)/(precision+recall);
+				}
+			}
+		}
+	}
+	
 	public void loadTripleStore(String sparqlQuery, String endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
@@ -172,10 +196,4 @@ public class Evaluation {
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();
 	}
-
-	class Selection {
-		public int begin;
-		public int end;
-	}
-
 }
