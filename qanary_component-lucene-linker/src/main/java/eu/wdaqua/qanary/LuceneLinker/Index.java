@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.LuceneSpotter;
+package eu.wdaqua.qanary.LuceneLinker;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +14,7 @@ import org.apache.jena.riot.lang.PipedRDFIterator;
 import org.apache.jena.riot.lang.PipedRDFStream;
 import org.apache.jena.riot.lang.PipedTriplesStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
@@ -44,10 +45,10 @@ public class Index {
 	private static String dump;
 	public Index(String d) throws IOException{		
 		//dump=d;
-		dump="/Users/Dennis/Desktop/dump.ttl";
+		dump="/tmp/dump.nt";
 		index = FSDirectory.open(Paths.get("/tmp/lucene"));
 		if (DirectoryReader.indexExists(index)==false){
-			//index();
+			index();
 		}
 	}
     
@@ -93,7 +94,7 @@ public class Index {
         IndexSearcher searcher = new IndexSearcher(reader);
 
 		searcher.setSimilarity(new CustomSimilarity());
-        TopDocs docs_instances = searcher.search(q, 10);
+        TopDocs docs_instances = searcher.search(q, 15);
         ScoreDoc[] hits = docs_instances.scoreDocs;
 		
         // Display results
@@ -104,7 +105,8 @@ public class Index {
             Document d = searcher.doc(docId);
 			
 			//Look if the retrieved result matches exactly the searched
-			ArrayList<String> token1=new ArrayList<String>();
+            System.out.println("Search " + querystr + " found " + d.get("resource"));
+            ArrayList<String> token1=new ArrayList<String>();
 			TokenStream tokenStream1 = analyzer.tokenStream(null, new StringReader(querystr));
 			tokenStream1.reset();
 			while(tokenStream1.incrementToken()){
