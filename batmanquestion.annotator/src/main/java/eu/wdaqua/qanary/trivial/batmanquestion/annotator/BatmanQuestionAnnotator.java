@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
+import eu.wdaqua.qanary.component.QanaryQuestion;
+import eu.wdaqua.qanary.component.QanaryUtils;
 
 @Component
 public class BatmanQuestionAnnotator extends QanaryComponent {
@@ -28,7 +30,9 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 		// TODO: implement this (custom for every component)
 
 		// TODO: wait for the fully working implementation in QanaryComponent
-		this.getQuestion(myQanaryMessage);
+		QanaryUtils utils = this.getUtils(myQanaryMessage);
+		QanaryQuestion<String> question = utils.getQuestion();
+		logger.info("question: {} from {}", question.getUri(), question.getRawData());
 
 		logger.info("apply vocabulary alignment on outgraph for the Batman question");
 
