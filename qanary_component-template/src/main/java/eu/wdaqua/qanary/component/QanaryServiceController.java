@@ -1,6 +1,9 @@
 package eu.wdaqua.qanary.component;
 
+import java.net.URI;
+
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +53,18 @@ public class QanaryServiceController {
 	@ResponseBody
 	// public QanaryMessage annotatequestion(@RequestBody QanaryMessage
 	// myQanaryMessage) {
-	public QanaryMessage annotatequestion(@RequestBody String message) throws Exception {
+	public QanaryMessage annotatequestion(HttpServletRequest request, @RequestBody String message) throws Exception {
 		logger.info("annotatequestion: {}", message);
+		long start = QanaryUtils.getTime();
+
+		QanaryConfiguration.setServiceUri(new URI(String.format("%s://%s:%d/" + QanaryConfiguration.annotatequestion,
+				request.getScheme(), request.getServerName(), request.getServerPort())));
 
 		QanaryMessage myQanaryMessage = new QanaryMessage(message);
 
 		this.qanaryComponent.process(myQanaryMessage);
+
+		logger.debug("processing took: {} ms", QanaryUtils.getTime() - start);
 
 		return myQanaryMessage;
 	}
