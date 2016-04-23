@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -91,6 +92,15 @@ public class QanaryQuestionController {
 		// store the received question in a file
 		final String filename = UUID.randomUUID().toString();
 		final String filepath = Paths.get(this.getDirectoryForStoringQuestionRawData(), filename).toString();
+
+		// check if question directory is actually existing
+		if (!Files.isDirectory(Paths.get(this.getDirectoryForStoringQuestionRawData()))) {
+			File file = new File(this.getDirectoryForStoringQuestionRawData());
+			file.mkdirs();
+			logger.warn("created directory for storing questions: {}", this.getDirectoryForStoringQuestionRawData());
+		} else {
+			logger.warn("directory exists: {}", this.getDirectoryForStoringQuestionRawData());
+		}
 
 		// Save the file locally
 		final BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)));
