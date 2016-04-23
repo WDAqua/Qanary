@@ -20,7 +20,7 @@ public class Application {
 	
 	@Bean
 	public QanaryComponent qanaryComponent() {
-		return new DBpediaLinker();
+		return new DBpediaSpotlightNED();
 	}
 	/**
 	 * default main, can be removed later
