@@ -100,9 +100,9 @@ import org.xml.sax.InputSource;
  */
 
 @Component
-public class DBpediaLinker extends QanaryComponent {
+public class DBpediaSpotlightNED extends QanaryComponent {
 	//private String agdistisService="http://139.18.2.164:8080/AGDISTIS";
-	private static final Logger logger = LoggerFactory.getLogger(DBpediaLinker.class);
+	private static final Logger logger = LoggerFactory.getLogger(DBpediaSpotlightNED.class);
 	/**
 	 * default processor of a QanaryMessage
 	 */
