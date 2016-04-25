@@ -53,6 +53,7 @@ public class FileReader {
 		JsonObject query;
 		String sparqlquery;
 
+
 		for (int i = 0; i < questions.size(); i++) {
 			question = questions.get(i).getAsJsonObject();
 			// System.out.println(question.getAsJsonArray("question"));
@@ -62,6 +63,7 @@ public class FileReader {
 			for (int j = 0; j < questiondata.size(); j++) {
 				language = questiondata.get(j).getAsJsonObject().get("language").getAsString();
 				if (language.compareTo("en") == 0) {
+					URIDetector uriDetector = new URIDetector();
 					questionstring = questiondata.get(j).getAsJsonObject().get("string").getAsString();
 					query = question.get("query").getAsJsonObject();
 					if (query.isJsonObject() && !query.isJsonNull() && query.has("sparql")) {
@@ -84,108 +86,9 @@ public class FileReader {
 																				// of
 																				// the
 																				// query,
-							ElementVisitor v = new ElementVisitor() {
 
-								@Override
-								public void visit(ElementSubQuery el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementService el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementMinus el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementNotExists el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementExists el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementNamedGraph el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementDataset el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementGroup el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementOptional el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementUnion el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementData el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementBind el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementAssign el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementFilter el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementPathBlock el) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void visit(ElementTriplesBlock el) {
-									// TODO Auto-generated method stub
-									BasicPattern pattern = el.getPattern();
-									pattern.get(0).getMatchSubject().getURI(); // TODO
-
-								}
-							};
 							// the WHERE bit
-							querypattern.visit(v);
+							querypattern.visit(uriDetector);
 
 						}
 					} else {
@@ -193,8 +96,10 @@ public class FileReader {
 					}
 
 					// TODO: expected output: List of subjects, List of
-					// predicate, List of objects
-
+					// predicate, List of objects u
+					uriDetector.getSubjects();
+					uriDetector.getPredicates();
+					uriDetector.getObjects();
 					System.out
 							.println(question.get("id").getAsInt() + ": " + questionstring + " SPARQL: " + sparqlquery);
 					break;
