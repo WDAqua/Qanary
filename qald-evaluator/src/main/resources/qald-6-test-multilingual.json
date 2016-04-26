@@ -651,7 +651,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT COUNT(DISTINCT ?uri) WHERE { ?uri <http://dbpedia.org/ontology/director> <http://dbpedia.org/resource/Park_Chan-wook> . }"
+        "sparql": "SELECT (COUNT(DISTINCT ?uri) as ?count) WHERE { ?uri <http://dbpedia.org/ontology/director> <http://dbpedia.org/resource/Park_Chan-wook> . }"
       },
       "answers": [
         {
@@ -25965,7 +25965,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT COUNT(DISTINCT ?y) WHERE { <http://dbpedia.org/resource/Jacques_Cousteau> <http://dbpedia.org/ontology/child> ?x . ?x <http://dbpedia.org/ontology/child> ?y . }"
+        "sparql": "SELECT (COUNT(DISTINCT ?y) AS ?count) WHERE { <http://dbpedia.org/resource/Jacques_Cousteau> <http://dbpedia.org/ontology/child> ?x . ?x <http://dbpedia.org/ontology/child> ?y . }"
       },
       "answers": [
         {
@@ -29961,7 +29961,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT COUNT(DISTINCT ?uri) WHERE { ?uri <http://dbpedia.org/property/title> <http://dbpedia.org/resource/Emperor_of_China> . }"
+        "sparql": "SELECT (COUNT(DISTINCT ?uri) AS ?count) WHERE { ?uri <http://dbpedia.org/property/title> <http://dbpedia.org/resource/Emperor_of_China> . }"
       },
       "answers": [
         {
