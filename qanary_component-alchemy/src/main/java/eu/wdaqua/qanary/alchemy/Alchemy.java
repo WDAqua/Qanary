@@ -109,7 +109,7 @@ public class Alchemy extends QanaryComponent {
 						 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
 						 +"INSERT { "
 						 +"GRAPH <"+namedGraph+"> { "
-						 +"  ?a a qa:AnnotationOfNamedEntity . "
+						 +"  ?a a qa:AnnotationOfInstance . "
 						 +"  ?a oa:hasTarget [ "
 						 +"           a    oa:SpecificResource; "
 						 +"           oa:hasSource    <"+uriQuestion+">; "

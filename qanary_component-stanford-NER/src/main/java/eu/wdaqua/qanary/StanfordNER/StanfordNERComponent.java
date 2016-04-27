@@ -140,7 +140,7 @@ public class StanfordNERComponent extends QanaryComponent {
 			sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 					+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + namedGraph + "> { "
-					+ "  ?a a qa:AnnotationOfNamedEntity . " + "  ?a oa:hasTarget [ "
+					+ "  ?a a qa:AnnotationOfSpotInstance . " + "  ?a oa:hasTarget [ "
 					+ "           a    oa:SpecificResource; " + "           oa:hasSource    <" + uriQuestion + ">; "
 					+ "           oa:hasSelector  [ " + "                    a oa:TextPositionSelector ; "
 					+ "                    oa:start \"" + s.begin + "\"^^xsd:nonNegativeInteger ; "
