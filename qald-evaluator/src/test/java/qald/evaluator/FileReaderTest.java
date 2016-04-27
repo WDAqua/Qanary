@@ -2,6 +2,9 @@ package qald.evaluator;
 
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import org.junit.Test;
 
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
@@ -9,7 +12,7 @@ import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 public class FileReaderTest {
 
 	@Test
-	public void test() {
+	public void test() throws UnsupportedEncodingException, IOException {
 
 		FileReader filereader = new FileReader();
 
