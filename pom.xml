@@ -8,15 +8,15 @@
     <module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
     <module>qanary_component-example</module>
-    <module>batmanquestion.annotator</module>
     <module>qanary_component-stanford-NER</module>
     <module>qanary_component-AGDISTIS</module>
     <module>qanary_component-spotter</module>
     <module>qanary_component-alchemy</module>
-<!--    <module>qanary_component-lucene-linker</module> //-->
+    <module>qanary_component-lucene-linker</module>
     <module>qanary_component-dbpedia-spotlight-NED</module>
     <module>qanary_component-dbpediaspotter</module>
     <module>qald-evaluator</module>
-<!--    <module>qanary_evaluation_tool</module> //-->
+    <module>qanary_component-FOX</module>
+    <module>batmanquestion.annotator</module>
   </modules>
 </project>

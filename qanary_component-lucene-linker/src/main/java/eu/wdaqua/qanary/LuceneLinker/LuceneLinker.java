@@ -1,12 +1,14 @@
-package eu.wdaqua.qanary.LuceneSpotter;
+package eu.wdaqua.qanary.LuceneLinker;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -20,6 +22,7 @@ import org.apache.jena.update.UpdateRequest;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
@@ -76,11 +79,17 @@ public class LuceneLinker extends QanaryComponent {
 			ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion+"/raw", String.class);
 			String question=responseEntity.getBody();
 			logger.info("Question: {}", question);
-
+			
+			//String question="Who was influenced by Socrates?";
+			//String question="Give me all Swedish oceanographers.";
+			//String question="Which German cities have more than 250000 inhabitants?";
+			//String question="What is the birth name of Angela Merkel?";
 			// STEP3: Pass the information to the component and execute it
 			//Tokenize the question using the lucene tokenizer
+			Index index = new Index("/Users/Dennis/Desktop/dump.ttl");
 			ArrayList<String> stopWords = new ArrayList<String>(Arrays.asList(new String[]{"give", "me", "is", "are", "was", "were", "has", "have", "had", "do", "does", "did", "of", "the", "a", "in", "by", "to", "me", "all", "with", "from", "for", "and", "who"}));
-			Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
+			Analyzer analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
+			//Analyzer analyzer = index.analyzer;
 			TokenStream tokenStream = analyzer.tokenStream(null, new StringReader(question));
 			tokenStream.reset();
 			List<AttributeSource> tokens = new ArrayList<AttributeSource>();
@@ -90,9 +99,9 @@ public class LuceneLinker extends QanaryComponent {
 			}
 			tokenStream.close();
 			tokenStream.end();
-			analyzer.close();
+			//analyzer.close();
 			
-			Index index = new Index("/Users/Dennis/Desktop/dump.ttl");
+			
 			//Try to match each sequence of words in a question to an uri searching at rdfs:label
 			List<Annotation> annotations = new ArrayList<Annotation>();
 			for (int i=0; i<tokens.size(); i++){
@@ -164,20 +173,35 @@ public class LuceneLinker extends QanaryComponent {
 				}
 			}
 
+			//Remove duplicates
+			it = annotations.iterator();
+			while(it.hasNext()){
+				Annotation a1=it.next();
+				int count=0;
+				for (Annotation a2: annotations){
+					if ((a1.uri).equals(a2.uri)){
+						count++;
+					}
+				}
+				if (count>1){
+					it.remove();
+				}
+			}
+			
 			for (Annotation a : annotations){
 				System.out.println(a.uri);
 			}
-			
+
 			// STEP4: Push the result of the component to the triplestore
 			logger.info("Apply vocabulary alignment on outgraph");
-		
+
 			for (Annotation a : annotations) {
 				sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 						+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 						+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " 
 						+ "INSERT { " 
 						+ "GRAPH <" + namedGraph + "> { "
-						+ "  ?a a qa:AnnotationOfNamedEntity . " 
+						+ "  ?a a qa:AnnotationOfInstance . " 
 						+ "  ?a oa:hasTarget [ "
 						+ "           a    oa:SpecificResource; " 
 						+ "           oa:hasSource    <" + uriQuestion + ">; "

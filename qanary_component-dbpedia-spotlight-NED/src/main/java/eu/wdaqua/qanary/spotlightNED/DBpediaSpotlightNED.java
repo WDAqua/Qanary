@@ -181,8 +181,6 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 			logger.info("InGraph: {}", namedGraph);
 			
 			//STEP2: Retrive information that are needed for the computations
-			
-			
 			String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
 					+"SELECT ?questionuri "
 					+"FROM <"+namedGraph+"> "
@@ -203,7 +201,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 				+"SELECT ?start ?end "
 				+"FROM <"+namedGraph+"> "
 				+"WHERE { " 
-				+"?a a qa:AnnotationOfNamedEntity . " 
+				+"?a a qa:AnnotationOfSpotInstance . " 
 				+"?a oa:hasTarget [ "
 				+"		a    oa:SpecificResource; "
 		        +"		oa:hasSource    ?q; "
@@ -227,8 +225,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 				links.add(link);
 			}
 			
-			
-		
+			//STEP3: Call the DBpedia NED service
 			
 			//it will create XML coneten, which needs to be input in DBpedia NED with curl command
 			String content= getXmlFromQuestion(question,links);
@@ -237,37 +234,18 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 			String response= runCurl1(content);
 			
 			
-			
-			
-
-			//STEP3: Call the DBpedia NED service
-			
 			//Now the output of DBPediaNED, which is JSON, is parsed below to fetch the corresponding URIs
-			try{
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(response);
 			JSONArray arr = (JSONArray) json.get("Resources");
 			Iterator i = arr.iterator();
 			int cnt=0;
 			while (i.hasNext()) {
-				
 				JSONObject obj = (JSONObject) i.next();
 				String uri = (String) obj.get("@URI");
 				links.get(cnt++).link=uri;
-				
 			}
-			}catch (Exception e){}
 			
-		/*	JSONArray arr = new JSONArray(response);
-			for (int i = 0; i < arr.length(); i++){
-				System.out.println("Here");
-			    Link l=new Link();
-				l.link = arr.getJSONObject(i).getString("@URI");
-				l.begin = arr.getJSONObject(i).getInt("start");
-				l.end = arr.getJSONObject(i).getInt("start")+arr.getJSONObject(i).getInt("offset");
-				links.add(l);
-			}
-			*/
 			logger.info("apply vocabulary alignment on outgraph");
 			
 			//STEP4: Push the result of the component to the triplestore
@@ -278,7 +256,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 						 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
 						 +"INSERT { "
 						 +"GRAPH <"+namedGraph+"> { "
-						 +"  ?a a qa:AnnotationOfNamedEntity . "
+						 +"  ?a a qa:AnnotationOfInstance . "
 						 +"  ?a oa:hasTarget [ "
 						 +"           a    oa:SpecificResource; "
 						 +"           oa:hasSource    <"+uriQuestion+">; "
@@ -289,7 +267,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 						 +"           ] "
 						 +"  ] . "
 						 +"  ?a oa:hasBody <"+l.link+"> ;"
-						 +"     oa:annotatedBy <http://agdistis.aksw.org> ; "
+						 +"     oa:annotatedBy <https://github.com/dbpedia-spotlight/dbpedia-spotlight> ; "
 						 +"	    oa:AnnotatedAt ?time  "
 						 +"}} "
 						 +"WHERE { " 
