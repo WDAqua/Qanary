@@ -45,9 +45,10 @@ public class Evaluation {
 		//String components="StanfordNER ,agdistis";
 		//String components="StanfordNER ,DBpediaSpotlightNED";
 		//String components="luceneLinker";
-		//String components="DBpediaSpotlightSpotter ,agdistis";
+		String components="DBpediaSpotlightSpotter ,agdistis";
 		//String components="DBpediaSpotlightSpotter ,DBpediaSpotlightNED";
-		String components="FOX ,agdistis";
+		//String components="FOX ,agdistis";
+		//String components="FOX ,DBpediaSpotlightNED";
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -56,7 +57,10 @@ public class Evaluation {
 			Double globalPrecision=0.0;
 			Double globalRecall=0.0;
 			Double globalFMeasure=0.0;
+			ArrayList<Integer> rightQuestions = new ArrayList<Integer>();
 			int count=0;
+			int numerCorrectQuestion=0;
+			int numerRecallOne=0;
 			String path = Evaluation.class.getResource("/qald-benchmark/qald6-train-questions.json").getPath();
 			File file = new File(path);
 			String content=FileUtils.readFileToString(file);
@@ -69,7 +73,7 @@ public class Evaluation {
 				
 				logger.info("Question "+question);
 				
-				//question="Which volcanos in Japan erupted since 2000?";
+				question="Who developed Minecraft?";
 				//question="In which country does the Ganges start?";
 				//question="What is the official website of Tom Cruise?";
 				
@@ -92,7 +96,7 @@ public class Evaluation {
 						+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 						+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " 
 						+ "SELECT ?uri { " + "GRAPH <" + namedGraph + "> { "
-						+ "  ?a a qa:AnnotationOfNamedEntity . "
+						+ "  ?a a qa:AnnotationOfInstance . "
 						+ "  ?a oa:hasBody ?uri } }";
 				ResultSet r=selectTripleStore(sparql,endpoint);
 				List<String> systemAnswers = new ArrayList<String>();
@@ -127,12 +131,29 @@ public class Evaluation {
 				logger.info("F-MEASURE {} ",m.fMeasure);
 				globalPrecision+=m.precision;
 				globalRecall+=m.recall;
+				if (m.fMeasure==1){
+					numerCorrectQuestion++;
+				}
+				if (systemAnswers.size()!=0 && m.recall==1.0){
+					numerRecallOne++;
+				}
+				if (m.recall==1.0){
+					rightQuestions.add(1);
+				} else {
+					rightQuestions.add(0);
+				}
 				globalFMeasure+=m.fMeasure;
 				count++;
 			}
 			System.out.println("Global Precision="+(double)globalPrecision/count);
 			System.out.println("Global Recall="+(double)globalRecall/count);
 			System.out.println("Global F-measure="+(double)globalFMeasure/count);
+			System.out.println("Total number of right questions"+numerCorrectQuestion);
+			System.out.println("Total number of question with recall truly 1"+numerRecallOne);
+			System.out.println("Right questions:");
+			for (int i : rightQuestions){
+				System.out.println(i);
+			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -156,7 +177,6 @@ public class Evaluation {
 					correctRetrieved++;
 				}
 			}
-			
 			//Compute precision and recall following the evaluation metrics of QALD
 			if (expectedAnswers.size()==0){
 				if (systemAnswers.size()==0){
