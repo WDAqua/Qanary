@@ -13,7 +13,7 @@
 				rdfs:label "Qanary ontology"@en ;
 				rdfs:comment "Ontology to annotate a question with typical informations generated during a QA process"@en ;
 				terms:title "Qanary"@en ;
-				terms:created "01-10-2015"^^xsd:date ;
+				terms:created "2015-10-01"^^xsd:date ;
 				terms:creator <http://wdaqua.informatik.uni-bonn.de> ;
 				owl:versionInfo 1.0 ;
 				terms:license <http://creativecommons.org/licenses/by-nc-sa/2.0/> ;
