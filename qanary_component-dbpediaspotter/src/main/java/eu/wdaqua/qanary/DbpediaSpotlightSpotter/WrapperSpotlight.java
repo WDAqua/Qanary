@@ -112,6 +112,7 @@ public class WrapperSpotlight extends QanaryComponent {
 		 * qns);
 		 */
 		try {
+			logger.info("Input is: {}", input);
 			madeUrlFromInput += URLEncoder.encode(input, "UTF-8");
 			;// +"&executeSparqlQuery=on&relationExtractorType=Semantic";
 		} catch (Exception e) {
@@ -181,20 +182,32 @@ public class WrapperSpotlight extends QanaryComponent {
 				s1.end = Integer.parseInt(str1[1]);
 				selections.add(s1);
 			}
-			// STEP4: Push the result of the component to the triplestore
 
-			for (Selection s : selections) {
-				sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
-						+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-						+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + namedGraph
-						+ "> { " + "  ?a a qa:AnnotationOfNamedEntity . " + "  ?a oa:hasTarget [ "
-						+ "           a    oa:SpecificResxource; " + "           oa:hasSource    <" + uriQuestion
-						+ ">; " + "           oa:hasSelector  [ " + "                    a oa:TextPositionSelector ; "
-						+ "                    oa:start \"" + s.begin + "\"^^xsd:nonNegativeInteger ; "
-						+ "                    oa:end  \"" + s.end + "\"^^xsd:nonNegativeInteger  " + "           ] "
-						+ "  ] ; " + "     oa:annotatedBy <http://spotlight.sztaki.hu:2222/rest/spot> ; "
-						+ "	    oa:AnnotatedAt ?time  " + "}} " + "WHERE { " + "BIND (IRI(str(RAND())) AS ?a) ."
-						+ "BIND (now() as ?time) " + "}";
+			//STEP4: Push the result of the component to the triplestore
+			
+			for (Selection s: selections){
+				sparql="prefix qa: <http://www.wdaqua.eu/qa#> "
+						 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+						 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+						 +"INSERT { "
+						 +"GRAPH <"+namedGraph+"> { "
+						 +"  ?a a qa:AnnotationOfSpotInstance . "
+						 +"  ?a oa:hasTarget [ "
+						 +"           a    oa:SpecificResource; "
+						 +"           oa:hasSource    <"+uriQuestion+">; "
+						 +"           oa:hasSelector  [ "
+						 +"                    a oa:TextPositionSelector ; "
+						 +"                    oa:start \""+s.begin+"\"^^xsd:nonNegativeInteger ; "
+						 +"                    oa:end  \""+s.end+"\"^^xsd:nonNegativeInteger  "
+						 +"           ] "
+						 +"  ] ; "
+						 +"     oa:annotatedBy <http://spotlight.sztaki.hu:2222/rest/spot> ; "
+						 +"	    oa:AnnotatedAt ?time  "
+						 +"}} "
+						 +"WHERE { " 
+						 +"BIND (IRI(str(RAND())) AS ?a) ."
+						 +"BIND (now() as ?time) "
+					     +"}";
 				loadTripleStore(sparql, endpoint);
 			}
 			long estimatedTime = System.currentTimeMillis() - startTime;

@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.LuceneSpotter;
+package eu.wdaqua.qanary.LuceneLinker;
 
 public class Annotation {
 		public int begin;

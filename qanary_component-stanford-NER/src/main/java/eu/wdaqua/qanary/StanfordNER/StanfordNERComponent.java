@@ -89,6 +89,7 @@ public class StanfordNERComponent extends QanaryComponent {
 		CoreLabel endToken = null; // stores the last found token with
 									// non-zero tag, if it does not exist
 									// set to null
+		//Note that consequent non-zero tokens with the same tag like " 0 PERSON PERSON 0 " must be considered together
 		// Iterate over the tags
 		for (CoreLabel token : document.get(TokensAnnotation.class)) {
 			logger.info("Tagged question (token ---- tag): {}", token.toString() + "  ----  " +token.get(NamedEntityTagAnnotation.class));
@@ -139,7 +140,7 @@ public class StanfordNERComponent extends QanaryComponent {
 			sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 					+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + namedGraph + "> { "
-					+ "  ?a a qa:AnnotationOfNamedEntity . " + "  ?a oa:hasTarget [ "
+					+ "  ?a a qa:AnnotationOfSpotInstance . " + "  ?a oa:hasTarget [ "
 					+ "           a    oa:SpecificResource; " + "           oa:hasSource    <" + uriQuestion + ">; "
 					+ "           oa:hasSelector  [ " + "                    a oa:TextPositionSelector ; "
 					+ "                    oa:start \"" + s.begin + "\"^^xsd:nonNegativeInteger ; "

@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.LuceneLinker;
+package eu.wdaqua.qanary.FOX;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -23,7 +23,7 @@ public class Application {
 	 */
 	@Bean
 	public QanaryComponent qanaryComponent() {
-		return new LuceneLinker();
+		return new FOXComponent();
 	}
 
 	public static void main(String[] args) {
