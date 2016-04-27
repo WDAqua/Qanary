@@ -40,7 +40,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.BytesRef;
 
 public class Index {
-	private static Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
+	public static Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
 	private static Directory index;
 	private static String dump;
 	public Index(String d) throws IOException{		
@@ -64,7 +64,7 @@ public class Index {
 		int count = 0;
 		while (iter.hasNext()) {
 				Triple next = iter.next();
-				if (next.getPredicate().toString().equals("http://www.w3.org/2000/01/rdf-schema#label")){
+				if (next.getPredicate().toString().equals("http://www.w3.org/2000/01/rdf-schema#label") || next.getPredicate().toString().equals("http://dbpedia.org/ontology/demonym")){
 						if ( next.getObject().getLiteralLanguage().toString().equals("en")){
 							addDoc(w_instances, next.getSubject().toString(), next.getObject().getLiteralValue().toString());
 						}
@@ -89,14 +89,29 @@ public class Index {
 		List<String> result = new ArrayList<String>();
 		// the "lexicalization" arg specifies the default field to use
         	// when no field is explicitly specified in the query.
-        Query q = new QueryParser("lexicalization", analyzer).parse(querystr);
+        
+		//System.out.println("QUERYSTR "+querystr);
+		
+		Query q = new QueryParser("lexicalization", analyzer).parse(querystr);
         IndexReader reader = DirectoryReader.open(index);
         IndexSearcher searcher = new IndexSearcher(reader);
 
 		searcher.setSimilarity(new CustomSimilarity());
-        TopDocs docs_instances = searcher.search(q, 15);
+        TopDocs docs_instances = searcher.search(q, 10);
         ScoreDoc[] hits = docs_instances.scoreDocs;
+        
+        //Search more if perfect match
+        //if (hits.length>0 && hits[0].score==hits[hits.length-1].score){
+        if (hits.length>0 && compareStemmed(querystr,searcher.doc(hits[hits.length-1].doc).get("lexicalization"))==true){
+        	docs_instances = searcher.search(q, 20);
+            hits = docs_instances.scoreDocs;
+        }
 		
+        if (hits.length>0 && compareStemmed(querystr,searcher.doc(hits[hits.length-1].doc).get("lexicalization"))==true){
+        	docs_instances = searcher.search(q, 60);
+            hits = docs_instances.scoreDocs;
+        }
+        
         // Display results
         //System.out.println("Found " + hits.length + " hits.");
 
@@ -105,26 +120,9 @@ public class Index {
             Document d = searcher.doc(docId);
 			
 			//Look if the retrieved result matches exactly the searched
-            System.out.println("Search " + querystr + " found " + d.get("resource"));
-            ArrayList<String> token1=new ArrayList<String>();
-			TokenStream tokenStream1 = analyzer.tokenStream(null, new StringReader(querystr));
-			tokenStream1.reset();
-			while(tokenStream1.incrementToken()){
-				token1.add(tokenStream1.getAttribute(CharTermAttribute.class).toString());
-            		}
-			tokenStream1.close();
-			tokenStream1.end();
-
-			ArrayList<String> token2=new ArrayList<String>();
-            TokenStream tokenStream2 = analyzer.tokenStream(null, new StringReader(d.get("lexicalization")));
-            tokenStream2.reset();
-            while(tokenStream2.incrementToken()){
-            	token2.add(tokenStream1.getAttribute(CharTermAttribute.class).toString());
-            }
-            tokenStream2.close();
-            tokenStream2.end();
+            System.out.println("Search " + querystr + " found " + d.get("resource") + "  Score: " + hits[i].score);
 			
-			if (token1.equals(token2)){
+			if (compareStemmed(querystr,d.get("lexicalization"))==true){
 				result.add(d.get("resource"));
 			} else {
 				result.add("http://dbpedia.org/");
@@ -154,6 +152,32 @@ public class Index {
                 executor.submit(parser);
 		return iter;
 	}
+	
+	public static boolean compareStemmed (String s1, String s2) throws IOException{
+		ArrayList<String> token1=new ArrayList<String>();
+		TokenStream tokenStream1 = analyzer.tokenStream(null, new StringReader(s1));
+		tokenStream1.reset();
+		while(tokenStream1.incrementToken()){
+			token1.add(tokenStream1.getAttribute(CharTermAttribute.class).toString());
+        		}
+		tokenStream1.close();
+		tokenStream1.end();
+
+		ArrayList<String> token2=new ArrayList<String>();
+        TokenStream tokenStream2 = analyzer.tokenStream(null, new StringReader(s2));
+        tokenStream2.reset();
+        while(tokenStream2.incrementToken()){
+        	token2.add(tokenStream1.getAttribute(CharTermAttribute.class).toString());
+        }
+        tokenStream2.close();
+        tokenStream2.end();
+        if (token1.equals(token2)){
+			return true;
+		} else {
+			return false;
+		}	
+	}
+	
 }
 
 class CustomSimilarity extends TFIDFSimilarity {
