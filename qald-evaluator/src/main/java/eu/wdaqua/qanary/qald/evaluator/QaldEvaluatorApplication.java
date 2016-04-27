@@ -2,6 +2,7 @@ package eu.wdaqua.qanary.qald.evaluator;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +71,11 @@ public class QaldEvaluatorApplication {
 			// question="Which volcanos in Japan erupted since 2000?";
 			// question="In which country does the Ganges start?";
 			// question="What is the official website of Tom Cruise?";
+			//question="How many goals did Pelé score?";
+			//questions.get(0).setQuestion("How many goals did Pelé score?");
+			
+			System.out.println(URLEncoder.encode(questions.get(1).getQuestion(), "UTF-8"));
+			
 			// Send the question
 			RestTemplate restTemplate = new RestTemplate();
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
@@ -90,7 +96,7 @@ public class QaldEvaluatorApplication {
 					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 					+ "SELECT ?uri { " //
 					+ "  GRAPH <" + namedGraph + "> { " //
-					+ "    ?a a qa:AnnotationOfNamedEntity . " //
+					+ "    ?a a qa:AnnotationOfInstance . " //
 					+ "    ?a oa:hasBody ?uri " //
 					+ "} }";
 			ResultSet r = selectTripleStore(sparql, endpoint);
@@ -129,6 +135,8 @@ public class QaldEvaluatorApplication {
 				Double precision = (double) correctRetrieved / systemAnswers.size();
 				Double recall = (double) correctRetrieved / expectedAnswers.size();
 				Double fMeasure = (2 * precision * recall) / (precision + recall);
+				logger.info("PRECISION: {} ", precision);
+				logger.info("RECALL: {} ", recall);
 				logger.info("F-MEASURE: {} ", fMeasure);
 				globalFMeasure += fMeasure;
 				countFMeasure++;
