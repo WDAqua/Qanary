@@ -3,17 +3,21 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix terms: <http://purl.org/dc/terms/> .
 
 #Introducing new prefix
-
-@prefix qa: <http://www.wdaqua.eu/qa#> .
-
+@prefix qa: <https://w3id.org/wdaqua/qanary#> .
 
 # Introducing new ontology
-
-<http://www.wdaqua.eu/qa> 	rdf:type owl:Ontology ;
- 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> ;
-				owl:imports <https://raw.githubusercontent.com/NLP2RDF/ontologies/master/nif-core/nif-core.ttl> .
+<https://w3id.org/wdaqua/qanary#> rdf:type :Ontology ;
+				rdfs:label "Qanary ontology"@en ;
+				rdfs:comment "Ontology to annotate a question with typical informations generated during a QA process"@en ;
+				terms:title "Qanary"@en ;
+				terms:created "01-10-2015"^^xsd:date ;
+				terms:creator <http://wdaqua.informatik.uni-bonn.de> ;
+				owl:versionInfo 1.0 ;
+				terms:license <http://creativecommons.org/licenses/by-nc-sa/2.0/> ;
+ 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> .
 
 # Introducing classes for question, answer and dataset
 
