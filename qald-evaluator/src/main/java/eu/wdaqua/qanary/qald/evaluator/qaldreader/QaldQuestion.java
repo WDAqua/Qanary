@@ -3,6 +3,9 @@ package eu.wdaqua.qanary.qald.evaluator.qaldreader;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.jena.graph.Node;
@@ -26,6 +29,7 @@ public class QaldQuestion {
 	 */
 	private HashMap<String, QaldQuestionUri> uris = new HashMap<>();
 	private final int qaldId;
+	private String question;
 
 	/**
 	 * might be null if not provided by QALD
@@ -58,6 +62,8 @@ public class QaldQuestion {
 			language = questiondata.get(j).getAsJsonObject().get("language").getAsString();
 			if (language.compareTo("en") == 0) {
 				questionstring = questiondata.get(j).getAsJsonObject().get("string").getAsString();
+				this.setQuestion(questionstring);
+
 				query = qaldQuestion.get("query").getAsJsonObject();
 
 				// check if SPARQL query is available
@@ -162,6 +168,47 @@ public class QaldQuestion {
 
 	public String getSparqlQuery() {
 		return this.sparqlQuery;
+	}
+
+	/**
+	 * set question string
+	 * 
+	 * TODO: cover different languages
+	 * 
+	 * @param lang
+	 * @param question
+	 */
+	public void setQuestion(String question) {
+		this.question = question;
+	}
+
+	/**
+	 * receive question string
+	 * 
+	 * @return
+	 */
+	public String getQuestion() {
+		return this.question;
+	}
+
+	/**
+	 * returns all instances that are DBpedia resource URIs
+	 * 
+	 * @return
+	 */
+	public List<QaldQuestionUri> getResourceUris() {
+		List<QaldQuestionUri> resourceUris = new LinkedList<>();
+		QaldQuestionUri qaldQuestionUri;
+
+		Iterator<QaldQuestionUri> iter = this.uris.values().iterator();
+		while (iter.hasNext()) {
+			qaldQuestionUri = iter.next();
+			if (qaldQuestionUri.isDBpediaResource()) {
+				resourceUris.add(qaldQuestionUri);
+			}
+		}
+
+		return resourceUris;
 	}
 
 }
