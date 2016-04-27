@@ -3,17 +3,21 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix terms: <http://purl.org/dc/terms/> .
 
 #Introducing new prefix
-
-@prefix qa: <http://www.wdaqua.eu/qa#> .
-
+@prefix qa: <https://w3id.org/wdaqua/qanary#> .
 
 # Introducing new ontology
-
-<http://www.wdaqua.eu/qa> 	rdf:type owl:Ontology ;
- 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> ;
-				owl:imports <https://raw.githubusercontent.com/NLP2RDF/ontologies/master/nif-core/nif-core.ttl> .
+<https://w3id.org/wdaqua/qanary#> rdf:type :Ontology ;
+				rdfs:label "Qanary ontology"@en ;
+				rdfs:comment "Ontology to annotate a question with typical informations generated during a QA process"@en ;
+				terms:title "Qanary"@en ;
+				terms:created "01-10-2015"^^xsd:date ;
+				terms:creator <http://wdaqua.informatik.uni-bonn.de> ;
+				owl:versionInfo 1.0 ;
+				terms:license <http://creativecommons.org/licenses/by-nc-sa/2.0/> ;
+ 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> .
 
 # Introducing classes for question, answer and dataset
 
@@ -106,14 +110,18 @@ qa:AnnoOfPosTag rdf:type owl:Class ;
 
 
 
-##Annotation for assigning to named entities in a question a uri
-qa:NamedEntity rdf:type owl:Class .
-qa:AnnotationOfInstance rdf:type owl:Class ;
-                owl:equivalentClass [ rdf:type owl:Restriction ;
-                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
-                                      owl:someValuesFrom qa:NamedEntity
-                                    ] ;
-                rdfs:subClassOf qa:AnnotationOfQuestion .
+##Annotation for spotting entities, instances, relations and classes
+qa:AnnotationOfSpotEntity rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationQuestion .
+
+qa:AnnotationOfSpotInstance rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
+
+qa:AnnotationOfSpotRelation rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
+
+qa:AnnotationOfSpotClass rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
 
 
 ##Annotation for assigning to specific parts of the question a uri
@@ -130,6 +138,7 @@ qa:Instance rdf:type owl:Class .
 qa:Instance rdfs:subClassOf qa:Entity .
 
 ##Annotation for assigning to named entities in a question a uri
+qa:Instance rdf:type owl:Class .
 qa:AnnotationOfInstance rdf:type owl:Class ;
 
                 owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -161,186 +170,4 @@ qa:AnnotationOfClass rdf:type owl:Class ;
                                       owl:someValuesFrom qa:Class
                                     ] ;
                 rdfs:subClassOf qa:AnnotationOfEntity .
-
-#Imports
-
-<http://purl.org/olia/olia-top.owl#MorphosyntacticCategory> rdf:type owl:Class ;
-                                                            rdfs:subClassOf qa:Imported .
-
-qa:DBpediaTypes rdf:type owl:Class ;
-		 rdfs:subClassOf qa:Imported .
-
-<http://dbpedia.org/ontology/Activity> rdf:type :DBpediaTypes ,
-                                                owl:NamedIndividual ;
-                                       
-                                       rdfs:comment """The types correspond to the result of the following query to DBpedia:
-select * where {
-   ?x rdf:type owl:Class .
-   ?x rdfs:subClassOf owl:Thing
-}""" .
-
-
-<http://dbpedia.org/ontology/Agent> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Altitude> rdf:type qa:DBpediaTypes ,
-                                                owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/AnatomicalStructure> rdf:type qa:DBpediaTypes ,
-                                                           owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Area> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Award> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Biomolecule> rdf:type qa:DBpediaTypes ,
-                                                   owl:NamedIndividual .
-
-
-<http://dbpedia.org/ontology/Blazon> rdf:type qa:DBpediaTypes ,
-                                              owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/CelestialBody> rdf:type qa:DBpediaTypes ,
-                                                     owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/ChartsPlacements> rdf:type qa:DBpediaTypes ,
-                                                        owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/ChemicalSubstance> rdf:type qa:DBpediaTypes ,
-                                                         owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Colour> rdf:type qa:DBpediaTypes ,
-                                              owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Currency> rdf:type qa:DBpediaTypes ,
-                                                owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Demographics> rdf:type qa:DBpediaTypes ,
-                                                    owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Depth> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-
-<http://dbpedia.org/ontology/Device> rdf:type qa:DBpediaTypes ,
-                                              owl:NamedIndividual .
-
-
-<http://dbpedia.org/ontology/Diploma> rdf:type qa:DBpediaTypes ,
-                                               owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Drug> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-
-<http://dbpedia.org/ontology/EthnicGroup> rdf:type qa:DBpediaTypes ,
-                                                   owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Event> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Flag> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Food> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/GeneLocation> rdf:type qa:DBpediaTypes ,
-                                                    owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/GrossDomesticProduct> rdf:type qa:DBpediaTypes ,
-                                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/GrossDomesticProductPerCapita> rdf:type qa:DBpediaTypes ,
-                                                                     owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Holiday> rdf:type qa:DBpediaTypes ,
-                                               owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/HumanDevelopmentIndex> rdf:type qa:DBpediaTypes ,
-                                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Imdb> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Language> rdf:type qa:DBpediaTypes ,
-                                                owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/LinkTitle> rdf:type qa:DBpediaTypes ,
-                                                 owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/List> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Mayor> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/MeanOfTransportation> rdf:type qa:DBpediaTypes ,
-                                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Media> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Medicine> rdf:type qa:DBpediaTypes ,
-                                                owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Name> rdf:type qa:DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/PenaltyShootOut> rdf:type qa:DBpediaTypes ,
-                                                       owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/PersonFunction> rdf:type qa:DBpediaTypes ,
-                                                      owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Place> rdf:type qa:DBpediaTypes ,
-                                             owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Polyhedron> rdf:type qa:DBpediaTypes ,
-                                                  owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Population> rdf:type qa:DBpediaTypes ,
-                                                  owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/PublicService> rdf:type qa:DBpediaTypes ,
-                                                     owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/RouteStop> rdf:type qa:DBpediaTypes ,
-                                                 owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Species> rdf:type qa:DBpediaTypes ,
-                                               owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/SportCompetitionResult> rdf:type qa:DBpediaTypes ,
-                                                              owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/SportsSeason> rdf:type qa:DBpediaTypes ,
-                                                    owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Statistic> rdf:type qa:DBpediaTypes ,
-                                                 owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/TimePeriod> rdf:type qa:DBpediaTypes ,
-                                                  owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/TopicalConcept> rdf:type qa:DBpediaTypes ,
-                                                      owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/UnitOfWork> rdf:type :DBpediaTypes ,
-                                                  owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Unknown> rdf:type :DBpediaTypes ,
-                                               owl:NamedIndividual .
-
-<http://dbpedia.org/ontology/Work> rdf:type :DBpediaTypes ,
-                                            owl:NamedIndividual .
-
-
-
-# Bindings
-
-qa:AnswerType owl:equivalentClass qa:DBpediaTypes .
-qa:PosTag owl:equivalentClass <http://purl.org/olia/olia-top.owl#MorphosyntacticCategory> .
 
