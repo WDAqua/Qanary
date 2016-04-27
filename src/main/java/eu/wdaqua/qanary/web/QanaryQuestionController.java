@@ -114,7 +114,7 @@ public class QanaryQuestionController {
 	}
 
 	/**
-	 * return directory where the raw questions are stored or saved if not
+	 * return directory where the i questions are stored or saved if not
 	 * existing, then create the directory
 	 *
 	 * @return
@@ -197,7 +197,7 @@ public class QanaryQuestionController {
 		FileReader reader = null;
 		try {
 			reader = new FileReader(file);
-			final char[] chars = new char[(int) file.length()];
+			final char[] chars = new char[(int) file.length()-1];
 			reader.read(chars);
 			content = new String(chars);
 		} catch (final IOException e) {
