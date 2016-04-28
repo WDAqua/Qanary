@@ -837,7 +837,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  <http://dbpedia.org/resource/Ganges> <http://dbpedia.org/property/sourceCountry> ?l . ?uri <http://www.w3.org/2000/01/rdf-schema#label> ?l . ?uri rdf:type <http://dbpedia.org/ontology/Country> . }"
+        "sparql": "SELECT DISTINCT ?uri WHERE {  <http://dbpedia.org/resource/Ganges> <http://dbpedia.org/property/sourceCountry> ?l . ?uri <http://www.w3.org/2000/01/rdf-schema#label> ?l . ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> . }"
       },
       "answers": [
         {
@@ -16940,7 +16940,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Song> .  ?uri <http://dbpedia.org/ontology/artist> <http://dbpedia.org/resource/Bruce_Springsteen> .  ?uri <http://dbpedia.org/ontology/releaseDate> ?date .  FILTER (?date >= '1980-01-01'^^xsd:date && ?date <= '1990-12-31'^^xsd:date) } "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Song> .  ?uri <http://dbpedia.org/ontology/artist> <http://dbpedia.org/resource/Bruce_Springsteen> .  ?uri <http://dbpedia.org/ontology/releaseDate> ?date .  FILTER (?date >= '1980-01-01'^^<http://www.w3.org/2001/XMLSchema#date> && ?date <= '1990-12-31'^^<http://www.w3.org/2001/XMLSchema#date>) } "
       },
       "answers": [
         {
@@ -26964,7 +26964,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?film <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?film <http://dbpedia.org/ontology/producer> ?uri . } ORDER BY DESC(COUNT(?film)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?film <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?film <http://dbpedia.org/ontology/producer> ?uri . } GROUP BY ?uri ORDER BY DESC(COUNT(?film)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -27035,7 +27035,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> foaf:Person .  ?uri foaf:givenName 'Jimmy'@en . } "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .  ?uri <http://xmlns.com/foaf/0.1/givenName> 'Jimmy'@en . } "
       },
       "answers": [
         {
@@ -43270,7 +43270,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .  ?uri <http://dbpedia.org/property/officialLanguages> ?language . } ORDER BY DESC(COUNT(?language)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .  ?uri <http://dbpedia.org/property/officialLanguages> ?language . } GROUP BY ?uri ORDER BY DESC(COUNT(?language)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -53497,7 +53497,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?x WHERE {  ?uri <http://dbpedia.org/ontology/deathCause> ?x . } ORDER BY DESC(COUNT(DISTINCT ?uri)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?x WHERE {  ?uri <http://dbpedia.org/ontology/deathCause> ?x . } GROUP BY ?x ORDER BY DESC(COUNT(DISTINCT ?uri)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -53627,7 +53627,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?uri <http://dbpedia.org/ontology/director> <http://dbpedia.org/resource/Steven_Spielberg> .  ?uri <http://dbpedia.org/ontology/budget> ?b .  FILTER( xsd:double(?b) >= 8.0E7 ) } "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?uri <http://dbpedia.org/ontology/director> <http://dbpedia.org/resource/Steven_Spielberg> .  ?uri <http://dbpedia.org/ontology/budget> ?b .  FILTER( <http://www.w3.org/2001/XMLSchema#double>(?b) >= 8.0E7 ) } "
       },
       "answers": [
         {
@@ -54120,7 +54120,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri foaf:surname 'Baldwin'@en . { ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Actor> . } UNION { ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> . } } "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://xmlns.com/foaf/0.1/surname> 'Baldwin'@en . { ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Actor> . } UNION { ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> . } } "
       },
       "answers": [
         {
@@ -55189,7 +55189,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Poet> .  ?x <http://dbpedia.org/ontology/author> ?uri .  ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Book> . } ORDER BY DESC(COUNT(?x)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Poet> .  ?x <http://dbpedia.org/ontology/author> ?uri .  ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Book> . } GROUP BY ?uri ORDER BY DESC(COUNT(?x)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -56018,7 +56018,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> .  ?f <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?f <http://dbpedia.org/ontology/starring> ?uri . } ORDER BY DESC(COUNT(DISTINCT(?f))) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> .  ?f <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Film> .  ?f <http://dbpedia.org/ontology/starring> ?uri . } GROUP BY ?uri ORDER BY DESC(COUNT(DISTINCT(?f))) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -56315,7 +56315,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> .  ?uri <http://dbpedia.org/ontology/birthPlace> <http://dbpedia.org/resource/Paris> .  ?uri <http://dbpedia.org/ontology/birthDate> ?date .  FILTER ( ?date >= xsd:dateTime('1950-12-31T00:00:00Z')) } "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Actor> .  ?uri <http://dbpedia.org/ontology/birthPlace> <http://dbpedia.org/resource/Paris> .  ?uri <http://dbpedia.org/ontology/birthDate> ?date .  FILTER ( ?date >= <http://www.w3.org/2001/XMLSchema#dateTime>('1950-12-31T00:00:00Z')) } "
       },
       "answers": [
         {
@@ -83718,7 +83718,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT ?uri WHERE {  ?airline <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Airline> .  ?airline <http://dbpedia.org/property/frequentFlyer> ?uri.  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/class/yago/FrequentFlyerPrograms> . } ORDER BY DESC(COUNT(DISTINCT ?airline)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT ?uri WHERE {  ?airline <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Airline> .  ?airline <http://dbpedia.org/property/frequentFlyer> ?uri.  ?uri <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/class/yago/FrequentFlyerPrograms> . } GROUP BY ?uri ORDER BY DESC(COUNT(DISTINCT ?airline)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -84988,7 +84988,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Musician> .  ?x <http://dbpedia.org/ontology/author> ?uri .  ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Book> . } ORDER BY DESC(COUNT(?x)) OFFSET 0 LIMIT 1 "
+        "sparql": "SELECT DISTINCT ?uri WHERE {  ?uri <http://dbpedia.org/ontology/occupation> <http://dbpedia.org/resource/Musician> .  ?x <http://dbpedia.org/ontology/author> ?uri .  ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Book> . } GROUP BY ?uri ORDER BY DESC(COUNT(?x)) OFFSET 0 LIMIT 1 "
       },
       "answers": [
         {
@@ -85989,7 +85989,7 @@
         }
       ],
       "query": {
-        "sparql": "SELECT DISTINCT (?h1-?h2) WHERE {  <http://dbpedia.org/resource/Mount_Everest> <http://dbpedia.org/ontology/elevation> ?h1 .  <http://dbpedia.org/resource/K2> <http://dbpedia.org/ontology/elevation> ?h2 . } "
+        "sparql": "SELECT DISTINCT ((?h1-?h2) as ?h) WHERE {  <http://dbpedia.org/resource/Mount_Everest> <http://dbpedia.org/ontology/elevation> ?h1 .  <http://dbpedia.org/resource/K2> <http://dbpedia.org/ontology/elevation> ?h2 . } "
       },
       "answers": [
         {
