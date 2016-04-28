@@ -2,7 +2,6 @@ package eu.wdaqua.qanary.qald.evaluator;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +15,10 @@ import org.apache.jena.query.ResultSet;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
-import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestionUri;
+import eu.wdaqua.qanary.qald.evaluator.qaldreader.TurtleResultWriter;
 
 /**
  * start the spring application
@@ -31,9 +34,10 @@ import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestionUri;
  * @author AnBo
  *
  */
-// @SpringBootApplication
-// @EnableAutoConfiguration
-// @ComponentScan("eu.wdaqua.qanary.component")
+@SpringBootApplication
+@Configuration
+@ComponentScan
+@EnableAutoConfiguration
 public class QaldEvaluatorApplication {
 	private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
 
@@ -49,13 +53,14 @@ public class QaldEvaluatorApplication {
 
 		// SpringApplication.run(QaldEvaluatorApplication.class, args);
 
+		TurtleResultWriter writer = new TurtleResultWriter("/tmp/results.ttl");
 		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 		// String components="alchemy";
 		// String components="StanfordNER ,agdistis";
 		// String components = "luceneLinker";
 		// String components="DBpediaSpotlightSpotter ,agdistis";
-		// String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
-		String components = "DBpediaSpotlightSpotter";
+		String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
+		// String components = "DBpediaSpotlightSpotter";
 
 		FileReader filereader = new FileReader();
 
@@ -66,16 +71,15 @@ public class QaldEvaluatorApplication {
 
 		for (int i = 0; i < questions.size(); i++) {
 
-			logger.info("Question {}", questions.get(i).getQuestion());
+			logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
+			writer.writeQaldQuestionInformation(questions.get(i));
 
 			// question="Which volcanos in Japan erupted since 2000?";
 			// question="In which country does the Ganges start?";
 			// question="What is the official website of Tom Cruise?";
-			//question="How many goals did Pelé score?";
-			//questions.get(0).setQuestion("How many goals did Pelé score?");
-			
-			System.out.println(URLEncoder.encode(questions.get(1).getQuestion(), "UTF-8"));
-			
+			// question="How many goals did Pelé score?";
+			// questions.get(0).setQuestion("How many goals did Pelé score?");
+
 			// Send the question
 			RestTemplate restTemplate = new RestTemplate();
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
@@ -91,6 +95,7 @@ public class QaldEvaluatorApplication {
 			JSONObject responseJson = new JSONObject(response);
 			String endpoint = responseJson.getString("endpoint");
 			String namedGraph = responseJson.getString("graph");
+			logger.debug("{}. named graph: {}", questions.get(i).getQaldId(), namedGraph);
 			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
 					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
@@ -99,22 +104,33 @@ public class QaldEvaluatorApplication {
 					+ "    ?a a qa:AnnotationOfInstance . " //
 					+ "    ?a oa:hasBody ?uri " //
 					+ "} }";
+			logger.debug("SPARQL: {}", sparql);
 			ResultSet r = selectTripleStore(sparql, endpoint);
 			List<String> systemAnswers = new ArrayList<String>();
 			while (r.hasNext()) {
 				QuerySolution s = r.next();
-				logger.info("System answers {} ", s.getResource("uri").toString());
-				systemAnswers.add(s.getResource("uri").toString());
+				if (s.getResource("uri") != null && !s.getResource("uri").toString().endsWith("null")) {
+					logger.info("System answers: {} ", s.getResource("uri").toString());
+					systemAnswers.add(s.getResource("uri").toString());
+					writer.writeEntityInQuestion(questions.get(i).getQaldId(), s.getResource("uri").getURI(),
+							"recognized");
+				}
 			}
 
 			// Retrieve the expected resources from the SPARQL query
-			List<QaldQuestionUri> expectedAnswers = questions.get(i).getResourceUris();
+			List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
+			for (String expected : expectedAnswers) {
+				writer.writeEntityInQuestion(questions.get(i).getQaldId(), expected, "required");
+			}
 
 			// Compute precision and recall
 			int correctRetrieved = 0;
 			for (String s : systemAnswers) {
 				if (expectedAnswers.contains(s)) {
 					correctRetrieved++;
+					logger.debug("{}. {} in {}.", questions.get(i).getQaldId(), s, expectedAnswers);
+				} else {
+					logger.debug("{}. {} NOT in {}.", questions.get(i).getQaldId(), s, expectedAnswers);
 				}
 			}
 			logger.info("Correctly retrieved: {}", correctRetrieved);
@@ -146,6 +162,7 @@ public class QaldEvaluatorApplication {
 		logger.info("Global Recall={}", (double) globalRecall / countRecall);
 		logger.info("Global F-measure={}", (double) globalFMeasure / countFMeasure);
 
+		writer.close();
 		// retrieve recognized URIs from configured pipeline
 
 		// compare to provided uris
