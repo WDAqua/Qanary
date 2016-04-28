@@ -211,4 +211,17 @@ public class QaldQuestion {
 		return resourceUris;
 	}
 
+	/**
+	 * returns a list of strings representing the dbpedia:resource URIs
+	 * 
+	 * @return
+	 */
+	public List<String> getResourceUrisAsString() {
+		List<String> result = new LinkedList<>();
+		for (QaldQuestionUri uri : this.getResourceUris()) {
+			result.add(uri.getUri().toString());
+		}
+		return result;
+	}
+
 }
