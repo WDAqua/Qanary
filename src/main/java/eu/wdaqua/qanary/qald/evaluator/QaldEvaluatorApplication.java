@@ -41,7 +41,10 @@ import eu.wdaqua.qanary.qald.evaluator.qaldreader.TurtleResultWriter;
 public class QaldEvaluatorApplication {
 	private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
 
-	public void process() throws UnsupportedEncodingException, IOException {
+	String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
+
+	public void process(String components, int maxQuestionsToBeProcessed)
+			throws UnsupportedEncodingException, IOException {
 		Double globalPrecision = 0.0;
 		Double globalRecall = 0.0;
 		Double globalFMeasure = 0.0;
@@ -54,13 +57,6 @@ public class QaldEvaluatorApplication {
 		// SpringApplication.run(QaldEvaluatorApplication.class, args);
 
 		TurtleResultWriter writer = new TurtleResultWriter("/tmp/results.ttl");
-		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
-		// String components="alchemy";
-		// String components="StanfordNER ,agdistis";
-		// String components = "luceneLinker";
-		// String components="DBpediaSpotlightSpotter ,agdistis";
-		String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
-		// String components = "DBpediaSpotlightSpotter";
 
 		FileReader filereader = new FileReader();
 
@@ -181,7 +177,39 @@ public class QaldEvaluatorApplication {
 	}
 
 	public static void main(String... args) throws UnsupportedEncodingException, IOException {
+
+		// TODO:
+		int maxQuestions = 350;
+
 		QaldEvaluatorApplication app = new QaldEvaluatorApplication();
-		app.process();
+
+		List<String> componentConfigurations = new LinkedList<>();
+
+		List<String> nerComponents = new LinkedList<>();
+		List<String> nedComponents = new LinkedList<>();
+
+		// TODO: move to config
+		nerComponents.add("StanfordNER");
+		nerComponents.add("DBpediaSpotlightSpotter");
+		nerComponents.add("FOX");
+
+		// TODO: move to config
+		nedComponents.add("agdistis");
+		nedComponents.add("DBpediaSpotlightNED");
+
+		// monolithic configurations (NER+NED)
+		componentConfigurations.add("alchemy");
+		componentConfigurations.add("luceneLinker");
+
+		// create all configurations
+		for (String ner : nerComponents) {
+			for (String ned : nedComponents) {
+				componentConfigurations.add(ner + "," + ned);
+			}
+		}
+
+		for (String componentConfiguration : componentConfigurations) {
+			app.process(componentConfiguration, maxQuestions);
+		}
 	}
 }
