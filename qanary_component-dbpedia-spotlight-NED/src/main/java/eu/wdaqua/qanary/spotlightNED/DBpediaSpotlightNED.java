@@ -169,15 +169,19 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 			JSONParser parser = new JSONParser();
 			JSONObject json = (JSONObject) parser.parse(response);
 			JSONArray arr = (JSONArray) json.get("Resources");
-			Iterator i = arr.iterator();
+			
 			int cnt = 0;
-			while (i.hasNext()) {
-				JSONObject obj = (JSONObject) i.next();
-				String uri = (String) obj.get("@URI");
-				links.get(cnt).link = uri;
-				logger.info("recognized: {} at ({},{})", uri, links.get(cnt).begin, links.get(cnt).end);
-				cnt++;
+			if (arr!=null){
+				Iterator i = arr.iterator();
+				while (i.hasNext()) {
+					JSONObject obj = (JSONObject) i.next();
+					String uri = (String) obj.get("@URI");
+					links.get(cnt).link = uri;
+					logger.info("recognized: {} at ({},{})", uri, links.get(cnt).begin, links.get(cnt).end);
+					cnt++;
+				}
 			}
+			
 			if (cnt == 0) {
 				logger.warn("nothing recognized for \"{}\": {}", question, json);
 			} else {
