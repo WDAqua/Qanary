@@ -74,7 +74,7 @@ public class QaldQuestion {
 							this.getSparqlQuery());
 
 					uriDetector = new URIDetector(this.getSparqlQuery());
-
+					
 					addNodeToLists(qaldId, uriDetector.getSubjects(), NodePosition.SUBJECT);
 					addNodeToLists(qaldId, uriDetector.getPredicates(), NodePosition.PREDICATE);
 					addNodeToLists(qaldId, uriDetector.getObjects(), NodePosition.OBJECT);
