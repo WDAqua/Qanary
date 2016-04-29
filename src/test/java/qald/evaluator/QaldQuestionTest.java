@@ -17,7 +17,7 @@ public class QaldQuestionTest {
 
 		JsonObject rawQuestion = new JsonObject();
 		rawQuestion.addProperty("id", 42);
-		rawQuestion.addProperty("question", "Can you cry underwater?");
+		rawQuestion.addProperty("question", "How many goals did Pelé score?");
 
 		QaldQuestion qaldQuestion = new QaldQuestion(rawQuestion);
 
