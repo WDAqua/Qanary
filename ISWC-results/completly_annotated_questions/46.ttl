@@ -1,0 +1,901 @@
+<https://w3id.org/wdaqua/qanary#AnnotationOfSpotInstance>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfSpotEntity> .
+
+<http://localhost:8080//Answer>
+        a       <http://www.wdaqua.eu/qa#Answer> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationQuestion>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasTarget> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Answer>
+                ] .
+
+<http://www.w3.org/ns/oa#prefix>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A snippet of text that occurs immediately before the text which is being selected.\n\nSee oa:TextQuoteSelector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Selector> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "prefix"@en .
+
+<https://w3id.org/wdaqua/qanary#AnswerFormat>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#when>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The timestamp at which the Source resource should be interpreted for the Annotation, typically the time that the Annotation was created."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#TimeState> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "when"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#dateTimeStamp> .
+
+<http://www.w3.org/ns/oa#hasScope>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a Specific Resource and the resource that provides the scope or context for it in this Annotation.\n\nThere MAY be 0 or more hasScope relationships for each Specific Resource."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#SpecificResource> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasScope"@en .
+
+<http://www.w3.org/ns/oa#hasSelector>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a oa:SpecificResource and a oa:Selector.\n\nThere MUST be exactly 0 or 1 oa:hasSelector relationship associated with a \nSpecific Resource. \n\nIf multiple Selectors are required, either to express a choice between different optional, equivalent selectors, or a chain of selectors that should all be processed, it is necessary to use oa:Choice, oa:Composite or oa:List as a selector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#SpecificResource> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<http://www.w3.org/ns/oa#SvgSelector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A Selector which selects an area specified as an SVG shape.\n\nThe SVG document should either be retrievable by resolving the URI of this resource, or be included as an Embedded Resource using cnt:Content.\n\nIt is RECOMMENDED that the document contain only a single shape element and that element SHOULD be one of: path, rect, circle, ellipse, polyline, polygon or g. The g element SHOULD ONLY be used to construct a multi-element group, for example to define a donut shape requiring an outer circle and a clipped inner circle.\n\nThe dimensions of both the shape and the SVG canvas MUST be relative to the dimensions of the Source resource. For example, given an image which is 600 pixels by 400 pixels, and the desired section is a circle of 100 pixel radius at the center of the image, then the SVG element would be: <circle cx=\"300\" cy=\"200\" r=\"100\"/>\n\nIt is NOT RECOMMENDED to include style information within the SVG element, nor Javascript, animation, text or other non shape oriented information. Clients SHOULD ignore such information if present."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "SvgSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationDataset>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasTarget> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Dataset>
+                ] .
+
+<http://www.w3.org/ns/oa#item>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a multiplicity construct node and its constituent resources.\n\nThere MUST be 1 or more item relationships for each multiplicity construct oa:Choice, oa:Composite and oa:List."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "item"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                <http://www.w3.org/2000/01/rdf-schema#member> .
+
+<http://www.w3.org/ns/oa#questioning>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents asking a question about the target resource(s). For example to ask for assistance with a particular section of text, or question its veracity."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "questioning"@en .
+
+<tag:stardog:api:0.5566265752125039>
+        a       <http://www.wdaqua.eu/qa#AnnotationOfInstance> ;
+        <http://www.w3.org/ns/openannotation/core/AnnotatedAt>
+                "2016-04-30T14:53:32.912+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.w3.org/ns/openannotation/core/annotatedBy>
+                <https://github.com/dbpedia-spotlight/dbpedia-spotlight> ;
+        <http://www.w3.org/ns/openannotation/core/hasBody>
+                <http://dbpedia.org/resource/Frank_Herbert> ;
+        <http://www.w3.org/ns/openannotation/core/hasTarget>
+                [ a       <http://www.w3.org/ns/openannotation/core/SpecificResource> ;
+                  <http://www.w3.org/ns/openannotation/core/hasSelector>
+                          [ a       <http://www.w3.org/ns/openannotation/core/TextPositionSelector> ;
+                            <http://www.w3.org/ns/openannotation/core/end>
+                                    16 ;
+                            <http://www.w3.org/ns/openannotation/core/start>
+                                    3
+                          ] ;
+                  <http://www.w3.org/ns/openannotation/core/hasSource>
+                          <http://localhost:8080/question/952f93b1-8afa-45c8-a97b-1279c05f2191>
+                ] .
+
+<http://www.w3.org/ns/oa#hasState>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a oa:SpecificResource and a oa:State resource.\n\nThere MAY be 0 or 1 oa:hasState relationship for each SpecificResource.\n\nIf there are multiple State resources that must be associated with the specific resource, then the use of the Multiplicity Constructs oa:Choice, oa:Composite or oa:List is RECOMMENDED."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#SpecificResource> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasState"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/ns/oa#State> .
+
+<https://w3id.org/wdaqua/qanary#Entity>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#TextPositionSelector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "An oa:Selector which describes a range of text based on its start and end positions.\n\nThe text MUST be normalized before counting characters. For a Selector that works from the bitstream rather than the rendered characters, see oa:DataPositionSelector.\n\nEach oa:TextPositionSelector MUST have exactly 1 oa:start property.\n\nEach oa:TextPositionSelector MUST have exactly 1 oa:end property."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "TextPositionSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<http://www.w3.org/ns/oa#annotatedBy>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The object of the relationship is a resource that identifies the agent responsible for creating the Annotation. This may be either a human or software agent. \n\nThere SHOULD be exactly 1 oa:annotatedBy relationship per Annotation, but MAY be 0 or more than 1, as the Annotation may be anonymous, or multiple agents may have worked together on it.\n\nIt is RECOMMENDED to use these and other FOAF terms to describe agents: foaf:Person, prov:SoftwareAgent, foaf:Organization, foaf:name, foaf:mbox, foaf:openid, foaf:homepage"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "annotatedBy"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                <http://www.w3.org/ns/prov#wasAttributedTo> .
+
+<http://www.w3.org/ns/oa#SemanticTag>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A class assigned to the Body when it is a semantic tagging resource; a URI that identifies a concept, rather than an embedded string, frequently a term from a controlled vocabulary.\n\nIt is NOT RECOMMENDED to use the URI of a document as a Semantic Tag, as it might also be used as a regular Body in other Annotations which would inherit the oa:SemanticTag class assignment. Instead it is more appropriate to create a new URI and link it to the document, using the foaf:page predicate."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "SemanticTag"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Tag> .
+
+<http://www.w3.org/ns/oa#Style>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes the style in which the selection or resource should be rendered, indicated with oa:styledBy from an oa:Annotation.\n\nThis class is not used directly in Annotations, only its subclasses are.\n\nThe content of the resource provides the rendering hints about the Annotation's constituent resources. \n\nThe Specifier's description MAY be conveyed as an external or embedded resource (cnt:Content), or as RDF properties within the graph. The description SHOULD use existing standards whenever possible. If the Specifier has an HTTP URI, then its description, and only its description, MUST be returned when the URI is dereferenced."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Style"@en .
+
+<http://www.w3.org/ns/oa#describing>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents a description of the target resource(s), as opposed to a comment about them. For example describing the above PDF's contents, rather than commenting on their accuracy."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "describing"@en .
+
+<http://www.w3.org/ns/oa#DataPositionSelector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A Selector which describes a range of data based on its start and end positions within the byte stream of the representation.\n\nEach DataPositionSelector MUST have exactly 1 oa:start property.\n\nEach TextPositionSelector MUST have exactly 1 oa:end property.\n\nSee oa:TextPositionSelector for selection at normalized character level rather than bytestream level."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "DataPositionSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfInstance>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfEntity> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Instance>
+                ] .
+
+<http://www.w3.org/ns/oa#exact>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A copy of the text which is being selected, after normalization.\n\nSee oa:TextQuoteSelector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Selector> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "exact"@en .
+
+<https://w3id.org/wdaqua/qanary#AnswerType>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#Motivation>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The Motivation for creating an Annotation, indicated with oa:motivatedBy, is a reason for its creation, and might include things like oa:replying to another annotation, oa:commenting on a resource, or oa:linking to a related resource.\n\nEach Annotation SHOULD have at least one oa:motivatedBy relationship to an instance of oa:Motivation, which is a subClass of skos:Concept."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Motivation"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://www.w3.org/ns/oa#highlighting>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents a highlighted section of the target resource or segment. For example to draw attention to the selected text that the annotator disagrees with. A Highlight may or may not have a Body resource"@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "highlighting"@en .
+
+<http://www.w3.org/ns/oa#commenting>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents a commentary about or review of the target resource(s). For example to provide a commentary about a particular PDF."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "commenting"@en .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfEntity>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationQuestion> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Entity>
+                ] .
+
+<http://localhost:8080/question/952f93b1-8afa-45c8-a97b-1279c05f2191>
+        a       <http://www.wdaqua.eu/qa#Question> .
+
+<http://www.w3.org/ns/oa#suffix>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The snippet of text that occurs immediately after the text which is being selected. \n\nSee oa:TextQuoteSelector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Selector> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "suffix"@en .
+
+<https://w3id.org/wdaqua/qanary#Relation>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#Entity> .
+
+<http://www.w3.org/ns/oa#styleClass>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The string name of the class used in the CSS description that should be applied to the Specific Resource.\n\nThere MAY be 0 or more styleClass properties on a Specific Resource.\n\nSee oa:CssStyle."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#SpecificResource> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "annotatedAt"@en .
+
+<http://www.w3.org/ns/oa#HttpRequestState>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes how to retrieve an appropriate representation of the Source resource for the Annotation, based on the HTTP Request headers to send to the server.\n\nThere MUST be exactly 1 rdf:value property per HttpRequestState, containing HTTP request headers as a single, complete string, exactly as they would appear in an HTTP request."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "HttpRequestState"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#State> .
+
+<http://www.w3.org/ns/oa#Composite>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A multiplicity construct that conveys to a consuming application that all of the constituent resources are required for the Annotation to be correctly interpreted. \n\noa:Composite can be used as the object of the object of the oa:hasBody, oa:hasTarget, oa:hasSelector, oa:hasState, oa:styledBy and oa:hasScope relationships, \n\nThere MUST be 2 or more oa:item relationships for each oa:Composite."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Composite" ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag> .
+
+<https://w3id.org/wdaqua/qanary#Question>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#State>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes how to retrieve an appropriate representation of the Source resource, indicated with oa:hasState from the Specific Resource.\n\nThis class is not used directly in Annotations, only its subclasses are.\n\nThe Specifier's description MAY be conveyed as an external or embedded resource (cnt:Content), or as RDF properties within the graph. The description SHOULD use existing standards whenever possible. If the Specifier has an HTTP URI, then its description, and only its description, MUST be returned when the URI is dereferenced."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "State"@en .
+
+<file:///Users/Dennis/Documents/workspace/qanary_private/qanary_pipeline-template/anno2>
+        a       <http://www.w3.org/ns/openannotation/core/AnnotationOfQuestion> ;
+        <http://www.w3.org/ns/openannotation/core/hasBody>
+                <file:///Users/Dennis/Documents/workspace/qanary_private/qanary_pipeline-template/URIDataset> ;
+        <http://www.w3.org/ns/openannotation/core/hasTarget>
+                <http://localhost:8080/question/952f93b1-8afa-45c8-a97b-1279c05f2191> .
+
+<https://w3id.org/wdaqua/qanary#Answer>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#FragmentSelector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A Selector which describes the segment of interest in a representation, through the use of the fragment identifier component of a URI.\n\nIt is RECOMMENDED to use oa:FragmentSelector as the selector on a Specific Resource rather than annotating the fragment URI directly, in order to improve discoverability of annotation on the Source.\n\nThe oa:FragmentSelector MUST have exactly 1 rdf:value property, containing the fragment identifier component of a URI that describes the segment of interest in the resource, excluding the initial \"#\".\n\nThe Fragment Selector SHOULD have a dcterms:conformsTo relationship with the object being the specification that defines the syntax of the fragment, for instance <http://tools.ietf.org/rfc/rfc3236> for HTML fragments."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "FragmentSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<http://www.w3.org/ns/oa#Tag>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A class assigned to the Body when it is a tag, such as a embedded text string with cnt:chars.\n\nTags are typically keywords or labels, and used for organization, description or discovery of the resource being tagged. In the Semantic Web, URIs are used instead of strings to avoid the issue of polysemy where one word has multiple meanings, such usage MUST be indicated using the subclass oa:SemanticTag.\n\nAnnotations that tag resources, either with text or semantic tags, SHOULD also have the oa:tagging motivation to make the reason for the Annotation more clear to applications, and MAY have other motivations as well."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Tag"@en .
+
+<http://www.w3.org/ns/oa#>
+        a       <http://www.w3.org/2002/07/owl#Ontology> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The Open Annotation Core Data Model specifies an interoperable framework for creating associations between related resources, annotations, using a methodology that conforms to the Architecture of the World Wide Web.\n\nThis ontology is a non-normative OWL formalization of the textual OA specification at http://www.openannotation.org/spec/core/20130208/index.html\n\nNote that OWL imports are disabled in the published version in order to reduce external implications, improve OWL 2 Profile conformity and increase interoperability. Some OWL tools might thus misleadingly show this ontology as (re)defining properties like skos:prefLabel."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#seeAlso>
+                <http://www.openannotation.org/spec/core/20130208/index.html> ;
+        <http://purl.org/dc/elements/1.1/contributor>
+                "Stian Soiland-Reyes"@en ;
+        <http://purl.org/dc/elements/1.1/creator>
+                "Paolo Ciccarese"@it , "Herbert Van de Sompel"@vls , "Robert Sanderson"@en ;
+        <http://purl.org/dc/elements/1.1/description>
+                "The Open Annotation Core Data Model specifies an interoperable framework for creating associations between related resources, annotations, using a methodology that conforms to the Architecture of the World Wide Web. Open Annotations can easily be shared between platforms, with sufficient richness of expression to satisfy complex requirements while remaining simple enough to also allow for the most common use cases, such as attaching a piece of text to a single web resource.\n\nAn Annotation is considered to be a set of connected resources, typically including a body and target, where the body is somehow about the target. The full model supports additional functionality, enabling semantic annotations, embedding content, selecting segments of resources, choosing the appropriate representation of a resource and providing styling hints for consuming clients."@en ;
+        <http://purl.org/dc/elements/1.1/title>
+                "Open Annotation Data Model"@en ;
+        <http://purl.org/dc/terms/modified>
+                "2013-02-22T21:40:51+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.w3.org/2002/07/owl#versionIRI>
+                <http://www.openannotation.org/spec/core/20130208/oa.owl> ;
+        <http://www.w3.org/2002/07/owl#versionInfo>
+                "0.9.20130208" .
+
+<http://www.w3.org/ns/oa#end>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The end position of the segment of text or bytes. The first character/byte in the full text/stream is position 0. The character/byte indicated at position oa:end is NOT included within the selected segment. \n\nSee oa:DataPositionSelector and oa:oa:TextPositionSelector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Selector> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "end"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#nonNegativeInteger> .
+
+<http://www.w3.org/ns/oa#CssStyle>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes styles for resources participating in the Annotation using CSS.\n\nSpecific Resources MAY be assigned a CSS style class using oa:styleClass.\n\nThe CSS resource MAY have its own dereferencable URI that provides the information. For example, \"Style1\" in the diagram below might actually have the URI \"http://www.example.com/styles/annotations.css\". It MAY be embedded within the Annotation using the inline constructions described in Embedding Resources."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "CssStyle"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Style> .
+
+<http://www.w3.org/ns/oa#annotatedAt>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The time at which the Annotation was created. \n\nThere SHOULD be exactly 1 oa:annotatedAt property per Annotation, and MUST NOT be more than 1. The datetime MUST be expressed in the xsd:dateTime format, and SHOULD have a timezone specified."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "annotatedAt"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#dateTimeStamp> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfSpotRelation>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfSpotEntity> .
+
+<https://w3id.org/wdaqua/qanary#Class>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#Entity> .
+
+<http://www.w3.org/ns/oa#hasSource>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a oa:SpecificResource and the resource that it is a more specific representation of. \n\nThere MUST be exactly 1 oa:hasSource relationship associated with a Specific Resource."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#SpecificResource> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasSource"@en .
+
+<http://www.w3.org/ns/oa#SpecificResource>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource identifies part of another Source resource, a particular representation of a resource, a resource with styling hints for renders, or any combination of these. \n\nThe Specific Resource takes the role of oa:hasBody or oa:hasTarget in an oa:Annotation instead of the Source resource.\n\nThere MUST be exactly 1 oa:hasSource relationship associated with a Specific Resource.\n\nThere MUST be exactly 0 or 1 oa:hasSelector relationship associated with a Specific Resource.\n\nThere MAY be 0 or 1 oa:hasState relationship for each Specific Resource.\n\nIf the Specific Resource has an HTTP URI, then the exact segment of the Source resource that it identifies, and only the segment, MUST be returned when the URI is dereferenced. For example, if the segment of interest is a region of an image and the Specific Resource has an HTTP URI, then dereferencing it MUST return the selected region of the image as it was at the time when the annotation was created. Typically this would be a burden to support, and thus the Specific Resource SHOULD be identified by a globally unique URI, such as a UUID URN. If it is not considered important to allow other Annotations or systems to refer to the Specific Resource, then a blank node MAY be used instead."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "SpecificResource"@en .
+
+<https://w3id.org/wdaqua/qanary#Instance>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#Entity> .
+
+<https://w3id.org/wdaqua/qanary#Endpoint>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#identifying>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents the assignment of an identity to the target resource(s). For example, annotating the name of a city in a string of text with the URI that identifies it."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "identifying"@en .
+
+<http://www.w3.org/ns/oa#tagging>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents adding a Tag on the target resource(s). One or more of the bodies of the annotation should be typed as a oa:Tag or oa:SemanticTag."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "tagging"@en .
+
+<http://www.w3.org/ns/oa#bookmarking>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents the creation of a bookmark to the target resources or recorded point or points within one or more resources. For example, an Annotation that bookmarks the point in a text where the reader finished reading. Bookmark Annotations may or may not have a Body resource."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "bookmarking"@en .
+
+<https://w3id.org/wdaqua/qanary#PosTag>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://localhost:8080/Dataset>
+        a       <http://www.wdaqua.eu/qa#Dataset> .
+
+<http://www.w3.org/ns/oa#replying>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents a reply to a previous statement, either an Annotation or another resource. For example providing the assistance requested in the above."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "replying"@en .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfSpotClass>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfSpotEntity> .
+
+<file:///Users/Dennis/Documents/workspace/qanary_private/qanary_pipeline-template/anno1>
+        a       <http://www.w3.org/ns/openannotation/core/AnnotationOfQuestion> ;
+        <http://www.w3.org/ns/openannotation/core/hasBody>
+                <file:///Users/Dennis/Documents/workspace/qanary_private/qanary_pipeline-template/URIAnswer> ;
+        <http://www.w3.org/ns/openannotation/core/hasTarget>
+                <http://localhost:8080/question/952f93b1-8afa-45c8-a97b-1279c05f2191> .
+
+<http://www.w3.org/ns/oa#List>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A multiplicity construct that conveys to a consuming application that all of the constituent resources are required for the Annotation to be correctly interpreted, and in a particular order. \n\noa:List can be used as the object of the object of the oa:hasBody, oa:hasTarget, oa:hasSelector, oa:hasState, oa:styledBy and oa:hasScope relationships, \n\nThere MUST be 2 or more oa:item relationships for each oa:List, with their order defined using the rdf:List construct of rdf:first/rdf:rest/rdf:nil.\n\nAll the elements of the list should also be declared using oa:item, and each of the oa:items should appear at least once in the list."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "List"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Composite> .
+
+<https://w3id.org/wdaqua/qanary#AnnoOfPosTag>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationQuestion> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#PosTag>
+                ] .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfAnswerType>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationAnswer> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#AnswerType>
+                ] .
+
+<http://www.w3.org/ns/oa#Choice>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A multiplicity construct that conveys to a consuming application that it should select one of the constituent resources to display to the user, and not render/use all of them. \n\noa:Choice can be used as the object of the object of the oa:hasBody, oa:hasTarget, oa:hasSelector, oa:hasState, oa:styledBy and oa:hasScope relationships, \n\nThere MUST be 1 or more oa:item relationships for each oa:Choice.\n\nThere SHOULD be exactly 1 default relationship for each Choice."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Choice"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt> .
+
+<http://www.w3.org/ns/oa#serializedBy>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The object of the relationship is the agent, likely software, responsible for generating the serialization of the Annotation's serialization. \n\nIt is RECOMMENDED to use these and other FOAF terms to describe agents: foaf:Person, prov:SoftwareAgent, foaf:Organization, foaf:name, foaf:mbox, foaf:openid, foaf:homepage\n\nThere MAY be 0 or more oa:serializedBy relationships per Annotation."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "serializedBy"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                <http://www.w3.org/ns/prov#wasAttributedTo> .
+
+<https://w3id.org/wdaqua/qanary#AnnoOfEndpointOfDataset>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationDataset> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Endpoint>
+                ] .
+
+<https://w3id.org/wdaqua/qanary#AnnotationAnswer>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasTarget> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Answer>
+                ] .
+
+<http://www.w3.org/ns/oa#equivalentTo>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The subject and object resources of the oa:equivalentTo relationship represent the same resource, but potentially have different metadata such as oa:serializedBy, oa:serializedAt and serialization format.  oa:equivalentTo is a symmetrical and transitive relationship; if A oa:equivalentTo B, then it is also true that B oa:equivalent A; and that if B oa:equivalentTo C, then it is also true that A oa:equivalentTo C. \n\nThe Annotation MAY include 0 or more instances of the oa:equivalentTo relationship between copies of the Annotation or other resources, and SHOULD include as many as are available.\n\nIf a system publishes an embedded resource (a cnt:Content) at a new HTTP URI, then it SHOULD express the oa:equivalentTo relationship between the resource's URN and the new URI from which it is available."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "equivalentTo"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                <http://www.w3.org/ns/prov#alternateOf> .
+
+<https://w3id.org/wdaqua/qanary#Dataset>
+        a       <http://www.w3.org/2002/07/owl#Class> .
+
+<http://www.w3.org/ns/oa#cachedSource>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A link to a copy of the Source resource's representation appropriate for the Annotation, typically a copy of the original at the time that the Annotation was created"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#TimeState> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "cachedSource"@en .
+
+<http://www.w3.org/ns/oa#start>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The starting position of the segment of text or bytes. The first character/byte in the full text/stream is position 0. The character/byte indicated at position oa:start is included within the selected segment. \n\nSee oa:DataPositionSelector and oa:TextPositionSelector."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Selector> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "start"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#nonNegativeInteger> .
+
+<https://w3id.org/wdaqua/qanary#score>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "Describes the confidence/trust we have in the Annotation."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#decimal> .
+
+<http://www.w3.org/ns/oa#styledBy>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between a oa:Annotation and a oa:Style.\n\nThere MAY be 0 or 1 styledBy relationships for each Annotation.\n\nIf there are multiple Style resources that must be associated with the Annotation, then the use of the Multiplicity Constructs oa:Choice, oa:Composite or oa:List is RECOMMENDED."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "styledBy"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/ns/oa#Style> .
+
+<http://www.w3.org/ns/oa#motivatedBy>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between an Annotation and a Motivation, indicating the reasons why the Annotation was created.\n\nEach Annotation SHOULD have at least one oa:motivatedBy relationship, and MAY be more than 1."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "motivatedBy"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/ns/oa#Motivation> .
+
+<https://w3id.org/wdaqua/qanary#>
+        a       <http://api.stardog.com/Ontology> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "Ontology to annotate a question with typical informations generated during a QA process"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Qanary ontology"@en ;
+        <http://purl.org/dc/terms/created>
+                "2015-10-01"^^<http://www.w3.org/2001/XMLSchema#date> ;
+        <http://purl.org/dc/terms/creator>
+                <http://wdaqua.informatik.uni-bonn.de> ;
+        <http://purl.org/dc/terms/license>
+                <http://creativecommons.org/licenses/by-nc-sa/2.0/> ;
+        <http://purl.org/dc/terms/title>
+                "Qanary"@en ;
+        <http://www.w3.org/2002/07/owl#imports>
+                <http://www.openannotation.org/spec/core/20130208/oa.owl> ;
+        <http://www.w3.org/2002/07/owl#versionInfo>
+                1.0 .
+
+<tag:stardog:api:0.4239000676394752>
+        a       <http://www.wdaqua.eu/qa#AnnotationOfSpotInstance> ;
+        <http://www.w3.org/ns/openannotation/core/AnnotatedAt>
+                "2016-04-30T14:53:31.742+02:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.w3.org/ns/openannotation/core/annotatedBy>
+                <http://spotlight.sztaki.hu:2222/rest/spot> ;
+        <http://www.w3.org/ns/openannotation/core/hasTarget>
+                [ a       <http://www.w3.org/ns/openannotation/core/SpecificResource> ;
+                  <http://www.w3.org/ns/openannotation/core/hasSelector>
+                          [ a       <http://www.w3.org/ns/openannotation/core/TextPositionSelector> ;
+                            <http://www.w3.org/ns/openannotation/core/end>
+                                    16 ;
+                            <http://www.w3.org/ns/openannotation/core/start>
+                                    3
+                          ] ;
+                  <http://www.w3.org/ns/openannotation/core/hasSource>
+                          <http://localhost:8080/question/952f93b1-8afa-45c8-a97b-1279c05f2191>
+                ] .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfClass>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfEntity> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Class>
+                ] .
+
+<http://www.w3.org/ns/oa#linking>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents an untyped link to a resource related to the target."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "linking"@en .
+
+<http://www.w3.org/ns/oa#hasTarget>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between oa:Annotation and target. The target resource is what the oa:hasBody is somewhat \"about\".\n\nThe target may be of any media type, and contain any type of content. The target SHOULD be identified by HTTP URIs unless they are embedded within the Annotation.\n\nEmbedded targets SHOULD be instances of cnt:ContentAsText and embed their content with cnt:chars. They SHOULD declare their media type with dc:format, and MAY indicate their language using dc:language and a RFC-3066 language tag. \n\nThere is no OA class provided for \"Target\" as a target might be a body in a different annotation. However, there SHOULD be 1 or more content-based classes associated with the target resources of an Annotation, and the dctypes: vocabulary is recommended for this purpose, for instance dctypes:Text to declare textual content."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasTarget"@en .
+
+<http://www.w3.org/ns/oa#Annotation>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "Typically an Annotation has a single Body (oa:hasBody), which is the comment or other descriptive resource, and a single Target (oa:hasTarget) that the Body is somehow \"about\". The Body provides the information which is annotating the Target. \n\nThis \"aboutness\" may be further clarified or extended to notions such as classifying or identifying with oa:motivatedBy."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Annotation"@en .
+
+<http://www.w3.org/ns/oa#Selector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes the segment of interest in a representation of a Source resource, indicated with oa:hasSelector from the Specific Resource. \n\nThis class is not used directly in Annotations, only its subclasses are.\n\nThe nature of the Selector will be dependent on the type of the representation for which the segment is conveyed. The specific type of selector should be indicated using a subclass of oa:Selector.\n\nThe Specifier's description MAY be conveyed as an external or embedded resource (cnt:Content), or as RDF properties within the graph. The description SHOULD use existing standards whenever possible. If the Specifier has an HTTP URI, then its description, and only its description, MUST be returned when the URI is dereferenced."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "Selector"@en .
+
+<https://w3id.org/wdaqua/qanary#TargetDataset>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#Dataset> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfSpotEntity>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationQuestion> .
+
+<http://www.w3.org/ns/oa#hasBody>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The relationship between oa:Annotation and body. The body is somehow \"about\" the oa:hasTarget of the annotation.\n\nThe Body may be of any media type, and contain any type of content. The Body SHOULD be identified by HTTP URIs unless they are embedded within the Annotation.\n\nEmbedded bodies SHOULD be instances of cnt:ContentAsText and embed their content with cnt:chars. They SHOULD declare their media type with dc:format, and MAY indicate their language using dc:language and a RFC-3066 language tag. \n\nThere is no OA class provided for \"Body\" as a body might be a target of a different annotation. However, there SHOULD be 1 or more content-based classes associated with the body resources of an Annotation, and the dctypes: vocabulary is recommended for this purpose, for instance dctypes:Text to declare textual content."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "hasBody"@en .
+
+<http://www.w3.org/ns/oa#moderating>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents an assignment of value or quality to the target resource(s). For example annotating an Annotation to moderate it up in a trust network or threaded discussion."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "moderating"@en .
+
+<https://w3id.org/wdaqua/qanary#HelperDataset>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#Dataset> .
+
+<http://www.w3.org/ns/oa#default>
+        a       <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The constituent resource of a oa:Choice to use as a default option, if there is no other means to determine which would be most appropriate.\n\nThere SHOULD be exactly 1 default relationship for each Choice."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Choice> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "default"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                <http://www.w3.org/ns/oa#item> .
+
+<http://www.w3.org/ns/oa#TimeState>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A resource which describes how to retrieve a representation of the Source resource that is temporally appropriate for the Annotation.\n\nThere MUST be at least one of oa:cachedSource or oa:when specified. If there is more than 1, each gives an alternative copy of the representation."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "TimeState"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#State> .
+
+<http://www.w3.org/ns/oa#classifying>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents the assignment of a classification type, typically from a controlled vocabulary, to the target resource(s). For example to classify an Image resource as a Portrait."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "classifying"@en .
+
+<http://www.w3.org/ns/oa#TextQuoteSelector>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "A Selector that describes a textual segment by means of quoting it, plus passages before or after it.\n\nFor example, if the document were \"abcdefghijklmnopqrstuvwxyz\", one could select \"efg\" by a oa:prefix of \"abcd\", the quotation of oa:exact \"efg\" and a oa:suffix of \"hijk\".\n\nThe text MUST be normalized before recording.\n\nEach TextQuoteSelector MUST have exactly 1 oa:exact property.\n\nEach TextQuoteSelector SHOULD have exactly 1 oa:prefix property, and MUST NOT have more than 1.\n\nEach TextQuoteSelector SHOULD have exactly 1 oa:suffix property, and MUST NOT have more than 1."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "TextQuoteSelector"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <http://www.w3.org/ns/oa#Selector> .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfRelation>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationOfEntity> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#Relation>
+                ] .
+
+<http://www.w3.org/ns/oa#motivationScheme>
+        a       <http://www.w3.org/2004/02/skos/core#ConceptScheme> , <http://www.w3.org/2002/07/owl#NamedIndividual> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The concept scheme for Open Annotation Motivations"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "motivationScheme"@en .
+
+<https://w3id.org/wdaqua/qanary#AnnotationOfAnswerFormat>
+        a       <http://www.w3.org/2002/07/owl#Class> ;
+        <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                <https://w3id.org/wdaqua/qanary#AnnotationAnswer> ;
+        <http://www.w3.org/2002/07/owl#equivalentClass>
+                [ a       <http://www.w3.org/2002/07/owl#Restriction> ;
+                  <http://www.w3.org/2002/07/owl#onProperty>
+                          <http://www.w3.org/ns/oa#hasBody> ;
+                  <http://www.w3.org/2002/07/owl#someValuesFrom>
+                          <https://w3id.org/wdaqua/qanary#AnswerFormat>
+                ] .
+
+<http://www.w3.org/ns/oa#serializedAt>
+        a       <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The time at which the agent referenced by oa:serializedBy generated the first serialization of the Annotation, and any subsequent substantially different one. The annotation graph MUST have changed for this property to be updated, and as such represents the last modified datestamp for the Annotation. This might be used to determine if it should be re-imported into a triplestore when discovered. \n\nThere MAY be exactly 1 oa:serializedAt property per Annotation, and MUST NOT be more than 1. The datetime MUST be expressed in the xsd:dateTime format, and SHOULD have a timezone specified."@en ;
+        <http://www.w3.org/2000/01/rdf-schema#domain>
+                <http://www.w3.org/ns/oa#Annotation> ;
+        <http://www.w3.org/2000/01/rdf-schema#isDefinedBy>
+                <http://www.w3.org/ns/oa#> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "serializedAt"@en ;
+        <http://www.w3.org/2000/01/rdf-schema#range>
+                <http://www.w3.org/2001/XMLSchema#dateTimeStamp> .
+
+<http://www.w3.org/ns/oa#editing>
+        a       <http://www.w3.org/2002/07/owl#NamedIndividual> , <http://www.w3.org/ns/oa#Motivation> ;
+        <http://www.w3.org/2000/01/rdf-schema#comment>
+                "The motivation that represents a request for a modification or edit to the target resource. For example, an Annotation that requests a typo to be corrected."@en ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                <http://www.w3.org/ns/oa#motivationScheme> ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "editing"@en .
