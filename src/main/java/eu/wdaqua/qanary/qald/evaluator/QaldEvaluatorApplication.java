@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.qald.evaluator;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +63,6 @@ public class QaldEvaluatorApplication {
 		// SpringApplication.run(QaldEvaluatorApplication.class, args);
 
 		TurtleResultWriter writer = new TurtleResultWriter("/tmp/results.ttl");
-<<<<<<< HEAD
 		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 		//String components="alchemy";
 		//String components="StanfordNER ,agdistis";
@@ -69,10 +71,8 @@ public class QaldEvaluatorApplication {
 		//String components="FOX ,DBpediaSpotlightNED";
 		//String components = "luceneLinker";
 		//String components="DBpediaSpotlightSpotter ,agdistis";
-		String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
+		//String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
 		// String components = "DBpediaSpotlightSpotter";
-=======
->>>>>>> 856da2e0bf40574ad820532c86a575a223da4ff7
 
 		FileReader filereader = new FileReader();
 
@@ -151,6 +151,20 @@ public class QaldEvaluatorApplication {
 			
 			if (m.fMeasure==1){
 				fullFMeasure.add(1);
+				/*
+				sparql = "CONSTRUCT {?s ?p ?o} "
+						+"WHERE { GRAPH "
+						+" <"+namedGraph+"> "
+						+"{?s ?p ?o} "
+						+"} ";
+				Query query = QueryFactory.create(sparql);
+				QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+				Model results = qExe.execConstruct();
+				File file = new File( "/tmp/ISWC/"+components+"/"+questions.get(i).getQaldId()+".ttl");
+				file.getParentFile().mkdirs();
+				FileWriter out = new FileWriter( file );
+				results.write(out, "TURTLE");
+				*/
 			} else {
 				fullFMeasure.add(0);
 			}
@@ -243,9 +257,9 @@ public class QaldEvaluatorApplication {
 		List<String> nedComponents = new LinkedList<>();
 
 		// TODO: move to config
-		nerComponents.add("StanfordNER");
-		nerComponents.add("DBpediaSpotlightSpotter");
-		nerComponents.add("FOX");
+		//nerComponents.add("StanfordNER");
+		//nerComponents.add("DBpediaSpotlightSpotter");
+		//nerComponents.add("FOX");
 
 		// TODO: move to config
 		nedComponents.add("agdistis");
@@ -253,7 +267,7 @@ public class QaldEvaluatorApplication {
 
 		// monolithic configurations (NER+NED)
 		componentConfigurations.add("alchemy");
-		componentConfigurations.add("luceneLinker");
+		//componentConfigurations.add("luceneLinker");
 
 		// create all configurations
 		for (String ner : nerComponents) {
