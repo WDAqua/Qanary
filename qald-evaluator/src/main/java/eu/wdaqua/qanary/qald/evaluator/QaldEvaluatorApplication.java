@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.qald.evaluator;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +51,28 @@ public class QaldEvaluatorApplication {
 		Double globalPrecision = 0.0;
 		Double globalRecall = 0.0;
 		Double globalFMeasure = 0.0;
-		int countPrecision = 0; // stores for how many questions the precision
+		//int countPrecision = 0; // stores for how many questions the precision
 								// can be computed, i.e. do not divide by zero
-		int countRecall = 0; // analogusly to countPrecision
-		int countFMeasure = 0; // analogusly to countRecall
+		//int countRecall = 0; // analogusly to countPrecision
+		//int countFMeasure = 0; // analogusly to countRecall
 		int count = 0;
 
+		ArrayList<Integer> fullRecall = new ArrayList<Integer>();
+		ArrayList<Integer> fullFMeasure = new ArrayList<Integer>();
+		
 		// SpringApplication.run(QaldEvaluatorApplication.class, args);
 
 		TurtleResultWriter writer = new TurtleResultWriter("/tmp/results.ttl");
+		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
+		//String components="alchemy";
+		//String components="StanfordNER ,agdistis";
+		//String components="StanfordNER ,DBpediaSpotlightNED";
+		//String components="FOX ,agdistis";
+		//String components="FOX ,DBpediaSpotlightNED";
+		//String components = "luceneLinker";
+		//String components="DBpediaSpotlightSpotter ,agdistis";
+		//String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
+		// String components = "DBpediaSpotlightSpotter";
 
 		FileReader filereader = new FileReader();
 
@@ -120,44 +136,54 @@ public class QaldEvaluatorApplication {
 			}
 
 			// Compute precision and recall
-			int correctRetrieved = 0;
-			for (String s : systemAnswers) {
-				if (expectedAnswers.contains(s)) {
-					correctRetrieved++;
-					logger.debug("{}. {} in {}.", questions.get(i).getQaldId(), s, expectedAnswers);
-				} else {
-					logger.debug("{}. {} NOT in {}.", questions.get(i).getQaldId(), s, expectedAnswers);
-				}
+			Metrics m = new Metrics();
+			m.compute(expectedAnswers, systemAnswers);
+			globalPrecision += m.precision;
+			globalRecall += m.recall;
+			globalFMeasure += m.fMeasure;
+			count++;
+			
+			if (m.recall==1){
+				fullRecall.add(1);
+			} else {
+				fullRecall.add(0);
 			}
-			logger.info("Correctly retrieved: {}", correctRetrieved);
-
-			if (systemAnswers.size() != 0) {
-				Double precision = (double) correctRetrieved / systemAnswers.size();
-				logger.info("PRECISION: {} ", precision);
-				globalPrecision += precision;
-				countPrecision++;
+			
+			if (m.fMeasure==1){
+				fullFMeasure.add(1);
+				/*
+				sparql = "CONSTRUCT {?s ?p ?o} "
+						+"WHERE { GRAPH "
+						+" <"+namedGraph+"> "
+						+"{?s ?p ?o} "
+						+"} ";
+				Query query = QueryFactory.create(sparql);
+				QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+				Model results = qExe.execConstruct();
+				File file = new File( "/tmp/ISWC/"+components+"/"+questions.get(i).getQaldId()+".ttl");
+				file.getParentFile().mkdirs();
+				FileWriter out = new FileWriter( file );
+				results.write(out, "TURTLE");
+				*/
+			} else {
+				fullFMeasure.add(0);
 			}
-			if (expectedAnswers.size() != 0) {
-				Double recall = (double) correctRetrieved / expectedAnswers.size();
-				logger.info("RECALL: {} ", recall);
-				globalRecall += recall;
-				countRecall++;
-			}
-			if (systemAnswers.size() != 0 && expectedAnswers.size() != 0 && correctRetrieved != 0) {
-				Double precision = (double) correctRetrieved / systemAnswers.size();
-				Double recall = (double) correctRetrieved / expectedAnswers.size();
-				Double fMeasure = (2 * precision * recall) / (precision + recall);
-				logger.info("PRECISION: {} ", precision);
-				logger.info("RECALL: {} ", recall);
-				logger.info("F-MEASURE: {} ", fMeasure);
-				globalFMeasure += fMeasure;
-				countFMeasure++;
-			}
+			
 		}
-		logger.info("Global Precision={}", (double) globalPrecision / countPrecision);
-		logger.info("Global Recall={}", (double) globalRecall / countRecall);
-		logger.info("Global F-measure={}", (double) globalFMeasure / countFMeasure);
+		logger.info("Global Precision={}", (double) globalPrecision / count);
+		logger.info("Global Recall={}", (double) globalRecall / count);
+		logger.info("Global F-measure={}", (double) globalFMeasure / count);
 
+		System.out.println("FullRecall");
+		for (int i: fullRecall){
+			System.out.println(i);
+		}
+		
+		System.out.println("FullFMeasure");
+		for (int i: fullFMeasure){
+			System.out.println(i);
+		}
+		
 		writer.close();
 		// retrieve recognized URIs from configured pipeline
 
@@ -170,6 +196,48 @@ public class QaldEvaluatorApplication {
 
 	}
 
+	class Metrics{
+        private Double precision=0.0;
+        private Double recall=0.0;
+        private Double fMeasure=0.0;
+
+
+        public void compute(List<String> expectedAnswers, List<String> systemAnswers){
+                //Compute the number of retrieved answers
+                int correctRetrieved = 0;
+                for (String s:systemAnswers){
+                        if (expectedAnswers.contains(s)){
+                                correctRetrieved++;
+                        }
+                }
+                //Compute precision and recall following the evaluation metrics of QALD
+                if (expectedAnswers.size()==0){
+                        if (systemAnswers.size()==0){
+                                recall=1.0;
+                                precision=1.0;
+                                fMeasure=1.0;
+                        } else {
+                                recall=0.0;
+                                precision=0.0;
+                                fMeasure=0.0;
+                        }
+                } else {
+                        if (systemAnswers.size()==0){
+                                recall=0.0;
+                                precision=1.0;
+                        } else {
+                                precision = (double)correctRetrieved/systemAnswers.size();
+                                recall = (double)correctRetrieved/expectedAnswers.size();
+                        }
+                        if (precision==0 && recall==0){
+                                fMeasure=0.0;
+                        } else {
+                                fMeasure = (2*precision*recall)/(precision+recall);
+                        }
+                }
+        }
+	}
+	
 	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
@@ -189,9 +257,9 @@ public class QaldEvaluatorApplication {
 		List<String> nedComponents = new LinkedList<>();
 
 		// TODO: move to config
-		nerComponents.add("StanfordNER");
-		nerComponents.add("DBpediaSpotlightSpotter");
-		nerComponents.add("FOX");
+		//nerComponents.add("StanfordNER");
+		//nerComponents.add("DBpediaSpotlightSpotter");
+		//nerComponents.add("FOX");
 
 		// TODO: move to config
 		nedComponents.add("agdistis");
@@ -199,7 +267,7 @@ public class QaldEvaluatorApplication {
 
 		// monolithic configurations (NER+NED)
 		componentConfigurations.add("alchemy");
-		componentConfigurations.add("luceneLinker");
+		//componentConfigurations.add("luceneLinker");
 
 		// create all configurations
 		for (String ner : nerComponents) {
