@@ -95,7 +95,6 @@ public class LuceneLinker extends QanaryComponent {
 			List<AttributeSource> tokens = new ArrayList<AttributeSource>();
 			while(tokenStream.incrementToken()){
 				tokens.add(tokenStream.cloneAttributes());
-				System.out.println(tokenStream.getAttribute(CharTermAttribute.class).toString());
 			}
 			tokenStream.close();
 			tokenStream.end();
@@ -110,35 +109,27 @@ public class LuceneLinker extends QanaryComponent {
 				int k=1;
 				List<String> candidates = new ArrayList<String>();
 				while (found==true){
-					System.out.println("SEARCH"+search);
+					logger.info("Search string {} ", search);
 					List<String> tmp=index.query("\""+search+"\"");
-					
-					for (String s: tmp){
-						System.out.println(s);
-					}
 					
 					//If no matches found add the previews ones if they exist 
 					if (tmp.size()==0){
 						found=false;
-						System.out.println("Here1 k:"+k);
 						for (String uri:candidates){
 							if (uri.equals("http://dbpedia.org/")==false){
 								int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 								int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
-								System.out.println(question.substring(begin, end));
-        						System.out.println(uri);
+								logger.info("Added uri {} ",uri);
 								annotations.add(new Annotation(begin,end,uri));
 							}
 						}
 					} else{
 						if (candidates.size()>0){
-							System.out.println("Here3");
 							for (String uri:candidates){
 								if (uri.equals("http://dbpedia.org/")==false){
 									int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 									int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
-									System.out.println(question.substring(begin, end));
-	        						System.out.println(uri);
+									logger.info("Added uri {} ",uri);
 									annotations.add(new Annotation(begin,end,uri));
 								}
 							}
@@ -154,8 +145,7 @@ public class LuceneLinker extends QanaryComponent {
                            		if (uri.equals("http://dbpedia.org/")==false){
 	                           		int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 	        						int end=tokens.get(i+k-1).getAttribute(OffsetAttribute.class).endOffset();
-	        						System.out.println(question.substring(begin, end));
-	        						System.out.println(uri);
+	        						logger.info("Added uri {} ",uri);
 	        						annotations.add(new Annotation(begin,end,uri));
                            		}
        						}
@@ -167,7 +157,6 @@ public class LuceneLinker extends QanaryComponent {
 			Iterator<Annotation> it = annotations.iterator();
 			while(it.hasNext()){
 				Annotation a = it.next();
-				System.out.println(question.substring(a.begin, a.end));
 				if (stopWords.contains(question.substring(a.begin, a.end).toLowerCase())){
 					it.remove();
 				}
@@ -186,10 +175,6 @@ public class LuceneLinker extends QanaryComponent {
 				if (count>1){
 					it.remove();
 				}
-			}
-			
-			for (Annotation a : annotations){
-				System.out.println(a.uri);
 			}
 
 			// STEP4: Push the result of the component to the triplestore
