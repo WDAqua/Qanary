@@ -38,8 +38,11 @@ import org.apache.lucene.index.FieldInvertState;
 import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.BytesRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Index {
+	private static final Logger logger = LoggerFactory.getLogger(LuceneLinker.class);
 	public static Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
 	private static Directory index;
 	private static String dump;
@@ -59,7 +62,6 @@ public class Index {
 	
 		//Create an index for the instances
 		IndexWriter w_instances = new IndexWriter(index, config);
-		System.out.println(dump);
 		PipedRDFIterator<Triple> iter = parse(dump);
 		int count = 0;
 		while (iter.hasNext()) {
@@ -71,7 +73,7 @@ public class Index {
 				}
 				count++;
 	        	if (count % 10000 == 0){
-	        		System.out.println(count);
+	        		logger.info("Number {} ",count);
 	        	}
         	}
         	w_instances.close();
@@ -88,9 +90,7 @@ public class Index {
 	public static List<String> query(String querystr) throws IOException, ParseException, InvalidTokenOffsetsException {
 		List<String> result = new ArrayList<String>();
 		// the "lexicalization" arg specifies the default field to use
-        	// when no field is explicitly specified in the query.
-        
-		//System.out.println("QUERYSTR "+querystr);
+        // when no field is explicitly specified in the query.
 		
 		Query q = new QueryParser("lexicalization", analyzer).parse(querystr);
         IndexReader reader = DirectoryReader.open(index);
@@ -111,17 +111,15 @@ public class Index {
         	docs_instances = searcher.search(q, 60);
             hits = docs_instances.scoreDocs;
         }
-        
-        // Display results
-        //System.out.println("Found " + hits.length + " hits.");
 
 		for(int i=0; i<hits.length; ++i) {
 			int docId = hits[i].doc;
             Document d = searcher.doc(docId);
 			
-			//Look if the retrieved result matches exactly the searched
-            System.out.println("Search " + querystr + " found " + d.get("resource") + "  Score: " + hits[i].score);
 			
+            //System.out.println("Search " + querystr + " found " + d.get("resource") + "  Score: " + hits[i].score);
+			
+            //Look if the retrieved result matches exactly the searched
 			if (compareStemmed(querystr,d.get("lexicalization"))==true){
 				result.add(d.get("resource"));
 			} else {
@@ -203,7 +201,6 @@ class CustomSimilarity extends TFIDFSimilarity {
 
     @Override
     public final float decodeNormValue(long norm) {
-        //System.out.println(norm);
         return ((float) norm) / NORM_ADJUSTMENT;
     }
 
