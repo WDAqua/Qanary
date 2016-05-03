@@ -55,12 +55,7 @@ public class WrapperSpotlight extends QanaryComponent {
 			URL url = new URL(urladd);
 			URLConnection urlConnection = url.openConnection();
 			HttpURLConnection connection = null;
-			if (urlConnection instanceof HttpURLConnection) {
-				connection = (HttpURLConnection) urlConnection;
-			} else {
-				System.out.println("Please enter an HTTP URL.");
-				return retLst;
-			}
+			connection = (HttpURLConnection) urlConnection;
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -70,7 +65,6 @@ public class WrapperSpotlight extends QanaryComponent {
 
 			NodeList nList = doc.getElementsByTagName("surfaceForm");
 
-			// System.out.println("----------------------------");
 			boolean flg = true;
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 
