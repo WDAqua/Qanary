@@ -93,7 +93,6 @@ public class StanfordNERComponent extends QanaryComponent {
 		// Iterate over the tags
 		for (CoreLabel token : document.get(TokensAnnotation.class)) {
 			logger.info("Tagged question (token ---- tag): {}", token.toString() + "  ----  " +token.get(NamedEntityTagAnnotation.class));
-			// System.out.println(token.get(NamedEntityTagAnnotation.class));
 			if (token.get(NamedEntityTagAnnotation.class).equals("O") == false) {
 				if (startToken == null) {
 					startToken = token;
@@ -125,14 +124,8 @@ public class StanfordNERComponent extends QanaryComponent {
 			Selection s = new Selection();
 			s.begin = startToken.beginPosition();
 			s.end = endToken.endPosition();
-			System.out.println("end"+s.begin+"---"+s.end);
 			selections.add(s);
 		}
-
-		for (Selection s: selections){
-			System.out.println(s.begin+"---"+s.end);
-		}
-		
 
 		// STEP4: Push the result of the component to the triplestore
 		logger.info("Apply vocabulary alignment on outgraph");
