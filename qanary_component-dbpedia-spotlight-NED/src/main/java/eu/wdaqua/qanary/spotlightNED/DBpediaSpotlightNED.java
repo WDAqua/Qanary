@@ -80,8 +80,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 			}
 			in.close();
 			xmlResp = response.toString();
-
-			System.out.println("Curl1 Response: \n" + xmlResp);
+			logger.info("Response spotlight service {}", xmlResp);
 		} catch (Exception e) {
 		}
 		return (xmlResp);
