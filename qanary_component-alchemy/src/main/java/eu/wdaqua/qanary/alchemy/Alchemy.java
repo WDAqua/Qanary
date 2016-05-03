@@ -89,14 +89,12 @@ public class Alchemy extends QanaryComponent {
 					if (node.selectSingleNode("disambiguated").selectSingleNode("dbpedia")!=null){
 						Selection s = new Selection();
 						String text = node.selectSingleNode("text").getText();
-						System.out.println(text);
 						for (int i = -1; (i = question.indexOf(text, i + 1)) != -1; ) {
 							s.begin=i;
 						    s.end=i+text.length();
 						    selections.add(s);
 						}
 						s.uri=node.selectSingleNode("disambiguated").selectSingleNode("dbpedia").getText();
-						System.out.println(s.uri);
 					}
 				}
 			}
