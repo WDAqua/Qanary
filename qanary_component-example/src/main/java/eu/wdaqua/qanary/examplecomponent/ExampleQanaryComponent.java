@@ -20,7 +20,6 @@ public class ExampleQanaryComponent extends QanaryComponent {
 	 */
 	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) {
-		System.out.println("Hello");
 		logger.info("process: {}", myQanaryMessage);
 		// TODO: implement processing of question
 
