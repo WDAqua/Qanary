@@ -10,7 +10,7 @@
     <properties>
         <java.version>1.8</java.version>
     </properties>
-    <artifactId>qa.alchemy</artifactId>
+    <artifactId>qa.Lucene-Linker-NERD</artifactId>
     <dependencies>
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
@@ -93,15 +93,25 @@
             <version>3.0.0</version>
         </dependency>
 	<dependency>
-		<groupId>dom4j</groupId>
-		<artifactId>dom4j</artifactId>
-		<version>1.6.1</version>
-	</dependency>
-	<dependency>
-		<groupId>jaxen</groupId>
-		<artifactId>jaxen</artifactId>
-		<version>1.1.1</version>
-	</dependency>
+	    <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>5.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>5.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>5.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-highlighter</artifactId>
+            <version>5.4.1</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

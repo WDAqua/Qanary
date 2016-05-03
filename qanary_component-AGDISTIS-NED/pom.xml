@@ -10,13 +10,17 @@
     <properties>
         <java.version>1.8</java.version>
     </properties>
-    <artifactId>qa.DBpediaSpotlightSpotter</artifactId>
+    <artifactId>qa.AGDISTIS-NED</artifactId>
     <dependencies>
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.component</artifactId>
             <version>0.1.0</version>
         </dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -74,17 +78,6 @@
             <artifactId>json-path-assert</artifactId>
             <version>0.8.1</version>
             <scope>test</scope>
-        </dependency>
-	<dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.5.2</version>
-            <classifier>models</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
