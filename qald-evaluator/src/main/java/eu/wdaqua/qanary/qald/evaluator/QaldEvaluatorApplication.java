@@ -82,7 +82,7 @@ public class QaldEvaluatorApplication {
 		List<QaldQuestion> questions = new LinkedList<>(filereader.getQuestions());
 
 		for (int i = 0; i < questions.size(); i++) {
-
+			List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
 			logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
 			writer.writeQaldQuestionInformation(questions.get(i));
 
@@ -91,7 +91,7 @@ public class QaldEvaluatorApplication {
 			// question="What is the official website of Tom Cruise?";
 			// question="How many goals did Pelé score?";
 			// questions.get(0).setQuestion("How many goals did Pelé score?");
-
+/*
 			// Send the question
 			RestTemplate restTemplate = new RestTemplate();
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
@@ -164,36 +164,17 @@ public class QaldEvaluatorApplication {
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter( file );
 				results.write(out, "TURTLE");
-				*/
+				
 			} else {
 				fullFMeasure.add(0);
 			}
-			
+*/			
 		}
 		logger.info("Global Precision={}", (double) globalPrecision / count);
 		logger.info("Global Recall={}", (double) globalRecall / count);
 		logger.info("Global F-measure={}", (double) globalFMeasure / count);
 
-		System.out.println("FullRecall");
-		for (int i: fullRecall){
-			System.out.println(i);
-		}
-		
-		System.out.println("FullFMeasure");
-		for (int i: fullFMeasure){
-			System.out.println(i);
-		}
-		
 		writer.close();
-		// retrieve recognized URIs from configured pipeline
-
-		// compare to provided uris
-
-		// String sparql = "SELECT DISTINCT ?uri WHERE {
-		// <http://dbpedia.org/resource/Albert_Einstein>
-		// <http://dbpedia.org/ontology/doctoralAdvisor> ?uri . }";
-		// Query query = QueryFactory.create(sparql);
-
 	}
 
 	class Metrics{
