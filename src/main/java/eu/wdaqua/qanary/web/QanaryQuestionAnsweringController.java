@@ -194,24 +194,6 @@ public class QanaryQuestionAnsweringController {
 		String sparqlquery = "";
 		String namedGraphMarker = "<" + namedGraph.toString() + ">";
 
-		/*
-		 * // TODO: please look if this code is still necessary. PS: I really
-		 * would prefer as a triplesotre and external service and not an
-		 * internal one. It is easier to debug. // Using local jean store to
-		 * store the data // TODO: is this step needed on every execution or
-		 * should it no be an // init step? final Node graphName =
-		 * NodeUtils.asNode(namedGraph); inMemoryStore.addGraph(graphName,
-		 * GraphFactory.createGraphMem()); final Model model =
-		 * RDFDataMgr.loadModel(
-		 * "http://www.openannotation.org/spec/core/20130208/oa.ow");
-		 * model.listStatements().forEachRemaining(statement -> {
-		 * inMemoryStore.add(new Quad(graphName, statement.asTriple())); });
-		 * 
-		 * System.out.println("\n ++++++++++++++++\n" + sparqlquery);
-		 * insertSparqlIntoTriplestore(sparqlquery); // fail //
-		 * loadTripleStore(sparqlquery, triplestore);
-		 */
-
 		// Load the Open Annotation Ontology
 		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "
 				+ namedGraphMarker;
