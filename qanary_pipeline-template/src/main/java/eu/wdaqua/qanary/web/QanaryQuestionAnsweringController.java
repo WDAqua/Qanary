@@ -78,6 +78,17 @@ public class QanaryQuestionAnsweringController {
 	 *
 	 * @return
 	 */
+	@RequestMapping(value = "/startquestionanswering", method = RequestMethod.GET)
+	public String startquestionanswering(Model model) {
+		return "startquestionanswering";
+	}
+
+	/**
+	 * a simple HTML input form for starting a question answering process with a
+	 * QuestionURI
+	 *
+	 * @return
+	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
 	public String startquestionansweringwithtextquestion(Model model) {
 		return "startquestionansweringwithtextquestion";
@@ -90,6 +101,7 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@ModelAttribute("componentList")
 	public List<String> componentList() {
+		logger.info("available components: {}", qanaryConfigurator.getComponentNames());
 		return qanaryConfigurator.getComponentNames();
 	}
 
@@ -120,17 +132,6 @@ public class QanaryQuestionAnsweringController {
 			URI questionUri = qanaryQuestionController.storeQuestion(question);
 			return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
 		}
-	}
-
-	/**
-	 * a simple HTML input form for starting a question answering process with a
-	 * QuestionURI
-	 *
-	 * @return
-	 */
-	@RequestMapping(value = "/startquestionanswering", method = RequestMethod.GET)
-	public String startquestionanswering() {
-		return "startquestionanswering";
 	}
 
 	/**
@@ -179,7 +180,7 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
-			@RequestParam(value = "componentlist") final List<String> componentsToBeCalled)
+			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
 					throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 		logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
 
