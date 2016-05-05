@@ -3,24 +3,134 @@
 <head> 
     <title>Qanary Helper: Start question answering with a new textual question</title> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<style>
-	input[type=text] { width:50%; display:block; }
-	</style>
+                <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+                <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+                <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+                <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <style>
+    body { 
+        font-family:Open Sans; 
+        font-size:12pt; 
+        background-color: #f1f1f1; 
+        font-color: #333; 
+        margin: 0; 
+        padding: 0;
+    }
+        h1 { 
+                font-size: 14pt; 
+                font-weight: 600; 
+                background-image:url(logo-qanary.svg); 
+                background-size: 100px auto; 
+                background-position: 10px center; 
+                background-repeat: no-repeat; 
+                padding-top: 1ex;
+                padding-bottom: 1.1ex;
+                padding-left: 125px;
+        }
+    .applicationheader { 
+        background-color: #34302D; 
+        color:#f1f1f1; 
+        padding:0.25ex; 
+    }
+    header { background-color: #34302D; }
+    form { margin-left: 1ex; }
+        input[type=text] { 
+                width:50%; 
+                display:block; 
+                margin-bottom:2ex; 
+                max-width:500px; 
+                font-size: 13pt; 
+                padding:5px;
+                border: 1px solid #999;
+        }
+        input[type=text].isempty {
+                background-color:#FFC; 
+        }
+    ul {  
+        list-style-type: none; 
+        margin: 0; 
+        padding: 0; 
+    } 
+    div.selection {
+        margin: 0; 
+        width: 500px; 
+        padding:0ex; 
+    }
+    div.selection li {
+        margin:0.25ex; 
+        padding: 0.25ex; 
+        border:1px solid #999; 
+        font-size:13pt; 
+        background-color: #f1f1f1; 
+        color: #333; 
+        cursor:ns-resize;
+    }
+     div.selection li.selected {
+        background-color:#FFF;
+        color:#000;
+    }
+    button { 
+        font: normal normal normal 14px/1 FontAwesome; 
+        margin-top: 1ex; 
+        padding:1ex 1ex; 
+        transition: background-position .1s linear;
+        color: #FFF;
+        border-radius: 4px;
+        border: 1px solid #999; 
+        background-color:#6db33f; 
+    } 
+    button:hover { 
+                border: 1px solid #333; 
+        background-color:#73bc42;
+    }
+        </style>
+        <script>
+                $(function() {
+                        $( "#sortable" ).sortable();
+                        $( "#sortable" ).disableSelection();
+                        $( "#sortable li input").click( function(){
+                                console.log("click: "+this);
+                                console.log($(this));
+                                console.log($(this).prop("checked"));
+                                if( $(this).prop("checked") == true ){
+                                        $(this).addClass("selected");
+                                        $(this).parents("li").addClass("selected");     
+                                } else {
+                                        $(this).removeClass("selected");
+                                        $(this).parents("li").removeClass("selected");
+                                }                       
+                        });
+                        $("input[type=text]").focusout( function(){
+                                if( $(this).val().trim() == "" ){
+                                        $(this).addClass("isempty");
+                                } else {
+                                        $(this).removeClass("isempty");                         
+                                } 
+                        });
+                });
+        </script>
 </head>
 <body>
-	<h1>Start a QA process with a new textual question</h1>
-	<ul>
-		<li>input a textual question</li>
-		<li>input the components to be executed</li>
-	</ul>
-	<form action="/startquestionansweringwithtextquestion" method="POST">
-		<div>
-			Question string: <input type="text" name="question" id="question" />
-		</div>
-		<div>
-			Name of component: <input type="text" name="componentlist" id="componentlist" />	
-		</div>
-		<input type="submit" name="submit" id="submit" value="start QA process" /> 		
-	</form>
+        <header>
+                
+        </header>
+        <h1>Start a QA process with a new textual question</h1>
+        <form action="/startquestionansweringwithtextquestion" method="POST">
+                <div>
+                        Please insert a textual question: <input type="text" name="question" id="question" title="Example: What is Batman's real name?" />
+                </div>
+                Activate the components to be executed and drag them in the intended execution order: 
+                <div class="selection">
+                        <div class="applicationheader">Currently available Qanary components
+                        <ul id="sortable">
+	                        <li th:each="component : ${componentList}">
+	                        	<input type="checkbox" name="componentlist[]" th:id="'componentlist'+${component}" th:value="${component}" />
+                                <label th:for="'componentlist'+${component}" th:title="'activate '+${component}+' for the QA pipeline'" th:text="${component}" />
+                        	</li>
+                        </ul>
+                </div>
+                <button id="submit">start QA process provided by Qanary &#xf135;</button>               
+                </div>
+        </form>
 </body>
 </html>
