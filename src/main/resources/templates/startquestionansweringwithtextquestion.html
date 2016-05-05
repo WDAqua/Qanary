@@ -17,15 +17,16 @@
         padding: 0;
     }
     h1 { 
-	    font-size: 14pt; 
-	    font-weight: 600; 
-	    background-image:url(logo-qanary.svg); 
+	    /* TODO: Github is used here, should be replaced by SVG */ 
+	    background-image:url(https://raw.githubusercontent.com/WDAqua/Qanary/master/doc/logo-qanary_s.png); 
 	    background-size: 100px auto; 
 	    background-position: 10px center; 
 	    background-repeat: no-repeat; 
 	    padding-top: 1ex;
 	    padding-bottom: 1.1ex;
 	    padding-left: 125px;
+	    font-size: 14pt; 
+	    font-weight: 600; 
     }
     .applicationheader { 
         background-color: #34302D; 
@@ -74,6 +75,13 @@
         background-color:#FFF;
         color:#000;
     }
+    #sortable li:hover {
+        background-color:#FFFFF0;
+    }
+    #sortable li.selected:hover {
+        background-color:#FFFFF9;
+    }
+    
     button { 
         font: normal normal normal 14px/1 FontAwesome; 
         margin-top: 1ex; 
