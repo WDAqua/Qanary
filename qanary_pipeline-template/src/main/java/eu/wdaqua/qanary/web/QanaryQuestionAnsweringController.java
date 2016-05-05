@@ -33,6 +33,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
+import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
 import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
@@ -100,21 +101,25 @@ public class QanaryQuestionAnsweringController {
 	 * @throws URISyntaxException
 	 * @throws QanaryExceptionServiceCallNotOk
 	 * @throws IOException
+	 * @throws QanaryExceptionQuestionNotProvided
 	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
 			@RequestParam(value = "question", required = true) final String question,
-			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled) throws URISyntaxException,
-					QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk, IOException {
+			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
+					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
+					IOException, QanaryExceptionQuestionNotProvided {
 
-		logger.info("UI call: {}", componentsToBeCalled);
-		URI questionUri = qanaryQuestionController.storeQuestion(question);
+		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 
-		// TODO: address of triplestore, outGraph
-		// TODO: question URI
-
-		return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
+		// you cannot pass without a question
+		if (question.trim().isEmpty()) {
+			throw new QanaryExceptionQuestionNotProvided();
+		} else {
+			URI questionUri = qanaryQuestionController.storeQuestion(question);
+			return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
+		}
 	}
 
 	/**

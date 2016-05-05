@@ -7,7 +7,7 @@
                 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
                 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
                 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-        <style>
+    <style>
     body { 
         font-family:Open Sans; 
         font-size:12pt; 
@@ -16,17 +16,17 @@
         margin: 0; 
         padding: 0;
     }
-        h1 { 
-                font-size: 14pt; 
-                font-weight: 600; 
-                background-image:url(logo-qanary.svg); 
-                background-size: 100px auto; 
-                background-position: 10px center; 
-                background-repeat: no-repeat; 
-                padding-top: 1ex;
-                padding-bottom: 1.1ex;
-                padding-left: 125px;
-        }
+    h1 { 
+	    font-size: 14pt; 
+	    font-weight: 600; 
+	    background-image:url(logo-qanary.svg); 
+	    background-size: 100px auto; 
+	    background-position: 10px center; 
+	    background-repeat: no-repeat; 
+	    padding-top: 1ex;
+	    padding-bottom: 1.1ex;
+	    padding-left: 125px;
+    }
     .applicationheader { 
         background-color: #34302D; 
         color:#f1f1f1; 
@@ -43,29 +43,34 @@
                 padding:5px;
                 border: 1px solid #999;
         }
-        input[type=text].isempty {
-                background-color:#FFC; 
-        }
-    ul {  
+    input[type=text].isempty {
+        background-color:#FFC; 
+    }
+    #sortable {  
         list-style-type: none; 
         margin: 0; 
         padding: 0; 
+        border: 1px solid #34302D;
     } 
+    #sortable.missingcomponentselection {
+    	border-color: #FFC;
+    }  
+    
     div.selection {
         margin: 0; 
         width: 500px; 
-        padding:0ex; 
+        padding:0ex;
     }
-    div.selection li {
+    #sortable li {
         margin:0.25ex; 
         padding: 0.25ex; 
-        border:1px solid #999; 
+        border: 0; 
         font-size:13pt; 
         background-color: #f1f1f1; 
         color: #333; 
         cursor:ns-resize;
     }
-     div.selection li.selected {
+    #sortable li.selected {
         background-color:#FFF;
         color:#000;
     }
@@ -83,32 +88,53 @@
                 border: 1px solid #333; 
         background-color:#73bc42;
     }
-        </style>
-        <script>
-                $(function() {
-                        $( "#sortable" ).sortable();
-                        $( "#sortable" ).disableSelection();
-                        $( "#sortable li input").click( function(){
-                                console.log("click: "+this);
-                                console.log($(this));
-                                console.log($(this).prop("checked"));
-                                if( $(this).prop("checked") == true ){
-                                        $(this).addClass("selected");
-                                        $(this).parents("li").addClass("selected");     
-                                } else {
-                                        $(this).removeClass("selected");
-                                        $(this).parents("li").removeClass("selected");
-                                }                       
-                        });
-                        $("input[type=text]").focusout( function(){
-                                if( $(this).val().trim() == "" ){
-                                        $(this).addClass("isempty");
-                                } else {
-                                        $(this).removeClass("isempty");                         
-                                } 
-                        });
+    </style>
+    <script>
+       	// TODO: move minimumNumberOfSelectedComponents to config
+       	minimumNumberOfSelectedComponents = 1;
+       	
+        $(function() {
+        		// make the li elements sortable (by drag and drop)
+                $( "#sortable" ).sortable();
+                // disable text selection on draggable elements 
+                $( "#sortable" ).disableSelection();
+                // change style of selected elements
+                $( "#sortable li input").click( function(){
+                        if( $(this).prop("checked") == true ){
+                                $(this).addClass("selected");
+                                $(this).parents("li").addClass("selected");     
+                        } else {
+                                $(this).removeClass("selected");
+                                $(this).parents("li").removeClass("selected");
+                        }                       
                 });
-        </script>
+                // check the value of the question input
+                $("#question").focusout( function(){
+                	checkQuestionInput(this);
+                });
+                // check the selections within the component list
+                $("#submit").mouseover(function(){
+                	checkQuestionInput($("#question"));
+                	checkComponentList("#sortable",minimumNumberOfSelectedComponents);
+                });
+        });
+        
+        function checkQuestionInput(inputelement){
+                if( $(inputelement).val().trim() == "" ){
+                        $(inputelement).addClass("isempty");
+                } else {
+                        $(inputelement).removeClass("isempty");                         
+                } 
+        }
+        
+        function checkComponentList(blockElementContainingCheckboxes, minimumNumberOfSelectedComponents){
+			if( $(blockElementContainingCheckboxes).find("input:checked").length >= minimumNumberOfSelectedComponents){
+                $(blockElementContainingCheckboxes).removeClass("missingcomponentselection");
+			} else {
+				$(blockElementContainingCheckboxes).addClass("missingcomponentselection");
+			}	
+        }
+    </script>
 </head>
 <body>
         <header>
