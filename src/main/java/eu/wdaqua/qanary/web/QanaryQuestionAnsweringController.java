@@ -14,6 +14,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -76,8 +78,18 @@ public class QanaryQuestionAnsweringController {
 	 * @return
 	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
-	public String startquestionansweringwithtextquestion() {
+	public String startquestionansweringwithtextquestion(Model model) {
 		return "startquestionansweringwithtextquestion";
+	}
+
+	/**
+	 * expose the model with the
+	 * 
+	 * @return
+	 */
+	@ModelAttribute("componentList")
+	public List<String> componentList() {
+		return qanaryConfigurator.getComponentNames();
 	}
 
 	/**
@@ -93,9 +105,10 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
 			@RequestParam(value = "question", required = true) final String question,
-			@RequestParam(value = "componentlist") final List<String> componentsToBeCalled) throws URISyntaxException,
+			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled) throws URISyntaxException,
 					QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk, IOException {
 
+		logger.info("UI call: {}", componentsToBeCalled);
 		URI questionUri = qanaryQuestionController.storeQuestion(question);
 
 		// TODO: address of triplestore, outGraph
