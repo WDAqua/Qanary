@@ -2,21 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head> 
     <title>Qanary Helper: Start question answering with an existing question URI</title> 
- 	<div th:replace="header"></div>        
-
+ 	<meta th:replace="lib/header"/>        
 </head>
 <body>
-        <header>
-                
-        </header>
         <h1>Create new URI for a textual question</h1>
         <form action="/question" method="POST">
-                <div>
-                        Please insert a textual question: <input type="text" name="question" id="question" title="Example: What is Batman's real name?" />
-                </div>
+		        <div th:replace="lib/reusableforms::textquestioninput"/>
                 <button id="submit">add question &#xf055;</button>               
         </form>
 
- 		<div th:replace="footer"></div>        
+ 		<div th:replace="lib/footer"/>        
 </body>
 </html>
