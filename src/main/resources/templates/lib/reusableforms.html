@@ -1,0 +1,19 @@
+			<div th:fragment="textquestioninput">
+                <div>
+                        Please insert a textual question: <input type="text" name="question" id="question" title="Example: What is Batman's real name?" />
+                </div>
+			</div>
+
+			<div th:fragment="componentlistcheckboxes">
+                Activate the components to be executed and drag them in the intended execution order: 
+                <div class="selection">
+                    <div class="applicationheader">Currently available Qanary components
+                        <ul id="sortable">
+	                        <li th:each="component : ${componentList}">
+	                        	<input type="checkbox" name="componentlist[]" th:id="'componentlist'+${component}" th:value="${component}" />
+                                <label th:for="'componentlist'+${component}" th:title="'activate '+${component}+' for the QA pipeline'" th:text="${component}" />
+                        	</li>
+                        </ul>
+                	</div>
+				</div>
+			</div>

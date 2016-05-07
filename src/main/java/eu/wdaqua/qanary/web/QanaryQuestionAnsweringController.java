@@ -14,7 +14,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,19 +77,8 @@ public class QanaryQuestionAnsweringController {
 	 *
 	 * @return
 	 */
-	@RequestMapping(value = "/startquestionanswering", method = RequestMethod.GET)
-	public String startquestionanswering(Model model) {
-		return "startquestionanswering";
-	}
-
-	/**
-	 * a simple HTML input form for starting a question answering process with a
-	 * QuestionURI
-	 *
-	 * @return
-	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
-	public String startquestionansweringwithtextquestion(Model model) {
+	public String startquestionansweringwithtextquestion() {
 		return "startquestionansweringwithtextquestion";
 	}
 
