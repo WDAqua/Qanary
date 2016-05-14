@@ -169,7 +169,7 @@ public class QanaryUtils {
 					+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { " //
 					+ "  ?a a qa:AnnotationOfNamedEntity . " //
 					+ "  ?a oa:hasTarget [ " //
-					+ "                a oa:SpecificResxource; " //
+					+ "                a oa:SpecificResource; " //
 					+ "                oa:hasSource    <" + this.getQuestion() + ">; " //
 					+ "                oa:hasSelector  [ " //
 					+ "                    a oa:TextPositionSelector ; " //
