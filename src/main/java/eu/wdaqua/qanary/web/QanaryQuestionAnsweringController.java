@@ -36,6 +36,7 @@ import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
 import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
+import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -117,8 +118,8 @@ public class QanaryQuestionAnsweringController {
 		if (question.trim().isEmpty()) {
 			throw new QanaryExceptionQuestionNotProvided();
 		} else {
-			URI questionUri = qanaryQuestionController.storeQuestion(question);
-			return this.questionanswering(questionUri.toURL(), componentsToBeCalled);
+			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
+			return this.questionanswering(qanaryQuestionCreated.getQuestionURI().toURL(), componentsToBeCalled);
 		}
 	}
 
