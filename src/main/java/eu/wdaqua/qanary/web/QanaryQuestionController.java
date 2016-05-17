@@ -68,9 +68,11 @@ public class QanaryQuestionController {
 			@RequestParam(value = "question", required = true) final String questionstring) {
 
 		logger.info("add received question: " + questionstring);
-		URI uriOfQuestion;
+		// URI uriOfQuestion;
+		QanaryQuestionCreated responseMessage;
 		try {
-			uriOfQuestion = this.storeQuestion(questionstring);
+			// uriOfQuestion = this.storeQuestion(questionstring);
+			responseMessage = this.storeQuestion(questionstring);
 		} catch (IOException e) {
 			// will be caused by problems with file writing
 			e.printStackTrace();
@@ -81,13 +83,14 @@ public class QanaryQuestionController {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
-		final QanaryQuestionCreated responseMessage = new QanaryQuestionCreated(uriOfQuestion);
+		// final QanaryQuestionCreated responseMessage = new
+		// QanaryQuestionCreated(uriOfQuestion);
 
 		// send a HTTP 201 CREATED message back
 		return new ResponseEntity<QanaryQuestionCreated>(responseMessage, HttpStatus.CREATED);
 	}
 
-	public URI storeQuestion(String questionstring) throws IOException, URISyntaxException {
+	public QanaryQuestionCreated storeQuestion(String questionstring) throws IOException, URISyntaxException {
 
 		// store the received question in a file
 		final String filename = UUID.randomUUID().toString();
@@ -110,7 +113,7 @@ public class QanaryQuestionController {
 		final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
 		logger.info("uriOfQuestion: " + uriOfQuestion);
 
-		return uriOfQuestion;
+		return new QanaryQuestionCreated(filename, uriOfQuestion);
 	}
 
 	/**
@@ -197,7 +200,7 @@ public class QanaryQuestionController {
 		FileReader reader = null;
 		try {
 			reader = new FileReader(file);
-			final char[] chars = new char[(int) file.length()-1];
+			final char[] chars = new char[(int) file.length()];
 			reader.read(chars);
 			content = new String(chars);
 		} catch (final IOException e) {
@@ -213,6 +216,7 @@ public class QanaryQuestionController {
 			}
 		}
 
+		logger.info("getQuestionRawData: {}", content);
 		return content;
 	}
 
