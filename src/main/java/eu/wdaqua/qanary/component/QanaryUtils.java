@@ -150,7 +150,7 @@ public class QanaryUtils {
 
 		logger.info("question {} found in {} at {}", question, this.getInGraph(), this.getEndpoint());
 
-		return new QanaryQuestion<Object>(questionUri);
+		return new QanaryQuestion(questionUri);
 
 	}
 
@@ -177,7 +177,7 @@ public class QanaryUtils {
 					+ "                    oa:end  \"" + s.getEnd() + "\"^^xsd:nonNegativeInteger  " //
 					+ "           ] " + "  ] ; " //
 					+ "     oa:annotatedBy <" + this.getComponentUri() + "> ; " //
-					+ "	    oa:AnnotatedAt ?time  " //
+					+ "	    oa:annotatedAt ?time  " //
 					+ "}} WHERE { " //
 					+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 					+ "     BIND (now() as ?time) " //
