@@ -9,9 +9,12 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -28,8 +31,8 @@ import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
  * @author Dennis Diefenbach, AnBo
  *
  */
-
-@Component
+@SpringBootApplication
+@ComponentScan("eu.wdaqua.qanary.component")
 public class Alchemy extends QanaryComponent {
 	private String alchemyKey = "7fdef5a245edb49cfc711e80217667be512869b9";
 	private String alchemyService = "http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities";
@@ -59,7 +62,7 @@ public class Alchemy extends QanaryComponent {
 		Collection<TextPositionSelector> discoveredNamedEntities = this.parseXmlInput(xmlRawData, myQuestion);
 
 		// STEP 3: save the text selectors with their disambiguations as
-		// annotations of the current question to the tripelstore
+		// annotations of the current question to the triplestore
 		myQanaryUtils.addAnnotations(discoveredNamedEntities);
 
 		return myQanaryMessage;
@@ -125,6 +128,25 @@ public class Alchemy extends QanaryComponent {
 		}
 
 		return discoveredNamedEntities;
+	}
+
+	/**
+	 * a bean is required to enable the automatic integration
+	 * 
+	 * @return
+	 */
+	@Bean
+	public QanaryComponent qanaryComponent() {
+		return new Alchemy();
+	}
+
+	/**
+	 * main method starting the spring application
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		SpringApplication.run(Alchemy.class, args);
 	}
 
 }
