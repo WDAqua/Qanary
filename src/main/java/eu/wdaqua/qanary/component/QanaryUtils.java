@@ -22,6 +22,9 @@ import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
  * the class is a covering standard tasks users of the Qanary methodology might
  * have
  * 
+ * if you are missing helper methods than please request them via
+ * {@see <a href="https://github.com/WDAqua/Qanary/issues/new">Github</a>}
+ * 
  * @author AnBo
  *
  */
@@ -157,16 +160,42 @@ public class QanaryUtils {
 	/**
 	 * adds oa:TextPositionSelectors to triplestore
 	 * 
+	 * if scores are available, then they are also saved to the triplestore
+	 * 
+	 * if resource URIs are available, then they are also saved to the
+	 * triplestore
+	 * 
+	 * TODO: move this to a SPARQL builder
+	 * 
 	 * @param selections
 	 * @throws Exception
 	 */
 	public void addAnnotations(Collection<TextPositionSelector> selectors) throws Exception {
 		String sparql;
+		String resourceSparql;
+		String scoreSparql;
+
 		for (TextPositionSelector s : selectors) {
-			sparql = "prefix qa: <http://www.wdaqua.eu/qa#> " //
-					+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> " //
-					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " //
-					+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { " //
+
+			// score might not be available
+			if (s.getScore() != null) {
+				scoreSparql = "     oa:score \"" + s.getScore() + "\"^^xsd:double ;";
+			} else {
+				scoreSparql = "";
+			}
+
+			// resource might not be available
+			if (s.getResourceUri() != null) {
+				resourceSparql = "     oa:hasBody <" + s.getResourceUri() + "> ;";
+			} else {
+				resourceSparql = "";
+			}
+
+			sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+					+ "INSERT { " //
+					+ "GRAPH <" + this.getOutGraph() + "> { " //
 					+ "  ?a a qa:AnnotationOfNamedEntity . " //
 					+ "  ?a oa:hasTarget [ " //
 					+ "                a oa:SpecificResource; " //
@@ -175,13 +204,17 @@ public class QanaryUtils {
 					+ "                    a oa:TextPositionSelector ; " //
 					+ "                    oa:start \"" + s.getStart() + "\"^^xsd:nonNegativeInteger ; " //
 					+ "                    oa:end  \"" + s.getEnd() + "\"^^xsd:nonNegativeInteger  " //
-					+ "           ] " + "  ] ; " //
+					+ "           ] " //
+					+ "  ] ; " //
+					+ resourceSparql //
+					+ scoreSparql //
 					+ "     oa:annotatedBy <" + this.getComponentUri() + "> ; " //
 					+ "	    oa:annotatedAt ?time  " //
 					+ "}} WHERE { " //
 					+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 					+ "     BIND (now() as ?time) " //
 					+ "}";
+
 			this.updateTripleStore(sparql);
 		}
 	}
