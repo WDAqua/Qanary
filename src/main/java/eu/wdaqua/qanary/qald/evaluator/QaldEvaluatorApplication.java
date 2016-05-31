@@ -51,28 +51,12 @@ public class QaldEvaluatorApplication {
 		Double globalPrecision = 0.0;
 		Double globalRecall = 0.0;
 		Double globalFMeasure = 0.0;
-		//int countPrecision = 0; // stores for how many questions the precision
-								// can be computed, i.e. do not divide by zero
-		//int countRecall = 0; // analogusly to countPrecision
-		//int countFMeasure = 0; // analogusly to countRecall
 		int count = 0;
 
 		ArrayList<Integer> fullRecall = new ArrayList<Integer>();
 		ArrayList<Integer> fullFMeasure = new ArrayList<Integer>();
 		
-		// SpringApplication.run(QaldEvaluatorApplication.class, args);
-
-		TurtleResultWriter writer = new TurtleResultWriter("/tmp/results.ttl");
 		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
-		//String components="alchemy";
-		//String components="StanfordNER ,agdistis";
-		//String components="StanfordNER ,DBpediaSpotlightNED";
-		//String components="FOX ,agdistis";
-		//String components="FOX ,DBpediaSpotlightNED";
-		//String components = "luceneLinker";
-		//String components="DBpediaSpotlightSpotter ,agdistis";
-		//String components = "DBpediaSpotlightSpotter,DBpediaSpotlightNED";
-		// String components = "DBpediaSpotlightSpotter";
 
 		FileReader filereader = new FileReader();
 
@@ -84,12 +68,7 @@ public class QaldEvaluatorApplication {
 		for (int i = 0; i < questions.size(); i++) {
 			List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
 			logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
-			writer.writeQaldQuestionInformation(questions.get(i));
-
-			// question="Which volcanos in Japan erupted since 2000?";
-			// question="In which country does the Ganges start?";
-			// question="What is the official website of Tom Cruise?";
-			// question="How many goals did Pelé score?";
+			
 			// questions.get(0).setQuestion("How many goals did Pelé score?");
 
 			// Send the question
@@ -99,9 +78,6 @@ public class QaldEvaluatorApplication {
 			MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
 			bodyMap.add("question", questions.get(i).getQuestion());
 			bodyMap.add("componentlist[]", components);
-			System.out.println(components);
-			System.out.println(questions.get(i).getQuestion());
-			// bodyMap.add("submit", "start QA process");
 			String response = restTemplate.postForObject(service.build().encode().toUri(), bodyMap, String.class);
 			logger.info("Response pipline: {}", response);
 
@@ -126,15 +102,13 @@ public class QaldEvaluatorApplication {
 				if (s.getResource("uri") != null && !s.getResource("uri").toString().endsWith("null")) {
 					logger.info("System answers: {} ", s.getResource("uri").toString());
 					systemAnswers.add(s.getResource("uri").toString());
-					writer.writeEntityInQuestion(questions.get(i).getQaldId(), s.getResource("uri").getURI(),
-							"recognized");
 				}
 			}
 
 			// Retrieve the expected resources from the SPARQL query
 			//List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
 			for (String expected : expectedAnswers) {
-				writer.writeEntityInQuestion(questions.get(i).getQaldId(), expected, "required");
+				logger.info("Expected answers: {} ", expected);
 			}
 
 			// Compute precision and recall
@@ -150,31 +124,10 @@ public class QaldEvaluatorApplication {
 			} else {
 				fullRecall.add(0);
 			}
-			/*
-			if (m.fMeasure==1){
-				fullFMeasure.add(1);
-				sparql = "CONSTRUCT {?s ?p ?o} "
-						+"WHERE { GRAPH "
-						+" <"+namedGraph+"> "
-						+"{?s ?p ?o} "
-						+"} ";
-				Query query = QueryFactory.create(sparql);
-				QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-				Model results = qExe.execConstruct();
-				//File file = new File( "/tmp/ISWC/"+components+"/"+questions.get(i).getQaldId()+".ttl");
-				//file.getParentFile().mkdirs();
-				//FileWriter out = new FileWriter( file );
-				//results.write(out, "TURTLE");
-				
-			} else {
-				fullFMeasure.add(0);
-			}*/			
 		}
 		logger.info("Global Precision={}", (double) globalPrecision / count);
 		logger.info("Global Recall={}", (double) globalRecall / count);
 		logger.info("Global F-measure={}", (double) globalFMeasure / count);
-
-		writer.close();
 	}
 
 	class Metrics{
