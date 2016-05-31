@@ -91,14 +91,16 @@ public class QaldEvaluatorApplication {
 			// question="What is the official website of Tom Cruise?";
 			// question="How many goals did Pelé score?";
 			// questions.get(0).setQuestion("How many goals did Pelé score?");
-/*
+
 			// Send the question
 			RestTemplate restTemplate = new RestTemplate();
 			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
 
 			MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
 			bodyMap.add("question", questions.get(i).getQuestion());
-			bodyMap.add("componentlist", components);
+			bodyMap.add("componentlist[]", components);
+			System.out.println(components);
+			System.out.println(questions.get(i).getQuestion());
 			// bodyMap.add("submit", "start QA process");
 			String response = restTemplate.postForObject(service.build().encode().toUri(), bodyMap, String.class);
 			logger.info("Response pipline: {}", response);
@@ -130,7 +132,7 @@ public class QaldEvaluatorApplication {
 			}
 
 			// Retrieve the expected resources from the SPARQL query
-			List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
+			//List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
 			for (String expected : expectedAnswers) {
 				writer.writeEntityInQuestion(questions.get(i).getQaldId(), expected, "required");
 			}
@@ -148,10 +150,9 @@ public class QaldEvaluatorApplication {
 			} else {
 				fullRecall.add(0);
 			}
-			
+			/*
 			if (m.fMeasure==1){
 				fullFMeasure.add(1);
-				/*
 				sparql = "CONSTRUCT {?s ?p ?o} "
 						+"WHERE { GRAPH "
 						+" <"+namedGraph+"> "
@@ -160,15 +161,14 @@ public class QaldEvaluatorApplication {
 				Query query = QueryFactory.create(sparql);
 				QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 				Model results = qExe.execConstruct();
-				File file = new File( "/tmp/ISWC/"+components+"/"+questions.get(i).getQaldId()+".ttl");
-				file.getParentFile().mkdirs();
-				FileWriter out = new FileWriter( file );
-				results.write(out, "TURTLE");
+				//File file = new File( "/tmp/ISWC/"+components+"/"+questions.get(i).getQaldId()+".ttl");
+				//file.getParentFile().mkdirs();
+				//FileWriter out = new FileWriter( file );
+				//results.write(out, "TURTLE");
 				
 			} else {
 				fullFMeasure.add(0);
-			}
-*/			
+			}*/			
 		}
 		logger.info("Global Precision={}", (double) globalPrecision / count);
 		logger.info("Global Recall={}", (double) globalRecall / count);
@@ -243,11 +243,11 @@ public class QaldEvaluatorApplication {
 		//nerComponents.add("FOX");
 
 		// TODO: move to config
-		nedComponents.add("agdistis");
-		nedComponents.add("DBpediaSpotlightNED");
+		//nedComponents.add("agdistis");
+		//nedComponents.add("DBpediaSpotlightNED");
 
 		// monolithic configurations (NER+NED)
-		componentConfigurations.add("alchemy");
+		componentConfigurations.add("Alchemy-NERD");
 		//componentConfigurations.add("luceneLinker");
 
 		// create all configurations
