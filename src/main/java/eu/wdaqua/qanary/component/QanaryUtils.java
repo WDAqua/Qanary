@@ -196,7 +196,7 @@ public class QanaryUtils {
 					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 					+ "INSERT { " //
 					+ "GRAPH <" + this.getOutGraph() + "> { " //
-					+ "  ?a a qa:AnnotationOfNamedEntity . " //
+					+ "  ?a a qa:AnnotationOfInstance . " //
 					+ "  ?a oa:hasTarget [ " //
 					+ "                a oa:SpecificResource; " //
 					+ "                oa:hasSource    <" + this.getQuestion() + ">; " //
