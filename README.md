@@ -4,7 +4,7 @@
 (To see how to run the code, scroll down till the last)
 ## Qanary in a Nutshell
 
-Qanary is a Methodology for Creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.informatik.uni-bonn.de) where question answering systems are researched and developed. Here, we are providing our key contributions on-top of the [RDF vocabulary qa](/WDAqua/QAOntology) the reference implementation of the Qanary methodology. In detail the following sub-projects are available all aiming at establishing an ecosystem for question answering systems.
+Qanary is a Methodology for Creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.informatik.uni-bonn.de) where question answering systems are researched and developed. Here, we are providing our key contributions on-top of the [RDF vocabulary qa](/WDAqua/QAOntology) the reference implementation of the Qanary methodology. This repository contributes several sub-resources for Question Answring Community to build knowledge driven QA systems incorporating a standard [RDF vocabulary qa](/WDAqua/QAOntology). All the resources are reusable. In detail the following sub-projects are available all aiming at establishing an ecosystem for question answering systems.
 
  * [**Qanary Pipeline**](#qanarypipeline) implementation: a central component where components for question answering systems are connected automatically and can be called by Web UIs
  * Qanary component implementations: components providing wrappers to existing functionality or implement new question answering approaches 
