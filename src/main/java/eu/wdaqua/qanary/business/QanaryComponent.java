@@ -9,7 +9,7 @@ public class QanaryComponent  {
     private final Application application;
     private boolean used;
 
-    public QanaryComponent(Application application){
+    private QanaryComponent(Application application){
         this.application = application;
     }
 

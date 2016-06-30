@@ -8,9 +8,9 @@ import com.hp.hpl.jena.rdf.model.Model;
  *         at 08.04.16.
  */
 public interface SparqlConnector {
-    public ResultSet select(String query);
+    ResultSet select(String query);
 
-    public Model construct(String query);
+    Model construct(String query);
 
-    public void update(String query);
+    void update(String query);
 }

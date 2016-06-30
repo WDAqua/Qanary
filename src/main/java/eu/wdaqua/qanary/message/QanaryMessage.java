@@ -26,13 +26,13 @@ public class QanaryMessage {
 
 	// the property URI (key) for accessing the endpoint, TODO: move to
 	// QanaryConfiguration
-	public static final String endpointKey = "http://qanary/#endpoint";
+	private static final String endpointKey = "http://qanary/#endpoint";
 	// the property URI (key) for accessing the input data at the endpoint TODO:
 	// move to QanaryConfiguration
-	public static final String inGraphKey = "http://qanary/#inGraph";
+	private static final String inGraphKey = "http://qanary/#inGraph";
 	// the property URI (key) for inserting the output into the endpoint TODO:
 	// move to QanaryConfiguration
-	public static final String outGraphKey = "http://qanary/#outGraph";
+	private static final String outGraphKey = "http://qanary/#outGraph";
 
 	private Map<URI, URI> values;
 
@@ -72,7 +72,7 @@ public class QanaryMessage {
 	 * @param outGraph
 	 * @throws URISyntaxException
 	 */
-	public void setValues(URI endpoint, URI inGraph, URI outGraph) throws URISyntaxException {
+	private void setValues(URI endpoint, URI inGraph, URI outGraph) throws URISyntaxException {
 		this.values = new HashMap<>();
 
 		URI keyEndpoint = new URI(endpointKey);

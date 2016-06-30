@@ -15,16 +15,16 @@ import eu.wdaqua.qanary.business.QanaryComponent;
  */
 public class QanaryQuestionAnsweringFinished {
 	// holds the ID of the QA process
-	UUID questionanswering;
+	private UUID questionanswering;
 
 	// start at point in time in milliseconds
-	long start;
+	private long start;
 
 	// start at point in time in milliseconds
-	long end;
+	private long end;
 
 	// trivial protocol
-	List<String> protocol;
+	private List<String> protocol;
 
 	public void startQuestionAnswering() {
 		this.start = System.currentTimeMillis();
