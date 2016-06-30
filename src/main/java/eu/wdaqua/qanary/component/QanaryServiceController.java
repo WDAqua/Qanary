@@ -21,7 +21,7 @@ public class QanaryServiceController {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryServiceController.class);
 
-	QanaryComponent qanaryComponent;
+	private QanaryComponent qanaryComponent;
 
 	@Inject
 	public QanaryServiceController(QanaryComponent qanaryComponent) {

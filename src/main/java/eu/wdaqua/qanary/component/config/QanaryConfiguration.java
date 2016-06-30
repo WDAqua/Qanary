@@ -14,7 +14,7 @@ public class QanaryConfiguration {
 	public static final String questionRawDataUrlSuffix = "/rawdata";
 	public static final String questionRawDataProperyName = "rawdata";
 
-	public static URI serviceUri;
+	private static URI serviceUri;
 
 	/**
 	 * set the URI of the endpoint
