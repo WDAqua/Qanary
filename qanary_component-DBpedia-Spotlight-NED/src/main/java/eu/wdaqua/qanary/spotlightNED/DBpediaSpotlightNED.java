@@ -46,7 +46,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 	 * default processor of a QanaryMessage
 	 */
 
-	public String runCurl1(String question) {
+	private String runCurl1(String question) {
 
 		String xmlResp = "";
 		try {
@@ -87,7 +87,7 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 
 	}
 
-	public String getXmlFromQuestion(String question, ArrayList<Link> offsets) {
+	private String getXmlFromQuestion(String question, ArrayList<Link> offsets) {
 		String xmlFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><annotation text=\"" + question + "\">";
 
 		for (Link sel : offsets) {
@@ -231,19 +231,19 @@ public class DBpediaSpotlightNED extends QanaryComponent {
 		return QanaryMessage;
 	}
 
-	public void loadTripleStore(String sparqlQuery, String endpoint) {
+	private void loadTripleStore(String sparqlQuery, String endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 		proc.execute();
 	}
 
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();
 	}
 
-	class Spot {
+	private class Spot {
 		public int begin;
 		public int end;
 	}

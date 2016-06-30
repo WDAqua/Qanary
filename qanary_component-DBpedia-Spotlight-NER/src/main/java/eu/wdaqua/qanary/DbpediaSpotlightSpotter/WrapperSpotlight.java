@@ -47,7 +47,7 @@ public class WrapperSpotlight extends QanaryComponent {
 	 * default processor of a QanaryMessage
 	 */
 
-	public List<String> usingXml(String urladd) {
+	private List<String> usingXml(String urladd) {
 		String urladdress = "";
 		List<String> retLst = new ArrayList<String>();
 		try {
@@ -86,7 +86,7 @@ public class WrapperSpotlight extends QanaryComponent {
 		return retLst;
 	}
 
-	public List<String> getResults(String input) {
+	private List<String> getResults(String input) {
 		/*
 		 * This can be an alternative for passing text using API String
 		 * SpotterService = "http://spotlight.sztaki.hu:2222/rest/spot";
@@ -108,7 +108,7 @@ public class WrapperSpotlight extends QanaryComponent {
 		try {
 			logger.info("Input is: {}", input);
 			madeUrlFromInput += URLEncoder.encode(input, "UTF-8");
-			;// +"&executeSparqlQuery=on&relationExtractorType=Semantic";
+			// +"&executeSparqlQuery=on&relationExtractorType=Semantic";
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.warn(e.getMessage());
@@ -214,13 +214,13 @@ public class WrapperSpotlight extends QanaryComponent {
 		return myQanaryMessage;
 	}
 
-	public void loadTripleStore(String sparqlQuery, String endpoint) {
+	private void loadTripleStore(String sparqlQuery, String endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 		proc.execute();
 	}
 
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();

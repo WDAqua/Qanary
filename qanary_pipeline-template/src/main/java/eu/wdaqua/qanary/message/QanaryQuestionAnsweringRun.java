@@ -15,13 +15,13 @@ import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
  */
 public class QanaryQuestionAnsweringRun {
 
-	final URI questionAnsweringRunUri;
+	private final URI questionAnsweringRunUri;
 
-	final URI endpoint;
+	private final URI endpoint;
 
-	final URI graph;
+	private final URI graph;
 
-	final URI question;
+	private final URI question;
 
 	public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI graph,
 			QanaryConfigurator configurator) throws URISyntaxException {
@@ -36,7 +36,7 @@ public class QanaryQuestionAnsweringRun {
 		return this.getQuestionAnsweringRunUri().toASCIIString();
 	}
 
-	public URI getQuestionAnsweringRunUri() {
+	private URI getQuestionAnsweringRunUri() {
 		return this.questionAnsweringRunUri;
 	}
 

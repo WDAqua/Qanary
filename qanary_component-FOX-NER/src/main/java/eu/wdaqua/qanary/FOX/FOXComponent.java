@@ -146,19 +146,19 @@ public class FOXComponent extends QanaryComponent {
 		return myQanaryMessage;
 	}
 
-	public void loadTripleStore(String sparqlQuery, String endpoint) {
+	private void loadTripleStore(String sparqlQuery, String endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 		proc.execute();
 	}
 
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();
 	}
 
-	class Selection {
+	private class Selection {
 		public int begin;
 		public int end;
 	}

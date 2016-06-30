@@ -25,7 +25,7 @@ public class TextPositionSelectorTest {
 		createAndTestForCorrectValues(100, 200);
 	}
 
-	public void createAndTestForCorrectValues(int start, int end) {
+	private void createAndTestForCorrectValues(int start, int end) {
 		TextPositionSelector selector = new TextPositionSelector(start, end);
 		assertTrue(selector.getStart() == start);
 		assertTrue(selector.getEnd() == end);
@@ -45,7 +45,7 @@ public class TextPositionSelectorTest {
 		createAndTestForIncorrectValues(-1, -1);
 	}
 
-	public void createAndTestForIncorrectValues(int start, int end) {
+	private void createAndTestForIncorrectValues(int start, int end) {
 		try {
 			TextPositionSelector selector = new TextPositionSelector(start, end);
 			fail("selector cannot cover a negative text range");

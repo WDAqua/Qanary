@@ -46,7 +46,7 @@ public class QaldEvaluatorApplication {
 
 	String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 
-	public void process(String components, int maxQuestionsToBeProcessed)
+	private void process(String components, int maxQuestionsToBeProcessed)
 			throws UnsupportedEncodingException, IOException {
 		Double globalPrecision = 0.0;
 		Double globalRecall = 0.0;
@@ -125,9 +125,9 @@ public class QaldEvaluatorApplication {
 				fullRecall.add(0);
 			}
 		}
-		logger.info("Global Precision={}", (double) globalPrecision / count);
-		logger.info("Global Recall={}", (double) globalRecall / count);
-		logger.info("Global F-measure={}", (double) globalFMeasure / count);
+		logger.info("Global Precision={}", globalPrecision / count);
+		logger.info("Global Recall={}", globalRecall / count);
+		logger.info("Global F-measure={}", globalFMeasure / count);
 	}
 
 	class Metrics{
@@ -172,7 +172,7 @@ public class QaldEvaluatorApplication {
         }
 	}
 	
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();

@@ -76,7 +76,7 @@ public abstract class QanaryComponent {
 	 * @param qanaryMessage
 	 * @return
 	 */
-	public QanaryUtils getUtils(QanaryMessage qanaryMessage) {
+	protected QanaryUtils getUtils(QanaryMessage qanaryMessage) {
 		return new QanaryUtils(qanaryMessage);
 	}
 

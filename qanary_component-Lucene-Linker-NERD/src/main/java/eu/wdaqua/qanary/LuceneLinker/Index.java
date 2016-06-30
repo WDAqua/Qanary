@@ -43,20 +43,20 @@ import org.slf4j.LoggerFactory;
 
 public class Index {
 	private static final Logger logger = LoggerFactory.getLogger(LuceneLinker.class);
-	public static Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
+	private static final Analyzer analyzer = new EnglishAnalyzer(CharArraySet.EMPTY_SET);
 	private static Directory index;
 	private static String dump;
 	public Index(String d) throws IOException{		
 		//dump=d;
 		dump="/tmp/dump.nt";
 		index = FSDirectory.open(Paths.get("/tmp/lucene"));
-		if (DirectoryReader.indexExists(index)==false){
+		if (!DirectoryReader.indexExists(index)){
 			index();
 		}
 	}
     
  
-	public static void index() throws IOException{
+	private static void index() throws IOException{
 		//The index uses the same analyser as the query parser
 		IndexWriterConfig config = new IndexWriterConfig(analyzer).setSimilarity(new CustomSimilarity());        
 	
@@ -67,7 +67,7 @@ public class Index {
 		while (iter.hasNext()) {
 				Triple next = iter.next();
 				if (next.getPredicate().toString().equals("http://www.w3.org/2000/01/rdf-schema#label") || next.getPredicate().toString().equals("http://dbpedia.org/ontology/demonym")){
-						if ( next.getObject().getLiteralLanguage().toString().equals("en")){
+						if ( next.getObject().getLiteralLanguage().equals("en")){
 							addDoc(w_instances, next.getSubject().toString(), next.getObject().getLiteralValue().toString());
 						}
 				}
@@ -102,12 +102,12 @@ public class Index {
         
         //Search more if perfect match
         //if (hits.length>0 && hits[0].score==hits[hits.length-1].score){
-        if (hits.length>0 && compareStemmed(querystr,searcher.doc(hits[hits.length-1].doc).get("lexicalization"))==true){
+        if (hits.length>0 && compareStemmed(querystr, searcher.doc(hits[hits.length - 1].doc).get("lexicalization"))){
         	docs_instances = searcher.search(q, 20);
             hits = docs_instances.scoreDocs;
         }
 		
-        if (hits.length>0 && compareStemmed(querystr,searcher.doc(hits[hits.length-1].doc).get("lexicalization"))==true){
+        if (hits.length>0 && compareStemmed(querystr, searcher.doc(hits[hits.length - 1].doc).get("lexicalization"))){
         	docs_instances = searcher.search(q, 60);
             hits = docs_instances.scoreDocs;
         }
@@ -120,7 +120,7 @@ public class Index {
             //System.out.println("Search " + querystr + " found " + d.get("resource") + "  Score: " + hits[i].score);
 			
             //Look if the retrieved result matches exactly the searched
-			if (compareStemmed(querystr,d.get("lexicalization"))==true){
+			if (compareStemmed(querystr, d.get("lexicalization"))){
 				result.add(d.get("resource"));
 			} else {
 				result.add("http://dbpedia.org/");
@@ -131,7 +131,7 @@ public class Index {
 	}
 
 	//Methods to parse rdf dunmps. It takes as input the location of the dump and returns an iterator over it
-	public static PipedRDFIterator<Triple> parse(String dump){
+	private static PipedRDFIterator<Triple> parse(String dump){
                 PipedRDFIterator<Triple> iter = new PipedRDFIterator<Triple>();
                 final String d=dump;
                 final PipedRDFStream<Triple> inputStream = new PipedTriplesStream(iter);
@@ -151,7 +151,7 @@ public class Index {
 		return iter;
 	}
 	
-	public static boolean compareStemmed (String s1, String s2) throws IOException{
+	private static boolean compareStemmed(String s1, String s2) throws IOException{
 		ArrayList<String> token1=new ArrayList<String>();
 		TokenStream tokenStream1 = analyzer.tokenStream(null, new StringReader(s1));
 		tokenStream1.reset();
@@ -169,11 +169,7 @@ public class Index {
         }
         tokenStream2.close();
         tokenStream2.end();
-        if (token1.equals(token2)){
-			return true;
-		} else {
-			return false;
-		}	
+		return token1.equals(token2);
 	}
 	
 }

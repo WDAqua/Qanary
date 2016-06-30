@@ -43,7 +43,7 @@ public class QaldQuestion {
 	 */
 	public enum NodePosition {
 		SUBJECT, PREDICATE, OBJECT
-	};
+	}
 
 	public QaldQuestion(JsonObject qaldQuestion) {
 
@@ -166,7 +166,7 @@ public class QaldQuestion {
 		this.sparqlQuery = sparqlQuery;
 	}
 
-	public String getSparqlQuery() {
+	private String getSparqlQuery() {
 		return this.sparqlQuery;
 	}
 
@@ -178,7 +178,7 @@ public class QaldQuestion {
 	 * @param lang
 	 * @param question
 	 */
-	public void setQuestion(String question) {
+	private void setQuestion(String question) {
 		this.question = question;
 	}
 
@@ -196,7 +196,7 @@ public class QaldQuestion {
 	 * 
 	 * @return
 	 */
-	public List<QaldQuestionUri> getResourceUris() {
+	private List<QaldQuestionUri> getResourceUris() {
 		List<QaldQuestionUri> resourceUris = new LinkedList<>();
 		QaldQuestionUri qaldQuestionUri;
 

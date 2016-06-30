@@ -93,7 +93,7 @@ public class StanfordNERComponent extends QanaryComponent {
 		// Iterate over the tags
 		for (CoreLabel token : document.get(TokensAnnotation.class)) {
 			logger.info("Tagged question (token ---- tag): {}", token.toString() + "  ----  " +token.get(NamedEntityTagAnnotation.class));
-			if (token.get(NamedEntityTagAnnotation.class).equals("O") == false) {
+			if (!token.get(NamedEntityTagAnnotation.class).equals("O")) {
 				if (startToken == null) {
 					startToken = token;
 					endToken = token;

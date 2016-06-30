@@ -61,7 +61,7 @@ public class QanaryConfigurator {
 	 * @throws QanaryExceptionServiceCallNotOk
 	 * @throws URISyntaxException
 	 */
-	public QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message)
+	private QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message)
 			throws QanaryExceptionServiceCallNotOk {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
@@ -72,7 +72,7 @@ public class QanaryConfigurator {
 
 			URI myURI;
 			try {
-				myURI = new URI(component.getUrl().toString() + "/annotatequestion");
+				myURI = new URI(component.getUrl() + "/annotatequestion");
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 				return result;
@@ -107,7 +107,7 @@ public class QanaryConfigurator {
 	 * @return
 	 * @throws QanaryComponentNotAvailableException
 	 */
-	public List<QanaryComponent> getComponentsByName(List<String> myComponentNames)
+	private List<QanaryComponent> getComponentsByName(List<String> myComponentNames)
 			throws QanaryComponentNotAvailableException {
 		// check if the list contains valid IDs of components if not all are
 		// available throw an exception
@@ -177,7 +177,7 @@ public class QanaryConfigurator {
 	 * @param componentName
 	 * @return
 	 */
-	public QanaryComponent getComponent(String componentName) {
+	private QanaryComponent getComponent(String componentName) {
 		for (QanaryComponent qanaryComponent : this.components) {
 			if (qanaryComponent.getName().compareTo(componentName) == 0) {
 				logger.info("found component: " + componentName);

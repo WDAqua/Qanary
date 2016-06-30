@@ -59,7 +59,7 @@ import eu.wdaqua.qanary.component.QanaryMessage;
 
 @Component
 public class Agdistis extends QanaryComponent {
-	private String agdistisService="http://139.18.2.164:8080/AGDISTIS";
+	private final String agdistisService="http://139.18.2.164:8080/AGDISTIS";
 	private static final Logger logger = LoggerFactory.getLogger(Agdistis.class);
 	
 	public QanaryMessage process(QanaryMessage QanaryMessage) {
@@ -141,7 +141,7 @@ public class Agdistis extends QanaryComponent {
 			ArrayList<Link> links=new ArrayList<Link>();
 			JSONArray arr = new JSONArray(response);
 			for (int i = 0; i < arr.length(); i++){
-				if (arr.getJSONObject(i).isNull("disambiguatedURL")==false){
+				if (!arr.getJSONObject(i).isNull("disambiguatedURL")){
 					Link l=new Link();
 					l.link = arr.getJSONObject(i).getString("disambiguatedURL");
 					l.begin = arr.getJSONObject(i).getInt("start")-1;
@@ -187,13 +187,13 @@ public class Agdistis extends QanaryComponent {
 		return QanaryMessage;
 	}
 	
-	public void loadTripleStore(String sparqlQuery, String endpoint){
+	private void loadTripleStore(String sparqlQuery, String endpoint){
 		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 	    proc.execute() ;
 	}
 	
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint){
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint){
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		return qExe.execSelect();

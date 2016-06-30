@@ -134,7 +134,7 @@ public class TestQanaryServiceController {
 
 		for (Entry<URI, URI> entry : requestMessage.getValues().entrySet()) {
 			URI key = entry.getKey();
-			int compareResult = entry.getValue().toString().compareTo(resultMessage.getValues().get(key).toString());;
+			int compareResult = entry.getValue().toString().compareTo(resultMessage.getValues().get(key).toString());
 			assertTrue("check result vs. request: " + key, compareResult == 0);
 		}
 

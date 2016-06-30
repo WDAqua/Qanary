@@ -46,7 +46,7 @@ public class QanaryQuestionController {
 	private final QanaryConfigurator qanaryConfigurator;
 
 	// TODO: define directory in config
-	String directoryForStoringQuestionRawData = "/tmp/questions";
+	private final String directoryForStoringQuestionRawData = "/tmp/questions";
 
 	/**
 	 * inject QanaryConfigurator

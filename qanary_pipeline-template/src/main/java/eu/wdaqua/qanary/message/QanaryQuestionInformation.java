@@ -12,8 +12,8 @@ import java.net.URL;
  */
 public class QanaryQuestionInformation {
 
-	public final URL rawdata;
-	public String questionID;
+	private final URL rawdata;
+	private String questionID;
 
 	/**
 	 * 

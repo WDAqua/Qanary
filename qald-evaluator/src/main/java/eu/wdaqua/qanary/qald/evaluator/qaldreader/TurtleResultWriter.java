@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class TurtleResultWriter {
 	private static final Logger logger = LoggerFactory.getLogger(TurtleResultWriter.class);
 
-	BufferedWriter writer;
+	private BufferedWriter writer;
 
 	public TurtleResultWriter(String filename) {
 

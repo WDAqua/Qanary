@@ -268,7 +268,7 @@ public class QanaryQuestionAnsweringController {
 	 * @param query
 	 * @return map
 	 */
-	public static void loadTripleStore(final String sparqlQuery, final URI endpoint) {
+	private static void loadTripleStore(final String sparqlQuery, final URI endpoint) {
 		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		final UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint.toString());
 		proc.execute();

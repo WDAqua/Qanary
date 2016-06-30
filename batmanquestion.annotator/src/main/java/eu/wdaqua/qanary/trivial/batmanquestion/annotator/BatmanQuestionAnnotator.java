@@ -24,7 +24,7 @@ import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
 @Component
 public class BatmanQuestionAnnotator extends QanaryComponent {
 	private static final Logger logger = LoggerFactory.getLogger(BatmanQuestionAnnotator.class);
-	final String questionToBeAccepted = "Who created Batman?";
+	private final String questionToBeAccepted = "Who created Batman?";
 
 	/**
 	 * implement this method encapsulating the functionality of your Qanary

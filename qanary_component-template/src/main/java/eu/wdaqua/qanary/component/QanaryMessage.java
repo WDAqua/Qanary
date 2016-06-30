@@ -125,7 +125,7 @@ public class QanaryMessage {
 		this.setValues(endpointValue, inGraphValue, outGraphValue);
 	}
 
-	public QanaryMessage(URI endpoint, String namedGraph) throws URISyntaxException {
+	private QanaryMessage(URI endpoint, String namedGraph) throws URISyntaxException {
 		this.setValues(endpoint, new URI(namedGraph), new URI(namedGraph));
 	}
 

@@ -108,7 +108,7 @@ public class LuceneLinker extends QanaryComponent {
 				String search=tokens.get(i).getAttribute(CharTermAttribute.class).toString();
 				int k=1;
 				List<String> candidates = new ArrayList<String>();
-				while (found==true){
+				while (found){
 					logger.info("Search string {} ", search);
 					List<String> tmp=index.query("\""+search+"\"");
 					
@@ -116,7 +116,7 @@ public class LuceneLinker extends QanaryComponent {
 					if (tmp.size()==0){
 						found=false;
 						for (String uri:candidates){
-							if (uri.equals("http://dbpedia.org/")==false){
+							if (!uri.equals("http://dbpedia.org/")){
 								int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 								int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
 								logger.info("Added uri {} ",uri);
@@ -126,14 +126,14 @@ public class LuceneLinker extends QanaryComponent {
 					} else{
 						if (candidates.size()>0){
 							for (String uri:candidates){
-								if (uri.equals("http://dbpedia.org/")==false){
+								if (!uri.equals("http://dbpedia.org/")){
 									int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 									int end=tokens.get(i+k-2).getAttribute(OffsetAttribute.class).endOffset();
 									logger.info("Added uri {} ",uri);
 									annotations.add(new Annotation(begin,end,uri));
 								}
 							}
-						}                    
+						}
 						//candidates=new ArrayList<String>(Arrays.asList(tmp));
 						candidates=tmp;
 						if (i+k<tokens.size()){
@@ -142,7 +142,7 @@ public class LuceneLinker extends QanaryComponent {
 						} else{
 							found = false;
                            	for (String uri:candidates){
-                           		if (uri.equals("http://dbpedia.org/")==false){
+                           		if (!uri.equals("http://dbpedia.org/")){
 	                           		int begin=tokens.get(i).getAttribute(OffsetAttribute.class).startOffset();
 	        						int end=tokens.get(i+k-1).getAttribute(OffsetAttribute.class).endOffset();
 	        						logger.info("Added uri {} ",uri);
@@ -221,13 +221,13 @@ public class LuceneLinker extends QanaryComponent {
 		return myQanaryMessage;
 	}
 
-	public void loadTripleStore(String sparqlQuery, String endpoint) {
+	private void loadTripleStore(String sparqlQuery, String endpoint) {
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 		proc.execute();
 	}
 
-	public ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
 		return qExe.execSelect();

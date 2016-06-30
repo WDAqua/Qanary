@@ -34,8 +34,8 @@ import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
 @SpringBootApplication
 @ComponentScan("eu.wdaqua.qanary.component")
 public class Alchemy extends QanaryComponent {
-	private String alchemyKey = "7fdef5a245edb49cfc711e80217667be512869b9";
-	private String alchemyService = "http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities";
+	private final String alchemyKey = "7fdef5a245edb49cfc711e80217667be512869b9";
+	private final String alchemyService = "http://access.alchemyapi.com/calls/text/TextGetRankedNamedEntities";
 	private static final Logger logger = LoggerFactory.getLogger(Alchemy.class);
 
 	/**
