@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 public class URIDetector {
 	private static final Logger logger = LoggerFactory.getLogger(URIDetector.class);
 
-	final Set<Node> subjects = new HashSet<Node>();
-	final Set<Node> predicates = new HashSet<Node>();
-	final Set<Node> objects = new HashSet<Node>();
+	private final Set<Node> subjects = new HashSet<Node>();
+	private final Set<Node> predicates = new HashSet<Node>();
+	private final Set<Node> objects = new HashSet<Node>();
 
 	public URIDetector(String sparqlQuery) {
 		processQuery(sparqlQuery);
