@@ -1,4 +1,7 @@
-package eu.wdaqua.qanary.examplecomponent;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package};
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,12 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.wdaqua.qanary.component.QanaryComponent;
-import eu.wdaqua.qanary.component.QanaryMessage;
+import ${groupId}.QanaryComponent;
+import ${groupId}.QanaryMessage;
 
 @Component
-public class ExampleQanaryComponent extends QanaryComponent {
-	private static final Logger logger = LoggerFactory.getLogger(ExampleQanaryComponent.class);
+public class ${classname} extends QanaryComponent {
+	private static final Logger logger = LoggerFactory.getLogger(${classname}.class);
 
 	/**
 	 * implement this method encapsulating the functionality of your Qanary

@@ -1,3 +1,6 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 package TestQanaryServiceController;
 
 import static org.junit.Assert.assertTrue;
@@ -29,10 +32,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import eu.wdaqua.qanary.component.QanaryMessage;
-import eu.wdaqua.qanary.component.QanaryService;
-import eu.wdaqua.qanary.component.QanaryServiceController;
-import eu.wdaqua.qanary.component.config.QanaryConfiguration;
+import ${groupId}.QanaryMessage;
+import ${groupId}.QanaryService;
+import ${groupId}.QanaryServiceController;
+import ${groupId}.config.QanaryConfiguration;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)

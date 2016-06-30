@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.wdaqua.qanary.component</groupId>
+  <artifactId>qa.qanarycomponent-archetype</artifactId>
+  <version>0.1.0</version>
+  <packaging>maven-archetype</packaging>
+
+  <name>qa.exampleqanarycomponent-archetype</name>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.archetype</groupId>
+        <artifactId>archetype-packaging</artifactId>
+        <version>2.4</version>
+      </extension>
+    </extensions>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-archetype-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <description>Spring Boot Starter Parent</description>
+
+  <url>http://projects.spring.io/spring-boot/qa.exampleqanarycomponent/</url>
+
+  <developers>
+    <developer>
+      <id>pwebb</id>
+      <name>Phillip Webb</name>
+      <email>pwebb at pivotal.io</email>
+      <organization>Pivotal Software, Inc.</organization>
+      <organizationUrl>http://www.spring.io</organizationUrl>
+      <roles>
+        <role>Project lead</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dsyer</id>
+      <name>Dave Syer</name>
+      <email>dsyer at pivotal.io</email>
+      <organization>Pivotal Software, Inc.</organization>
+      <organizationUrl>http://www.spring.io</organizationUrl>
+      <roles>
+        <role>Project lead</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/spring-projects/spring-boot/spring-boot-starter-parent/qa.exampleqanarycomponent</url>
+  </scm>
+</project>

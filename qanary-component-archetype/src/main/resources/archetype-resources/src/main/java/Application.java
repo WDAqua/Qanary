@@ -1,11 +1,14 @@
-package eu.wdaqua.qanary.examplecomponent;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package};
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import eu.wdaqua.qanary.component.QanaryComponent;
-import eu.wdaqua.qanary.component.QanaryService;
+import ${groupId}.QanaryComponent;
+import ${groupId}.QanaryService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -16,7 +19,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @SpringBootApplication
 @EnableAutoConfiguration
-@ComponentScan("eu.wdaqua.qanary.examplecomponent")
+@ComponentScan("${package}")
 public class Application {
 
 	/**
@@ -27,7 +30,7 @@ public class Application {
 	*/
 	@Bean
 	public QanaryComponent qanaryComponent() {
-		return new ExampleQanaryComponent();
+		return new ${classname}();
 	}
 	
 	
