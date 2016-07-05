@@ -103,26 +103,6 @@ More details follow soon.
 For a mapping between the resources presented at ISWC and this repository please refer to the wiki under section "Resources presented at ISWC".
 
 
-
-## HowTos
-
-### Quick Start
-coming soon
-
-
-### Using Qanary Pipeline Functionality
-coming soon
-
-
-### Implement Your First Qanary Component
-coming soon
-
-
-### Implement Your First Qanary Pipeline
-coming soon
-
-
-
 ## Publications / References
 
 If you want to inform yourself about the Qanary methodology in general, please use this publication:  *Andreas Both, Dennis Diefenbach, Kuldeep Signh, Saedeeh Shekarpour, Didier Cherix and Christoph Lange: Qanary - A Methodology for Vocabulary-driven Open Question Answering Systems* appearing in [13th Extended Semantic Web Conference](http://2016.eswc-conferences.org), 2016.
@@ -159,6 +139,6 @@ If you want to inform yourself about the Qanary methodology in general, please u
   java -jar target/qa.Alchemy-NERD-0.1.0.jar
   ```
  
- * After running corresponding jar files, you can see Springboot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
+* After running corresponding jar files, you can see Springboot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
 
- * Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
+* Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
