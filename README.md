@@ -156,8 +156,8 @@ If you want to inform yourself about the Qanary methodology in general, please u
 * Use the Web console of the qanary pipeline http://localhost:8080/#/overview to see the status of the available components (at the time no components are running).
 
 * After `maven build` jar files will be generated in the corresponding folders of the Qanary components. For example, to start the Alchemy API components:
-       cd qanary_component-Alchemy-NERD
-       java -jar target/qa.Alchemy-NERD-0.1.0.jar.
+          cd qanary_component-Alchemy-NERD
+           java -jar target/qa.Alchemy-NERD-0.1.0.jar.
  
  * After running corresponding jar files, you can see Springboot application running on http://localhost:8080/#/overview that will tell the status of currently running components.
 
