@@ -67,7 +67,7 @@ public class Agdistis extends QanaryComponent {
 			long startTime = System.currentTimeMillis();
 			logger.info("process: {}", QanaryMessage);
 			
-			//STEP1: Retrive the named graph and the endpoint
+			//STEP1: Retrieve the named graph and the endpoint
 			String endpoint=QanaryMessage.getEndpoint().toASCIIString();
 			String namedGraph=QanaryMessage.getInGraph().toASCIIString();
 			logger.info("Endpoint: {}", endpoint);
