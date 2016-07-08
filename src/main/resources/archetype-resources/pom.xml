@@ -16,7 +16,7 @@
         <java.version>1.8</java.version>
         <qanary.version>0.1.0</qanary.version>
         <docker.image.prefix>qanary</docker.image.prefix>
-        <docker.image.name>${artifactId}</docker.image.name>
+        <docker.image.name>qanary-component</docker.image.name>
     </properties>
 
     <dependencies>
