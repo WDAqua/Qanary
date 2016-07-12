@@ -131,7 +131,7 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
 	@ResponseBody
 	public ClassPathResource getFile1() {
-		return new ClassPathResource("src/main/resources/oa.owl");
+		return new ClassPathResource("/oa.owl");
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
 	public ClassPathResource getFile2() {
-		return new ClassPathResource("src/main/resources/qanaryOntology.ttl");
+		return new ClassPathResource("/qanaryOntology.ttl");
 	}
 
 	/*
