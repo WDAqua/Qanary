@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Comment/uncomment the following code lines according to your needs
+
 # Stop all containers
 docker stop $(docker ps -a -q)
 
@@ -15,12 +17,12 @@ docker run -itd -v /home/ilytra/data/qanary:/stardog-4.1.1/qanary -p 5820:4000 -
 echo "Starting qapipeline container"
 docker run -itd -p 8080:5000 --net="host" --name qapipeline qanary/qapipeline
 
-# Start containers for all qanary components
+# Start containers for qanary components
 echo "Starting agdistis-ned component container"
 docker run -d -P --net="host" --name agdistis-ned -t qanary/agdistis-ned
 
-echo "Starting alchemy-nerd component container"
-docker run -d -P --net="host" --name alchemy-nerd -t qanary/alchemy-nerd
+# echo "Starting alchemy-nerd component container"
+# docker run -d -P --net="host" --name alchemy-nerd -t qanary/alchemy-nerd
 
 # echo "Starting dbpedia-spotlight-ned component container"
 # docker run -d -P --net="host" --name dbpedia-spotlight-ned -t qanary/dbpedia-spotlight-ned
