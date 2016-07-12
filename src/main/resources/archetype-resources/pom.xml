@@ -15,7 +15,8 @@
         <java.version>1.8</java.version>
         <qanary.version>0.1.0</qanary.version>
         <docker.image.prefix>qanary</docker.image.prefix>
-        <docker.image.name>${dockerName}</docker.image.name>
+        <!-- Replace the name of the docker image to be generated -->
+        <docker.image.name>my-qanary-component</docker.image.name>
     </properties>
 
     <dependencies>
