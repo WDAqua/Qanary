@@ -8,7 +8,7 @@
     <version>0.1.0</version>
     <packaging>maven-archetype</packaging>
 
-    <name>qa.exampleqanarycomponent-archetype</name>
+    <name>qanary-component-archetype</name>
 
     <build>
         <extensions>

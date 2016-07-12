@@ -6,4 +6,4 @@ cache:
   directories:
     - '$HOME/.m2/repository'
 
-script: mvn clean install package -DskipDockerBuild
+script: mvn clean install -DskipDockerBuild
