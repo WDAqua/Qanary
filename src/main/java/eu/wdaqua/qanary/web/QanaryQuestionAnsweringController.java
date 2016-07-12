@@ -10,7 +10,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -130,8 +130,8 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
 	@ResponseBody
-	public FileSystemResource getFile1() {
-		return new FileSystemResource("src/main/resources/oa.owl");
+	public ClassPathResource getFile1() {
+		return new ClassPathResource("/oa.owl");
 	}
 
 	/**
@@ -141,8 +141,8 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
-	public FileSystemResource getFile2() {
-		return new FileSystemResource("src/main/resources/qanaryOntology.ttl");
+	public ClassPathResource getFile2() {
+		return new ClassPathResource("/qanaryOntology.ttl");
 	}
 
 	/*
