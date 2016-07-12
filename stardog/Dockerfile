@@ -14,4 +14,8 @@ CMD rm /stardog/system.lock || true && \
     ./bin/stardog-admin server start && \
     sleep 1 && \
     (tail -f ${STARDOG_HOME}/stardog.log &) && \
+<<<<<<< HEAD
 while (pidof java > /dev/null); do sleep 1; done
+=======
+    while (pidof java > /dev/null); do sleep 1; done
+>>>>>>> 594ce800400bd4639e55387b80e7a42b0f9beea4
