@@ -7,9 +7,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 public class QanaryWebConfiguration extends WebMvcConfigurerAdapter {
 
-	@Override
-	public void addViewControllers(ViewControllerRegistry registry) {
-		registry.addViewController("/static").setViewName("static");
-	}
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/static").setViewName("static");
+    }
 
 }

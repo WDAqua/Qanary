@@ -8,8 +8,7 @@ import com.hp.hpl.jena.sparql.util.NodeUtils;
 import com.hp.hpl.jena.update.*;
 
 /**
- * @author Didier Cherix
- *         at 08.04.16.
+ * @author Didier Cherix at 08.04.16.
  */
 public class SparqlInMemoryStore implements SparqlConnector {
 

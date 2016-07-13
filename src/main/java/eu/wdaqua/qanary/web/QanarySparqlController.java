@@ -28,49 +28,46 @@ import eu.wdaqua.qanary.sparql.SparqlConnector;
 @Controller
 public class QanarySparqlController {
 
-	private static final Logger logger = LoggerFactory.getLogger(QanarySparqlController.class);
+    private static final Logger logger = LoggerFactory.getLogger(QanarySparqlController.class);
 
-	private final QanaryConfigurator qanaryConfigurator;
+    private final QanaryConfigurator qanaryConfigurator;
 
-	private final SparqlConnector sparqlConnector;
+    private final SparqlConnector sparqlConnector;
 
-	@Autowired
-	public QanarySparqlController(final QanaryConfigurator qanaryConfigurator, final SparqlConnector sparqlConnector) {
-		this.qanaryConfigurator = qanaryConfigurator;
-		this.sparqlConnector = sparqlConnector;
-	}
+    @Autowired
+    public QanarySparqlController(final QanaryConfigurator qanaryConfigurator, final SparqlConnector sparqlConnector) {
+        this.qanaryConfigurator = qanaryConfigurator;
+        this.sparqlConnector = sparqlConnector;
+    }
 
-	/**
-	 * wrapper for SPARQL endpoint
-	 *
-	 * @param sparqlquerystring
-	 * @return
-	 */
-	@RequestMapping(value = "/sparql")
-	public void executeSparqlQuery(@RequestParam(value = "query", required = true) final String query,
-			final HttpServletResponse response) {
-		try {
-			if (StringUtils.containsIgnoreCase(query, "select")) {
-				final ResultSet result = sparqlConnector.select(query);
-				response.setContentType(ResultsFormat.FMT_RS_JSON.getSymbol());
-				ResultSetFormatter.output(response.getOutputStream(), result, ResultsFormat.FMT_RS_JSON);
+    /**
+     * wrapper for SPARQL endpoint
+     */
+    @RequestMapping(value = "/sparql")
+    public void executeSparqlQuery(@RequestParam(value = "query", required = true) final String query,
+                                   final HttpServletResponse response) {
+        try {
+            if (StringUtils.containsIgnoreCase(query, "select")) {
+                final ResultSet result = sparqlConnector.select(query);
+                response.setContentType(ResultsFormat.FMT_RS_JSON.getSymbol());
+                ResultSetFormatter.output(response.getOutputStream(), result, ResultsFormat.FMT_RS_JSON);
 
-			} else if (StringUtils.containsIgnoreCase(query, "construct")) {
-				final Model graph = sparqlConnector.construct(query);
-				response.setContentType("text/turtle");
-				graph.write(response.getOutputStream(), "TURTLE");
-			} else if (StringUtils.containsIgnoreCase(query, "INSERT")
-					|| StringUtils.containsIgnoreCase(query, "DELETE")) {
-				sparqlConnector.update(query);
-			}
-			response.setStatus(200);
-		} catch (final Exception e) {
-			try {
-				response.sendError(500, e.toString());
-			} catch (final IOException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
+            } else if (StringUtils.containsIgnoreCase(query, "construct")) {
+                final Model graph = sparqlConnector.construct(query);
+                response.setContentType("text/turtle");
+                graph.write(response.getOutputStream(), "TURTLE");
+            } else if (StringUtils.containsIgnoreCase(query, "INSERT")
+                    || StringUtils.containsIgnoreCase(query, "DELETE")) {
+                sparqlConnector.update(query);
+            }
+            response.setStatus(200);
+        } catch (final Exception e) {
+            try {
+                response.sendError(500, e.toString());
+            } catch (final IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
 
 }

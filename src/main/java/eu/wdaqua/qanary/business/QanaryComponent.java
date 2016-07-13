@@ -5,15 +5,15 @@ import de.codecentric.boot.admin.model.Application;
 /**
  * Created by didier on 27.03.16.
  */
-public class QanaryComponent  {
+public class QanaryComponent {
     private final Application application;
     private boolean used;
 
-    private QanaryComponent(Application application){
+    private QanaryComponent(Application application) {
         this.application = application;
     }
 
-    public QanaryComponent(Application application, boolean used){
+    public QanaryComponent(Application application, boolean used) {
         this(application);
         this.used = used;
     }
@@ -26,11 +26,11 @@ public class QanaryComponent  {
         this.used = used;
     }
 
-    public String getName(){
+    public String getName() {
         return application.getName();
     }
 
-    public String getUrl(){
+    public String getUrl() {
         return application.getServiceUrl();
     }
 }
