@@ -18,50 +18,50 @@ import org.slf4j.LoggerFactory;
  * Created by didier on 25.04.16.
  */
 public class URIDetector {
-	private static final Logger logger = LoggerFactory.getLogger(URIDetector.class);
+    private static final Logger logger = LoggerFactory.getLogger(URIDetector.class);
 
-	private final Set<Node> subjects = new HashSet<Node>();
-	private final Set<Node> predicates = new HashSet<Node>();
-	private final Set<Node> objects = new HashSet<Node>();
+    private final Set<Node> subjects = new HashSet<Node>();
+    private final Set<Node> predicates = new HashSet<Node>();
+    private final Set<Node> objects = new HashSet<Node>();
 
-	public URIDetector(String sparqlQuery) {
-		processQuery(sparqlQuery);
-	}
+    public URIDetector(String sparqlQuery) {
+        processQuery(sparqlQuery);
+    }
 
-	public Set<Node> getSubjects() {
-		return subjects;
-	}
+    public Set<Node> getSubjects() {
+        return subjects;
+    }
 
-	public Set<Node> getPredicates() {
-		return predicates;
-	}
+    public Set<Node> getPredicates() {
+        return predicates;
+    }
 
-	public Set<Node> getObjects() {
-		return objects;
-	}
+    public Set<Node> getObjects() {
+        return objects;
+    }
 
-	private void processQuery(String query) {
-		Query q = QueryFactory.create(query); // SPARQL 1.1
+    private void processQuery(String query) {
+        Query q = QueryFactory.create(query); // SPARQL 1.1
 
-		// This will walk through all parts of the query
-		ElementWalker.walk(q.getQueryPattern(),
-				// For each element...
-				new ElementVisitorBase() {
-					// ...when it's a block of triples...
-					public void visit(ElementPathBlock el) {
-						// ...go through all the triples...
-						Iterator<TriplePath> triples = el.patternElts();
-						while (triples.hasNext()) {
-							// ...and grab the subject
-							TriplePath triple = triples.next();
-							subjects.add(triple.getSubject());
-							predicates.add(triple.getPredicate());
-							objects.add(triple.getObject());
-						}
-					}
-				});
-		logger.debug("subjects: {}", subjects);
-		logger.debug("predicates: {}", predicates);
-		logger.debug("objects: {}", objects);
-	}
+        // This will walk through all parts of the query
+        ElementWalker.walk(q.getQueryPattern(),
+                // For each element...
+                new ElementVisitorBase() {
+                    // ...when it's a block of triples...
+                    public void visit(ElementPathBlock el) {
+                        // ...go through all the triples...
+                        Iterator<TriplePath> triples = el.patternElts();
+                        while (triples.hasNext()) {
+                            // ...and grab the subject
+                            TriplePath triple = triples.next();
+                            subjects.add(triple.getSubject());
+                            predicates.add(triple.getPredicate());
+                            objects.add(triple.getObject());
+                        }
+                    }
+                });
+        logger.debug("subjects: {}", subjects);
+        logger.debug("predicates: {}", predicates);
+        logger.debug("objects: {}", objects);
+    }
 }
