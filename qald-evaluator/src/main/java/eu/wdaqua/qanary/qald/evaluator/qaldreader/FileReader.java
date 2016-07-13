@@ -14,46 +14,39 @@ import com.google.gson.JsonObject;
 
 public class FileReader {
 
-	private HashMap<Integer, QaldQuestion> questions = new HashMap<>();
+    private HashMap<Integer, QaldQuestion> questions = new HashMap<>();
 
-	public FileReader() throws UnsupportedEncodingException, IOException {
-		Reader reader = new InputStreamReader(FileReader.class.getResourceAsStream("/qald-benchmark/qald6-train-questions.json"),
-				"UTF-8");
-		Gson gson = new GsonBuilder().create();
-		JsonObject json = gson.fromJson(reader, JsonObject.class);
+    public FileReader() throws UnsupportedEncodingException, IOException {
+        Reader reader = new InputStreamReader(FileReader.class.getResourceAsStream("/qald-benchmark/qald6-train-questions.json"),
+                "UTF-8");
+        Gson gson = new GsonBuilder().create();
+        JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-		JsonArray questions = json.get("questions").getAsJsonArray();
+        JsonArray questions = json.get("questions").getAsJsonArray();
 
-		for (int i = 0; i < questions.size(); i++) {
-			this.addQuestion(new QaldQuestion(questions.get(i).getAsJsonObject()));
-		}
-	}
+        for (int i = 0; i < questions.size(); i++) {
+            this.addQuestion(new QaldQuestion(questions.get(i).getAsJsonObject()));
+        }
+    }
 
-	/**
-	 * register a question
-	 * 
-	 * @param qaldQuestion
-	 */
-	private void addQuestion(QaldQuestion qaldQuestion) {
-		this.questions.put(qaldQuestion.getQaldId(), qaldQuestion);
-	}
+    /**
+     * register a question
+     */
+    private void addQuestion(QaldQuestion qaldQuestion) {
+        this.questions.put(qaldQuestion.getQaldId(), qaldQuestion);
+    }
 
-	/**
-	 * retrieve a QaldQuestion via the QALD question id
-	 * 
-	 * @param qaldId
-	 * @return
-	 */
-	public QaldQuestion getQuestion(int qaldId) {
-		return this.questions.get(qaldId);
-	}
+    /**
+     * retrieve a QaldQuestion via the QALD question id
+     */
+    public QaldQuestion getQuestion(int qaldId) {
+        return this.questions.get(qaldId);
+    }
 
-	/**
-	 * returns all QaldQuestions parsed from the QALD file
-	 * 
-	 * @return
-	 */
-	public Collection<QaldQuestion> getQuestions() {
-		return this.questions.values();
-	}
+    /**
+     * returns all QaldQuestions parsed from the QALD file
+     */
+    public Collection<QaldQuestion> getQuestions() {
+        return this.questions.values();
+    }
 }

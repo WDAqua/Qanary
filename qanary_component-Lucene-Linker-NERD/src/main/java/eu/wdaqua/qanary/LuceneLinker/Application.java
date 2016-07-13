@@ -15,18 +15,16 @@ import eu.wdaqua.qanary.component.QanaryComponent;
 @EnableAutoConfiguration
 @ComponentScan("eu.wdaqua.qanary.component")
 public class Application {
-	/**
-	 * this method is needed to make the QanaryComponent in this project known
-	 * to the QanaryServiceController in the qanary_component-template
-	 * 
-	 * @return
-	 */
-	@Bean
-	public QanaryComponent qanaryComponent() {
-		return new LuceneLinker();
-	}
+    /**
+     * this method is needed to make the QanaryComponent in this project known to the
+     * QanaryServiceController in the qanary_component-template
+     */
+    @Bean
+    public QanaryComponent qanaryComponent() {
+        return new LuceneLinker();
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 }

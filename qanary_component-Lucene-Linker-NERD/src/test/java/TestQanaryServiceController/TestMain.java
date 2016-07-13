@@ -1,18 +1,13 @@
 package TestQanaryServiceController;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import eu.wdaqua.qanary.LuceneLinker.Index;
 
 import org.junit.Test;
-import org.springframework.util.Assert;
 
-import eu.wdaqua.qanary.LuceneLinker.Index;
-import eu.wdaqua.qanary.LuceneLinker.LuceneLinker;
-import eu.wdaqua.qanary.component.QanaryMessage;
-import net.minidev.json.JSONObject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import static org.junit.Assert.fail;
 
 public class TestMain {
 

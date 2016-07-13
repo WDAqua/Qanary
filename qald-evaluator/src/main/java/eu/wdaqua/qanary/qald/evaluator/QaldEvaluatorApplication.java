@@ -1,12 +1,7 @@
 package eu.wdaqua.qanary.qald.evaluator;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
+import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -14,7 +9,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,191 +21,192 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
-import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
-import eu.wdaqua.qanary.qald.evaluator.qaldreader.TurtleResultWriter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * start the spring application
- * 
- * @author AnBo
  *
+ * @author AnBo
  */
 @SpringBootApplication
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
 public class QaldEvaluatorApplication {
-	private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
 
-	String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
+    String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 
-	private void process(String components, int maxQuestionsToBeProcessed)
-			throws UnsupportedEncodingException, IOException {
-		Double globalPrecision = 0.0;
-		Double globalRecall = 0.0;
-		Double globalFMeasure = 0.0;
-		int count = 0;
+    private void process(String components, int maxQuestionsToBeProcessed)
+            throws UnsupportedEncodingException, IOException {
+        Double globalPrecision = 0.0;
+        Double globalRecall = 0.0;
+        Double globalFMeasure = 0.0;
+        int count = 0;
 
-		ArrayList<Integer> fullRecall = new ArrayList<Integer>();
-		ArrayList<Integer> fullFMeasure = new ArrayList<Integer>();
-		
-		String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
+        ArrayList<Integer> fullRecall = new ArrayList<Integer>();
+        ArrayList<Integer> fullFMeasure = new ArrayList<Integer>();
 
-		FileReader filereader = new FileReader();
+        String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 
-		filereader.getQuestion(1).getUris();
+        FileReader filereader = new FileReader();
 
-		// send to pipeline
-		List<QaldQuestion> questions = new LinkedList<>(filereader.getQuestions());
+        filereader.getQuestion(1).getUris();
 
-		for (int i = 0; i < questions.size(); i++) {
-			List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
-			logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
-			
-			// questions.get(0).setQuestion("How many goals did Pelé score?");
+        // send to pipeline
+        List<QaldQuestion> questions = new LinkedList<>(filereader.getQuestions());
 
-			// Send the question
-			RestTemplate restTemplate = new RestTemplate();
-			UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
+        for (int i = 0; i < questions.size(); i++) {
+            List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
+            logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
 
-			MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
-			bodyMap.add("question", questions.get(i).getQuestion());
-			bodyMap.add("componentlist[]", components);
-			String response = restTemplate.postForObject(service.build().encode().toUri(), bodyMap, String.class);
-			logger.info("Response pipline: {}", response);
+            // questions.get(0).setQuestion("How many goals did Pelé score?");
 
-			// Retrieve the computed uris
-			JSONObject responseJson = new JSONObject(response);
-			String endpoint = responseJson.getString("endpoint");
-			String namedGraph = responseJson.getString("graph");
-			logger.debug("{}. named graph: {}", questions.get(i).getQaldId(), namedGraph);
-			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
-					+ "SELECT ?uri { " //
-					+ "  GRAPH <" + namedGraph + "> { " //
-					+ "    ?a a qa:AnnotationOfInstance . " //
-					+ "    ?a oa:hasBody ?uri " //
-					+ "} }";
-			logger.debug("SPARQL: {}", sparql);
-			ResultSet r = selectTripleStore(sparql, endpoint);
-			List<String> systemAnswers = new ArrayList<String>();
-			while (r.hasNext()) {
-				QuerySolution s = r.next();
-				if (s.getResource("uri") != null && !s.getResource("uri").toString().endsWith("null")) {
-					logger.info("System answers: {} ", s.getResource("uri").toString());
-					systemAnswers.add(s.getResource("uri").toString());
-				}
-			}
+            // Send the question
+            RestTemplate restTemplate = new RestTemplate();
+            UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
 
-			// Retrieve the expected resources from the SPARQL query
-			//List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
-			for (String expected : expectedAnswers) {
-				logger.info("Expected answers: {} ", expected);
-			}
+            MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
+            bodyMap.add("question", questions.get(i).getQuestion());
+            bodyMap.add("componentlist[]", components);
+            String response = restTemplate.postForObject(service.build().encode().toUri(), bodyMap, String.class);
+            logger.info("Response pipline: {}", response);
 
-			// Compute precision and recall
-			Metrics m = new Metrics();
-			m.compute(expectedAnswers, systemAnswers);
-			globalPrecision += m.precision;
-			globalRecall += m.recall;
-			globalFMeasure += m.fMeasure;
-			count++;
-			
-			if (m.recall==1){
-				fullRecall.add(1);
-			} else {
-				fullRecall.add(0);
-			}
-		}
-		logger.info("Global Precision={}", globalPrecision / count);
-		logger.info("Global Recall={}", globalRecall / count);
-		logger.info("Global F-measure={}", globalFMeasure / count);
-	}
-
-	class Metrics{
-        private Double precision=0.0;
-        private Double recall=0.0;
-        private Double fMeasure=0.0;
-
-
-        public void compute(List<String> expectedAnswers, List<String> systemAnswers){
-                //Compute the number of retrieved answers
-                int correctRetrieved = 0;
-                for (String s:systemAnswers){
-                        if (expectedAnswers.contains(s)){
-                                correctRetrieved++;
-                        }
+            // Retrieve the computed uris
+            JSONObject responseJson = new JSONObject(response);
+            String endpoint = responseJson.getString("endpoint");
+            String namedGraph = responseJson.getString("graph");
+            logger.debug("{}. named graph: {}", questions.get(i).getQaldId(), namedGraph);
+            String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+                    + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+                    + "SELECT ?uri { " //
+                    + "  GRAPH <" + namedGraph + "> { " //
+                    + "    ?a a qa:AnnotationOfInstance . " //
+                    + "    ?a oa:hasBody ?uri " //
+                    + "} }";
+            logger.debug("SPARQL: {}", sparql);
+            ResultSet r = selectTripleStore(sparql, endpoint);
+            List<String> systemAnswers = new ArrayList<String>();
+            while (r.hasNext()) {
+                QuerySolution s = r.next();
+                if (s.getResource("uri") != null && !s.getResource("uri").toString().endsWith("null")) {
+                    logger.info("System answers: {} ", s.getResource("uri").toString());
+                    systemAnswers.add(s.getResource("uri").toString());
                 }
-                //Compute precision and recall following the evaluation metrics of QALD
-                if (expectedAnswers.size()==0){
-                        if (systemAnswers.size()==0){
-                                recall=1.0;
-                                precision=1.0;
-                                fMeasure=1.0;
-                        } else {
-                                recall=0.0;
-                                precision=0.0;
-                                fMeasure=0.0;
-                        }
-                } else {
-                        if (systemAnswers.size()==0){
-                                recall=0.0;
-                                precision=1.0;
-                        } else {
-                                precision = (double)correctRetrieved/systemAnswers.size();
-                                recall = (double)correctRetrieved/expectedAnswers.size();
-                        }
-                        if (precision==0 && recall==0){
-                                fMeasure=0.0;
-                        } else {
-                                fMeasure = (2*precision*recall)/(precision+recall);
-                        }
-                }
+            }
+
+            // Retrieve the expected resources from the SPARQL query
+            //List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
+            for (String expected : expectedAnswers) {
+                logger.info("Expected answers: {} ", expected);
+            }
+
+            // Compute precision and recall
+            Metrics m = new Metrics();
+            m.compute(expectedAnswers, systemAnswers);
+            globalPrecision += m.precision;
+            globalRecall += m.recall;
+            globalFMeasure += m.fMeasure;
+            count++;
+
+            if (m.recall == 1) {
+                fullRecall.add(1);
+            } else {
+                fullRecall.add(0);
+            }
         }
-	}
-	
-	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
-		Query query = QueryFactory.create(sparqlQuery);
-		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-		return qExe.execSelect();
-	}
+        logger.info("Global Precision={}", globalPrecision / count);
+        logger.info("Global Recall={}", globalRecall / count);
+        logger.info("Global F-measure={}", globalFMeasure / count);
+    }
 
-	public static void main(String... args) throws UnsupportedEncodingException, IOException {
+    class Metrics {
+        private Double precision = 0.0;
+        private Double recall = 0.0;
+        private Double fMeasure = 0.0;
 
-		// TODO:
-		int maxQuestions = 350;
 
-		QaldEvaluatorApplication app = new QaldEvaluatorApplication();
+        public void compute(List<String> expectedAnswers, List<String> systemAnswers) {
+            //Compute the number of retrieved answers
+            int correctRetrieved = 0;
+            for (String s : systemAnswers) {
+                if (expectedAnswers.contains(s)) {
+                    correctRetrieved++;
+                }
+            }
+            //Compute precision and recall following the evaluation metrics of QALD
+            if (expectedAnswers.size() == 0) {
+                if (systemAnswers.size() == 0) {
+                    recall = 1.0;
+                    precision = 1.0;
+                    fMeasure = 1.0;
+                } else {
+                    recall = 0.0;
+                    precision = 0.0;
+                    fMeasure = 0.0;
+                }
+            } else {
+                if (systemAnswers.size() == 0) {
+                    recall = 0.0;
+                    precision = 1.0;
+                } else {
+                    precision = (double) correctRetrieved / systemAnswers.size();
+                    recall = (double) correctRetrieved / expectedAnswers.size();
+                }
+                if (precision == 0 && recall == 0) {
+                    fMeasure = 0.0;
+                } else {
+                    fMeasure = (2 * precision * recall) / (precision + recall);
+                }
+            }
+        }
+    }
 
-		List<String> componentConfigurations = new LinkedList<>();
+    private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+        Query query = QueryFactory.create(sparqlQuery);
+        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+        return qExe.execSelect();
+    }
 
-		List<String> nerComponents = new LinkedList<>();
-		List<String> nedComponents = new LinkedList<>();
+    public static void main(String... args) throws UnsupportedEncodingException, IOException {
 
-		// TODO: move to config
-		//nerComponents.add("StanfordNER");
-		//nerComponents.add("DBpediaSpotlightSpotter");
-		//nerComponents.add("FOX");
+        // TODO:
+        int maxQuestions = 350;
 
-		// TODO: move to config
-		//nedComponents.add("agdistis");
-		//nedComponents.add("DBpediaSpotlightNED");
+        QaldEvaluatorApplication app = new QaldEvaluatorApplication();
 
-		// monolithic configurations (NER+NED)
-		componentConfigurations.add("Alchemy-NERD");
-		//componentConfigurations.add("luceneLinker");
+        List<String> componentConfigurations = new LinkedList<>();
 
-		// create all configurations
-		for (String ner : nerComponents) {
-			for (String ned : nedComponents) {
-				componentConfigurations.add(ner + "," + ned);
-			}
-		}
+        List<String> nerComponents = new LinkedList<>();
+        List<String> nedComponents = new LinkedList<>();
 
-		for (String componentConfiguration : componentConfigurations) {
-			app.process(componentConfiguration, maxQuestions);
-		}
-	}
+        // TODO: move to config
+        //nerComponents.add("StanfordNER");
+        //nerComponents.add("DBpediaSpotlightSpotter");
+        //nerComponents.add("FOX");
+
+        // TODO: move to config
+        //nedComponents.add("agdistis");
+        //nedComponents.add("DBpediaSpotlightNED");
+
+        // monolithic configurations (NER+NED)
+        componentConfigurations.add("Alchemy-NERD");
+        //componentConfigurations.add("luceneLinker");
+
+        // create all configurations
+        for (String ner : nerComponents) {
+            for (String ned : nedComponents) {
+                componentConfigurations.add(ner + "," + ned);
+            }
+        }
+
+        for (String componentConfiguration : componentConfigurations) {
+            app.process(componentConfiguration, maxQuestions);
+        }
+    }
 }

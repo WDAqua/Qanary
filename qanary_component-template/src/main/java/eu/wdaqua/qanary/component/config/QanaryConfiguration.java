@@ -6,32 +6,28 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QanaryConfiguration {
-	public static final String description = "/description";
+    public static final String description = "/description";
 
-	// TODO should move to commons package
-	public static final String annotatequestion = "/annotatequestion";
-	public static final String sparql = "/sparql";
-	public static final String questionRawDataUrlSuffix = "/rawdata";
-	public static final String questionRawDataProperyName = "rawdata";
+    // TODO should move to commons package
+    public static final String annotatequestion = "/annotatequestion";
+    public static final String sparql = "/sparql";
+    public static final String questionRawDataUrlSuffix = "/rawdata";
+    public static final String questionRawDataProperyName = "rawdata";
 
-	private static URI serviceUri;
+    private static URI serviceUri;
 
-	/**
-	 * set the URI of the endpoint
-	 * 
-	 * @param uri
-	 */
-	public static void setServiceUri(URI uri) {
-		serviceUri = uri;
-	}
+    /**
+     * set the URI of the endpoint
+     */
+    public static void setServiceUri(URI uri) {
+        serviceUri = uri;
+    }
 
-	/**
-	 * get the URI of the endpoint
-	 * 
-	 * @param uri
-	 */
-	public static URI getServiceUri() {
-		return (serviceUri);
-	}
+    /**
+     * get the URI of the endpoint
+     */
+    public static URI getServiceUri() {
+        return (serviceUri);
+    }
 
 }

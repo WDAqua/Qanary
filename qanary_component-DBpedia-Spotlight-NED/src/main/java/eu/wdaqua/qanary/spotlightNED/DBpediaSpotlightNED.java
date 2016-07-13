@@ -32,226 +32,225 @@ import eu.wdaqua.qanary.component.QanaryMessage;
 
 /**
  * represents a wrapper of the DBpedia Spotlight as NED
- * 
- * @author Kuldeep Singh
  *
+ * @author Kuldeep Singh
  */
 
 @Component
 public class DBpediaSpotlightNED extends QanaryComponent {
-	// private String agdistisService="http://139.18.2.164:8080/AGDISTIS";
-	private static final Logger logger = LoggerFactory.getLogger(DBpediaSpotlightNED.class);
+    // private String agdistisService="http://139.18.2.164:8080/AGDISTIS";
+    private static final Logger logger = LoggerFactory.getLogger(DBpediaSpotlightNED.class);
 
-	/**
-	 * default processor of a QanaryMessage
-	 */
+    /**
+     * default processor of a QanaryMessage
+     */
 
-	private String runCurl1(String question) {
+    private String runCurl1(String question) {
 
-		String xmlResp = "";
-		try {
-			URL url = new URL("http://spotlight.sztaki.hu:2222/rest/disambiguate/");
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			// String temp = "text=<?xml version=\"1.0\"
-			// encoding=\"UTF-8\"?><annotation
-			// text=\""+question+"\"><surfaceForm name=\"published\"
-			// offset=\"23\" /><surfaceForm name=\"Heart\" offset=\"63\"
-			// /></annotation>";
-			connection.setRequestMethod("POST");
-			connection.setDoOutput(true);
-			connection.setDoInput(true);
-			connection.setRequestProperty("Accept", "application/json");
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        String xmlResp = "";
+        try {
+            URL url = new URL("http://spotlight.sztaki.hu:2222/rest/disambiguate/");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            // String temp = "text=<?xml version=\"1.0\"
+            // encoding=\"UTF-8\"?><annotation
+            // text=\""+question+"\"><surfaceForm name=\"published\"
+            // offset=\"23\" /><surfaceForm name=\"Heart\" offset=\"63\"
+            // /></annotation>";
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-			DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
 
-			wr.write(("text=" + question).getBytes("UTF-8"));
-			wr.flush();
-			wr.close();
+            wr.write(("text=" + question).getBytes("UTF-8"));
+            wr.flush();
+            wr.close();
 
-			// InputStreamReader ir = new
-			// InputStreamReader(connection.getInputStream());
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
+            // InputStreamReader ir = new
+            // InputStreamReader(connection.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
 
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
-			xmlResp = response.toString();
-			logger.info("Response spotlight service {}", xmlResp);
-		} catch (Exception e) {
-		}
-		return (xmlResp);
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            xmlResp = response.toString();
+            logger.info("Response spotlight service {}", xmlResp);
+        } catch (Exception e) {
+        }
+        return (xmlResp);
 
-	}
+    }
 
-	private String getXmlFromQuestion(String question, ArrayList<Link> offsets) {
-		String xmlFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><annotation text=\"" + question + "\">";
+    private String getXmlFromQuestion(String question, ArrayList<Link> offsets) {
+        String xmlFileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><annotation text=\"" + question + "\">";
 
-		for (Link sel : offsets) {
-			int begin = sel.begin;
-			int end = sel.end;
-			String surNam = question.substring(begin, end);
-			xmlFileContent += "<surfaceForm name=\"" + surNam + "\" offset=\"" + begin + "\"/>";
-		}
-		xmlFileContent += "</annotation>";
+        for (Link sel : offsets) {
+            int begin = sel.begin;
+            int end = sel.end;
+            String surNam = question.substring(begin, end);
+            xmlFileContent += "<surfaceForm name=\"" + surNam + "\" offset=\"" + begin + "\"/>";
+        }
+        xmlFileContent += "</annotation>";
 
-		return xmlFileContent;
-	}
+        return xmlFileContent;
+    }
 
-	public QanaryMessage process(QanaryMessage QanaryMessage) {
-		logger.info("process: {}", QanaryMessage);
+    public QanaryMessage process(QanaryMessage QanaryMessage) {
+        logger.info("process: {}", QanaryMessage);
 
-		try {
-			long startTime = System.currentTimeMillis();
-			logger.info("process: {}", QanaryMessage);
-			// STEP1: Retrieve the named graph and the endpoint
-			String endpoint = QanaryMessage.getEndpoint().toASCIIString();
-			String namedGraph = QanaryMessage.getInGraph().toASCIIString();
-			logger.info("Endpoint: {}", endpoint);
-			logger.info("InGraph: {}", namedGraph);
+        try {
+            long startTime = System.currentTimeMillis();
+            logger.info("process: {}", QanaryMessage);
+            // STEP1: Retrieve the named graph and the endpoint
+            String endpoint = QanaryMessage.getEndpoint().toASCIIString();
+            String namedGraph = QanaryMessage.getInGraph().toASCIIString();
+            logger.info("Endpoint: {}", endpoint);
+            logger.info("InGraph: {}", namedGraph);
 
-			// STEP2: Retrieve information that are needed for the computations
-			String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> " + "SELECT ?questionuri " + "FROM <" + namedGraph
-					+ "> " + "WHERE {?questionuri a qa:Question}";
-			ResultSet result = selectTripleStore(sparql, endpoint);
-			String uriQuestion = result.next().getResource("questionuri").toString();
-			logger.info("Uri of the question: {}", uriQuestion);
-			// Retrieve the question itself
-			RestTemplate restTemplate = new RestTemplate();
-			// TODO: pay attention to "/raw" maybe change that
-			ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion + "/raw", String.class);
-			String question = responseEntity.getBody();
-			logger.info("Question: {}", question);
-			// Retrieves the spots from the knowledge graph
-			sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "//
-					+ "SELECT ?start ?end " + "FROM <" + namedGraph + "> " //
-					+ "WHERE { " //
-					+ "    ?a a qa:AnnotationOfSpotInstance . " + "?a oa:hasTarget [ "
-					+ "		     a               oa:SpecificResource; " //
-					+ "		     oa:hasSource    ?q; " //
-					+ "	         oa:hasSelector  [ " //
-					+ "			         a        oa:TextPositionSelector ; " //
-					+ "			         oa:start ?start ; " //
-					+ "			         oa:end   ?end " //
-					+ "		     ] " //
-					+ "    ] ; " //
-					+ "    oa:annotatedBy ?annotator " //
-					+ "} " //
-					+ "ORDER BY ?start ";
+            // STEP2: Retrieve information that are needed for the computations
+            String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> " + "SELECT ?questionuri " + "FROM <" + namedGraph
+                    + "> " + "WHERE {?questionuri a qa:Question}";
+            ResultSet result = selectTripleStore(sparql, endpoint);
+            String uriQuestion = result.next().getResource("questionuri").toString();
+            logger.info("Uri of the question: {}", uriQuestion);
+            // Retrieve the question itself
+            RestTemplate restTemplate = new RestTemplate();
+            // TODO: pay attention to "/raw" maybe change that
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion + "/raw", String.class);
+            String question = responseEntity.getBody();
+            logger.info("Question: {}", question);
+            // Retrieves the spots from the knowledge graph
+            sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                    + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "//
+                    + "SELECT ?start ?end " + "FROM <" + namedGraph + "> " //
+                    + "WHERE { " //
+                    + "    ?a a qa:AnnotationOfSpotInstance . " + "?a oa:hasTarget [ "
+                    + "		     a               oa:SpecificResource; " //
+                    + "		     oa:hasSource    ?q; " //
+                    + "	         oa:hasSelector  [ " //
+                    + "			         a        oa:TextPositionSelector ; " //
+                    + "			         oa:start ?start ; " //
+                    + "			         oa:end   ?end " //
+                    + "		     ] " //
+                    + "    ] ; " //
+                    + "    oa:annotatedBy ?annotator " //
+                    + "} " //
+                    + "ORDER BY ?start ";
 
-			ResultSet r = selectTripleStore(sparql, endpoint);
-			ArrayList<Link> links = new ArrayList<Link>();
-			while (r.hasNext()) {
-				QuerySolution s = r.next();
-				Link link = new Link();
-				link.begin = s.getLiteral("start").getInt();
-				link.end = s.getLiteral("end").getInt();
-				links.add(link);
-			}
+            ResultSet r = selectTripleStore(sparql, endpoint);
+            ArrayList<Link> links = new ArrayList<Link>();
+            while (r.hasNext()) {
+                QuerySolution s = r.next();
+                Link link = new Link();
+                link.begin = s.getLiteral("start").getInt();
+                link.end = s.getLiteral("end").getInt();
+                links.add(link);
+            }
 
-			// STEP3: Call the DBpedia NED service
+            // STEP3: Call the DBpedia NED service
 
-			// it will create XML content, which needs to be input in DBpedia
-			// NED with curl command
-			String content = getXmlFromQuestion(question, links);
+            // it will create XML content, which needs to be input in DBpedia
+            // NED with curl command
+            String content = getXmlFromQuestion(question, links);
 
-			// storing the output of DBpediaNED, which is a JSON
-			String response = runCurl1(content);
+            // storing the output of DBpediaNED, which is a JSON
+            String response = runCurl1(content);
 
-			// Now the output of DBPediaNED, which is JSON, is parsed below to
-			// fetch the corresponding URIs
-			JSONParser parser = new JSONParser();
-			JSONObject json = (JSONObject) parser.parse(response);
-			JSONArray arr = (JSONArray) json.get("Resources");
-			
-			int cnt = 0;
-			if (arr!=null){
-				Iterator i = arr.iterator();
-				while (i.hasNext()) {
-					JSONObject obj = (JSONObject) i.next();
-					String uri = (String) obj.get("@URI");
-					links.get(cnt).link = uri;
-					logger.info("recognized: {} at ({},{})", uri, links.get(cnt).begin, links.get(cnt).end);
-					cnt++;
-				}
-			}
-			
-			if (cnt == 0) {
-				logger.warn("nothing recognized for \"{}\": {}", question, json);
-			} else {
-				logger.info("recognized {} entities: {}", cnt, json);
-			}
+            // Now the output of DBPediaNED, which is JSON, is parsed below to
+            // fetch the corresponding URIs
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(response);
+            JSONArray arr = (JSONArray) json.get("Resources");
 
-			logger.debug("Apply vocabulary alignment on outgraph.");
+            int cnt = 0;
+            if (arr != null) {
+                Iterator i = arr.iterator();
+                while (i.hasNext()) {
+                    JSONObject obj = (JSONObject) i.next();
+                    String uri = (String) obj.get("@URI");
+                    links.get(cnt).link = uri;
+                    logger.info("recognized: {} at ({},{})", uri, links.get(cnt).begin, links.get(cnt).end);
+                    cnt++;
+                }
+            }
 
-			// STEP4: Push the result of the component to the triplestore
-			// long startTime = System.currentTimeMillis();
+            if (cnt == 0) {
+                logger.warn("nothing recognized for \"{}\": {}", question, json);
+            } else {
+                logger.info("recognized {} entities: {}", cnt, json);
+            }
 
-			// TODO: prevent that duplicate entries are created within the
-			// triplestore, here the same data is added as already exit (see
-			// previous SELECT query)
-			for (Link l : links) {
-				sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-						+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-						+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
-						+ "INSERT { " + "GRAPH <" + namedGraph + "> { " //
-						+ "  ?a a qa:AnnotationOfInstance . " //
-						+ "  ?a oa:hasTarget [ " //
-						+ "           a    oa:SpecificResource; " //
-						+ "           oa:hasSource    <" + uriQuestion + ">; " //
-						+ "           oa:hasSelector  [ " //
-						+ "                    a oa:TextPositionSelector ; " //
-						+ "                    oa:start \"" + l.begin + "\"^^xsd:nonNegativeInteger ; " //
-						+ "                    oa:end  \"" + l.end + "\"^^xsd:nonNegativeInteger  " //
-						+ "           ] " //
-						+ "  ] . " //
-						+ "  ?a oa:hasBody <" + l.link + "> ;" //
-						+ "     oa:annotatedBy <https://github.com/dbpedia-spotlight/dbpedia-spotlight> ; " //
-						+ "	    oa:AnnotatedAt ?time  " + "}} " //
-						+ "WHERE { " //
-						+ "  BIND (IRI(str(RAND())) AS ?a) ."//
-						+ "  BIND (now() as ?time) " //
-						+ "}";
-				logger.debug("Sparql query: {}", sparql);
-				loadTripleStore(sparql, endpoint);
-			}
-			long estimatedTime = System.currentTimeMillis() - startTime;
-			logger.info("Time {}", estimatedTime);
+            logger.debug("Apply vocabulary alignment on outgraph.");
 
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            // STEP4: Push the result of the component to the triplestore
+            // long startTime = System.currentTimeMillis();
 
-		return QanaryMessage;
-	}
+            // TODO: prevent that duplicate entries are created within the
+            // triplestore, here the same data is added as already exit (see
+            // previous SELECT query)
+            for (Link l : links) {
+                sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+                        + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+                        + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+                        + "INSERT { " + "GRAPH <" + namedGraph + "> { " //
+                        + "  ?a a qa:AnnotationOfInstance . " //
+                        + "  ?a oa:hasTarget [ " //
+                        + "           a    oa:SpecificResource; " //
+                        + "           oa:hasSource    <" + uriQuestion + ">; " //
+                        + "           oa:hasSelector  [ " //
+                        + "                    a oa:TextPositionSelector ; " //
+                        + "                    oa:start \"" + l.begin + "\"^^xsd:nonNegativeInteger ; " //
+                        + "                    oa:end  \"" + l.end + "\"^^xsd:nonNegativeInteger  " //
+                        + "           ] " //
+                        + "  ] . " //
+                        + "  ?a oa:hasBody <" + l.link + "> ;" //
+                        + "     oa:annotatedBy <https://github.com/dbpedia-spotlight/dbpedia-spotlight> ; " //
+                        + "	    oa:AnnotatedAt ?time  " + "}} " //
+                        + "WHERE { " //
+                        + "  BIND (IRI(str(RAND())) AS ?a) ."//
+                        + "  BIND (now() as ?time) " //
+                        + "}";
+                logger.debug("Sparql query: {}", sparql);
+                loadTripleStore(sparql, endpoint);
+            }
+            long estimatedTime = System.currentTimeMillis() - startTime;
+            logger.info("Time {}", estimatedTime);
 
-	private void loadTripleStore(String sparqlQuery, String endpoint) {
-		UpdateRequest request = UpdateFactory.create(sparqlQuery);
-		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-		proc.execute();
-	}
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-	private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
-		Query query = QueryFactory.create(sparqlQuery);
-		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-		return qExe.execSelect();
-	}
+        return QanaryMessage;
+    }
 
-	private class Spot {
-		public int begin;
-		public int end;
-	}
+    private void loadTripleStore(String sparqlQuery, String endpoint) {
+        UpdateRequest request = UpdateFactory.create(sparqlQuery);
+        UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
+        proc.execute();
+    }
 
-	class Link {
-		public int begin;
-		public int end;
-		public String link;
-	}
+    private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+        Query query = QueryFactory.create(sparqlQuery);
+        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+        return qExe.execSelect();
+    }
+
+    private class Spot {
+        public int begin;
+        public int end;
+    }
+
+    class Link {
+        public int begin;
+        public int end;
+        public String link;
+    }
 
 }
