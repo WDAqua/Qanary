@@ -108,7 +108,6 @@ For a mapping between the resources presented at ISWC and this repository please
 If you want to inform yourself about the Qanary methodology in general, please use this publication:  *Andreas Both, Dennis Diefenbach, Kuldeep Signh, Saedeeh Shekarpour, Didier Cherix and Christoph Lange: Qanary - A Methodology for Vocabulary-driven Open Question Answering Systems* appearing in [13th Extended Semantic Web Conference](http://2016.eswc-conferences.org), 2016.
 
 
-<<<<<<< HEAD
 ## Stuff used to make this:
 
  * [Spring Boot](http://projects.spring.io/spring-boot/) project
