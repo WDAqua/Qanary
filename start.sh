@@ -11,7 +11,7 @@ docker rm $(docker ps -a -q)
 
 # Start stardog container
 echo "Starting stardog container"
-docker run -itd -v /home/ilytra/data/qanary:/stardog-4.1.1/qanary -p 5820:4000 --net="host" --name stardog qanary/stardog
+docker run -itd -v /data/qanary:/stardog-4.1.1/qanary -p 5820:4000 --net="host" --name stardog qanary/stardog
 
 # Start qapipeline container
 echo "Starting qapipeline container"
