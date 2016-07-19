@@ -10,8 +10,8 @@ import java.net.URL;
  */
 public class QanaryQuestionInformation {
 
-    private final URL rawdata;
-    private String questionID;
+    public final URL rawdata;
+    public String questionID;
 
     /**
      *
