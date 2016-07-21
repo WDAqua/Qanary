@@ -1,25 +1,35 @@
 package eu.wdaqua.qanary.web;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.core.DatasetImpl;
@@ -29,6 +39,13 @@ import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateProcessor;
 import com.hp.hpl.jena.update.UpdateRequest;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
@@ -53,6 +70,11 @@ public class QanaryQuestionAnsweringController {
 
     private final QanaryConfigurator qanaryConfigurator;
     private final QanaryQuestionController qanaryQuestionController;
+    
+    @Value("${server.host}")
+	private String host;
+	@Value("${server.port}")
+	private String port;
 
     /**
      * Jena model
@@ -110,6 +132,61 @@ public class QanaryQuestionAnsweringController {
         }
     }
 
+    @RequestMapping(value="/qa",  method = RequestMethod.GET)
+    public String qa() {
+        return "qa_input";
+    }
+    
+    @RequestMapping(value="/qa",  method = RequestMethod.POST)
+	public String qa(
+			@RequestParam(value = "question", required = true) final String question,  Model model)
+					throws URISyntaxException, ParseException, UnsupportedEncodingException {
+    	logger.info("Asked question {}"+question);
+    	UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(host+":"+port+"/startquestionansweringwithtextquestion");
+        logger.info("Service request " + service);
+        String body = "question="+URLEncoder.encode(question, "UTF-8")+"&" + "&componentlist[]=Monolitic";
+        RestTemplate restTemplate = new RestTemplate();
+        String response = restTemplate.postForObject(service.build().encode().toUri(), body, String.class);
+        System.out.println("RESPONSE"+response);
+        QanaryMessage m = new QanaryMessage(response);
+        
+        String sparqlQuery =  "SELECT ?json "
+        		+ "FROM "+  m.getInGraph() + " "
+        		+ "WHERE { "
+        		+ "  ?a a qa:AnnotationOfAnswerJSON . "
+                + "  ?a oa:hasBody ?json " 
+        		+ "}";
+        
+        ResultSet r = selectFromTripleStore(sparqlQuery, m.getEndpoint().toString());
+        if (r.hasNext()){
+        	String jsonAnswer=r.next().getLiteral("json").toString();
+        	
+        	//Compute the Answer
+        	/*String s="{ \"head\": { \"link\": [], \"vars\": [\"x\"] }, "
+        			+ "\"results\": { \"distinct\": false, \"ordered\": true, \"bindings\": [ "
+        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/OpenLink_Software\" }},"
+        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/Leipzig_University\" }},"
+        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/University_of_Mannheim\" }} ] } }";*/
+        	//Parse the json result set using jena
+        	ResultSetFactory factory = new ResultSetFactory();
+        	InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
+        	ResultSet result= factory.fromJSON(in);
+        	List<String> var= result.getResultVars();
+        	List<String> list = new ArrayList<>();
+        	while (result.hasNext()){
+            	for (String v:var){
+            		list.add(result.next().get(v).toString());
+            	}
+        	}
+        	
+        	model.addAttribute("answers", list);
+        	return "qa_output";
+        }
+        return "No answer";  	
+	}
+    
+    
+    
     /**
      * exposing the oa vocabulary
      */
@@ -244,6 +321,17 @@ public class QanaryQuestionAnsweringController {
         final UpdateRequest request = UpdateFactory.create(sparqlQuery);
         final UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint.toString());
         proc.execute();
+    }
+    
+    /**
+     * query a SPARQL endpoint with a given query
+     */
+    public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
+        logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
+        Query query = QueryFactory.create(sparqlQuery);
+        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+        ResultSet resultset = qExe.execSelect();
+        return resultset;
     }
 
     /**

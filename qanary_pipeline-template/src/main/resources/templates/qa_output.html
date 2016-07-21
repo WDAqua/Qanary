@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>WDAqua core-0</title> 
+ 	<meta th:replace="lib/qa_header"/>        
+</head>
+<body>
+	<div>
+		<p>
+			Answer
+			<p th:if="${answers != null}">
+				<ul th:each="item : ${answers}">    
+			        <li>
+			            <a th:href="${item}" th:text="${item}"></a>
+			        </li>    
+				</ul>
+			</p>
+		</p>
+	</div>
+</body>
+</html>

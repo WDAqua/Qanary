@@ -1,0 +1,108 @@
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+                <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+                <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+                <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style>
+    body {
+        font-size:14pt; 
+        background-color: #FFFFFF; 
+        font-color: #333; 
+        margin: 0; 
+        padding: 0;
+        text-align: center;
+        height: 100% ;
+    }
+    div.container {
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+    	position: absolute;
+    	display: table ;
+	}
+    #logo-img { 
+    	height: 120px;
+    }/*
+    form {
+    	margin-left: 1ex;
+		vertical-align: middle ; 
+		margin-top: 10px;
+	}*/
+    input[type=text] {
+	     width:50%;  
+	     /* display:block; */  
+	     margin-top:2ex;
+	     margin-bottom:2ex; 
+	     max-width:500px; 
+	     font-size: 13pt; 
+	     padding:5px;
+	     border: 1px solid #999;
+     }
+    .inner-container {
+    	margin-top: 10%;
+    }
+    #text-question {
+	    text-transform: uppercase;
+	    font-family: "Verdana", Times, Sans-serif;
+	    font-weight: bold;
+	    font-size: 15px;
+	    color: #595959;
+    }
+    div.selection {
+        margin: 0; 
+        width: 500px; 
+        padding:0;
+    }
+    button { 
+        text-transform: uppercase;
+	    font-family: "Verdana", Times, Sans-serif;
+	    font-size: 17px;
+    	font-weight: bold;
+        margin-top: 1ex; 
+        text-shadow: 1px 1px #457128;
+        letter-spacing: 1px;
+        transition: background-position .1s linear;
+        color: #FFF;
+        border-radius: 4px;
+        border: 1px solid #999; 
+        background-color: #51842e; 
+        //background-color:#6db33f; 
+        width: 130px;
+    	height: 30px;
+    } 
+    button:hover { 
+		border: 1px solid #457128; 
+        background-color:#457128;
+    }
+    button:focus {
+    	outline:0;
+    	background-color:  #68aa3c;
+    	border: 1px solid #5c9735;
+    	
+    }
+    </style>
+    <script>
+       	// TODO: move minimumNumberOfSelectedComponents to config
+       	minimumNumberOfSelectedComponents = 1;
+       	
+        $(function() {
+                // check the value of the question input
+                $("#question").focusout( function(){
+                	checkQuestionUriInput(this);
+                });
+                // check the selections within the component list
+                $("#submit").mouseover(function(){
+                	checkQuestionUriInput($("#question"));
+                });
+        });
+        
+        function checkQuestionUriInput(inputelement){
+                if( $(inputelement).val().trim() == "" ){
+                        $(inputelement).addClass("isempty");
+                } else {
+                        $(inputelement).removeClass("isempty");
+                } 
+        }
+        
+    </script>
