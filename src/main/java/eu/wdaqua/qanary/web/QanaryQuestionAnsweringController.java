@@ -147,7 +147,8 @@ public class QanaryQuestionAnsweringController {
 		//Send the question to the startquestionansweringwithtextquestion interface, select as a component wdaqua-core0
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("question", question);
-		map.add("componentlist[]", "Monolitic");
+		map.add("componentlist[]", "wdaqua-core0");
+		//map.add("componentlist[]", "Monolitic");
 		RestTemplate restTemplate = new RestTemplate();
 		String response = restTemplate.postForObject(host+":"+port+"/startquestionansweringwithtextquestion", map, String.class);
        		org.json.JSONObject json = new org.json.JSONObject(response);
