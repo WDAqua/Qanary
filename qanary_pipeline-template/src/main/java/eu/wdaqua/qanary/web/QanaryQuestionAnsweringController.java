@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.core.DatasetImpl;
@@ -141,48 +143,46 @@ public class QanaryQuestionAnsweringController {
 	public String qa(
 			@RequestParam(value = "question", required = true) final String question,  Model model)
 					throws URISyntaxException, ParseException, UnsupportedEncodingException {
-    	logger.info("Asked question {}"+question);
-    	UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(host+":"+port+"/startquestionansweringwithtextquestion");
-        logger.info("Service request " + service);
-        String body = "question="+URLEncoder.encode(question, "UTF-8")+"&" + "&componentlist[]=Monolitic";
-        RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.postForObject(service.build().encode().toUri(), body, String.class);
-        System.out.println("RESPONSE"+response);
-        QanaryMessage m = new QanaryMessage(response);
-        
-        String sparqlQuery =  "SELECT ?json "
-        		+ "FROM "+  m.getInGraph() + " "
+    		logger.info("Asked question {}"+question);
+		//Send the question to the startquestionansweringwithtextquestion interface, select as a component wdaqua-core0
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("question", question);
+		map.add("componentlist[]", "wdaqua-core0");
+		//map.add("componentlist[]", "Monolitic");
+		RestTemplate restTemplate = new RestTemplate();
+		String response = restTemplate.postForObject(host+":"+port+"/startquestionansweringwithtextquestion", map, String.class);
+       		org.json.JSONObject json = new org.json.JSONObject(response);
+		//TODO: replace previus line with QanaryQuestionAnsweringRun constructur
+		//Retrive the answers as JSON object from the triplestore
+        	String sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                        + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+                        + "SELECT ?json "
+        		+ "FROM <"+  json.get("graph").toString() + "> "
         		+ "WHERE { "
         		+ "  ?a a qa:AnnotationOfAnswerJSON . "
-                + "  ?a oa:hasBody ?json " 
+                	+ "  ?a oa:hasBody ?json " 
         		+ "}";
-        
-        ResultSet r = selectFromTripleStore(sparqlQuery, m.getEndpoint().toString());
-        if (r.hasNext()){
-        	String jsonAnswer=r.next().getLiteral("json").toString();
-        	
-        	//Compute the Answer
-        	/*String s="{ \"head\": { \"link\": [], \"vars\": [\"x\"] }, "
-        			+ "\"results\": { \"distinct\": false, \"ordered\": true, \"bindings\": [ "
-        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/OpenLink_Software\" }},"
-        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/Leipzig_University\" }},"
-        			+ "{ \"x\": { \"type\": \"uri\", \"value\": \"http://dbpedia.org/resource/University_of_Mannheim\" }} ] } }";*/
-        	//Parse the json result set using jena
-        	ResultSetFactory factory = new ResultSetFactory();
-        	InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
-        	ResultSet result= factory.fromJSON(in);
-        	List<String> var= result.getResultVars();
-        	List<String> list = new ArrayList<>();
-        	while (result.hasNext()){
-            	for (String v:var){
-            		list.add(result.next().get(v).toString());
-            	}
+        	ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
+        	//If there are answers give them back
+		if (r.hasNext()){
+        		String jsonAnswer=r.next().getLiteral("json").toString();
+                	logger.info("JSONAnSWER {}"+jsonAnswer);	
+        		//Parse the json result set using jena
+        		ResultSetFactory factory = new ResultSetFactory();
+        		InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
+        		ResultSet result= factory.fromJSON(in);
+        		List<String> var= result.getResultVars();
+        		List<String> list = new ArrayList<>();
+        		while (result.hasNext()){
+            			for (String v:var){
+            				list.add(result.next().get(v).toString());
+            			}
+        		}
+			//Wirte the ansers to the model such that it is available for the HTML template	
+        		model.addAttribute("answers", list);
+        		return "qa_output";
         	}
-        	
-        	model.addAttribute("answers", list);
-        	return "qa_output";
-        }
-        return "No answer";  	
+        	return "No answer";  	
 	}
     
     
