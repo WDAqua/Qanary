@@ -17,6 +17,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +40,13 @@ import eu.wdaqua.qanary.message.QanaryQuestionInformation;
  * @author AnBo
  */
 @Controller
-public class QanaryQuestionController {
 
+public class QanaryQuestionController {
+	@Value("${server.host}")
+	private String host;
+	@Value("${server.port}")
+	private String port;
+	
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
 
     private final QanaryConfigurator qanaryConfigurator;
@@ -126,7 +132,8 @@ public class QanaryQuestionController {
      */
     private String getHost() {
         // @TODO: replace by configuration
-        return "http://localhost:8080";
+    	
+        return host+":"+port;
     }
 
     /**
