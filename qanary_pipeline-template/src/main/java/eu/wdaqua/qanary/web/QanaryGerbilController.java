@@ -11,13 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.QuerySolution;
 
 import eu.wdaqua.qanary.message.QanaryMessage;
 
@@ -37,39 +41,39 @@ public class QanaryGerbilController {
 	private String port;
     
     @RequestMapping(value="/gerbil",  method = RequestMethod.POST, produces = "application/json")
-	public String gerbil(
-			@RequestParam(value = "query", required = true) final String question) throws URISyntaxException {
-    	logger.info("Asked question {}"+question);
-    	UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(host+":"+port+"/startquestionansweringwithtextquestion");
-        logger.info("Service request " + service);
-        //String body = "question="+URLEncoder.encode(question, "UTF-8")+"&componentlist[]=Monolitic";
-        String body = "question="+question+"&componentlist[]=Monolitic";
+	public ResponseEntity<?> gerbil(
+			@RequestParam(value = "query", required = true) final String query) throws URISyntaxException {
+    	logger.info("Asked question {}"+query);
+    	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.add("question", query);
+        map.add("componentlist[]", "wdaqua-core0");
         RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.postForObject(service.build().encode().toUri(), body, String.class);
-        System.out.println("RESPONSE"+response);
-        QanaryMessage m = new QanaryMessage(response);
-        
-        String sparqlQuery =  "SELECT ?sparql ?json "
-        		+ "FROM "+  m.getInGraph() + " "
+        String response = restTemplate.postForObject(host+":"+port+"/startquestionansweringwithtextquestion", map, String.class);
+        org.json.JSONObject json = new org.json.JSONObject(response);
+        String sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                        + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+			+ "SELECT ?sparql ?json "
+        		+ "FROM <"+  json.get("graph").toString() + "> "
         		+ "WHERE { "
         		+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
         		+ "  ?a oa:hasBody ?sparql . "
         		+ "  ?b a qa:AnnotationOfAnswerJSON . "
-                + "  ?b oa:hasBody ?json " 
+                	+ "  ?b oa:hasBody ?json " 
         		+ "}";
         
-        ResultSet r = selectFromTripleStore(sparqlQuery, m.getEndpoint().toString());
+        ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
         org.json.simple.JSONObject obj = new org.json.simple.JSONObject();
         String jsonAnswer="";
     	String sparqlAnswer="";
         if (r.hasNext()){
-        	jsonAnswer=r.next().getLiteral("json").toString();
-        	sparqlAnswer=r.next().getLiteral("sparql").toString();
+        	QuerySolution t = r.next();
+		jsonAnswer=t.getLiteral("json").toString();
+        	sparqlAnswer=t.getLiteral("sparql").toString();
         }
         obj.put("query", sparqlAnswer);
     	obj.put("answers", jsonAnswer);
     	
-    	return obj.toString();  	
+    	return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);  	
 	}
 
     
