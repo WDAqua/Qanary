@@ -2,6 +2,9 @@ package eu.wdaqua.qanary.web;
 
 import java.net.URISyntaxException;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.QuerySolution;
 
 import eu.wdaqua.qanary.message.QanaryMessage;
+
 
 /**
  * controller for processing questions, i.e., related to the question answering process
@@ -62,17 +66,39 @@ public class QanaryGerbilController {
         		+ "}";
         
         ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
-        org.json.simple.JSONObject obj = new org.json.simple.JSONObject();
         String jsonAnswer="";
     	String sparqlAnswer="";
         if (r.hasNext()){
         	QuerySolution t = r.next();
 		jsonAnswer=t.getLiteral("json").toString();
-        	sparqlAnswer=t.getLiteral("sparql").toString();
+        sparqlAnswer=t.getLiteral("sparql").toString();
         }
-        obj.put("query", sparqlAnswer);
-    	obj.put("answers", jsonAnswer);
-    	
+        //Generates the following output
+    	/*{
+ 		   "questions":[
+ 		      "question":{
+ 		         "answers":"...",
+ 		         "language":[
+ 		            {
+ 		               "SPARQL":"..."
+ 		            }
+ 		         ]
+ 		      }
+ 		   ]
+ 		}*/
+        JSONObject obj = new JSONObject();
+        JSONArray questions = new JSONArray();
+        JSONObject item = new JSONObject();
+        JSONObject question = new JSONObject();
+        JSONArray language = new JSONArray();
+        JSONObject sparql = new JSONObject();
+        sparql.put("SPARQL", sparqlAnswer);
+    	language.add(sparql);
+    	question.put("answers", jsonAnswer);
+    	question.put("language", language);
+    	item.put("question", question);
+    	questions.add(item);
+    	obj.put("questions", questions);
     	return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);  	
 	}
 
