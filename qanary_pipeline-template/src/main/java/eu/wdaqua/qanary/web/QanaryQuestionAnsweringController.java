@@ -143,8 +143,9 @@ public class QanaryQuestionAnsweringController {
 	public String qa(
 			@RequestParam(value = "question", required = true) final String question,  Model model)
 					throws URISyntaxException, ParseException, UnsupportedEncodingException {
-    		logger.info("Asked question {}"+question);
-		//Send the question to the startquestionansweringwithtextquestion interface, select as a component wdaqua-core0
+    	logger.info("Asked question {}"+question);
+    	model.addAttribute("question", question);
+    	//Send the question to the startquestionansweringwithtextquestion interface, select as a component wdaqua-core0
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("question", question);
 		map.add("componentlist[]", "wdaqua-core0");
@@ -154,35 +155,60 @@ public class QanaryQuestionAnsweringController {
        		org.json.JSONObject json = new org.json.JSONObject(response);
 		//TODO: replace previus line with QanaryQuestionAnsweringRun constructur
 		//Retrive the answers as JSON object from the triplestore
-        	String sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-                        + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-                        + "SELECT ?json "
-        		+ "FROM <"+  json.get("graph").toString() + "> "
-        		+ "WHERE { "
-        		+ "  ?a a qa:AnnotationOfAnswerJSON . "
-                	+ "  ?a oa:hasBody ?json " 
-        		+ "}";
+    	String sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+            + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+            + "SELECT ?json "
+    		+ "FROM <"+  json.get("graph").toString() + "> "
+    		+ "WHERE { "
+    		+ "  ?a a qa:AnnotationOfAnswerJSON . "
+            	+ "  ?a oa:hasBody ?json " 
+    		+ "}";
         	ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
         	//If there are answers give them back
-		if (r.hasNext()){
-        		String jsonAnswer=r.next().getLiteral("json").toString();
-                	logger.info("JSONAnSWER {}"+jsonAnswer);	
-        		//Parse the json result set using jena
-        		ResultSetFactory factory = new ResultSetFactory();
-        		InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
-        		ResultSet result= factory.fromJSON(in);
-        		List<String> var= result.getResultVars();
-        		List<String> list = new ArrayList<>();
-        		while (result.hasNext()){
-            			for (String v:var){
-            				list.add(result.next().get(v).toString());
-            			}
-        		}
-			//Wirte the ansers to the model such that it is available for the HTML template	
-        		model.addAttribute("answers", list);
-        		return "qa_output";
-        	}
-        	return "No answer";  	
+        String jsonAnswer = "";
+        if (r.hasNext()){
+        		jsonAnswer=r.next().getLiteral("json").toString();
+        		logger.info("JSONAnswer {}"+jsonAnswer);	
+		}
+        sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+                + "SELECT ?sparql "
+        		+ "FROM <"+  json.get("graph").toString() + "> "
+        		+ "WHERE { "
+        		+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
+                + "  ?a oa:hasBody ?json " 
+        		+ "}";
+        r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
+        String sparqlAnswer="";
+        if (r.hasNext()){
+    		sparqlAnswer=r.next().getLiteral("json").toString();
+    		logger.info("SPARQLAnswer {}"+jsonAnswer);	
+        }
+        if (jsonAnswer.equals("")==false && sparqlAnswer.equals("")==false ){
+        	//Parse the json result set using jena
+    		ResultSetFactory factory = new ResultSetFactory();
+    		InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
+    		ResultSet result= factory.fromJSON(in);
+    		List<String> var= result.getResultVars();
+    		List<String> list = new ArrayList<>();
+    		while (result.hasNext()){
+        			for (String v:var){
+        				list.add(result.next().get(v).toString());
+        			}
+    		}
+			//Write the answers to the model such that it is available for the HTML template	
+    		model.addAttribute("answers", list);
+    		//Format the SPARQL query nicely
+    		Query query = QueryFactory.create(sparqlAnswer);
+        	query.setPrefix("dbr", "http://dbpedia.org/resource/");
+        	query.setPrefix("dbp", "http://dbpedia.org/property/");
+        	query.setPrefix("dbo", "http://dbpedia.org/ontology/");
+        	String formatted=query.serialize();
+        	formatted=formatted.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
+        	model.addAttribute("sparqlQuery", formatted);
+        	return "qa_output";
+    	}
+    	return "No answer";  	
 	}
     
     
