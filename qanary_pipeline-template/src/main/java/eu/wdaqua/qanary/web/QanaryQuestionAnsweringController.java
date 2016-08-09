@@ -217,7 +217,10 @@ public class QanaryQuestionAnsweringController {
                 + "   oa:hasBody   <URIAnswer>   . " //
                 + "<anno2> a  oa:AnnotationOfQuestion; " //
                 + "   oa:hasTarget <" + questionUri.toString() + "> ; " //
-                + "   oa:hasBody   <URIDataset> " + "}}";
+                + "   oa:hasBody   <URIDataset>  ."
+                + "<anno3> a  oa:AnnotationOfQuestion; " //
+                + "   oa:hasTarget <" + questionUri.toString() + "> ; " //
+                + "   oa:hasBody   <Language> "+ "}}";
         logger.info("Sparql query " + sparqlquery);
         loadTripleStore(sparqlquery, triplestore);
 
