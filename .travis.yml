@@ -12,4 +12,4 @@ cache:
 install: true
 
 script:
-  - mvn clean install -DskipDockerBuild -DskipTests=true -Dmaven.javadoc.skip=true
+  - mvn clean install -DskipDockerBuild -DskipTests=true -Dmaven.javadoc.skip=true -B -V
