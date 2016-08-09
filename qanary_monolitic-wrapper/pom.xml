@@ -16,7 +16,7 @@
         <qanary.version>0.1.0</qanary.version>
         <docker.image.prefix>qanary</docker.image.prefix>
         <!-- Replace the name of the docker image to be generated -->
-        <docker.image.name>my-qanary-component</docker.image.name>
+        <docker.image.name>monolithic-wrapper</docker.image.name>
     </properties>
 
     <dependencies>
