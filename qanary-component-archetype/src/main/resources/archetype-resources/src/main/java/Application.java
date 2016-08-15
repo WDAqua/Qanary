@@ -14,12 +14,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 
-/**
- * Created by didier on 27.03.16.
- */
 @SpringBootApplication
 @EnableAutoConfiguration
-@ComponentScan("${package}")
+@ComponentScan("eu.wdaqua.qanary.component")
 public class Application {
 
 	/**
