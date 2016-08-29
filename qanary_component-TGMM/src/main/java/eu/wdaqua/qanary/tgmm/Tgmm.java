@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.tgm;
+package eu.wdaqua.qanary.tgmm;
 
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
@@ -41,12 +41,12 @@ import java.util.UUID;
 /**
  * represents a wrapper of the Stanford NER tool used here as a spotter
  *
- * @author Dennis Diefenbach
+ * @author Kuldeep
  */
 
 @Component
-public class Tgm extends QanaryComponent {
-    private static final Logger logger = LoggerFactory.getLogger(Tgm.class);
+public class Tgmm extends QanaryComponent {
+    private static final Logger logger = LoggerFactory.getLogger(Tgmm.class);
     //private static final String foxService = "http://fox-demo.aksw.org/api";
 
     /**
@@ -85,36 +85,33 @@ public class Tgm extends QanaryComponent {
 
         String xmlResp = "";
         try {
-            URL url = new URL(weburl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            // String temp = "text=<?xml version=\"1.0\"
-            // encoding=\"UTF-8\"?><annotation
-            // text=\""+question+"\"><surfaceForm name=\"published\"
-            // offset=\"23\" /><surfaceForm name=\"Heart\" offset=\"63\"
-            // /></annotation>";
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setRequestProperty("Content-Type",contentType);
+        	URL url = new URL(weburl);
+    		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    		
+    		connection.setRequestMethod("POST");
+    		connection.setDoOutput(true);
+    		
+    		connection.setRequestProperty("Content-Type", contentType);
+    				
+    		DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+    		wr.writeBytes(data);
+    		wr.flush();
+    		wr.close();
+    		
+    		
+    	
+    		BufferedReader in = new BufferedReader(
+    		        new InputStreamReader(connection.getInputStream()));
+    		String inputLine;
+    		StringBuffer response = new StringBuffer();
 
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-
-            wr.write(("text=" + data).getBytes("UTF-8"));
-            wr.flush();
-            wr.close();
-
-            // InputStreamReader ir = new
-            // InputStreamReader(connection.getInputStream());
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            xmlResp = response.toString();
+    		while ((inputLine = in.readLine()) != null) {
+    			response.append(inputLine);
+    		}
+    		in.close();
+    		xmlResp = response.toString();
+    		
+    		System.out.println("Curl Response: \n"+xmlResp);
             logger.info("Response spotlight service {}", xmlResp);
         } catch (Exception e) {
         }
@@ -131,6 +128,7 @@ public class Tgm extends QanaryComponent {
         // STEP1: Retrieve the named graph and the endpoint
         String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
         String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
+        System.out.println("Graph is" +namedGraph);
         logger.info("Endpoint: {}", endpoint);
         logger.info("InGraph: {}", namedGraph);
 
@@ -140,11 +138,6 @@ public class Tgm extends QanaryComponent {
                 + "SELECT ?questionuri "
                 + "FROM <" + namedGraph + "> "
                 + "WHERE {?questionuri a qa:Question}";
-        
-        String questionlang = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-                + "SELECT ?lang "
-                + "FROM <" + namedGraph + "> "
-                + "WHERE {?q a qa:Question ?anno has:target ?q .?anno has:body ?lang .?anno a qa:AnnotationOfQuestionLanguage}";
         
         ResultSet result = selectTripleStore(sparql, endpoint);
         String uriQuestion = result.next().getResource("questionuri").toString();
@@ -156,19 +149,36 @@ public class Tgm extends QanaryComponent {
         String question = responseEntity.getBody();
         logger.info("Question: {}", question);
         
+        String questionlang = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
+                + "SELECT ?lang "
+                + "FROM <" + namedGraph + "> "
+                + "WHERE {?q a qa:Question ."
+                + " ?anno <http://www.w3.org/ns/openannotation/core/hasTarget> ?q ."
+                + " ?anno <http://www.w3.org/ns/openannotation/core/hasBody> ?lang ."
+                + " ?anno a qa:AnnotationOfQuestionLanguage}";
+        
+        ResultSet result1 = selectTripleStore(questionlang, endpoint);
+        String language1 = result1.next().getLiteral("lang").toString();
+        logger.info("Langauge of the Question: {}",language1);
+        
+       
+        
+        /*ResponseEntity<String> responseEntity1 = restTemplate.getForEntity(questionlang + "/raw", String.class);
+        String question1 = responseEntity1.getBody();
+        logger.info("Question Language: {}", questionlang);*/
         //String langQuestion= result.getResource("lang")
        // retrieve language of the question from Named Graph
-        ResultSet result1 = selectTripleStore(questionlang, endpoint);
-        String langQuestion = result1.next().getResource("lang").toString();
-        logger.info("Language of the question: {}", langQuestion);
-        //Retrive the question itself
-        RestTemplate restTemplate1 = new RestTemplate();
-        //TODO: pay attention to "/raw" maybe change that
-        ResponseEntity<String> responseEntity1 = restTemplate1.getForEntity(langQuestion + "/raw", String.class);
-        String lang = responseEntity1.getBody();
-        logger.info("Language: {}", lang);
+        //ResultSet result1 = selectTripleStore(questionlang, endpoint);
+        //String langQuestion = result1.next().getResource("lang").toString();
         
-        System.out.println("lang:"+lang+"Question;"+question);
+        //Retrive the question itself
+        //RestTemplate restTemplate1 = new RestTemplate();
+        //TODO: pay attention to "/raw" maybe change that
+       // ResponseEntity<String> responseEntity1 = restTemplate1.getForEntity(langQuestion + "/raw", String.class);
+        //String lang = responseEntity1.getBody();
+        //logger.info("Language: {}", lang);
+        
+     
         // STEP3: Pass the information to the component and execute it
         //curl -d type=text -d task=NER -d output=N-Triples --data-urlencode "input=The foundation of the University of Leipzig in 1409 initiated the city's development into a centre of German law and the publishing industry, and towards being a location of the Reichsgericht (High Court), and the German National Library (founded in 1912). The philosopher and mathematician Gottfried Leibniz was born in Leipzig in 1646, and attended the university from 1661-1666." -H "Content-Type: application/x-www-form-urlencoded" http://fox-demo.aksw.org/api
         //Create body
@@ -186,15 +196,16 @@ public class Tgm extends QanaryComponent {
 		  	"language": "en"
 		   } http://ws.okbqa.org:1515/templategeneration/rocknrole
 		*/
-		url = "http://ws.okbqa.org:1515/templategeneration/rocknrole";
-		data = "{  \"string\":"+question+",\"language\":"+lang+"}";//"{  \"string\": \"Which river flows through Seoul?\",  \"language\": \"en\"}";
+		url = "http://ws.okbqa.org:2360/ko/tgm/stub/service";
+		data = "{  \"string\":\""+question+"\",\"language\":\""+language1+"\"}";//"{  \"string\": \"Which river flows through Seoul?\",  \"language\": \"en\"}";
 		System.out.println("\ndata :" +data);
 		System.out.println("\nComponent : 21");
 		String output1="";
 		try
 		{
-		output1= Tgm.runCurlPOSTWithParam(url, data, contentType);
+		output1= Tgmm.runCurlPOSTWithParam(url, data, contentType);
 		}catch(Exception e){}
+		System.out.println("The output template is:" +output1);
 		
         
 		//return output1;

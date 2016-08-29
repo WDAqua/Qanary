@@ -16,7 +16,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @SpringBootApplication
 @EnableAutoConfiguration
-@ComponentScan("eu.wdaqua.qanary.tgm")
+@ComponentScan("eu.wdaqua.qanary.component")
 public class Application {
 
 	/**

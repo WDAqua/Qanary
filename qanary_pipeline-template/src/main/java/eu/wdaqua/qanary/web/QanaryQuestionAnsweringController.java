@@ -212,15 +212,15 @@ public class QanaryQuestionAnsweringController {
         sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
                 + "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
                 + "INSERT DATA { " + "GRAPH " + namedGraphMarker + " { " //
-                + "<anno1> a  oa:AnnotationOfQuestion; " //
+                + "<anno1> a  qa:AnnotationOfQuestion; " //
                 + "   oa:hasTarget <" + questionUri.toString() + "> ;" //
                 + "   oa:hasBody   <URIAnswer>   . " //
-                + "<anno2> a  oa:AnnotationOfQuestion; " //
+                + "<anno2> a  qa:AnnotationOfQuestion; " //
                 + "   oa:hasTarget <" + questionUri.toString() + "> ; " //
                 + "   oa:hasBody   <URIDataset>  ."
-                + "<anno3> a  oa:AnnotationOfQuestion; " //
+                + "<anno3> a  qa:AnnotationOfQuestionLanguage; " //
                 + "   oa:hasTarget <" + questionUri.toString() + "> ; " //
-                + "   oa:hasBody   <Language> "+ "}}";
+                + "   oa:hasBody   \"en\" }}";
         logger.info("Sparql query " + sparqlquery);
         loadTripleStore(sparqlquery, triplestore);
 

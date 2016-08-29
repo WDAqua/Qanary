@@ -6,18 +6,19 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>qanary_pipeline-template</module>
+<module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
-    <module>qanary_component-TGΜ</module>
     <module>qanary_component-stanford-NER</module>
     <module>qanary_component-AGDISTIS-NED</module>
     <module>qanary_component-Alchemy-NERD</module>
     <module>qanary_component-Lucene-Linker-NERD</module>
     <module>qanary_component-DBpedia-Spotlight-NED</module>
     <module>qanary_component-DBpedia-Spotlight-NER</module>
-<module>qanary_component-FOX-NER</module>    
     <module>qanary_monolitic-wrapper</module>
     <module>qald-evaluator</module>
-    <module>batmanquestion.annotator</module>
+    <module>qanary_component-FOX-NER</module>
+    <module>batmanquestion.annotator</module>    
+     <module>qanary_component-TGM</module>
+    <module>qanary_component-TGMM</module>
   </modules>
 </project>
