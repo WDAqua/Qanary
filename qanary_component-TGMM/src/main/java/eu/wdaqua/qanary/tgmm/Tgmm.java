@@ -39,7 +39,7 @@ import java.net.URLDecoder;
 import java.util.UUID;
 
 /**
- * represents a wrapper of the Stanford NER tool used here as a spotter
+ * represents a wrapper of the template generator of OKBQA
  *
  * @author Kuldeep
  */
@@ -47,42 +47,13 @@ import java.util.UUID;
 @Component
 public class Tgmm extends QanaryComponent {
     private static final Logger logger = LoggerFactory.getLogger(Tgmm.class);
-    //private static final String foxService = "http://fox-demo.aksw.org/api";
 
     /**
-     * default processor of a QanaryMessage
+     * A method to fetch functionality using a CURL command
      */
     public static String runCurlPOSTWithParam(String weburl,String data,String contentType) throws Exception
 	{
-		/*URL url = new URL(weburl);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-		
-		connection.setRequestProperty("Content-Type", contentType);
-				
-		DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-		wr.writeBytes(data);
-		wr.flush();
-		wr.close();
-		
-		
-		String resp = "";
-		BufferedReader in = new BufferedReader(
-		        new InputStreamReader(connection.getInputStream()));
-		String inputLine;
-		StringBuffer response = new StringBuffer();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-		resp = response.toString();
-		
-		System.out.println("Curl Response: \n"+resp);*/
-    	
-
         String xmlResp = "";
         try {
         	URL url = new URL(weburl);
@@ -112,7 +83,7 @@ public class Tgmm extends QanaryComponent {
     		xmlResp = response.toString();
     		
     		System.out.println("Curl Response: \n"+xmlResp);
-            logger.info("Response spotlight service {}", xmlResp);
+            logger.info("Response  service {}", xmlResp);
         } catch (Exception e) {
         }
         return (xmlResp);
@@ -120,7 +91,7 @@ public class Tgmm extends QanaryComponent {
 	}
     
     public QanaryMessage process(QanaryMessage myQanaryMessage) {
-    	System.out.println("Kuldeep Singh");
+    	System.out.println("Let the pipeline begin");
         long startTime = System.currentTimeMillis();
         org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
         logger.info("Qanary Message: {}", myQanaryMessage);
@@ -132,7 +103,7 @@ public class Tgmm extends QanaryComponent {
         logger.info("Endpoint: {}", endpoint);
         logger.info("InGraph: {}", namedGraph);
 
-        // STEP2: Retrieve information that are needed for the computations
+        // STEP2: Retrieve information that are needed for the computations, in our case its Question and Langauge of the Question
         //Retrive the uri where the question is exposed
         String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
                 + "SELECT ?questionuri "
@@ -149,6 +120,8 @@ public class Tgmm extends QanaryComponent {
         String question = responseEntity.getBody();
         logger.info("Question: {}", question);
         
+        //Fetch the language of the Question from the triplestore.
+        
         String questionlang = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
                 + "SELECT ?lang "
                 + "FROM <" + namedGraph + "> "
@@ -156,50 +129,29 @@ public class Tgmm extends QanaryComponent {
                 + " ?anno <http://www.w3.org/ns/openannotation/core/hasTarget> ?q ."
                 + " ?anno <http://www.w3.org/ns/openannotation/core/hasBody> ?lang ."
                 + " ?anno a qa:AnnotationOfQuestionLanguage}";
-        
+        //Store the result in a variable language1
         ResultSet result1 = selectTripleStore(questionlang, endpoint);
         String language1 = result1.next().getLiteral("lang").toString();
         logger.info("Langauge of the Question: {}",language1);
         
        
         
-        /*ResponseEntity<String> responseEntity1 = restTemplate.getForEntity(questionlang + "/raw", String.class);
-        String question1 = responseEntity1.getBody();
-        logger.info("Question Language: {}", questionlang);*/
-        //String langQuestion= result.getResource("lang")
-       // retrieve language of the question from Named Graph
-        //ResultSet result1 = selectTripleStore(questionlang, endpoint);
-        //String langQuestion = result1.next().getResource("lang").toString();
-        
-        //Retrive the question itself
-        //RestTemplate restTemplate1 = new RestTemplate();
-        //TODO: pay attention to "/raw" maybe change that
-       // ResponseEntity<String> responseEntity1 = restTemplate1.getForEntity(langQuestion + "/raw", String.class);
-        //String lang = responseEntity1.getBody();
-        //logger.info("Language: {}", lang);
-        
-     
-        // STEP3: Pass the information to the component and execute it
-        //curl -d type=text -d task=NER -d output=N-Triples --data-urlencode "input=The foundation of the University of Leipzig in 1409 initiated the city's development into a centre of German law and the publishing industry, and towards being a location of the Reichsgericht (High Court), and the German National Library (founded in 1912). The philosopher and mathematician Gottfried Leibniz was born in Leipzig in 1646, and attended the university from 1661-1666." -H "Content-Type: application/x-www-form-urlencoded" http://fox-demo.aksw.org/api
-        //Create body
-       
-        
         String url = "";
 		String data = "";
 		String contentType = "application/json";
 		 
-		//http://repository.okbqa.org/components/21
+		//http://repository.okbqa.org/components/9
 		//Sample input	
 		/* 
 		 * {
 		  	"string": "Which river flows through Seoul?",
 		  	"language": "en"
-		   } http://ws.okbqa.org:1515/templategeneration/rocknrole
+		   } http://ws.okbqa.org:2360/ko/tgm/stub/service
 		*/
 		url = "http://ws.okbqa.org:2360/ko/tgm/stub/service";
 		data = "{  \"string\":\""+question+"\",\"language\":\""+language1+"\"}";//"{  \"string\": \"Which river flows through Seoul?\",  \"language\": \"en\"}";
 		System.out.println("\ndata :" +data);
-		System.out.println("\nComponent : 21");
+		System.out.println("\nComponent : 9");
 		String output1="";
 		try
 		{
@@ -209,7 +161,7 @@ public class Tgmm extends QanaryComponent {
 		
         
 		//return output1;
-
+// Now need to push output back to triplestore.
        /* // STEP4: Vocabulary alignment
         logger.info("Apply vocabulary alignment on outgraph");
         //Retrieve the triples from FOX
