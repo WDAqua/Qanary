@@ -29,7 +29,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -167,67 +168,102 @@ public class Tgm extends QanaryComponent {
 		}catch(Exception e){}
 		System.out.println("The output template is:" +output1);
 		
-        
+		/* once output is recieved, now the task is to parse the generated template, and store the needed
+		 * information which is Resource, Property, Resource Literal, and Class.
+		 * Then push this information back to triplestore
+		 * The below code before step 4 does parse the template. For parsing PropertyRetrival.java file 
+		 * is used, which is in the same package.
+		 * 
+		 * for this, we create a new object property of Property class.
+		 * 
+		 * */
+        Property property= PropertyRetrival.retrival(output1);
+        System.out.println("\nThe rdf:Resource List : "+property.resource.toString());
+		System.out.println("\nThe rdf:Property List : "+property.property.toString());
+		System.out.println("\nThe rdf:Literal List : "+property.resourceL.toString());
+		System.out.println("\nThe rdf:Class List : "+property.classRdf.toString());
+        // there will be multiple instances of above information ( ex. resource, class etc) so need List to store them.
 		
-		//return output1;
-         
-		
-		// NOTE: Now the work remaning is: To push this output back to Triplestore.
-		
-		//Hence below code is commented as it needs to be modified.
-		
+		List<MySelection> posLstl= new ArrayList<MySelection>();
+		//for resources
+				for(String wrd:property.resource){
+					MySelection ms = new MySelection();
+					ms.type= "AnnotationOfSpotInstance";
+					ms.rsc="SpecificResource";
+					ms.word= wrd;
+					ms.begin=question.indexOf(wrd);
+					ms.end=ms.begin+wrd.length();
+					posLstl.add(ms);
+				}
+				
+				// for property
+				for(String wrd:property.property){
+					MySelection ms = new MySelection();
+					ms.type= "AnnotationOfSpotProperty";
+					ms.rsc="SpecificProperty";
+					ms.word= wrd;
+					ms.begin=question.indexOf(wrd);
+					ms.end=ms.begin+wrd.length();
+					posLstl.add(ms);
+				}
+				
+				// for resource literal
+				for(String wrd:property.resourceL){
+					MySelection ms = new MySelection();
+					ms.type= "AnnotationOfSpotLiteral";
+					ms.rsc="SpecificLiteral";
+					ms.word= wrd;
+					ms.begin=question.indexOf(wrd);
+					ms.end=ms.begin+wrd.length();
+					posLstl.add(ms);
+				}
+				// for class
+				for(String wrd:property.classRdf){
+					MySelection ms = new MySelection();
+					ms.type= "AnnotationOfSpotClass";
+					ms.rsc="SpecificClass";
+					ms.word= wrd;
+					ms.begin=question.indexOf(wrd);
+					ms.end=ms.begin+wrd.length();
+					posLstl.add(ms);
+				}
+				
+				
+
 		
        /* // STEP4: Vocabulary alignment
-        logger.info("Apply vocabulary alignment on outgraph");
-        //Retrieve the triples from FOX
-        JSONObject obj = new JSONObject(response);
-        String triples = URLDecoder.decode(obj.getString("output"));
-
-        //Create a new temporary named graph
-        final UUID runID = UUID.randomUUID();
-        String namedGraphTemp = "urn:graph:" + runID.toString();
-
-        //Insert data into temporary graph
-        sparql = "INSERT DATA { GRAPH <" + namedGraphTemp + "> {" + triples + "}}";
-        logger.info(sparql);
-        loadTripleStore(sparql, endpoint);
-
-        //Align to QANARY vocabulary
-        sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
-                + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-                + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
-                + "INSERT { "
-                + "GRAPH <" + namedGraph + "> { "
-                + "  ?a a qa:AnnotationOfSpotInstance . "
-                + "  ?a oa:hasTarget [ "
-                + "           a    oa:SpecificResource; "
-                + "           oa:hasSource    <" + uriQuestion + ">; "
-                + "           oa:hasSelector  [ "
-                + "                    a oa:TextPositionSelector ; "
-                + "                    oa:start ?begin ; "
-                + "                    oa:end  ?end "
-                + "           ] "
-                + "  ] ; "
-                + "     oa:annotatedBy <http://fox-demo.aksw.org> ; "
-                + "	    oa:AnnotatedAt ?time  "
-                + "}} "
-                + "WHERE { "
-                + "	SELECT ?a ?s ?begin ?end ?time "
-                + "	WHERE { "
-                + "		graph <" + namedGraphTemp + "> { "
-                + "			?s	<http://ns.aksw.org/scms/beginIndex> ?begin . "
-                + "			?s  <http://ns.aksw.org/scms/endIndex> ?end . "
-                + "			BIND (IRI(str(RAND())) AS ?a) ."
-                + "			BIND (now() as ?time) "
-                + "		} "
-                + "	} "
-                + "}";
-        loadTripleStore(sparql, endpoint);
-
-        //Drop the temporary graph
-        sparql = "DROP SILENT GRAPH <" + namedGraphTemp + ">";
-        loadTripleStore(sparql, endpoint);
 */
+				logger.info("Apply vocabulary alignment on outgraph");
+	            for (MySelection l : posLstl) {
+	                sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+	                        + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+	                        + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+	                        + "INSERT { "
+	                        + "GRAPH <" + namedGraph + "> { "
+	                        + "  ?a a qa:"+l.type+" . "
+	                        + "  ?a oa:hasTarget [ "
+	                        + "           a    oa:"+l.rsc+";"
+	                        + "           oa:hasSource    <" + uriQuestion + ">; "
+	                        + "           oa:hasSelector  [ "
+	                        + "                    a oa:TextPositionSelector ; "
+	                        + "                    oa:start \"" + l.begin + "\"^^xsd:nonNegativeInteger ; "
+	                        + "                    oa:end  \"" + l.end + "\"^^xsd:nonNegativeInteger  "
+	                        + "           ] "
+	                        + "  ] . "
+	                        + "  ?a oa:hasBody <" + l.word + "> ;"
+	                        + "     oa:annotatedBy <http://agdistis.aksw.org> ; "
+	                        + "	    oa:AnnotatedAt ?time  "
+	                        + "}} "
+	                        + "WHERE { "
+	                        + "BIND (IRI(str(RAND())) AS ?a) ."
+	                        + "BIND (now() as ?time) "
+	                        + "}";
+	                logger.info("Sparql query {}", sparql);
+	                loadTripleStore(sparql, endpoint);
+	            }
+	           
+	            
+	            
         long estimatedTime = System.currentTimeMillis() - startTime;
         logger.info("Time: {}", estimatedTime);
 
@@ -250,7 +286,10 @@ public class Tgm extends QanaryComponent {
         public int begin;
         public int end;
     }
+    
+
 
 }
+
 
 
