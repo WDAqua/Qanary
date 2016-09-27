@@ -18,5 +18,6 @@
     <module>qald-evaluator</module>
     <module>qanary_component-FOX-NER</module>
     <module>batmanquestion.annotator</module>
+    <module>qanary_component-language-detection</module>
   </modules>
 </project>
