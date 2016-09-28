@@ -2,9 +2,7 @@ package LanguageDetection;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
 
-import com.cybozu.labs.langdetect.LangDetectException;
 import eu.wdaqua.qanary.component.QanaryQuestion;
 import eu.wdaqua.qanary.component.QanaryUtils;
 
@@ -21,16 +19,10 @@ import com.cybozu.labs.langdetect.Detector;
 @Component
 public class LanguageDetection extends QanaryComponent {
 	private static final Logger logger = LoggerFactory.getLogger(LanguageDetection.class);
-    //The my.properties file is created throught the pom.xml file
-    java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("config/my.properties");
-    private Properties props = new Properties();
-    //private Detector detector;
-    private boolean first=true;
 
 	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
         long startTime = System.currentTimeMillis();
-        props.load(is);
         org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
         logger.info("Qanary Message: {}", myQanaryMessage);
 
@@ -43,12 +35,6 @@ public class LanguageDetection extends QanaryComponent {
         logger.info("Question: {}", myQuestion);
 
 		//STEP2: The question is send to the language recognition library
-        logger.info("Directory with profiles: {}", props.getProperty("profile_directory"));
-        if (first==true){
-            //To avoid error that the profiles are loaded
-            DetectorFactory.loadProfile(props.getProperty("profile_directory"));
-            first=false;
-        }
         Detector detector = DetectorFactory.create();
         detector.append(myQuestion);
         String lang = detector.detect();
