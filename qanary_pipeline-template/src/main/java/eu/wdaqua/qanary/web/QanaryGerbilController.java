@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -43,7 +47,13 @@ public class QanaryGerbilController {
 	private String host;
 	@Value("${server.port}")
 	private String port;
-    
+  
+    //Set this to allow browser requests from other websites
+    @ModelAttribute
+    public void setVaryResponseHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }    
+ 
     @RequestMapping(value="/gerbil",  method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query) throws URISyntaxException {
