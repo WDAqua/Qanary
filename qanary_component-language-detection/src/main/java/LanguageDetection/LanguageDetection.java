@@ -57,12 +57,10 @@ public class LanguageDetection extends QanaryComponent {
                     + "     oa:annotatedBy <https://code.google.com/archive/p/language-detection/> ; "
                     + "	    oa:AnnotatedAt ?time . "
                     + "}} "
-                    + "WHERE { "
-                    + "	SELECT ?time "
-                    + "	WHERE { "
-                    + "			BIND (now() as ?time) "
-                    + "		} "
-                    + "}";
+                        + "WHERE { "
+                        + "    BIND (IRI(str(RAND())) AS ?a) ."
+                        + "    BIND (now() as ?time) "
+                        + "}";
             myQanaryUtils.updateTripleStore(sparql);
 
 		} catch (MalformedURLException e) {
