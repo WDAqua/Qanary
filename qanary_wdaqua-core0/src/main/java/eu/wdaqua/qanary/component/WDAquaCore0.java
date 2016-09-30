@@ -36,14 +36,24 @@ public class WDAquaCore0 extends QanaryComponent {
         // STEP 1: the question is retrived
         QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
         String myQuestion = myQanaryQuestion.getRawData();
+	logger.info("Question: {}",myQuestion);	
 
         // STEP 2: answer the question and give back the sparql query and the answers in RDF json http://www.w3.org/TR/sparql11-results-json/
         Execute e = new Execute();
 	String sparqlAnswer = e.go(myQuestion);
-        ResultSet result = myQanaryUtils.selectFromTripleStore(sparqlAnswer, "http://dbpedia.org/sparql"); 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ResultSetFormatter.outputAsJSON(outputStream, result);
-        String json = new String(outputStream.toByteArray());
+        Query query = QueryFactory.create(sparqlAnswer);
+        String json;
+        if (query.isAskType()){
+                Boolean result = myQanaryUtils.askTripleStore(sparqlAnswer, "http://dbpedia.org/sparql");
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ResultSetFormatter.outputAsJSON(outputStream, result);
+                json = new String(outputStream.toByteArray(), "UTF-8");
+        } else {
+                ResultSet result = myQanaryUtils.selectFromTripleStore(sparqlAnswer, "http://dbpedia.org/sparql");
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ResultSetFormatter.outputAsJSON(outputStream, result);
+                json = new String(outputStream.toByteArray(), "UTF-8");
+        }
         logger.info("Generated SPARQL query: {} ", sparqlAnswer);
         logger.info("Generated answers in RDF json: {}", json);
         
