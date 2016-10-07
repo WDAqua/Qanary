@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Qanary Helper: Start question answering with a new textual question</title> 
+ 	<meta th:replace="lib/header"/>        
+</head>
+<body>
+        <h1>Start a QA process with a new audio question</h1>
+        <form method="POST" enctype="multipart/form-data" action="/startquestionansweringwithaudioquestion">
+            <table>
+                <tr><td>File to upload:</td><td><input type="file" name="question" /></td></tr>
+            </table>
+            <div th:include="lib/reusableforms::componentlistcheckboxes"/>
+            <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
+        </form>
+ 		<div th:replace="lib/footer"/>        
+</body>
+</html>

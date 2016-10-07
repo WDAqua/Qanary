@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.web;
 
+import com.hp.hpl.jena.tdb.base.StorageException;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
@@ -112,6 +115,68 @@ public class QanaryQuestionController {
         final BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)));
         stream.write(questionstring.getBytes(Charset.defaultCharset()));
         stream.close();
+
+        final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
+        logger.info("uriOfQuestion: " + uriOfQuestion);
+
+        return new QanaryQuestionCreated(filename, uriOfQuestion);
+    }
+
+    /**
+     * synchronous call to start the QA process (POST) with an audio file, return the URL of the created question
+     */
+    @RequestMapping(value = "/question_audio", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> createAudioQuestion(
+            @RequestParam(value = "question", required = true) final MultipartFile file) {
+
+        logger.info("new audio file recived: " + file.getName());
+        // URI uriOfQuestion;
+        QanaryQuestionCreated responseMessage;
+        try {
+            // uriOfQuestion = this.storeQuestion(questionstring);
+            responseMessage = this.storeAudioQuestion(file);
+        } catch (IOException e) {
+            // will be caused by problems with file writing
+            e.printStackTrace();
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (URISyntaxException e) {
+            // should be caused by a bad URI
+            e.printStackTrace();
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        // final QanaryQuestionCreated responseMessage = new
+        // QanaryQuestionCreated(uriOfQuestion);
+
+        // send a HTTP 201 CREATED message back
+        return new ResponseEntity<QanaryQuestionCreated>(responseMessage, HttpStatus.CREATED);
+    }
+
+    public QanaryQuestionCreated storeAudioQuestion(MultipartFile file) throws IOException, URISyntaxException {
+
+        // store the received question in a file
+        final String filename = UUID.randomUUID().toString();
+        final String filepath = Paths.get(this.getDirectoryForStoringQuestionRawData(), filename).toString();
+
+        // check if question directory is actually existing
+        if (!Files.isDirectory(Paths.get(this.getDirectoryForStoringQuestionRawData()))) {
+            File dir = new File(this.getDirectoryForStoringQuestionRawData());
+            dir.mkdirs();
+            logger.warn("created directory for storing questions: {}", this.getDirectoryForStoringQuestionRawData());
+        } else {
+            logger.warn("directory exists: {}", this.getDirectoryForStoringQuestionRawData());
+        }
+
+        // Save the file locally
+        try {
+            if (file.isEmpty()) {
+                throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
+            }
+            Files.copy(file.getInputStream(), Paths.get(this.getDirectoryForStoringQuestionRawData(), filename));
+        } catch (IOException e) {
+            throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
+        }
 
         final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
         logger.info("uriOfQuestion: " + uriOfQuestion);
