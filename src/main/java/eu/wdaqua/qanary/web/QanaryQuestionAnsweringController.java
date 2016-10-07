@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.core.DatasetImpl;
@@ -106,6 +107,36 @@ public class QanaryQuestionAnsweringController {
             throw new QanaryExceptionQuestionNotProvided();
         } else {
             QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
+            return this.questionanswering(qanaryQuestionCreated.getQuestionURI().toURL(), componentsToBeCalled);
+        }
+    }
+
+    /**
+     * a simple HTML input form for starting a question answering process with a audio question
+     */
+    @RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.GET)
+    public String startquestionansweringwithaudioquestion() {
+        return "startquestionansweringwithaudioquestion";
+    }
+
+    /**
+     * start a process directly with an audio question
+     */
+    @RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> startquestionansweringwithaudioquestion(
+            @RequestParam(value = "question", required = true) final MultipartFile question,
+            @RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
+            throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
+            IOException, QanaryExceptionQuestionNotProvided {
+
+        logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
+
+        // you cannot pass without a question
+        if (question.isEmpty()) {
+            throw new QanaryExceptionQuestionNotProvided();
+        } else {
+            QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(question);
             return this.questionanswering(qanaryQuestionCreated.getQuestionURI().toURL(), componentsToBeCalled);
         }
     }
