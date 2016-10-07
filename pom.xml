@@ -19,6 +19,6 @@
     <module>qanary_component-FOX-NER</module>
     <module>batmanquestion.annotator</module>
     <module>qanary_component-language-detection</module>
-    <module>qanary_component-speach-recognition-kaldi</module>
+    <module>qanary_component-speach-recognition</module>
   </modules>
 </project>
