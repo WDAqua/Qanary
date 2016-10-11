@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -242,11 +243,12 @@ public class QanaryQuestionController {
      */
     @RequestMapping(value = "/question/{questionid}/raw", method = RequestMethod.GET, produces = MediaType.ALL_VALUE)
     @ResponseBody
-    public String getQuestionRawData(@PathVariable final String questionid) throws IOException {
+    public FileSystemResource getQuestionRawData(@PathVariable final String questionid) throws IOException {
 
         // TODO: move outside of this class
         final String filename = Paths.get(this.getDirectoryForStoringQuestionRawData(), questionid).toString();
-        String content = null;
+        return new FileSystemResource(filename); 
+	/*String content = null;
         final File file = new File(filename);
         FileReader reader = null;
         try {
@@ -268,7 +270,7 @@ public class QanaryQuestionController {
         }
 
         logger.info("getQuestionRawData: {}", content);
-        return content;
+        return content;*/
     }
 
     /**
