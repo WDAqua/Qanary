@@ -11,8 +11,8 @@ public class QanaryConfiguration {
     // TODO should move to commons package
     public static final String annotatequestion = "/annotatequestion";
     public static final String sparql = "/sparql";
-    public static final String questionRawDataUrlSuffix = "/rawdata";
-    public static final String questionRawDataProperyName = "rawdata";
+    public static final String questionRawDataUrlSuffix = "/raw";
+    public static final String questionRawDataProperyName = "raw";
 
     private static URI serviceUri;
 
