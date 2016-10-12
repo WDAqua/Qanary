@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,7 +108,23 @@ public class QanaryQuestionAnsweringController {
             throw new QanaryExceptionQuestionNotProvided();
         } else {
             QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
-            return this.questionanswering(qanaryQuestionCreated.getQuestionURI().toURL(), componentsToBeCalled);
+            QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
+            //The question is a text question and therefore this annotation is created
+            String sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                    + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
+                    + "INSERT { "
+                    + "GRAPH <" + myQanaryMessage.getInGraph() + "> { "
+                    + "  ?a a qa:AnnotationOfTextRepresentation . "
+                    + "  ?a oa:hasTarget <" + qanaryQuestionCreated.getQuestionURI().toString() + "> . "
+                    + "  ?a oa:hasBody <" + qanaryQuestionCreated.getQuestionURI().toString() + "> . "
+                    + "	 ?a oa:annotatedAt ?time  "
+                    + "}} WHERE { "
+                    + "     BIND (IRI(str(RAND())) AS ?a) ."
+                    + "     BIND (now() as ?time) "
+                    + "}";
+            loadTripleStore(sparqlquery, myQanaryMessage.getEndpoint());
+            return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
         }
     }
 
@@ -137,7 +154,23 @@ public class QanaryQuestionAnsweringController {
             throw new QanaryExceptionQuestionNotProvided();
         } else {
             QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(question);
-            return this.questionanswering(qanaryQuestionCreated.getQuestionURI().toURL(), componentsToBeCalled);
+            QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
+            //The question is an audio question and therefore this annotation is created
+            String sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+                    + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
+                    + "INSERT { "
+                    + "GRAPH <" + myQanaryMessage.getInGraph() + "> { "
+                    + "  ?a a qa:AnnotationOfAudioRepresentation . "
+                    + "  ?a oa:hasTarget <" + qanaryQuestionCreated.getQuestionURI().toString() + "> . "
+                    + "  ?a oa:hasBody <" + qanaryQuestionCreated.getQuestionURI().toString() + "> . "
+                    + "	 ?a oa:annotatedAt ?time  "
+                    + "}} WHERE { "
+                    + "     BIND (IRI(str(RAND())) AS ?a) ."
+                    + "     BIND (now() as ?time) "
+                    + "}";
+            loadTripleStore(sparqlquery, myQanaryMessage.getEndpoint());
+            return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
         }
     }
 
@@ -177,32 +210,32 @@ public class QanaryQuestionAnsweringController {
      */
     @RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    public ResponseEntity<?> questionanswering(@RequestParam(value = "question", required = true) final URL questionUri,
-                                               @RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
+    public ResponseEntity<?> questionanswering(@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled,
+                                               @RequestBody String message)
             throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
-        logger.info("calling component: {} with question {}", componentsToBeCalled, questionUri);
 
-        // Create a new named graph and insert it into the triplestore
+        QanaryMessage myQanaryMessage = new QanaryMessage(message);
+        //TODO: Think if the question is really necessary, if yes place it here.
+        URI question = null;
         final UUID runID = UUID.randomUUID();
-        URI namedGraph = new URI("urn:graph:" + runID.toString());
-
-        URI endpoint = this.initGraphInTripelStore(namedGraph, questionUri);
-
-        QanaryMessage myQanaryMessage = new QanaryMessage(endpoint, namedGraph);
+        logger.info("calling component: {} on named graph {} and endpoint {} ", componentsToBeCalled, myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph());
 
         // execute synchronous calls to all components with the same message
         // TODO: execute asynchronously?
         qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
 
-        QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, questionUri.toURI(), endpoint,
-                namedGraph, qanaryConfigurator);
+        QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, question, myQanaryMessage.getEndpoint(),
+            myQanaryMessage.getInGraph(), qanaryConfigurator);
         return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
     }
 
     /**
      * init the graph in the triplestore (c.f., applicationproperties)
      */
-    private URI initGraphInTripelStore(URI namedGraph, final URL questionUri) {
+    private QanaryMessage initGraphInTripelStore(final URL questionUri) throws URISyntaxException {
+        // Create a new named graph and insert it into the triplestore
+        URI namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
+
         final URI triplestore = qanaryConfigurator.getEndpoint();
         logger.info("Triplestore " + triplestore);
         String sparqlquery = "";
@@ -251,8 +284,7 @@ public class QanaryQuestionAnsweringController {
                 + "   oa:hasBody   <URIDataset> " + "}}";
         logger.info("Sparql query " + sparqlquery);
         loadTripleStore(sparqlquery, triplestore);
-
-        return triplestore;
+        return new QanaryMessage(triplestore, namedGraph);
     }
 
     /**

@@ -30,10 +30,9 @@ public class Monolitic extends QanaryComponent {
 
         // the class QanaryUtils provides some helpers for standard tasks
         QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
-
+        QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
         // STEP 1: the question is retrived
-        QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
-        String myQuestion = myQanaryQuestion.getRawData();
+        String myQuestion = myQanaryQuestion.getTextualRepresentation();
 
         // STEP 2: answer the question and give back the sparql query and the answers in RDF json http://www.w3.org/TR/sparql11-results-json/
         String sparqlAnswer = "SELECT DISTINCT ?x WHERE { "

@@ -28,10 +28,10 @@ public class LanguageDetection extends QanaryComponent {
 
         //STEP1: Retrieve the question
         QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
+        QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
 
         // question string is required as input for the service call
-        QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
-        String myQuestion = myQanaryQuestion.getRawData();
+        String myQuestion = myQanaryQuestion.getTextualRepresentation();
         logger.info("Question: {}", myQuestion);
 
 		//STEP2: The question is send to the language recognition library
@@ -52,7 +52,7 @@ public class LanguageDetection extends QanaryComponent {
                     + "INSERT { "
                     + "GRAPH <" + myQanaryUtils.getInGraph() + "> { "
                     + "  ?a a qa:AnnotationOfQuestionLanguage ; "
-                    + "     oa:hasTarget <" + myQanaryUtils.getQuestion().getUri() + ">; "
+                    + "     oa:hasTarget <" + myQanaryQuestion.getUri() + ">; "
                     + "     oa:hasSource \"" + lang +"\" ;"
                     + "     oa:annotatedBy <https://code.google.com/archive/p/language-detection/> ; "
                     + "	    oa:AnnotatedAt ?time . "

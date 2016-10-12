@@ -46,10 +46,10 @@ public class Alchemy extends QanaryComponent {
 
         // the class QanaryUtils provides some helpers for standard tasks
         QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
+        QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
 
         // question string is required as input for the service call
-        QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
-        String myQuestion = myQanaryQuestion.getRawData();
+        String myQuestion = myQanaryQuestion.getTextualRepresentation();
 
         // STEP 1: execute a service call to the Alchemy service
         String xmlRawData = this.getDataFromAlchemyService(myQuestion);
@@ -60,7 +60,7 @@ public class Alchemy extends QanaryComponent {
 
         // STEP 3: save the text selectors with their disambiguations as
         // annotations of the current question to the triplestore
-        myQanaryUtils.addAnnotations(discoveredNamedEntities);
+        myQanaryQuestion.addAnnotations(discoveredNamedEntities);
 
         return myQanaryMessage;
     }

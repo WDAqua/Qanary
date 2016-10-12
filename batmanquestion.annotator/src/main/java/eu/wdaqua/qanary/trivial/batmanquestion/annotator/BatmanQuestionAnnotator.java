@@ -39,16 +39,16 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 
         // TODO: wait for the fully working implementation in QanaryComponent
         QanaryUtils utils = this.getUtils(myQanaryMessage);
-        QanaryQuestion<String> question = utils.getQuestion();
-        logger.info("question: {} from {}", question.getRawData(), question.getUri());
+        QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
+        logger.info("question: {} from {}", myQanaryQuestion.getTextualRepresentation(), myQanaryQuestion.getUri());
 
-        if (question.getRawData().toLowerCase().compareTo(questionToBeAccepted.toLowerCase()) == 0) {
-            logger.info("question recognized that can be processed: {}", question.getRawData());
+        if (myQanaryQuestion.getTextualRepresentation().toLowerCase().compareTo(questionToBeAccepted.toLowerCase()) == 0) {
+            logger.info("question recognized that can be processed: {}", myQanaryQuestion.getTextualRepresentation());
             logger.info("apply vocabulary alignment on outgraph for the Batman question");
-            this.annotateBatmanQuestionWithPredefinedEntities(utils);
+            this.annotateBatmanQuestionWithPredefinedEntities(myQanaryQuestion);
         } else {
             logger.warn("question \"{}\" cannot be processed from this exemplary component, only \"{}\" is accepted.",
-                    question.getRawData(), this.questionToBeAccepted);
+                    myQanaryQuestion.getTextualRepresentation(), this.questionToBeAccepted);
         }
 
         return myQanaryMessage;
@@ -57,13 +57,13 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
     /**
      * annotate two entities as expected by QALD-6: "Who created Batman?" (created, Batman)
      */
-    private void annotateBatmanQuestionWithPredefinedEntities(QanaryUtils utils) throws Exception {
+    private void annotateBatmanQuestionWithPredefinedEntities(QanaryQuestion q) throws Exception {
         List<TextPositionSelector> selectors = new LinkedList<>();
 
         selectors.add(new TextPositionSelector(4, 10));
         selectors.add(new TextPositionSelector(12, 17));
 
-        utils.addAnnotations(selectors);
+        q.addAnnotations(selectors);
     }
 
 }
