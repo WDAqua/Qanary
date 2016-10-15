@@ -1,6 +1,8 @@
 package eu.wdaqua.qanary.web;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,6 +35,7 @@ import com.hp.hpl.jena.update.UpdateProcessor;
 import com.hp.hpl.jena.update.UpdateRequest;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.business.QanaryQuestion;
 import eu.wdaqua.qanary.business.QanaryQuestionWithAudio;
 import eu.wdaqua.qanary.business.QanaryQuestionWithText;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
@@ -96,6 +99,13 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * start a process directly with a textual question
+	 * 
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
@@ -103,7 +113,8 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = "question", required = true) final String question,
 			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
 					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
-					IOException, QanaryExceptionQuestionNotProvided {
+					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
+					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 
@@ -112,12 +123,8 @@ public class QanaryQuestionAnsweringController {
 			throw new QanaryExceptionQuestionNotProvided();
 		} else {
 			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
-			QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
-			// The question is a text question, it needs to be created, although
-			// we are not using it here
-			@SuppressWarnings("unused")
-			QanaryQuestionWithText myQanaryQuestionWithText = new QanaryQuestionWithText(myQanaryMessage.getEndpoint(),
-					myQanaryMessage.getInGraph(), qanaryQuestionCreated.getQuestionURI(), this);
+			QanaryMessage myQanaryMessage = createQuestionInTriplestore(qanaryQuestionCreated,
+					QanaryQuestionWithText.class);
 			return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
 		}
 	}
@@ -133,6 +140,13 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * start a process directly with an audio question
+	 * 
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
@@ -140,23 +154,57 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = "question", required = true) final MultipartFile question,
 			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
 					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
-					IOException, QanaryExceptionQuestionNotProvided {
+					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
+					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 
-		// you cannot pass without a question
+		// you cannot pass without a valid question
 		if (question.isEmpty()) {
 			throw new QanaryExceptionQuestionNotProvided();
 		} else {
 			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(question);
-			QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
-			// The question is an audio question and therefore this annotation
-			// is created
-			@SuppressWarnings("unused")
-			QanaryQuestionWithAudio myQanaryQuestionWithAudio = new QanaryQuestionWithAudio(myQanaryMessage.getEndpoint(),
-					myQanaryMessage.getInGraph(), qanaryQuestionCreated.getQuestionURI(), this);
+			QanaryMessage myQanaryMessage = createQuestionInTriplestore(qanaryQuestionCreated,
+					QanaryQuestionWithAudio.class);
 			return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
 		}
+	}
+
+	/**
+	 * creates question in triplestore, including the correct annotation
+	 * depending on the passed class (needs to be a concrete implementation of
+	 * {@link QanaryQuestion}
+	 * 
+	 * @param qanaryQuestionCreated
+	 * @param myQanaryQuestionClass
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws MalformedURLException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
+	private QanaryMessage createQuestionInTriplestore(QanaryQuestionCreated qanaryQuestionCreated,
+			Class<? extends QanaryQuestion> myQanaryQuestionClass)
+					throws URISyntaxException, MalformedURLException, InstantiationException, IllegalAccessException,
+					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
+
+		// The question has a specific representation, therefore an anonymous
+		// type is used here, prepare anonymous constructor for {@link
+		// QanaryQuestion} class
+		Class[] argTypes = new Class[4];
+		argTypes[0] = URI.class;
+		argTypes[1] = URI.class;
+		argTypes[2] = URI.class;
+		argTypes[3] = this.getClass();
+		myQanaryQuestionClass.getDeclaredConstructor(argTypes).newInstance(myQanaryMessage.getEndpoint(),
+				myQanaryMessage.getInGraph(), qanaryQuestionCreated.getQuestionURI(), this);
+
+		return myQanaryMessage;
 	}
 
 	/**
@@ -169,7 +217,7 @@ public class QanaryQuestionAnsweringController {
 	}
 
 	/**
-	 * exposing the qanary ontology
+	 * exposing the Qanary ontology
 	 */
 	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
@@ -177,13 +225,14 @@ public class QanaryQuestionAnsweringController {
 		return new ClassPathResource("/qanaryOntology.ttl");
 	}
 
-	/*
-	 * @ResponseBody public String plaintext(HttpServletResponse response) {
-	 * response.setContentType("text/turtle");
-	 * response.setCharacterEncoding("UTF-8"); return "qanaryOntology"; }
-	 * 
-	 */
 
+	/**
+	 * returns information about the run identified by the provided runId 
+	 * 
+	 * @param runId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(@PathVariable(value = "runId") final UUID runId) throws Exception {
@@ -219,6 +268,8 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * init the graph in the triplestore (c.f., applicationproperties)
+	 * 
+	 * TODO: needs to be extracted
 	 */
 	private QanaryMessage initGraphInTripelStore(final URL questionUri) throws URISyntaxException {
 		// Create a new named graph and insert it into the triplestore
