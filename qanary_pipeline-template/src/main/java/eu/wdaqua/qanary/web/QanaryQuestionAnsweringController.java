@@ -225,9 +225,8 @@ public class QanaryQuestionAnsweringController {
 		return new ClassPathResource("/qanaryOntology.ttl");
 	}
 
-
 	/**
-	 * returns information about the run identified by the provided runId 
+	 * returns information about the run identified by the provided runId
 	 * 
 	 * @param runId
 	 * @return
@@ -246,12 +245,12 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(
 			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled,
-			@RequestBody String message)
-					throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
+			@RequestBody String jsonMessage // expected is a JSON message that
+										// contains ingraph, outgraph, endpoint
+	) throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 
-		QanaryMessage myQanaryMessage = new QanaryMessage(message);
-		// TODO: Think if the question is really necessary, if yes place it
-		// here.
+		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
+		// TODO: fetch the URI of the available question in the triplestore 
 		URI question = null;
 		final UUID runID = UUID.randomUUID();
 		logger.info("calling component: {} on named graph {} and endpoint {} ", componentsToBeCalled,
