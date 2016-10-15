@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.speach;
+package eu.wdaqua.qanary.speech;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -24,7 +24,7 @@ public class Application {
 	*/
 	@Bean
 	public QanaryComponent qanaryComponent() {
-		return new SpeachRecognitionKaldi();
+		return new SpeechRecognitionKaldi();
 	}
 	
 	

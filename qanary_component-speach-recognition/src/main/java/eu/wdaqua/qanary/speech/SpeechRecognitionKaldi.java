@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.speach;
+package eu.wdaqua.qanary.speech;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,8 +27,8 @@ import eu.wdaqua.qanary.component.QanaryQuestion;
 import eu.wdaqua.qanary.component.QanaryUtils;
 
 @Component
-public class SpeachRecognitionKaldi extends QanaryComponent {
-	private static final Logger logger = LoggerFactory.getLogger(SpeachRecognitionKaldi.class);
+public class SpeechRecognitionKaldi extends QanaryComponent {
+	private static final Logger logger = LoggerFactory.getLogger(SpeechRecognitionKaldi.class);
 	@Value("${spring.boot.admin.url}")
 	private String qanaryHost;
 	@Value("${kaldi.url}")
