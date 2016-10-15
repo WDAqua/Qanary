@@ -248,29 +248,6 @@ public class QanaryQuestionController {
         // TODO: move outside of this class
         final String filename = Paths.get(this.getDirectoryForStoringQuestionRawData(), questionid).toString();
         return new FileSystemResource(filename); 
-	/*String content = null;
-        final File file = new File(filename);
-        FileReader reader = null;
-        try {
-            reader = new FileReader(file);
-            final char[] chars = new char[(int) file.length()];
-            reader.read(chars);
-            content = new String(chars);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-        }
-
-        logger.info("getQuestionRawData: {}", content);
-        return content;*/
     }
 
     /**
