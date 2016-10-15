@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -38,10 +42,14 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.UUID;
 
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 /**
  * represents a wrapper of the template generator of OKBQA
  *
- * @author Kuldeep
+ * @author 
  */
 
 @Component
@@ -54,23 +62,28 @@ public class Tgmm extends QanaryComponent {
     public static String runCurlPOSTWithParam(String weburl,String data,String contentType) throws Exception
 	{
 		
-        String xmlResp = "";
+        String urlString = "";
         try {
-        	URL url = new URL(weburl);
+        	
+              	
+        	System.out.println("Kuldeep");
+        	URL url = new URL(weburl+"data="+URLEncoder.encode(data,"UTF-8"));
+        	//URL url = new URL(weburl+"?data="+URLEncoder.encode(data,"UTF-8"));
     		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     		
-    		connection.setRequestMethod("POST");
-    		connection.setDoOutput(true);
+    		/*connection.setRequestMethod("GET");
     		
-    		connection.setRequestProperty("Content-Type", contentType);
+    		connection.setDoOutput(true);
+    		//connection.setRequestProperty("data", data);
+    		connection.setRequestProperty("Content-Type", contentType);*/
     				
-    		DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+    		/*DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
     		wr.writeBytes(data);
     		wr.flush();
-    		wr.close();
+    		wr.close();*/
     		
     		
-    	
+    
     		BufferedReader in = new BufferedReader(
     		        new InputStreamReader(connection.getInputStream()));
     		String inputLine;
@@ -80,13 +93,14 @@ public class Tgmm extends QanaryComponent {
     			response.append(inputLine);
     		}
     		in.close();
-    		xmlResp = response.toString();
+    		urlString = response.toString();
     		
-    		System.out.println("Curl Response: \n"+xmlResp);
-            logger.info("Response  service {}", xmlResp);
+    		System.out.println("Curl Response: \n"+urlString);
+            logger.info("Response  service {}", urlString);
         } catch (Exception e) {
+        	e.printStackTrace();
         }
-        return (xmlResp);
+        return (urlString);
 
 	}
     
@@ -120,27 +134,135 @@ public class Tgmm extends QanaryComponent {
         String question = responseEntity.getBody();
         logger.info("Question: {}", question);
         
-        //Fetch the language of the Question from the triplestore.
+        //Fetch the related information of the Question from the triplestore.
         
-        String questionlang = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-                + "SELECT ?lang "
-                + "FROM <" + namedGraph + "> "
-                + "WHERE {?q a qa:Question ."
-                + " ?anno <http://www.w3.org/ns/openannotation/core/hasTarget> ?q ."
-                + " ?anno <http://www.w3.org/ns/openannotation/core/hasBody> ?lang ."
-                + " ?anno a qa:AnnotationOfQuestionLanguage}";
-        //Store the result in a variable language1
-        ResultSet result1 = selectTripleStore(questionlang, endpoint);
-        String language1 = result1.next().getLiteral("lang").toString();
-        logger.info("Langauge of the Question: {}",language1);
+        String allTypes[]={"AnnotationOfSpotInstance","AnnotationOfSpotProperty","AnnotationOfSpotLiteral","AnnotationOfSpotClass"};
+        String allSpecific[]={"SpecificResource","SpecificProperty","SpecificLiteral","SpecificClass"};
+        
+        Map<String,List<String>> retrivedWords = new HashMap<String,List<String>>();
+         
+        //public Map<String,List<String>>
+        //rdf:Resource|rdfs:Literal rdf:Property rdf:Class
+        for(int i=0;i<allTypes.length;i++)
+        {
+        	String word= "";
+	        sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+	                + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+	                + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
+	                + "SELECT ?start ?end "
+	                + "FROM <" + namedGraph + "> "
+	                + "WHERE { "
+	                + "?a a qa:"+allTypes[i]+" . "
+	                + "?a oa:hasTarget [ "
+	                + "		a    oa:"+allSpecific[i]+"; "
+	                + "		oa:hasSource    ?q; "
+	                + "		oa:hasSelector  [ "
+	                + "			a oa:TextPositionSelector ; "
+	                + "			oa:start ?start ; "
+	                + "			oa:end  ?end "
+	                + "		] "
+	                + "] ; "
+	                + "oa:annotatedBy ?annotator "
+	                + "} "
+	                + "ORDER BY ?start ";
+	        ResultSet r = selectTripleStore(sparql, endpoint);
+	        //ArrayList<Spot> spots = new ArrayList<Spot>();
+	        System.out.println("The list of "+allTypes[i]);
+	        while (r.hasNext()) {
+	            QuerySolution s = r.next();
+	            word = question.substring(s.getLiteral("start").getInt(),s.getLiteral("end").getInt());	            
+	            System.out.println(word);
+	            //wordsRetrived.add(question.substring(s.getLiteral("start").getInt(),s.getLiteral("end").getInt()));
+	            //logger.info("Spot: {}-{}", spot.begin, spot.end);
+	            //spots.add(spot);
+	            List<String> wordsRetrived;//new List<String>();
+		        if(retrivedWords.size()<1 || !retrivedWords.containsKey(word) )
+		        {
+		        	wordsRetrived = new ArrayList<String>();
+		        }
+		        else if(retrivedWords.containsKey(word))
+		        {
+		        	wordsRetrived = retrivedWords.remove(word);
+		        }
+		        else
+		        {
+		        	wordsRetrived = new ArrayList<String>();
+		        }
+		        
+	        	if(allTypes[i].equals("AnnotationOfSpotInstance"))
+	        	{
+	        		wordsRetrived.add("rdf:Resource");
+	        	}
+	        	else if(allTypes[i].equals("AnnotationOfSpotProperty"))
+	        	{
+	        		wordsRetrived.add("rdf:Property");
+	        	}
+	        	else if(allTypes[i].equals("AnnotationOfSpotLiteral"))
+	        	{
+	        		wordsRetrived.add("rdfs:Literal");
+	        	}
+	        	else if(allTypes[i].equals("AnnotationOfSpotClass"))
+	        	{
+	        		wordsRetrived.add("rdf:Class");
+	        	}
+	        	
+		        System.out.println("=============================================================================");
+		        
+		        
+		        retrivedWords.put(word,wordsRetrived);
+		        
+		        System.out.println(wordsRetrived.toString());	        
+	        }
+	        
+	        
+        }
+        
+        String inputData="{  "+
+   "\"query\":\"SELECT ?v4 WHERE { ?v4 ?v2 ?v6 ; ?v7 ?v3 . } \","+
+   "\"question\":\""+question+"\","+
+   "\"score\":\"1.0\","+
+   "\"slots\":["+  
+      "{"+  
+         "\"o\":\"<http://lodqa.org/vocabulary/sort_of>\","+
+         "\"p\":\"is\","+
+         "\"s\":\"v7\""+
+      "},";
+        int varCount = 3;
+        for(String tempWord:retrivedWords.keySet())
+        {
+        	String classWord = "";
+        	List<String> tempListOfClass = retrivedWords.get(tempWord);
+        	for(String word: tempListOfClass)
+        	{
+        		classWord += word+"|";
+        	}
+        	classWord = classWord.substring(0,classWord.length()-1);
+        	
+        	inputData +="{"+  
+                "\"o\":\""+classWord+"\","+
+                "\"p\":\"is\","+
+                "\"s\":\"v"+varCount+"\""+
+             "},"+
+        	"{"+  
+                "\"o\":\""+tempWord+"\","+
+                "\"p\":\"verbalization\","+
+                "\"s\":\"v"+varCount+"\""+
+             "},";
+        	varCount++;
+        }
+        inputData = inputData.substring(0,inputData.length()-1)+"] }";
+        
+        
+        
+        System.out.println(inputData);
         
        
         
-        String url = "";
-		String data = "";
+        String url = "http://121.254.173.77:2357/agdistis/run?";
+		String data = inputData;
 		String contentType = "application/json";
 		 
-		//http://repository.okbqa.org/components/9
+		//http://repository.okbqa.org/components/7
 		//Sample input	
 		/* 
 		 * {
@@ -148,10 +270,10 @@ public class Tgmm extends QanaryComponent {
 		  	"language": "en"
 		   } http://ws.okbqa.org:2360/ko/tgm/stub/service
 		*/
-		url = "http://ws.okbqa.org:2360/ko/tgm/stub/service";
-		data = "{  \"string\":\""+question+"\",\"language\":\""+language1+"\"}";//"{  \"string\": \"Which river flows through Seoul?\",  \"language\": \"en\"}";
+		
+		//data = "{  \"string\":\""+question+"\",\"language\":\""+language1+"\"}";//"{  \"string\": \"Which river flows through Seoul?\",  \"language\": \"en\"}";
 		System.out.println("\ndata :" +data);
-		System.out.println("\nComponent : 9");
+		System.out.println("\nComponent : 7");
 		String output1="";
 		try
 		{
