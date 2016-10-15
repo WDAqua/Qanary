@@ -1,4 +1,4 @@
-package LanguageDetection;
+package eu.wdaqua.qanary.languagedetection;
 
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;

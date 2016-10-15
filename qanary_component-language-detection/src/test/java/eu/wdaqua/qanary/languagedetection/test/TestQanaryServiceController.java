@@ -1,4 +1,4 @@
-package TestQanaryServiceController;
+package eu.wdaqua.qanary.languagedetection.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -174,8 +175,9 @@ public class TestQanaryServiceController {
 	}
 
 	@Test
+	@Ignore
 	public void testAnnotation() {
-
+		// TODO
 		// QanaryMessage message = new QanaryMessage()
 		// mockMvc.perform
 	}

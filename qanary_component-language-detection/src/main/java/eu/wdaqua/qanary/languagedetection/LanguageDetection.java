@@ -1,4 +1,4 @@
-package LanguageDetection;
+package eu.wdaqua.qanary.languagedetection;
 
 import java.net.MalformedURLException;
 import java.net.URL;
