@@ -30,10 +30,9 @@ public class Monolitic extends QanaryComponent {
 
         // the class QanaryUtils provides some helpers for standard tasks
         QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
-
+        QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
         // STEP 1: the question is retrived
-        QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
-        String myQuestion = myQanaryQuestion.getRawData();
+        String myQuestion = myQanaryQuestion.getTextualRepresentation();
 
         // STEP 2: answer the question and give back the sparql query and the answers in RDF json http://www.w3.org/TR/sparql11-results-json/
         String sparqlAnswer = "SELECT DISTINCT ?x WHERE { "
@@ -68,16 +67,16 @@ public class Monolitic extends QanaryComponent {
                 + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
                 + "INSERT { "
                 + "GRAPH <" + myQanaryUtils.getInGraph() + "> { "
-                + "  ?a a qa:AnnotationOfAnswerJSON . "
+                + "  ?a a qa:AnnotationOfAnswerSPARQL . "
                 + "  ?a oa:hasTarget <URIAnswer> . "
-                + "  ?a oa:hasBody \"" + sparqlAnswer.replace("<", "!!").replace(">", "??") + "\" ;" //bug in stardog not premitting to put in strings greather and smaller than
+                + "  ?a oa:hasBody \"" + sparqlAnswer.replace("\n", " ") + "\" ;"
                 + "     oa:annotatedBy <http://monolitic-component.org> ; "
                 + "	    oa:AnnotatedAt ?time . "
                 + "  ?b a qa:AnnotationOfAnswerJSON . "
                 + "  ?b oa:hasTarget <URIAnswer> . "
                 + "  ?b oa:hasBody \"" + json.replace("\n", " ").replace("\"", "\\\"") + "\" ;"
                 + "     oa:annotatedBy <http://monolitic-component.org> ; "
-                + "	    oa:AnnotatedAt ?time  "
+                + "	    oa:annotatedAt ?time  "
                 + "}} "
                 + "WHERE { "
                 + "BIND (IRI(str(RAND())) AS ?a) ."

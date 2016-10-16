@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary.component</groupId>
     <artifactId>qa.DBpedia-Spotlight-NED</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -13,7 +13,7 @@
     </parent>
     <properties>
         <java.version>1.8</java.version>
-        <qanary.version>0.1.0</qanary.version>
+        <qanary.version>[1.,2.)</qanary.version>
         <docker.image.prefix>qanary</docker.image.prefix>
         <docker.image.name>dbpedia-spotlight-ned</docker.image.name>
     </properties>

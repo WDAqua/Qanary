@@ -68,4 +68,11 @@ public abstract class QanaryComponent {
         return new QanaryUtils(qanaryMessage);
     }
 
+    /**
+     * get access to a java representation of the question for the Qanary framework
+     */
+    protected QanaryQuestion<String> getQanaryQuestion(QanaryMessage qanaryMessage) {
+        return new QanaryQuestion<String>(qanaryMessage);
+    }
+
 }
