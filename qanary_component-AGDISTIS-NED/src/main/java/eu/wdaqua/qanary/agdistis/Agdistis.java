@@ -3,20 +3,13 @@ package eu.wdaqua.qanary.agdistis;
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
+import eu.wdaqua.qanary.component.QanaryQuestion;
+import eu.wdaqua.qanary.component.QanaryUtils;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.update.UpdateExecutionFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -36,38 +29,25 @@ public class Agdistis extends QanaryComponent {
     private final String agdistisService = "http://139.18.2.164:8080/AGDISTIS";
     private static final Logger logger = LoggerFactory.getLogger(Agdistis.class);
 
-    public QanaryMessage process(QanaryMessage QanaryMessage) {
+    public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
         try {
             long startTime = System.currentTimeMillis();
-            logger.info("process: {}", QanaryMessage);
+            logger.info("process: {}", myQanaryMessage);
+            //STEP 1: Retrive the information needed for the question
 
-            //STEP1: Retrieve the named graph and the endpoint
-            String endpoint = QanaryMessage.getEndpoint().toASCIIString();
-            String namedGraph = QanaryMessage.getInGraph().toASCIIString();
-            logger.info("Endpoint: {}", endpoint);
-            logger.info("InGraph: {}", namedGraph);
+            // the class QanaryUtils provides some helpers for standard tasks
+            QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
+            QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
 
-            // STEP2: Retrieve information that are needed for the computations
-            //Retrieve the uri where the question is exposed
-            String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-                    + "SELECT ?questionuri "
-                    + "FROM <" + namedGraph + "> "
-                    + "WHERE {?questionuri a qa:Question}";
-            ResultSet result = selectTripleStore(sparql, endpoint);
-            String uriQuestion = result.next().getResource("questionuri").toString();
-            logger.info("Uri of the question: {}", uriQuestion);
-            // Retrieve the question itself
-            RestTemplate restTemplate = new RestTemplate();
-            // TODO: pay attention to "/raw" maybe change that
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion + "/raw", String.class);
-            String question = responseEntity.getBody();
-            logger.info("Question: {}", question);
+            // Retrives the question string
+            String myQuestion = myQanaryQuestion.getTextualRepresentation();
+
             // Retrieves the spots from the knowledge graph
-            sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
+            String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
                     + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
                     + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
                     + "SELECT ?start ?end "
-                    + "FROM <" + namedGraph + "> "
+                    + "FROM <" + myQanaryMessage.getInGraph() + "> "
                     + "WHERE { "
                     + "?a a qa:AnnotationOfSpotInstance . "
                     + "?a oa:hasTarget [ "
@@ -82,7 +62,7 @@ public class Agdistis extends QanaryComponent {
                     + "oa:annotatedBy ?annotator "
                     + "} "
                     + "ORDER BY ?start ";
-            ResultSet r = selectTripleStore(sparql, endpoint);
+            ResultSet r = myQanaryUtils.selectFromTripleStore(sparql, myQanaryMessage.getEndpoint().toString());
             ArrayList<Spot> spots = new ArrayList<Spot>();
             while (r.hasNext()) {
                 QuerySolution s = r.next();
@@ -93,11 +73,11 @@ public class Agdistis extends QanaryComponent {
                 spots.add(spot);
             }
 
-            // STEP3: Call the AGDISTIS service
+            // Step 2: Call the AGDISTIS service
             // Informations about the AGDISTIS API can be found here: https://github.com/AKSW/AGDISTIS/wiki/2-Asking-the-webservice
             // curl --data-urlencode "text='The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>.'" -d type='agdistis' http://139.18.2.164:8080/AGDISTIS
             // Match the format "The <entity>University of Leipzig</entity> in <entity>Barack Obama</entity>."
-            String input = question;
+            String input = myQuestion;
             Integer offset = 0;
             for (Spot spot : spots) {
                 input = input.substring(0, spot.begin + offset) + "<entity>"
@@ -111,7 +91,7 @@ public class Agdistis extends QanaryComponent {
             UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(agdistisService);
             logger.info("Service request " + service);
             String body = "type=agdistis&" + "text='" + URLEncoder.encode(input, "UTF-8") + "'";
-            // RestTemplarestTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
             String response = restTemplate.postForObject(service.build().encode().toUri(), body, String.class);
             logger.info("JSON document from Agdistis api {}", response);
             // Extract entities
@@ -134,11 +114,11 @@ public class Agdistis extends QanaryComponent {
                         + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
                         + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
                         + "INSERT { "
-                        + "GRAPH <" + namedGraph + "> { "
+                        + "GRAPH <" + myQanaryQuestion.getOutGraph() + "> { "
                         + "  ?a a qa:AnnotationOfInstance . "
                         + "  ?a oa:hasTarget [ "
                         + "           a    oa:SpecificResource; "
-                        + "           oa:hasSource    <" + uriQuestion + ">; "
+                        + "           oa:hasSource    <" + myQanaryQuestion.getUri() + ">; "
                         + "           oa:hasSelector  [ "
                         + "                    a oa:TextPositionSelector ; "
                         + "                    oa:start \"" + l.begin + "\"^^xsd:nonNegativeInteger ; "
@@ -154,26 +134,14 @@ public class Agdistis extends QanaryComponent {
                         + "BIND (now() as ?time) "
                         + "}";
                 logger.info("Sparql query {}", sparql);
-                loadTripleStore(sparql, endpoint);
+                myQanaryUtils.updateTripleStore(sparql, myQanaryQuestion.getEndpoint().toString());
             }
             long estimatedTime = System.currentTimeMillis() - startTime;
             logger.info("Time {}", estimatedTime);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        return QanaryMessage;
-    }
-
-    private void loadTripleStore(String sparqlQuery, String endpoint) {
-        UpdateRequest request = UpdateFactory.create(sparqlQuery);
-        UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-        proc.execute();
-    }
-
-    private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
-        Query query = QueryFactory.create(sparqlQuery);
-        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-        return qExe.execSelect();
+        return myQanaryMessage;
     }
 
     class Spot {

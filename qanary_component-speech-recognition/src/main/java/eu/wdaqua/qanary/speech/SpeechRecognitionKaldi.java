@@ -36,18 +36,12 @@ public class SpeechRecognitionKaldi extends QanaryComponent {
 
 	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
+
+		// STEP1: Retrieve information that are needed for the computations
+
 		// the class QanaryUtils provides some helpers for standard tasks
         QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
 		QanaryQuestion<String> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
-
-        // STEP1: Retrieve information that are needed for the computations
-        //QanaryQuestion<String> myQanaryQuestion = myQanaryUtils.getQuestion();
-
-		//TODO: replace in future with getRawData
-		//RestTemplate restTemplate = new RestTemplate();
-		//String raw = myQanaryQuestion.getUri()+"/raw";
-		// Substitution with generic gives: Failed to read HTTP message: org.springframework.http.converter.HttpMessageNotReadableException: Could not read document: Unrecognized token 'ID3TSSE0LAME': was expecting 'null', 'true', 'false' or NaN at âSource: java.io.PushbackInputStreamà4038eb59; line: 1, column: 27ê; nested exception is com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'ID3TSSE0LAME': was expecting 'null', 'true', 'false' or NaN at âSource: java.io.PushbackInputStreamà4038eb59; line: 1, column: 27ê
-		//ResponseEntity<byte[]> binary = restTemplate.getForEntity(raw ,byte[].class);
 
 		byte[] binary = myQanaryQuestion.getAudioRepresentation();
 		logger.info("process: {}", myQanaryMessage);

@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.DbpediaSpotlightSpotter;
+package eu.wdaqua.qanary.dbpediaSpotlight;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -21,7 +21,7 @@ public class Application {
      */
     @Bean
     public QanaryComponent qanaryComponent() {
-        return new WrapperSpotlight();
+        return new DBpediaSpotlightNER();
     }
 
     public static void main(String[] args) {

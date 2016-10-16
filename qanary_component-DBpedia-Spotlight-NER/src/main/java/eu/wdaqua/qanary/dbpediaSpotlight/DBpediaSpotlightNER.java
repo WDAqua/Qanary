@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.DbpediaSpotlightSpotter;
+package eu.wdaqua.qanary.dbpediaSpotlight;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -10,20 +10,11 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.update.UpdateExecutionFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
+import eu.wdaqua.qanary.component.QanaryQuestion;
+import eu.wdaqua.qanary.component.QanaryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -39,8 +30,8 @@ import eu.wdaqua.qanary.component.QanaryMessage;
  */
 
 @Component
-public class WrapperSpotlight extends QanaryComponent {
-    private static final Logger logger = LoggerFactory.getLogger(WrapperSpotlight.class);
+public class DBpediaSpotlightNER extends QanaryComponent {
+    private static final Logger logger = LoggerFactory.getLogger(DBpediaSpotlightNER.class);
 
     /**
      * default processor of a QanaryMessage
@@ -130,30 +121,13 @@ public class WrapperSpotlight extends QanaryComponent {
 
             // STEP1: Retrieve the named graph and the endpoint
 
-            // String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
-            // endpoint= "http://admin:admin@104.155.21.91:5820/qanary/query";
-            // http://admin:admin@localhost:5820/qanary/query
-            // String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
-            // logger.info("store data at endpoint {}", endpoint);
-            // logger.info("store data in graph {}", namedGraph);
+            // the class QanaryUtils provides some helpers for standard tasks
+            QanaryUtils myQanaryUtils = this.getUtils(myQanaryMessage);
+            QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
 
-            String endpoint = myQanaryMessage.getEndpoint().toASCIIString();
-            String namedGraph = myQanaryMessage.getInGraph().toASCIIString();
-            logger.info("Endpoint: {}", endpoint);
-            logger.info("InGraph: {}", namedGraph);
-
-            // STEP2: Retriexve information that are needed for the computations
-            String sparql = "PREFIX qa:<http://www.wdaqua.eu/qa#> " + "SELECT ?questionuri " + "FROM <" + namedGraph
-                    + "> " + "WHERE {?questionuri a qa:Question}";
-            ResultSet result = selectTripleStore(sparql, endpoint);
-            String uriQuestion = result.next().getResource("questionuri").toString();
-            logger.info("Uri of the question: {}", uriQuestion);
-            // Retrive the question itself
-            RestTemplate restTemplate = new RestTemplate();
-            // TODO: pay attention to "/raw" maybe change that
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uriQuestion + "/raw", String.class);
-            String question = responseEntity.getBody();
-            logger.info("Question: {}", question);
+            // question string is required as input for the service call
+            String myQuestion = myQanaryQuestion.getTextualRepresentation();
+            logger.info("Question: {}", myQuestion);
 
             // String uriQuestion="http://wdaqua.eu/dummy";
             // String question="Brooklyn Bridge was designed by Alfred";
@@ -161,10 +135,10 @@ public class WrapperSpotlight extends QanaryComponent {
             // STEP3: Pass the information to the component and execute it
             // logger.info("apply vocabulary alignment on outgraph");
 
-            WrapperSpotlight qaw = new WrapperSpotlight();
+            DBpediaSpotlightNER qaw = new DBpediaSpotlightNER();
 
             List<String> stEn = new ArrayList<String>();
-            stEn = qaw.getResults(question);
+            stEn = qaw.getResults(myQuestion);
             int cnt = 0;
             ArrayList<Selection> selections = new ArrayList<Selection>();
             for (String str : stEn) {
@@ -178,15 +152,15 @@ public class WrapperSpotlight extends QanaryComponent {
             //STEP4: Push the result of the component to the triplestore
 
             for (Selection s : selections) {
-                sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+                String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
                         + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
                         + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
                         + "INSERT { "
-                        + "GRAPH <" + namedGraph + "> { "
+                        + "GRAPH <" + myQanaryQuestion.getOutGraph() + "> { "
                         + "  ?a a qa:AnnotationOfSpotInstance . "
                         + "  ?a oa:hasTarget [ "
                         + "           a    oa:SpecificResource; "
-                        + "           oa:hasSource    <" + uriQuestion + ">; "
+                        + "           oa:hasSource    <" + myQanaryQuestion.getUri() + ">; "
                         + "           oa:hasSelector  [ "
                         + "                    a oa:TextPositionSelector ; "
                         + "                    oa:start \"" + s.begin + "\"^^xsd:nonNegativeInteger ; "
@@ -200,7 +174,7 @@ public class WrapperSpotlight extends QanaryComponent {
                         + "BIND (IRI(str(RAND())) AS ?a) ."
                         + "BIND (now() as ?time) "
                         + "}";
-                loadTripleStore(sparql, endpoint);
+                myQanaryUtils.updateTripleStore(sparql, myQanaryQuestion.getEndpoint().toString());
             }
             long estimatedTime = System.currentTimeMillis() - startTime;
             logger.info("Time {}", estimatedTime);
@@ -210,18 +184,6 @@ public class WrapperSpotlight extends QanaryComponent {
         }
 
         return myQanaryMessage;
-    }
-
-    private void loadTripleStore(String sparqlQuery, String endpoint) {
-        UpdateRequest request = UpdateFactory.create(sparqlQuery);
-        UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-        proc.execute();
-    }
-
-    private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
-        Query query = QueryFactory.create(sparqlQuery);
-        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-        return qExe.execSelect();
     }
 
     class Selection {
