@@ -39,10 +39,25 @@ public class Monolitic extends QanaryComponent {
         		+ "<http://dbpedia.org/resource/DBpedia> <http://dbpedia.org/ontology/developer> ?x . "
         		+ "?x     <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Agent> . "
         		+ "}";
-        ResultSet result = myQanaryUtils.selectFromTripleStore(sparqlAnswer, "http://dbpedia.org/sparql"); 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ResultSetFormatter.outputAsJSON(outputStream, result);
-        String json = new String(outputStream.toByteArray());
+       
+	sparqlAnswer = "ASK WHERE { "
+                        + "<http://dbpedia.org/resource/DBpedia> <http://dbpedia.org/ontology/developer> ?x . "
+                        + "?x     <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Agent> . "
+                        + "}";
+	 
+	Query query = QueryFactory.create(sparqlAnswer);
+	String json;
+	if (query.isAskType()){
+		Boolean result = myQanaryUtils.askTripleStore(sparqlAnswer, "http://dbpedia.org/sparql");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ResultSetFormatter.outputAsJSON(outputStream, result);
+		json = new String(outputStream.toByteArray());
+	} else {
+		ResultSet result = myQanaryUtils.selectFromTripleStore(sparqlAnswer, "http://dbpedia.org/sparql"); 
+        	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        	ResultSetFormatter.outputAsJSON(outputStream, result);
+     		json = new String(outputStream.toByteArray());
+	}
         logger.info("Generated SPARQL query: {} ", sparqlAnswer);
         logger.info("Generated answers in RDF json: {}", json);
         

@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>WDAqua core-0</title> 
+ 	<meta th:replace="lib/qa_header"/>        
+</head>
+<body>
+
+<ul id="nav">
+  <li id="logo">
+  <a href="/qa" class="tablinks, img">
+  	<img id="logo-img-small" src="https://raw.githubusercontent.com/WDAqua/Qanary/master/doc/WDAquaLogo2.png" alt="Smiley face" />
+  </a></li>
+  <li id="search">
+	 <form action="/qa" method="POST">
+     	<div id="left">
+	     	<div id="text-question">
+	       		<input type="text" name="question" id="question" value="" th:value="${question}"/>    
+	        </div>
+        </div>
+        <button id="submit">Go </button>               
+  </form>
+ </li>
+</ul>
+
+<div>  
+<ul class="tab">
+  <li><a href="#" class="tablinks" onclick="openTab(event, 'Answers')">Answers</a></li>
+  <li><a href="#" class="tablinks" onclick="openTab(event, 'Query')">SPARQL Query</a></li>
+</ul>
+</div>
+<div id="Answers" class="tabcontent">
+	<div class="padding">
+		<p th:if="${answers != null}">
+			<ul th:each="item : ${answers}">    
+		    	<li>
+		        	<a th:href="${item}" th:text="${item}"></a>
+		        </li>    
+			</ul>
+		</p>
+	</div>
+	<!-- <div class="feedback">  -->
+	<!--	<div class="padding">  -->
+	<!--	<div>Feedback</div>  -->
+	<!--		<button class="yes">Correct!</button>   -->
+	<!--		<button class="no">Not correct!</button>  -->
+	<!--	</div>  -->
+	<!-- </div> -->
+</div>
+
+<div id="Query" class="tabcontent">
+	<p th:if="${sparqlQuery != null}">
+		<div class="padding">
+			<span  th:utext="${sparqlQuery}"></span>
+		</div> 
+	</p>
+</div>
+</body>
+</html>

@@ -73,7 +73,7 @@ public class QanaryUtils {
     }
 
     /**
-     * query a SPARQL endpoint with a given query
+     *  query a SPARQL endpoint with a given SELECT query
      */
     public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
         logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
@@ -83,6 +83,19 @@ public class QanaryUtils {
         ResultSet resultset = qExe.execSelect();
         this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
         return resultset;
+    }
+
+    /**
+     *  query a SPARQL endpoint with a given ASK query
+     */
+    public boolean askTripleStore(String sparqlQuery, String endpoint) {
+        logger.debug("askTripleStore on {} execute {}", endpoint, sparqlQuery);
+        long start = getTime();
+        Query query = QueryFactory.create(sparqlQuery);
+        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+        boolean b = qExe.execAsk();
+        this.logTime(getTime() - start, "askFromTripleStore: " + sparqlQuery);
+        return b;
     }
 
     /**

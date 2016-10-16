@@ -8,3 +8,4 @@
 *.zip
 *.bin
 qanary_component-language-detection/src/main/resources/config/my.properties
+/log
