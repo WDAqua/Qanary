@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
+import com.hp.hpl.jena.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,8 +251,15 @@ public class QanaryQuestionAnsweringController {
 	) throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 
 		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
-		// TODO: fetch the URI of the available question in the triplestore 
-		URI question = null;
+		// TODO: substitute with eu.wdaqua.qanary.component.QanaryMessage method when shared
+        String query = "SELECT ?question " +
+                "FROM <" + myQanaryMessage.getInGraph() + "> {" +
+                "?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>" +
+                "}";
+        ResultSet r = selectFromTripleStore(query, myQanaryMessage.getEndpoint());
+		URI question = new URI(r.next().getResource("question").toString());
+
+
 		final UUID runID = UUID.randomUUID();
 		logger.info("calling component: {} on named graph {} and endpoint {} ", componentsToBeCalled,
 				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph());
@@ -324,6 +332,17 @@ public class QanaryQuestionAnsweringController {
 		loadTripleStore(sparqlquery, triplestore);
 		return new QanaryMessage(triplestore, namedGraph);
 	}
+
+    /**
+     * query a SPARQL endpoint with a given query
+     */
+    public ResultSet selectFromTripleStore(String sparqlQuery, URI endpoint) {
+        logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
+        Query query = QueryFactory.create(sparqlQuery);
+        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint.toString(), query);
+        ResultSet resultset = qExe.execSelect();
+        return resultset;
+    }
 
 	/**
 	 * insert into local Jena triplestore
