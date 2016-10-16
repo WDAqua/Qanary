@@ -73,7 +73,7 @@
         <dependency>
             <groupId>eu.wdaqua</groupId>
             <artifactId>core0</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.3</version>
         </dependency>
     </dependencies>
     <build>
