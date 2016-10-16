@@ -48,6 +48,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 
+import javax.servlet.http.HttpServletResponse;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
@@ -65,6 +66,12 @@ import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 @Controller
 public class QanaryQuestionAnsweringController {
 
+    //Set this to allow browser requests from other websites
+    @ModelAttribute
+    public void setVaryResponseHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }
+	
     // the string used for the endpoints w.r.t. the question answering process
     public static final String QUESTIONANSWERING = "/questionanswering";
 
@@ -173,16 +180,16 @@ public class QanaryQuestionAnsweringController {
         sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
                 + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
                 + "SELECT ?sparql "
-        		+ "FROM <"+  json.get("graph").toString() + "> "
-        		+ "WHERE { "
-        		+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
-                + "  ?a oa:hasBody ?json " 
-        		+ "}";
+        	+ "FROM <"+  json.get("graph").toString() + "> "
+        	+ "WHERE { "
+        	+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
+                + "  ?a oa:hasBody ?sparql " 
+        	+ "}";
         r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
         String sparqlAnswer="";
         if (r.hasNext()){
-    		sparqlAnswer=r.next().getLiteral("json").toString();
-    		logger.info("SPARQLAnswer {}"+jsonAnswer);	
+    		sparqlAnswer=r.next().getLiteral("sparql").toString();
+    		logger.info("SPARQLAnswer {}"+sparqlAnswer);	
         }
         if (jsonAnswer.equals("")==false && sparqlAnswer.equals("")==false ){
         	//Parse the json result set using jena
