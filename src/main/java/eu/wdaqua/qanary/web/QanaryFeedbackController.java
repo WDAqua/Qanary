@@ -33,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -50,6 +53,12 @@ import java.util.UUID;
 public class QanaryFeedbackController {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryFeedbackController.class);
+
+    //Set this to allow browser requests from other websites
+    @ModelAttribute
+    public void setVaryResponseHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }
 
     /**
      * recives a message and stores it locally
