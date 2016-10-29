@@ -96,11 +96,6 @@ More details follow soon.
 
 More details follow soon.
 
-
-### ISWC Resources
-For a mapping between the resources presented at ISWC and this repository please refer to the wiki under section "Resources presented at ISWC".
-
-
 ## Publications / References
 
 If you want to inform yourself about the Qanary methodology in general, please use this publication:  *Andreas Both, Dennis Diefenbach, Kuldeep Signh, Saedeeh Shekarpour, Didier Cherix and Christoph Lange: Qanary - A Methodology for Vocabulary-driven Open Question Answering Systems* appearing in [13th Extended Semantic Web Conference](http://2016.eswc-conferences.org), 2016.
