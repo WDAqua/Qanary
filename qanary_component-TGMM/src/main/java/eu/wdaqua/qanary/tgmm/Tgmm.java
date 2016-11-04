@@ -4,12 +4,23 @@ import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.Query;
@@ -21,7 +32,6 @@ import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -45,6 +55,7 @@ import java.util.UUID;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 /**
  * represents a wrapper of the template generator of OKBQA
@@ -281,60 +292,146 @@ public class Tgmm extends QanaryComponent {
 		}catch(Exception e){}
 		System.out.println("The output template is:" +output1);
 		
+		JSONParser parser = new JSONParser();
+//		List<String> entities = new ArrayList<String>();
+//		List<String> classes = new ArrayList<String>();
+//		List<String> literals = new ArrayList<String>();
+//		List<String> properties = new ArrayList<String>();
+		Map<String,Map<String,Double>> allUrls = new HashMap<String,Map<String,Double>>();
+		
+		try {
+
+		
+			JSONObject json = (JSONObject) parser.parse(output1);
+
+			JSONArray characters = (JSONArray) json.get("ned");
+			Iterator i = characters.iterator();
+
+			while (i.hasNext()) {
+				JSONObject mainObject = (JSONObject) i.next();
+				//JSONArray nested = (JSONArray) mainObject.get("question");
+				String keyWords[] = {"entities","classes","literals","properties"};
+				
+				for(int j=0;j<keyWords.length;j++)
+				{
+					System.out.println("The List of URLs of "+keyWords[j]);
+					JSONArray types = (JSONArray) mainObject.get(keyWords[j]);
+					Iterator iTypes = types.iterator();
+					Map<String,Double> urlsAndScore = new HashMap<String,Double>();
+					
+					while (iTypes.hasNext()) {
+						
+						JSONObject tempObject = (JSONObject) iTypes.next();
+						String urls = (String) tempObject.get("value");
+						double score = (double) tempObject.get("score");
+						urlsAndScore.put(urls, score);	
+						System.out.println("url : "+urls+" , Score : "+score);
+						
+					}
+					
+					allUrls.put(keyWords[j],urlsAndScore );
+					
+				}
+
+				
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
         
-		//return output1;
-// Now need to push output back to triplestore.
-       /* // STEP4: Vocabulary alignment
-        logger.info("Apply vocabulary alignment on outgraph");
-        //Retrieve the triples from FOX
-        JSONObject obj = new JSONObject(response);
-        String triples = URLDecoder.decode(obj.getString("output"));
-
-        //Create a new temporary named graph
-        final UUID runID = UUID.randomUUID();
-        String namedGraphTemp = "urn:graph:" + runID.toString();
-
-        //Insert data into temporary graph
-        sparql = "INSERT DATA { GRAPH <" + namedGraphTemp + "> {" + triples + "}}";
-        logger.info(sparql);
-        loadTripleStore(sparql, endpoint);
-
-        //Align to QANARY vocabulary
-        sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
-                + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-                + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
-                + "INSERT { "
-                + "GRAPH <" + namedGraph + "> { "
-                + "  ?a a qa:AnnotationOfSpotInstance . "
-                + "  ?a oa:hasTarget [ "
-                + "           a    oa:SpecificResource; "
-                + "           oa:hasSource    <" + uriQuestion + ">; "
-                + "           oa:hasSelector  [ "
-                + "                    a oa:TextPositionSelector ; "
-                + "                    oa:start ?begin ; "
-                + "                    oa:end  ?end "
-                + "           ] "
-                + "  ] ; "
-                + "     oa:annotatedBy <http://fox-demo.aksw.org> ; "
-                + "	    oa:AnnotatedAt ?time  "
-                + "}} "
-                + "WHERE { "
-                + "	SELECT ?a ?s ?begin ?end ?time "
-                + "	WHERE { "
-                + "		graph <" + namedGraphTemp + "> { "
-                + "			?s	<http://ns.aksw.org/scms/beginIndex> ?begin . "
-                + "			?s  <http://ns.aksw.org/scms/endIndex> ?end . "
-                + "			BIND (IRI(str(RAND())) AS ?a) ."
-                + "			BIND (now() as ?time) "
-                + "		} "
-                + "	} "
-                + "}";
-        loadTripleStore(sparql, endpoint);
-
-        //Drop the temporary graph
-        sparql = "DROP SILENT GRAPH <" + namedGraphTemp + ">";
-        loadTripleStore(sparql, endpoint);
-*/
+		
+		
+		for (String link : allUrls.keySet()) {
+			
+			
+			String linkWord = "";
+			String linkData = "";
+			if(link.equals("entities"))
+        	{
+				linkWord = "AnnotationOfSpotInstance";
+			    linkData = "SpecificResource";
+        	}
+        	else if(link.equals("properties"))
+        	{
+        		linkWord = "AnnotationOfSpotProperty";
+        		 linkData = "SpecificProperty";
+        	}
+        	else if(link.equals("literals"))
+        	{
+        		linkWord = "AnnotationOfSpotLiteral";
+        	 linkData = "SpecificLiteral";
+        	}
+        	else if(link.equals("classes"))
+        	{
+        		linkWord = "AnnotationOfSpotClass";
+        		 linkData = "SpecificClass";
+        	}
+			for(String urls:allUrls.get(link).keySet())
+			{
+				
+				if(linkWord.equals("AnnotationOfSpotLiteral"))
+				{
+					System.out.println("Inside : Literal: "+allUrls.get(link).get(urls));
+					sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+		                    + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+		                    + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+		                    + "INSERT { "
+		                    + "GRAPH <" + namedGraph + "> { "
+		                    + "  ?a a qa:"+linkWord+" . "
+		                    + "  ?a oa:hasTarget [ "
+		                    + "           a    oa:"+linkData+"; "
+		                    + "           oa:hasSource    <" + uriQuestion + ">; "
+		                    + "           oa:hasSelector  [ "
+			                + "                     a oa:TextPositionSelector ; "
+			                + "                    oa:start \"" + question.indexOf(urls) + "\"^^xsd:nonNegativeInteger ; "
+			                + "                    oa:end  \"" + question.indexOf(urls)+urls.length() + "\"^^xsd:nonNegativeInteger  "
+			                + "           ] "
+		                    + "  ] . "
+		                    + "  ?a oa:hasBody <" + urls + "> ;"
+		                    + "     oa:annotatedBy <http://agdistis.aksw.org> ; " 
+		                    + "     oa:score \""+allUrls.get(link).get(urls)+"\"ˆˆxsd:decimal ."
+		                    + "	    oa:AnnotatedAt ?time  "
+		                    + "}} "
+		                    + "WHERE { "
+		                    + "BIND (IRI(str(RAND())) AS ?a) ."
+		                    + "BIND (now() as ?time) "
+		                    + "}";
+				}
+				else{
+					System.out.println("Inside : Literal: "+allUrls.get(link).get(urls));
+			            sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+			                    + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+			                    + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+			                    + "INSERT { "
+			                    + "GRAPH <" + namedGraph + "> { "
+			                    + "  ?a a qa:"+linkWord+" . "
+			                    + "  ?a oa:hasTarget [ "
+			                    + "           a    oa:"+linkData+"; "
+			                    + "           oa:hasSource    <" + uriQuestion + ">; "
+			                    + "  ] . "
+			                    + "  ?a oa:hasBody <" + urls + "> ;"
+			                    + "     oa:annotatedBy <http://agdistis.aksw.org> ; "
+			                    + "	    oa:AnnotatedAt ?time  "
+			                    + "     oa:score \""+allUrls.get(link).get(urls)+"\"ˆˆxsd:decimal ."
+			                    + "}} "
+			                    + "WHERE { "
+			                    + "BIND (IRI(str(RAND())) AS ?a) ."
+			                    + "BIND (now() as ?time) "
+			                    + "}";
+				}
+            //logger.info("Sparql query {}", sparql);
+            //myQanaryUtils.updateTripleStore(sparql, myQanaryQuestion.getEndpoint().toString());
+				logger.info("Sparql query {}", sparql);
+                loadTripleStore(sparql, endpoint);
+			}
+	    }
+		
+		
+		
+		
+		
         long estimatedTime = System.currentTimeMillis() - startTime;
         logger.info("Time: {}", estimatedTime);
 
