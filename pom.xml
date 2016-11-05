@@ -16,6 +16,7 @@
     <module>qanary_component-DBpedia-Spotlight-NER</module>
     <module>qanary_component-FOX-NER</module>
     <module>qanary_monolitic-wrapper</module>
+    <module>qanary_wdaqua-core0</module>
     <module>qald-evaluator</module>
     <module>batmanquestion.annotator</module>
     <module>qanary_component-language-detection</module>
