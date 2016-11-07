@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.component;
 
+import java.lang.*;
 import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryMessage;
+import eu.wdaqua.core0.connection.MyAnnotation;
 
 import eu.wdaqua.core0.qa.Execute;
 
@@ -37,8 +39,9 @@ public class WDAquaCore0 extends QanaryComponent {
         String myQuestion = myQanaryQuestion.getTextualRepresentation();
 	logger.info("Question {}", myQuestion);
         Execute e = new Execute();
-        String sparqlAnswer = e.go(myQuestion);
-        Query query = QueryFactory.create(sparqlAnswer);
+        MyAnnotation m = e.goAnnotation(myQuestion, "");
+        String sparqlAnswer = m.getQuery(0);
+	Query query = QueryFactory.create(sparqlAnswer);
         String json;
         if (query.isAskType()){
                 Boolean result = myQanaryUtils.askTripleStore(sparqlAnswer, "http://dbpedia.org/sparql");
@@ -55,16 +58,24 @@ public class WDAquaCore0 extends QanaryComponent {
         logger.info("Generated answers in RDF json: {}", json);
  
         // STEP 3: Push the sparql query and the json object to the named graph reserved for the question
+	String sparqlPart1="";
+	String sparqlPart2="";
+	for (int i=0; i<Math.min(m.numQueries(),30); i++){
+		sparqlPart1+="?a"+i+" a qa:AnnotationOfAnswerSPARQL . "
+                + "  ?a"+i+" oa:hasTarget <URIAnswer> . "
+                + "  ?a"+i+" oa:hasBody \"" +  m.getQuery(i).replace("\n", " ") + "\" ;"
+                + "     oa:annotatedBy <www.wdaqua.eu> ; "
+                + "         oa:AnnotatedAt ?time ; "
+		+ "         oa:hasScore "+ m.getQueryScore(i) + " . \n";	
+		sparqlPart2+= "BIND (IRI(str(RAND())) AS ?a"+i+") . \n";
+	}
+
         String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
                 + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
                 + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
                 + "INSERT { "
                 + "GRAPH <" + myQanaryUtils.getInGraph() + "> { "
-                + "  ?a a qa:AnnotationOfAnswerSPARQL . "
-                + "  ?a oa:hasTarget <URIAnswer> . "
-                + "  ?a oa:hasBody \"" + sparqlAnswer.replace("\n", " ") + "\" ;"
-                + "     oa:annotatedBy <www.wdaqua.eu> ; "
-                + "	    oa:AnnotatedAt ?time . "
+                + sparqlPart1
                 + "  ?b a qa:AnnotationOfAnswerJSON . "
                 + "  ?b oa:hasTarget <URIAnswer> . "
                 + "  ?b oa:hasBody \"" + json.replace("\n", " ").replace("\"", "\\\"") + "\" ;"
@@ -72,7 +83,7 @@ public class WDAquaCore0 extends QanaryComponent {
                 + "	    oa:annotatedAt ?time  "
                 + "}} "
                 + "WHERE { "
-                + "BIND (IRI(str(RAND())) AS ?a) ."
+                + sparqlPart2
                 + "BIND (IRI(str(RAND())) AS ?b) ."
                 + "BIND (now() as ?time) "
                 + "}";	
