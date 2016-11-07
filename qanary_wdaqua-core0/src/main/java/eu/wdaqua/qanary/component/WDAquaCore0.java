@@ -66,7 +66,7 @@ public class WDAquaCore0 extends QanaryComponent {
                 + "  ?a"+i+" oa:hasBody \"" +  m.getQuery(i).replace("\n", " ") + "\" ;"
                 + "     oa:annotatedBy <www.wdaqua.eu> ; "
                 + "         oa:AnnotatedAt ?time ; "
-		+ "         oa:hasScore "+ m.getQueryScore(i) + " . \n";	
+		+ "         qa:hasScore "+ m.getQueryScore(i) + " . \n";	
 		sparqlPart2+= "BIND (IRI(str(RAND())) AS ?a"+i+") . \n";
 	}
 
