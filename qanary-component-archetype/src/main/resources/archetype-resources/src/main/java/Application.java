@@ -6,13 +6,14 @@ package ${package};
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import ${groupId}.QanaryComponent;
-import ${groupId}.QanaryService;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+
+import eu.wdaqua.qanary.component.QanaryComponent;
+import eu.wdaqua.qanary.component.QanaryServiceController;
+import eu.wdaqua.qanary.component.QanaryQuestion;
+import eu.wdaqua.qanary.component.QanaryUtils;
 
 @SpringBootApplication
 @EnableAutoConfiguration
