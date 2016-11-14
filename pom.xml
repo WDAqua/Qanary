@@ -20,5 +20,6 @@
     <module>batmanquestion.annotator</module>
     <module>qanary_component-language-detection</module>
     <module>qanary_component-speech-recognition</module>
+    <module>qanary_component-smaph-erd</module>
   </modules>
 </project>
