@@ -349,7 +349,7 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(
 			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled,
-			@RequestBody String jsonMessage // expected is a JSON message that
+			@RequestParam(value = "qanaryMessage") String jsonMessage // expected is a JSON message that
 										// contains ingraph, outgraph, endpoint
 	) throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
 
