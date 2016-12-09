@@ -39,7 +39,7 @@ public class WDAquaCore0 extends QanaryComponent {
         String myQuestion = myQanaryQuestion.getTextualRepresentation();
 	logger.info("Question {}", myQuestion);
         Execute e = new Execute();
-        MyAnnotation m = e.goAnnotation(myQuestion, "");
+        MyAnnotation m = e.goAnnotation(myQuestion, "", "en");
  
         // STEP 2: Push the sparql query and the json object to the named graph reserved for the question
 	String sparqlPart1="";
