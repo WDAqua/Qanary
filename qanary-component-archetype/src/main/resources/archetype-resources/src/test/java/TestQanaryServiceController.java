@@ -1,7 +1,7 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-package TestQanaryServiceController;
+package ${package};
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -41,6 +41,10 @@ import net.minidev.json.JSONObject;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { QanaryService.class }, loader = SpringApplicationContextLoader.class)
 @WebAppConfiguration
+/**
+ * test class for the standard interface of Qanary components
+ * in general there is no need to change something here
+ */
 public class TestQanaryServiceController {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestQanaryServiceController.class);
@@ -174,13 +178,6 @@ public class TestQanaryServiceController {
 			fail(e.getMessage());
 		}
 
-	}
-
-	@Test
-	public void testAnnotation() {
-
-		// QanaryMessage message = new QanaryMessage()
-		// mockMvc.perform
 	}
 
 }
