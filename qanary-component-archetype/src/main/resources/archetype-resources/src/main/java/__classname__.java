@@ -14,6 +14,11 @@ import ${groupId}.QanaryComponent;
 import ${groupId}.QanaryMessage;
 
 @Component
+/**
+ * This component connected automatically to the Qanary pipeline.
+ * The Qanary pipeline endpoint defined in application.properties (spring.boot.admin.url)
+ * @see <a href="https://github.com/WDAqua/Qanary/wiki/How-do-I-integrate-a-new-component-in-Qanary%3F" target="_top">Github wiki howto</a>
+ */
 public class ${classname} extends QanaryComponent {
 	private static final Logger logger = LoggerFactory.getLogger(${classname}.class);
 
