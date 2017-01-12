@@ -37,9 +37,16 @@ public class WDAquaCore0 extends QanaryComponent {
         QanaryQuestion<String> myQanaryQuestion = this.getQanaryQuestion(myQanaryMessage);
         // STEP 1: the question is retrived
         String myQuestion = myQanaryQuestion.getTextualRepresentation();
-	logger.info("Question {}", myQuestion);
+	//logger.info("Question {}", myQuestion);
+	String lang = null;
+	try {
+		lang = myQanaryQuestion.getLanguage();
+	} catch (Exception e){
+		lang = "en";
+	}
+	logger.info("Question language {}", lang);
         Execute e = new Execute();
-        MyAnnotation m = e.goAnnotation(myQuestion, "", "en");
+        MyAnnotation m = e.goAnnotation(myQuestion, "", lang);
  
         // STEP 2: Push the sparql query and the json object to the named graph reserved for the question
 	String sparqlPart1="";
