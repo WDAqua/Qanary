@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,6 +38,8 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.message.QanaryQuestionInformation;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * controller for all service call w.r.t. questions
@@ -54,6 +57,12 @@ public class QanaryQuestionController {
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
 
     private final QanaryConfigurator qanaryConfigurator;
+
+    //Set this to allow browser requests from other websites
+    @ModelAttribute
+    public void setVaryResponseHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }
 
     // TODO: define directory in config
     private final String directoryForStoringQuestionRawData = "/tmp/questions";
