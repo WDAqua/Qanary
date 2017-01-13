@@ -68,13 +68,17 @@ public class QanaryFeedbackController {
     public ResponseEntity<?> startquestionansweringwithtextquestion(
         @RequestParam(value = "question", required = true) final String question,
         @RequestParam(value = "sparql") final String sparql,
-        @RequestParam(value = "correct") final Boolean correct)
+        @RequestParam(value = "correct") final Boolean correct,
+	@RequestParam(value = "language", required = false, defaultValue ="en") final String language,
+	@RequestParam(value = "knowledgebase",required = false, defaultValue = "dbpedia") final String knowledgebase)
         throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
         IOException, QanaryExceptionQuestionNotProvided {
         JSONObject obj = new JSONObject();
         obj.put("question", question);
         obj.put("sparql", sparql);
         obj.put("correct", correct);
+	obj.put("language", language);
+	obj.put("knowledgebase", knowledgebase);
         logger.info("feedback: {}", obj.toString());
         return new ResponseEntity<QanaryQuestionCreated>(HttpStatus.OK);
     }
