@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<smaph>
+    <setting name="cache">
+        <param name="bing-cache" value="" />
+    </setting>
+    <setting name="bing">
+        <param name="key" value="**BING_KEY**" />
+    </setting>
+    <setting name="tagme">
+        <param name="host" value="tagme.di.unipi.it/tag"/>
+        <param name="key" value="TAGME_KEY" />
+    </setting>
+</smaph>
