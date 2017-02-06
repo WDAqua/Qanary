@@ -10,7 +10,7 @@ RUN mvn install -DskipTests
 
 # Install smaph
 WORKDIR /
-RUN git clone http://github.com/marcocor/smaph-erd
+RUN git clone https://github.com/WDAqua/smaph-erd.git
 
 # Run smaph
 WORKDIR /smaph-erd

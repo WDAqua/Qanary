@@ -64,13 +64,10 @@ public class SmaphErd extends QanaryComponent {
             text = annotation.getString("title");
             try {
                 resourceUri = new URI(annotation.getString("url"));
-                // indexes of the (first) occurrence of the text in the question
-                begin = myQuestion.toLowerCase().indexOf(text.toLowerCase());
-                if (begin > -1) { // add named entity only if text exist in the question
-                    end = begin + text.length();
-                    logger.info("annotating question {} pos.{} to pos.{} with uri {}", myQuestion, begin, end, resourceUri);
-                    discoveredNamedEntities.add(new TextPositionSelector(begin, end, resourceUri, 1F));
-                }
+                begin = annotation.getInt("start");
+                end = begin + annotation.getInt("length");
+                logger.info("annotating question {} pos.{} to pos.{} with uri {}", myQuestion, begin, end, resourceUri);
+                discoveredNamedEntities.add(new TextPositionSelector(begin, end, resourceUri, 1F));
             } catch (URISyntaxException e) {
                 logger.warn("could not process smaph-erd answer item: {}\n{}", annotation.getString("url"), e.getMessage());
             }
