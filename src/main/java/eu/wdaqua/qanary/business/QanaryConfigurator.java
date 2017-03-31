@@ -21,9 +21,9 @@ import com.google.common.collect.Maps;
 
 import de.codecentric.boot.admin.model.Application;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
-import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 
 /**
