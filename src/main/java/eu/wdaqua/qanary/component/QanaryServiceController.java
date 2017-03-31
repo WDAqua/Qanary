@@ -1,5 +1,9 @@
 package eu.wdaqua.qanary.component;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+
 import java.net.URI;
 
 import javax.inject.Inject;
@@ -7,18 +11,21 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.wdaqua.qanary.component.config.QanaryConfiguration;
 
 @Controller
 public class QanaryServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryServiceController.class);
+
+    @Value("${spring.boot.admin.url}")
+    private String qanaryHost;
 
     private QanaryComponent qanaryComponent;
 
@@ -52,6 +59,7 @@ public class QanaryServiceController {
 
         QanaryConfiguration.setServiceUri(new URI(String.format("%s://%s:%d/" + QanaryConfiguration.annotatequestion,
                 request.getScheme(), request.getServerName(), request.getServerPort())));
+        QanaryConfiguration.setServiceUri(new URI(qanaryHost));
 
         QanaryMessage myQanaryMessage = new QanaryMessage(message);
 
