@@ -4,8 +4,6 @@ import java.net.URI;
 
 import org.springframework.boot.orm.jpa.EntityScan;
 
-import eu.wdaqua.qanary.web.QanarySparqlController;
-
 /**
  * message object send back to client by /question endpoint in {@link QanarySparqlController}
  *
