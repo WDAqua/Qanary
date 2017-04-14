@@ -87,7 +87,7 @@
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.pipeline</artifactId>
-            <version>1.0.0</version>
+            <version>[1.0.0,2.0.0)</version>
         </dependency>
     </dependencies>
 
