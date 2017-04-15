@@ -18,16 +18,18 @@ public class QanaryQuestionAnsweringRun {
 
     private final URI endpoint;
 
-    private final URI graph;
+    private final URI inGraph;
+    private final URI outGraph;
 
     private final URI question;
 
-    public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI graph,
+    public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI inGraph, URI outGraph,
                                       QanaryConfigurator configurator) throws URISyntaxException {
         this.questionAnsweringRunUri = new URI(configurator.getHost() + ":" + configurator.getPort()
                 + QanaryQuestionAnsweringController.QUESTIONANSWERING + "/" + runId.toString());
         this.endpoint = endpoint;
-        this.graph = graph;
+        this.inGraph = inGraph;
+        this.outGraph = outGraph;
         this.question = question;
     }
 
@@ -43,8 +45,12 @@ public class QanaryQuestionAnsweringRun {
         return this.endpoint;
     }
 
-    public URI getGraph() {
-        return this.graph;
+    public URI getInGraph() {
+        return this.inGraph;
+    }
+
+    public URI getOutGraph() {
+        return this.outGraph;
     }
 
     public URI getQuestion() {

@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.commons;
 
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 import java.net.URI;
 
@@ -39,6 +40,12 @@ public class QanaryUtils {
         this.endpoint = qanaryMessage.getEndpoint();
         this.inGraph = qanaryMessage.getInGraph();
         this.outGraph = qanaryMessage.getOutGraph();
+    }
+
+    public QanaryUtils(QanaryQuestionAnsweringRun qanaryRun) {
+        this.endpoint = qanaryRun.getEndpoint();
+        this.inGraph = qanaryRun.getInGraph();
+        this.outGraph = qanaryRun.getOutGraph();
     }
 
     /**
