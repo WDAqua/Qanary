@@ -217,7 +217,7 @@ public class QanaryQuestionAnsweringController {
 		}
 
 		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, question,
-				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph(), qanaryConfigurator);
+				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph(), myQanaryMessage.getOutGraph(), qanaryConfigurator);
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
 	}
 

@@ -7,48 +7,49 @@ import java.util.UUID;
 import eu.wdaqua.qanary.business.QanaryComponent;
 
 /**
- * message that is send to the caller at the end of the QuestionAnswering process
+ * message that is send to the caller at the end of the QuestionAnswering
+ * process
  *
  * @author AnBo
  */
 public class QanaryQuestionAnsweringFinished {
-    // holds the ID of the QA process
-    private UUID questionanswering;
+	// holds the ID of the QA process
+	private UUID questionanswering = UUID.randomUUID();
 
-    // start at point in time in milliseconds
-    private long start;
+	// start at point in time in milliseconds
+	private long start;
 
-    // start at point in time in milliseconds
-    private long end;
+	// start at point in time in milliseconds
+	private long end;
 
-    // trivial protocol
-    private List<String> protocol;
+	// trivial protocol
+	private List<String> protocol;
 
-    public void startQuestionAnswering() {
-        this.start = System.currentTimeMillis();
-        this.protocol = new LinkedList<>();
-    }
+	public void startQuestionAnswering() {
+		this.start = System.currentTimeMillis();
+		this.protocol = new LinkedList<>();
+	}
 
-    public long getStartOfQuestionAnswering() {
-        return this.start;
-    }
+	public long getStartOfQuestionAnswering() {
+		return this.start;
+	}
 
-    public void endQuestionAnswering() {
-        this.end = System.currentTimeMillis();
-    }
+	public void endQuestionAnswering() {
+		this.end = System.currentTimeMillis();
+	}
 
-    public long getendOfQuestionAnswering() {
-        return this.end;
-    }
+	public long getendOfQuestionAnswering() {
+		return this.end;
+	}
 
-    public String toString() {
-        return " question answering " + questionanswering + " took " + (this.end - this.start) + " ms, " + protocol;
-    }
+	public String toString() {
+		return " question answering " + questionanswering + " took " + (this.end - this.start) + " ms, " + protocol;
+	}
 
-    /**
-     * save the status of the run
-     */
-    public void appendProtocol(QanaryComponent component) {
-        this.protocol.add(component.getName() + " " + component.getUrl());
-    }
+	/**
+	 * save the status of the run
+	 */
+	public void appendProtocol(QanaryComponent component) {
+		this.protocol.add(component.getName() + " " + component.getUrl());
+	}
 }

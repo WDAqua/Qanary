@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 /**
  * controller providing an embedded front end for human users
@@ -42,6 +44,7 @@ public class QanaryEmbeddedQaWebFrontendController {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 	private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryQuestionController qanaryQuestionController;
+	private final QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
 
 	/**
 	 * Set this to allow browser requests from other websites
@@ -52,13 +55,18 @@ public class QanaryEmbeddedQaWebFrontendController {
 	}
 
 	/**
-	 * inject QanaryConfigurator
+	 * inject QanaryConfigurator and required controller
 	 */
 	@Autowired
 	public QanaryEmbeddedQaWebFrontendController(final QanaryConfigurator qanaryConfigurator,
-			final QanaryQuestionController qanaryQuestionController) {
+			final QanaryQuestionController qanaryQuestionController,
+			final QanaryQuestionAnsweringController qanaryQuestionAnsweringController) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
+		this.qanaryQuestionAnsweringController = qanaryQuestionAnsweringController;
+
+		logger.info("default question answering system will run with the following components: {}",
+				this.qanaryConfigurator.getDefaultComponentNames());
 	}
 
 	/**
@@ -72,56 +80,57 @@ public class QanaryEmbeddedQaWebFrontendController {
 	}
 
 	/**
-	 * 
+	 * start a predefined question answering process
 	 * 
 	 * @param question
 	 * @param model
 	 * @return
-	 * @throws URISyntaxException
-	 * @throws ParseException
-	 * @throws UnsupportedEncodingException
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/qa", method = RequestMethod.POST)
 	public String qa(@RequestParam(value = "question", required = true) final String question, Model model)
-			throws URISyntaxException, ParseException, UnsupportedEncodingException {
-		logger.info("Asked question {}" + question);
+			throws Exception {
+
+		logger.info("Asked question {}", question);
 		model.addAttribute("question", question);
-		// Send the question to the startquestionansweringwithtextquestion
-		// interface, select as a component wdaqua-core0
+
+		// define the question answering system run, select as a component
+		// the component from the default list in the currently used
+		// application.properties
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("question", question);
-		map.add("componentlist[]", "wdaqua-core0");
-		// map.add("componentlist[]", "Monolitic");
-		RestTemplate restTemplate = new RestTemplate();
-		// QanaryQuestionAnsweringRun
-		String response = restTemplate.postForObject(qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort()
-				+ "/startquestionansweringwithtextquestion", map, String.class);
-		org.json.JSONObject json = new org.json.JSONObject(response);
-		// TODO: replace previus line with QanaryQuestionAnsweringRun
-		// constructur
-		// Retrive the answers as JSON object from the triplestore
-		QanaryMessage myQanaryMessage = new QanaryMessage(json.toString());
-		QanaryUtils myQanaryUtils = new QanaryUtils(myQanaryMessage);
+		map.add("componentlist[]", qanaryConfigurator.getDefaultComponentNamesAsString());
+
+		// Send the question to the startquestionansweringwithtextquestion
+		ResponseEntity<?> response = qanaryQuestionAnsweringController.startquestionansweringwithtextquestion(question,
+				qanaryConfigurator.getDefaultComponentNames());
+		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
+		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
+
+		// retrieve the answers as JSON object from the triplestore
+		QanaryUtils myQanaryUtils = new QanaryUtils(run);
 		String sparqlQuery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " + "SELECT ?json " + "FROM <"
-				+ json.get("graph").toString() + "> " + "WHERE { " + "  ?a a qa:AnnotationOfAnswerJSON . "
-				+ "  ?a oa:hasBody ?json " + "}";
-		ResultSet r = myQanaryUtils.selectFromTripleStore(sparqlQuery);
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "SELECT ?json " + "FROM <" + run.getOutGraph() + "> " //
+				+ "WHERE { " + "  ?a a qa:AnnotationOfAnswerJSON . " + "  ?a oa:hasBody ?json " + "}";
+		ResultSet r = myQanaryUtils.selectFromTripleStore(sparqlQuery, run.getEndpoint().toString());
+
 		// If there are answers give them back
 		String jsonAnswer = "";
 		if (r.hasNext()) {
 			jsonAnswer = r.next().getLiteral("json").toString();
-			logger.info("JSONAnswer {}" + jsonAnswer);
+			logger.info("JSONAnswer {}", jsonAnswer);
 		}
 		sparqlQuery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " + "SELECT ?sparql " + "FROM <"
-				+ json.get("graph").toString() + "> " + "WHERE { " + "  ?a a qa:AnnotationOfAnswerSPARQL . "
-				+ "  ?a oa:hasBody ?sparql " + "}";
-		r = myQanaryUtils.selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "SELECT ?sparql " + "FROM <" + run.getOutGraph() + "> " //
+				+ "WHERE { " + "  ?a a qa:AnnotationOfAnswerSPARQL . " + "  ?a oa:hasBody ?sparql " + "}";
+		r = myQanaryUtils.selectFromTripleStore(sparqlQuery, run.getEndpoint().toString());
+		
 		String sparqlAnswer = "";
 		if (r.hasNext()) {
 			sparqlAnswer = r.next().getLiteral("sparql").toString();
-			logger.info("SPARQLAnswer {}" + sparqlAnswer);
+			logger.info("SPARQLAnswer {}", sparqlAnswer);
 		}
 		if (jsonAnswer.equals("") == false && sparqlAnswer.equals("") == false) {
 			// Parse the JSON result set using Jena
@@ -148,7 +157,7 @@ public class QanaryEmbeddedQaWebFrontendController {
 			model.addAttribute("sparqlQuery", formatted);
 			return "qa_output";
 		}
-		return "No answer";
+		return "qa_no-answer";
 	}
 
 }

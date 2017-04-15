@@ -28,7 +28,7 @@ import java.util.Map;
 @SpringBootApplication
 @EnableAdminServer
 @EnableDiscoveryClient // registers itself as client for the admin server,
-// removeable
+// removable
 @ComponentScan({"eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web"})
 public class QanaryPipeline {
 
@@ -40,10 +40,10 @@ public class QanaryPipeline {
     }    
     
     @Bean
-    public QanaryConfigurator configurator(@Value("'${qanary.components}'.split(',')") final List<String> components,
+    public QanaryConfigurator configurator(@Value("#{'${qanary.components}'.split(',')}") final List<String> components,
                                            @Value("${server.host}") @NotNull final String host, @Value("${server.port}") @NotNull final int port,
                                            @Value("${qanary.triplestore}") @NotNull final URI endpoint) {
-        return new QanaryConfigurator(restTemplate(), componentsToIndexMap(components), host, port, endpoint);
+        return new QanaryConfigurator(restTemplate(), components, host, port, endpoint);
     }
 
     @Bean
