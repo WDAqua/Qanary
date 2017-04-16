@@ -72,7 +72,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createQuestion(
-            @RequestParam(value = "question", required = true) final String questionstring) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String questionstring) {
 
         logger.info("add received question: " + questionstring);
         // URI uriOfQuestion;
@@ -129,7 +129,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question_audio", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createAudioQuestion(
-            @RequestParam(value = "question", required = true) final MultipartFile file) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
         logger.info("new audio file recived: " + file.getName());
         // URI uriOfQuestion;
