@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.commons.QanaryCommonSparqlQueryHelper;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
@@ -65,12 +66,12 @@ public class QanaryEmbeddedQaWebFrontendController {
 		this.qanaryQuestionController = qanaryQuestionController;
 		this.qanaryQuestionAnsweringController = qanaryQuestionAnsweringController;
 
-		logger.info("default question answering system will run with the following components: {}",
+		logger.warn("default question answering system will run with the following components: {}",
 				this.qanaryConfigurator.getDefaultComponentNames());
 	}
 
 	/**
-	 * publish the HTML search front end
+	 * publish the HTML search front end for inserting a question
 	 * 
 	 * @return
 	 */
@@ -80,7 +81,8 @@ public class QanaryEmbeddedQaWebFrontendController {
 	}
 
 	/**
-	 * start a predefined question answering process
+	 * start a predefined question answering process using the pre-defined
+	 * qanary.componentlist (from configuration)
 	 * 
 	 * @param question
 	 * @param model
@@ -107,31 +109,14 @@ public class QanaryEmbeddedQaWebFrontendController {
 		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
 		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
 
-		// retrieve the answers as JSON object from the triplestore
-		QanaryUtils myQanaryUtils = new QanaryUtils(run);
-		String sparqlQuery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-				+ "SELECT ?json " + "FROM <" + run.getOutGraph() + "> " //
-				+ "WHERE { " + "  ?a a qa:AnnotationOfAnswerJSON . " + "  ?a oa:hasBody ?json " + "}";
-		ResultSet r = myQanaryUtils.selectFromTripleStore(sparqlQuery, run.getEndpoint().toString());
+		QanaryCommonSparqlQueryHelper myHelper = new QanaryCommonSparqlQueryHelper(run);
 
-		// If there are answers give them back
-		String jsonAnswer = "";
-		if (r.hasNext()) {
-			jsonAnswer = r.next().getLiteral("json").toString();
-			logger.info("JSONAnswer {}", jsonAnswer);
-		}
-		sparqlQuery = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-				+ "SELECT ?sparql " + "FROM <" + run.getOutGraph() + "> " //
-				+ "WHERE { " + "  ?a a qa:AnnotationOfAnswerSPARQL . " + "  ?a oa:hasBody ?sparql " + "}";
-		r = myQanaryUtils.selectFromTripleStore(sparqlQuery, run.getEndpoint().toString());
-		
-		String sparqlAnswer = "";
-		if (r.hasNext()) {
-			sparqlAnswer = r.next().getLiteral("sparql").toString();
-			logger.info("SPARQLAnswer {}", sparqlAnswer);
-		}
+		// retrieve the answers as JSON object from the triplestore
+		String jsonAnswer = myHelper.getJsonAnswers();
+		// retrieve the answers as SPARQL QUERY from the triplestore
+		String sparqlAnswer = myHelper.getSparqlQueryAnswer();
+
+		// check for results and compute the information for the model
 		if (jsonAnswer.equals("") == false && sparqlAnswer.equals("") == false) {
 			// Parse the JSON result set using Jena
 			ResultSetFactory factory = new ResultSetFactory();
@@ -156,8 +141,10 @@ public class QanaryEmbeddedQaWebFrontendController {
 			formatted = formatted.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
 			model.addAttribute("sparqlQuery", formatted);
 			return "qa_output";
+		} else {
+			// no results found
+			return "qa_no-answer";
 		}
-		return "qa_no-answer";
 	}
 
 }
