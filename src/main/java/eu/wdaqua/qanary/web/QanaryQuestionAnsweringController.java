@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.jena.query.Query;
@@ -105,8 +106,8 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
-			@RequestParam(value = "question", required = true) final String question,
-			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
+			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue="") final List<String> componentsToBeCalled)
 			throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
@@ -144,8 +145,8 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithaudioquestion(
-			@RequestParam(value = "question", required = true) final MultipartFile question,
-			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
+			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile question,
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue="") final List<String> componentsToBeCalled)
 			throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
@@ -191,14 +192,14 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> questionanswering(@PathVariable(value = "runId") final UUID runId) throws Exception {
 		throw new Exception("not yet implemented");
 	}
-
+	
 	/**
 	 * start a configured process
 	 */
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> questionanswering(
-			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled,
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST) final List<String> componentsToBeCalled,
 			@RequestBody String jsonMessage // expected is a JSON message that
 										// contains ingraph, outgraph, endpoint
 	) throws Exception {

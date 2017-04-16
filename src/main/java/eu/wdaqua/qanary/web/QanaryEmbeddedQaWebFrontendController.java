@@ -90,8 +90,8 @@ public class QanaryEmbeddedQaWebFrontendController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/qa", method = RequestMethod.POST)
-	public String qa(@RequestParam(value = "question", required = true) final String question, Model model)
-			throws Exception {
+	public String qa(@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
+			Model model) throws Exception {
 
 		logger.info("Asked question {}", question);
 		model.addAttribute("question", question);
