@@ -38,6 +38,8 @@ public class QanaryQuestion<T> {
 	private QanaryMessage qanaryMessage;
 	private QanaryUtils qanaryUtil;
 	private T raw;
+	// note: uri not final due to different sources for the value (some from
+	// triplestore, some pre-set)
 	private URI uri;
 	private URI uriTextualRepresentation;
 	private String textualRepresentation;
@@ -45,20 +47,19 @@ public class QanaryQuestion<T> {
 	private byte[] audioRepresentation;
 	private final URI namedGraph; // where the question is stored
 
-	public QanaryQuestion(QanaryMessage qanaryMessage) {
-		this.qanaryMessage = qanaryMessage;
-		qanaryUtil = new QanaryUtils(qanaryMessage);
-		// save where the answer is stored
-		namedGraph = qanaryMessage.getOutGraph();
-	}
-
 	/**
-	 * init the graph in the triplestore (c.f., application.properties)
+	 * init the graph in the triplestore (c.f., application.properties) a new
+	 * graph is constructed
+	 * 
+	 * @param questionUri
+	 * @param qanaryConfigurator
+	 * @throws URISyntaxException
 	 */
 	public QanaryQuestion(final URL questionUri, QanaryConfigurator qanaryConfigurator) throws URISyntaxException {
 		// Create a new named graph and insert it into the triplestore
 		// in this graph the data is stored
-		namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
+		this.namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
+		this.uri = questionUri.toURI();
 
 		final URI triplestore = qanaryConfigurator.getEndpoint();
 		logger.info("Triplestore " + triplestore);
@@ -108,9 +109,46 @@ public class QanaryQuestion<T> {
 				+ "   oa:hasBody   <URIDataset> " + "}}";
 		logger.info("Sparql query " + sparqlquery);
 		loadTripleStore(sparqlquery, triplestore);
-		QanaryMessage myQanaryMessage = new QanaryMessage(triplestore, namedGraph);
-		this.qanaryMessage = myQanaryMessage;
-		qanaryUtil = new QanaryUtils(myQanaryMessage);
+		initFromTriplestore(triplestore);
+	}
+
+	/**
+	 * create QanaryQuestion from the information available in the provided
+	 * graph (data is retrieved from the Qanary triplestore, see
+	 * application.properties)
+	 * 
+	 * @param graph
+	 * @param qanaryConfigurator
+	 * @throws URISyntaxException
+	 */
+	public QanaryQuestion(URI namedGraph, QanaryConfigurator qanaryConfigurator) throws URISyntaxException {
+		this.initFromTriplestore(qanaryConfigurator.getEndpoint());
+		this.qanaryMessage = new QanaryMessage(qanaryConfigurator.getEndpoint(), namedGraph);
+		// save where the answer is stored
+		this.namedGraph = namedGraph;
+	}
+
+	/**
+	 * create a QanaryQuestion from a QanaryMessage
+	 * 
+	 * @param qanaryMessage
+	 */
+	public QanaryQuestion(QanaryMessage qanaryMessage) {
+		this.qanaryMessage = qanaryMessage;
+		this.qanaryUtil = new QanaryUtils(qanaryMessage);
+		// save where the answer is stored
+		this.namedGraph = qanaryMessage.getInGraph();
+	}
+
+	/**
+	 * init object properties from a given triplestore URI
+	 * 
+	 * @param triplestore
+	 * @throws URISyntaxException
+	 */
+	private void initFromTriplestore(final URI triplestore) throws URISyntaxException {
+		this.qanaryMessage = new QanaryMessage(triplestore, namedGraph);
+		this.qanaryUtil = new QanaryUtils(this.qanaryMessage);
 	}
 
 	/**
@@ -158,25 +196,30 @@ public class QanaryQuestion<T> {
 	 */
 	public URI getUri() throws QanaryExceptionNoOrMultipleQuestions, URISyntaxException {
 		if (this.uri == null) {
-			ResultSet resultset = qanaryUtil.selectFromTripleStore(
-					"SELECT ?question FROM <" + this.getInGraph()
-							+ "> {?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>}",
-					this.getEndpoint().toString());
+			// check if a graph is provided
+			if (this.getInGraph() == null) {
+				throw new QanaryExceptionNoOrMultipleQuestions("inGraph is null.");
+			} else {
+				ResultSet resultset = qanaryUtil.selectFromTripleStore(
+						"SELECT ?question FROM <" + this.getInGraph()
+								+ "> {?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>}",
+						this.getEndpoint().toString());
 
-			int i = 0;
-			String question = null;
-			while (resultset.hasNext()) {
-				question = resultset.next().get("question").asResource().getURI();
-				logger.debug("{}: qa#Question = {}", i++, question);
+				int i = 0;
+				String question = null;
+				while (resultset.hasNext()) {
+					question = resultset.next().get("question").asResource().getURI();
+					logger.debug("{}: qa#Question = {}", i++, question);
+				}
+				if (i > 1) {
+					throw new QanaryExceptionNoOrMultipleQuestions("More than 1 question (count: " + i + ") in graph "
+							+ this.getInGraph() + " at " + this.getEndpoint());
+				} else if (i == 0) {
+					throw new QanaryExceptionNoOrMultipleQuestions(
+							"No question available in graph " + this.getInGraph() + " at " + this.getEndpoint());
+				}
+				this.uri = new URI(question);
 			}
-			if (i > 1) {
-				throw new QanaryExceptionNoOrMultipleQuestions("More than 1 question (count: " + i + ") in graph "
-						+ this.getInGraph() + " at " + this.getEndpoint());
-			} else if (i == 0) {
-				throw new QanaryExceptionNoOrMultipleQuestions(
-						"No question available in graph " + this.getInGraph() + " at " + this.getEndpoint());
-			}
-			this.uri = new URI(question);
 		}
 		return this.uri;
 	}
@@ -479,4 +522,29 @@ public class QanaryQuestion<T> {
 		logger.info("Sparql query {}", sparql);
 		this.qanaryUtil.updateTripleStore(sparql);
 	}
+
+	/**
+	 * set a new language for the current question, stored in the Qanary
+	 * triplestore
+	 * 
+	 * @param language
+	 */
+	public void setLanguage(String language) {
+
+		// TODO@Dennis: add your SPARQL query here
+
+	}
+
+	/**
+	 * set a new targetdata for the current question, stored in the Qanary
+	 * triplestore
+	 * 
+	 * @param targetdata
+	 */
+	public void setTargetData(String targetdata) {
+
+		// TODO@Dennis: add your SPARQL query here
+
+	}
+
 }
