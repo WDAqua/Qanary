@@ -14,47 +14,68 @@ import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
  */
 public class QanaryQuestionAnsweringRun {
 
-    private final URI questionAnsweringRunUri;
+	private final URI questionAnsweringRunUri;
 
-    private final URI endpoint;
+	private final URI endpoint;
 
-    private final URI inGraph;
-    private final URI outGraph;
+	private final URI inGraph;
+	private final URI outGraph;
 
-    private final URI question;
+	private final URI question;
 
-    public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI inGraph, URI outGraph,
-                                      QanaryConfigurator configurator) throws URISyntaxException {
-        this.questionAnsweringRunUri = new URI(configurator.getHost() + ":" + configurator.getPort()
-                + QanaryQuestionAnsweringController.QUESTIONANSWERING + "/" + runId.toString());
-        this.endpoint = endpoint;
-        this.inGraph = inGraph;
-        this.outGraph = outGraph;
-        this.question = question;
-    }
+	private QanaryConfigurator configurator;
 
-    public String toString() {
-        return this.getQuestionAnsweringRunUri().toASCIIString();
-    }
+	public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI inGraph, URI outGraph,
+			QanaryConfigurator configurator) throws URISyntaxException {
+		if (runId == null) {
+			runId = UUID.randomUUID();
+		}
 
-    private URI getQuestionAnsweringRunUri() {
-        return this.questionAnsweringRunUri;
-    }
+		this.questionAnsweringRunUri = new URI(configurator.getHost() + ":" + configurator.getPort()
+				+ QanaryQuestionAnsweringController.QUESTIONANSWERING + "/" + runId.toString());
+		this.endpoint = endpoint;
+		this.inGraph = inGraph;
+		this.outGraph = outGraph;
+		this.question = question;
+	}
 
-    public URI getEndpoint() {
-        return this.endpoint;
-    }
+	/**
+	 * constructor wrapper if runId was not provided
+	 * 
+	 * @param question
+	 * @param endpoint
+	 * @param inGraph
+	 * @param outGraph
+	 * @param configurator
+	 * @throws URISyntaxException
+	 */
+	public QanaryQuestionAnsweringRun(URI question, URI endpoint, URI inGraph, URI outGraph,
+			QanaryConfigurator configurator) throws URISyntaxException {
+		this(null, question, endpoint, inGraph, outGraph, configurator);
+	}
 
-    public URI getInGraph() {
-        return this.inGraph;
-    }
+	public String toString() {
+		return this.getQuestionAnsweringRunUri().toASCIIString();
+	}
 
-    public URI getOutGraph() {
-        return this.outGraph;
-    }
+	private URI getQuestionAnsweringRunUri() {
+		return this.questionAnsweringRunUri;
+	}
 
-    public URI getQuestion() {
-        return this.question;
-    }
+	public URI getEndpoint() {
+		return this.endpoint;
+	}
+
+	public URI getInGraph() {
+		return this.inGraph;
+	}
+
+	public URI getOutGraph() {
+		return this.outGraph;
+	}
+
+	public URI getQuestion() {
+		return this.question;
+	}
 
 }
