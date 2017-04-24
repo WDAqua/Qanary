@@ -215,7 +215,7 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
 			@RequestParam(value = "question", required = true) final String question,
-			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
+			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
 					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
 					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
 					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -256,13 +256,12 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithaudioquestion(
 			@RequestParam(value = "question", required = true) final MultipartFile question,
-			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled)
+			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
 					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
 					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
 					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
-
 		// you cannot pass without a valid question
 		if (question.isEmpty()) {
 			throw new QanaryExceptionQuestionNotProvided();
@@ -369,7 +368,9 @@ public class QanaryQuestionAnsweringController {
 
 		// execute synchronous calls to all components with the same message
 		// TODO: execute asynchronously?
-		qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+		if (componentsToBeCalled.isEmpty()==false) { //if no component is passed nothing is happening
+			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+		}
 
 		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, question,
 				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph(), qanaryConfigurator);
