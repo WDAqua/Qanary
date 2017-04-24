@@ -60,7 +60,7 @@ public class QanaryGerbilController {
     	logger.info("Asked question {}"+query);
     	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
         map.add("question", query);
-        map.add("componentlist[]", "wdaqua-core0");
+        map.add("componentlist[]", "wdaqua-core0, QueryExecuter");
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.postForObject(host+":"+port+"/startquestionansweringwithtextquestion", map, String.class);
         org.json.JSONObject json = new org.json.JSONObject(response);
@@ -71,9 +71,10 @@ public class QanaryGerbilController {
         		+ "WHERE { "
         		+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
         		+ "  ?a oa:hasBody ?sparql . "
-        		+ "  ?b a qa:AnnotationOfAnswerJSON . "
+    			+ "  OPTIONAL {?a qa:hasScore ?score . } "
+			+ "  ?b a qa:AnnotationOfAnswerJSON . "
                 	+ "  ?b oa:hasBody ?json " 
-        		+ "}";
+        		+ "} ORDER BY DESC(?score) ";
         
         ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
         String jsonAnswer="";
