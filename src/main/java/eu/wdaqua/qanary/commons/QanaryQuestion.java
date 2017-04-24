@@ -462,15 +462,7 @@ public class QanaryQuestion<T> {
 		}
 	}
 
-	public void putLanguageText(String lang) throws Exception {
-		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
-				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> " + "INSERT { " + "GRAPH <"
-				+ this.getOutGraph() + "> { " + "?a a qa:AnnotationOfQuestionLanguage . " + "?a oa:hasBody \"" + lang
-				+ "\" ;" + "?a oa:hasTarget " + this.getUriTextualRepresentation()
-				+ "   oa:annotatedBy <www.wdaqua.eu/qa> ; " + "   oa:annotatedAt ?time ; " + " }} " + "WHERE { "
-				+ "BIND (IRI(str(RAND())) AS ?a) . " + "BIND (now() as ?time) . " + "}";
-		qanaryUtil.updateTripleStore(sparql);
-	}
+
 
 	public String getSparqlResult() {
 		String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
@@ -523,28 +515,53 @@ public class QanaryQuestion<T> {
 		this.qanaryUtil.updateTripleStore(sparql);
 	}
 
+
 	/**
 	 * set a new language for the current question, stored in the Qanary
 	 * triplestore
-	 * 
+	 *
 	 * @param language
 	 */
-	public void setLanguage(String language) {
-
-		// TODO@Dennis: add your SPARQL query here
-
+	public void setLanguageText(String language) throws Exception {
+		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+				+ "INSERT { " + "GRAPH <"
+				+ this.getOutGraph() + "> { "
+				+ "?a a qa:AnnotationOfQuestionLanguage . "
+				+ "?a oa:hasBody \"" + language + "\" ;"
+				+ "?a oa:hasTarget " + this.getUriTextualRepresentation()
+				+ "   oa:annotatedBy <www.wdaqua.eu/qa> ; "
+				+ "   oa:annotatedAt ?time ; " + " }} "
+				+ "WHERE { "
+				+ "BIND (IRI(str(RAND())) AS ?a) . "
+				+ "BIND (now() as ?time) . "
+				+ "}";
+		qanaryUtil.updateTripleStore(sparql);
 	}
 
+
 	/**
-	 * set a new targetdata for the current question, stored in the Qanary
+	 * set a new language for the current question, stored in the Qanary
 	 * triplestore
-	 * 
-	 * @param targetdata
+	 *
+	 * @param targetData
 	 */
-	public void setTargetData(String targetdata) {
-
-		// TODO@Dennis: add your SPARQL query here
-
+	public void setTargetData(String targetData) throws Exception {
+		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
+				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+				+ "INSERT { "
+				+ "GRAPH <" + this.getOutGraph() + "> { "
+				+ "?a a qa:AnnotationDataset . "
+				+ "?a oa:hasBody \"" + targetData + "\" ;"
+				+ "?a oa:hasTarget " + this.getUri()
+				+ "   oa:annotatedBy <www.wdaqua.eu/qa> ; "
+				+ "   oa:annotatedAt ?time ; "
+				+ " }} "
+				+ "WHERE { "
+				+ "BIND (IRI(str(RAND())) AS ?a) . "
+				+ "BIND (now() as ?time) . "
+				+ "}";
+		qanaryUtil.updateTripleStore(sparql);
 	}
 
 }

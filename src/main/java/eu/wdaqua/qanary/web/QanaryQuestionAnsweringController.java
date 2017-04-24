@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -131,7 +130,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled)
 					throws Exception {
 
-		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
+		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		// you cannot pass without a valid question
 		if (question.isEmpty()) {
 			throw new QanaryExceptionQuestionNotProvided();
@@ -276,7 +275,7 @@ public class QanaryQuestionAnsweringController {
 		}
 		// store language definition for current question
 		if (language.compareTo("") != 0 && language != null) {
-			qanaryQuestion.setLanguage(language);
+			qanaryQuestion.setLanguageText(language);
 		} else {
 			logger.info("no lanugage was given, no change for question \"{}\"", question);
 		}
