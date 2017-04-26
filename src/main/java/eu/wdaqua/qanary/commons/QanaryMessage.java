@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.message;
+package eu.wdaqua.qanary.commons;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// TODO: needs to be moved to pipeline project
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.endpointKey;
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.inGraphKey;
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.outGraphKey;
+
 public class QanaryMessage {
 
     /**
@@ -22,16 +25,6 @@ public class QanaryMessage {
     private static final long serialVersionUID = 42L;
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryMessage.class);
-
-    // the property URI (key) for accessing the endpoint, TODO: move to
-    // QanaryConfiguration
-    private static final String endpointKey = "http://qanary/#endpoint";
-    // the property URI (key) for accessing the input data at the endpoint TODO:
-    // move to QanaryConfiguration
-    private static final String inGraphKey = "http://qanary/#inGraph";
-    // the property URI (key) for inserting the output into the endpoint TODO:
-    // move to QanaryConfiguration
-    private static final String outGraphKey = "http://qanary/#outGraph";
 
     private Map<URI, URI> values;
 
@@ -59,7 +52,7 @@ public class QanaryMessage {
     /**
      * set all values for valid message
      */
-    private void setValues(URI endpoint, URI inGraph, URI outGraph) throws URISyntaxException {
+    public void setValues(URI endpoint, URI inGraph, URI outGraph) throws URISyntaxException {
         this.values = new HashMap<>();
 
         URI keyEndpoint = new URI(endpointKey);
@@ -112,7 +105,7 @@ public class QanaryMessage {
         this.setValues(endpointValue, inGraphValue, outGraphValue);
     }
 
-    public QanaryMessage(URI endpoint, String namedGraph) throws URISyntaxException {
+    private QanaryMessage(URI endpoint, String namedGraph) throws URISyntaxException {
         this.setValues(endpoint, new URI(namedGraph), new URI(namedGraph));
     }
 
@@ -123,8 +116,7 @@ public class QanaryMessage {
     public String asJsonString() {
         try {
             final ObjectMapper mapper = new ObjectMapper();
-            final String jsonContent = mapper.writeValueAsString(this);
-            return jsonContent;
+            return mapper.writeValueAsString(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

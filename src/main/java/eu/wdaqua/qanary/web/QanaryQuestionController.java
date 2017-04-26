@@ -1,7 +1,5 @@
 package eu.wdaqua.qanary.web;
 
-import com.hp.hpl.jena.tdb.base.StorageException;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -81,7 +79,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createQuestion(
-            @RequestParam(value = "question", required = true) final String questionstring) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String questionstring) {
 
         logger.info("add received question: " + questionstring);
         // URI uriOfQuestion;
@@ -138,7 +136,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question_audio", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createAudioQuestion(
-            @RequestParam(value = "question", required = true) final MultipartFile file) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
         logger.info("new audio file recived: " + file.getName());
         // URI uriOfQuestion;
@@ -181,11 +179,11 @@ public class QanaryQuestionController {
         // Save the file locally
         try {
             if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
+                throw new IOException("Failed to store empty file " + file.getOriginalFilename());
             }
             Files.copy(file.getInputStream(), Paths.get(this.getDirectoryForStoringQuestionRawData(), filename));
         } catch (IOException e) {
-            throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
+            throw new IOException("Failed to store file " + file.getOriginalFilename(), e);
         }
 
         final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
