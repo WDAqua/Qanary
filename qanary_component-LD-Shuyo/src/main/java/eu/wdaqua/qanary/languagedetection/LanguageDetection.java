@@ -3,9 +3,9 @@ package eu.wdaqua.qanary.languagedetection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
@@ -23,7 +23,6 @@ public class LanguageDetection extends QanaryComponent {
 	@Override
 	public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
         long startTime = System.currentTimeMillis();
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
         logger.info("Qanary Message: {}", myQanaryMessage);
 
         //STEP1: Retrieve the question
@@ -41,27 +40,11 @@ public class LanguageDetection extends QanaryComponent {
         logger.info("Language: {}", lang);
 
         //The language tags are already aligned with http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-
-        //STEP 3: The language tag is pushed to the triple store
+        
+	//STEP 3: The language tag is pushed to the triple store
         logger.info("store data in graph {}", myQanaryMessage.getEndpoint());
-        String sparql="";
-        sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
-                + "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-                + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
-                + "INSERT { "
-                + "GRAPH <" + myQanaryUtils.getInGraph() + "> { "
-                + "  ?a a qa:AnnotationOfQuestionLanguage ; "
-                + "     oa:hasTarget <" + myQanaryQuestion.getUri() + ">; "
-                + "     oa:hasSource \"" + lang +"\" ;"
-                + "     oa:annotatedBy <https://code.google.com/archive/p/language-detection/> ; "
-                + "	    oa:AnnotatedAt ?time . "
-                + "}} "
-                    + "WHERE { "
-                    + "    BIND (IRI(str(RAND())) AS ?a) ."
-                    + "    BIND (now() as ?time) "
-                    + "}";
-        myQanaryUtils.updateTripleStore(sparql);
-
+        myQanaryQuestion.setLanguageText(lang);
+        //        + "     oa:annotatedBy <https://code.google.com/archive/p/language-detection/> ; "
 		return myQanaryMessage;
 	}
 
