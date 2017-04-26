@@ -59,7 +59,6 @@ public class Agdistis extends QanaryComponent {
                     + "			oa:end  ?end "
                     + "		] "
                     + "] ; "
-                    + "oa:annotatedBy ?annotator "
                     + "} "
                     + "ORDER BY ?start ";
             ResultSet r = myQanaryUtils.selectFromTripleStore(sparql, myQanaryMessage.getEndpoint().toString());

@@ -61,7 +61,6 @@ public class DBpediaSpotlightNED extends QanaryComponent {
                 + "			         oa:end   ?end " //
                 + "		     ] " //
                 + "    ] ; " //
-                + "    oa:annotatedBy ?annotator " //
                 + "} " //
                 + "ORDER BY ?start ";
 
