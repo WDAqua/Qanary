@@ -112,7 +112,7 @@ public class QanaryEmbeddedQaWebFrontendController {
 		QanaryCommonSparqlQueryHelper myHelper = new QanaryCommonSparqlQueryHelper(run);
 
 		// retrieve the answers as JSON object from the triplestore
-		String jsonAnswer = myHelper.getJsonAnswers();
+		String jsonAnswer = myHelper.getJsonAnswers().replace("\\\"","\"");
 		// retrieve the answers as SPARQL QUERY from the triplestore
 		String sparqlAnswer = myHelper.getSparqlQueryAnswer();
 
