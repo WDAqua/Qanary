@@ -1,7 +1,7 @@
 PARAMETERS="-Xms256M -Xmx715M -XX:MaxDirectMemorySize=256M -Djava.security.egd=file:/dev/./urandom -Dhttp.proxySet=true -Dhttp.proxyHost=cache.univ-st-etienne.fr -Dhttp.proxyPort=3128 -Dhttp.nonProxyHosts=qanaryhost|qa|wikidatalog|speech"
 killall -9 java
 rm /home/services/stardog-4.1.1/system.lock
-/home/services/stardog-4.1.1/bin/stardog-admin server start --disable-security &>> stardog
+/home/services/stardog-4.1.1/bin/stardog-admin server start --disable-security &>> log/stardog
 java $PARAMETERS -jar qanary_pipeline-template/target/qa.pipeline-1.1.0.jar &>> log/pipline &
 java $PARAMETERS -jar qanary_component-NERD-Alchemy/target/qa.NERD-Alchemy-1.0.0.jar &>> log/NERD-Alchemy &
 java $PARAMETERS -jar qanary_component-NED-AGDISTIS/target/qa.NED-AGDISTIS-1.0.0.jar &>> log/NED-Agdistis &
