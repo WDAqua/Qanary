@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.component.QanaryComponent;
-import eu.wdaqua.qanary.component.QanaryMessage;
-import eu.wdaqua.qanary.component.QanaryQuestion;
-import eu.wdaqua.qanary.component.QanaryUtils;
-import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
+import eu.wdaqua.qanary.commons.ontology.TextPositionSelector;
 
 /**
  * represents the behavior of an annotator of QALD-6 question number 184: "Who created Batman?",
@@ -44,7 +44,7 @@ public class BatmanQuestionAnnotator extends QanaryComponent {
 
         if (myQanaryQuestion.getTextualRepresentation().toLowerCase().compareTo(questionToBeAccepted.toLowerCase()) == 0) {
             logger.info("question recognized that can be processed: {}", myQanaryQuestion.getTextualRepresentation());
-            logger.info("apply vocabulary alignment on outgraph for the Batman question");
+            logger.info("apply commons alignment on outgraph for the Batman question");
             this.annotateBatmanQuestionWithPredefinedEntities(myQanaryQuestion);
         } else {
             logger.warn("question \"{}\" cannot be processed from this exemplary component, only \"{}\" is accepted.",

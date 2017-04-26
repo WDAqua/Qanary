@@ -85,16 +85,9 @@
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>apache-jena-libs</artifactId>
-            <type>pom</type>
-            <version>3.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>eu.wdaqua.qanary</groupId>
+            <artifactId>qa.pipeline</artifactId>
+            <version>[1.0.0,2.0.0)</version>
         </dependency>
     </dependencies>
 

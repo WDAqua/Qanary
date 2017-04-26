@@ -98,7 +98,7 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa vocabulary
+		// TODO: replace key by URLs of the qa commons
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
 		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
 		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
@@ -155,7 +155,7 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa vocabulary
+		// TODO: replace key by URLs of the qa commons
 		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
 		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
 		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
