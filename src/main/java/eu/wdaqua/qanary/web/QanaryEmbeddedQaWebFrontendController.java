@@ -13,7 +13,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +25,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.QanaryCommonSparqlQueryHelper;
-import eu.wdaqua.qanary.commons.QanaryMessage;
-import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 /**
@@ -109,12 +105,12 @@ public class QanaryEmbeddedQaWebFrontendController {
 		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
 		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
 
-		QanaryCommonSparqlQueryHelper myHelper = new QanaryCommonSparqlQueryHelper(run);
+		QanaryQuestion myQanaryQuestion = new QanaryQuestion(run.getInGraph(),qanaryConfigurator);
 
 		// retrieve the answers as JSON object from the triplestore
-		String jsonAnswer = myHelper.getJsonAnswers().replace("\\\"","\"");
+		String jsonAnswer = myQanaryQuestion.getJsonResult();
 		// retrieve the answers as SPARQL QUERY from the triplestore
-		String sparqlAnswer = myHelper.getSparqlQueryAnswer();
+		String sparqlAnswer = myQanaryQuestion.getSparqlResult();
 
 		// check for results and compute the information for the model
 		if (jsonAnswer.equals("") == false && sparqlAnswer.equals("") == false) {
