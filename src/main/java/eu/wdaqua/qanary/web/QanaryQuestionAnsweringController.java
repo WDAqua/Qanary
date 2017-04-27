@@ -338,14 +338,14 @@ public class QanaryQuestionAnsweringController {
 
 		}
 		// store language definition for current question
-		if (language.compareTo("") != 0 && language != null) {
+		if (language != null && language.compareTo("") != 0) {
 			qanaryQuestion.setLanguageText(language);
 		} else {
 			logger.info("no lanugage was given, no change for question \"{}\"", question);
 		}
 
 		// store targetdata for the current question
-		if (targetdata.compareTo("") != 0 && targetdata != null) {
+		if (targetdata != null && targetdata.compareTo("") != 0) {
 			qanaryQuestion.setTargetData(targetdata);
 		} else {
 			logger.info("no targetdata was given, no change for question \"{}\"", question);
