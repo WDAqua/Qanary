@@ -9,6 +9,8 @@ package eu.wdaqua.qanary.web;
 public interface QanaryStandardWebParameters {
 	String COMPONENTLIST = "componentlist[]";
 	String QUESTION = "question";
+	String TEXTQUESTION = "textquestion";
+	String AUDIOQUESTION = "audioquestion";
 	String LANGUAGE = "language";
 	String TARGETDATA = "targetdata";
 	String GRAPH = "graph";
