@@ -307,7 +307,7 @@ public class QanaryQuestionAnsweringController {
 		// no question string was given, so it is tried to fetch it from the
 		// triplestore
 		QanaryQuestion qanaryQuestion;
-		if (question == null && questionaudio == null && question.trim().isEmpty()) {
+		if ((question == null || question.trim().isEmpty()) && questionaudio == null) {
 			if (graph == null) {
 				throw new Exception(
 						"graph URI was not provided to retrieve information about the question (which also was not provided).");
