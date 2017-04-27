@@ -6,6 +6,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,6 @@ import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
-import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
 import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
@@ -43,6 +44,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 public class QanaryQuestionAnsweringController {
 	// the string used for the endpoints w.r.t. the question answering process
 	public static final String QUESTIONANSWERING = "/questionanswering";
+	public static final String QUESTIONANSWERINGFULL = "/questionansweringfull";
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 	private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryQuestionController qanaryQuestionController;
@@ -207,6 +209,7 @@ public class QanaryQuestionAnsweringController {
 	 * create a new Question Answering process
 	 * 
 	 * @param textquestion
+	 * @param audioquestion
 	 * @param componentsToBeCalled
 	 * @param language
 	 * @param targetdata
@@ -233,6 +236,53 @@ public class QanaryQuestionAnsweringController {
 				componentsToBeCalled, language, targetdata);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
+	}
+
+	/**
+	 * create a new Question Answering process
+	 *
+	 * @param textquestion
+	 * @param audioquestion
+	 * @param componentsToBeCalled
+	 * @param language
+	 * @param targetdata
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = QUESTIONANSWERINGFULL, method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> createQuestionAnsweringFull( //
+													  @RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
+													  @RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
+													  @RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
+													  @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
+													  @RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+													  @RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+			throws Exception {
+
+		// create a new question answering system
+		logger.info(
+				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
+				textquestion, componentsToBeCalled, language, targetdata);
+
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
+				componentsToBeCalled, language, targetdata);
+		//retrive text representation, SPARQL and JSON result
+		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(),qanaryConfigurator);
+
+		JSONObject obj = new JSONObject();
+		obj.put("endpoint", myRun.getEndpoint());
+		obj.put("namedgraph", myRun.getInGraph());
+		obj.put("textrepresentation", myQanaryQuestion.getTextualRepresentation());
+		JSONArray sparql = new JSONArray();
+		List<String> ss = myQanaryQuestion.getSparqlResults();
+		for (String s : ss){
+			sparql.add(s);
+		}
+		obj.put("sparql", sparql);
+		obj.put("json", myQanaryQuestion.getJsonResult());
+
+		return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);
 	}
 
 	/**
@@ -277,9 +327,13 @@ public class QanaryQuestionAnsweringController {
 				// store the question on the current server
 				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(questionaudio);
 
-				// create an audio question in a new graph
+				// create question
 				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
 						qanaryConfigurator);
+
+				//add annotation saying that it is an audio question
+				qanaryQuestion.putAnnotationOfAudioRepresentation();
+
 			}
 
 		}

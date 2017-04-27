@@ -105,7 +105,7 @@ public class QanaryEmbeddedQaWebFrontendController {
 
 		// Send the question to the startquestionansweringwithtextquestion
 		ResponseEntity<?> response = qanaryQuestionAnsweringController.startquestionansweringwithtextquestion(question,
-				qanaryConfigurator.getDefaultComponentNames());
+				qanaryConfigurator.getDefaultComponentNames(), null, null);
 		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
 		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
 
