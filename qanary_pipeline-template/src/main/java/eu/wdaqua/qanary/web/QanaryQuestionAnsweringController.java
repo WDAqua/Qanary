@@ -95,21 +95,16 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
-			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled)
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
 					throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
+				componentsToBeCalled, language, targetdata);
 
-		// you cannot pass without a question
-		if (question.trim().isEmpty()) {
-			throw new QanaryExceptionQuestionNotProvided();
-		} else {
-			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
-			QanaryQuestion qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
-					qanaryConfigurator);
-			qanaryQuestion.putAnnotationOfTextRepresentation();
-			return this.questionansweringLegacy(componentsToBeCalled, qanaryQuestion.getQanaryMessage().asJsonString());
-		}
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
 	/**
@@ -135,20 +130,16 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithaudioquestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile question,
-			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled)
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled, //
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
 					throws Exception {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
-		// you cannot pass without a valid question
-		if (question.isEmpty()) {
-			throw new QanaryExceptionQuestionNotProvided();
-		} else {
-			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(question);
-			QanaryQuestion qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
-					qanaryConfigurator);
-			qanaryQuestion.putAnnotationOfAudioRepresentation();
-			return this.questionansweringLegacy(componentsToBeCalled, qanaryQuestion.getQanaryMessage().asJsonString());
-		}
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
+				componentsToBeCalled, language, targetdata);
+
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
 	/**
@@ -215,7 +206,7 @@ public class QanaryQuestionAnsweringController {
 	/**
 	 * create a new Question Answering process
 	 * 
-	 * @param question
+	 * @param textquestion
 	 * @param componentsToBeCalled
 	 * @param language
 	 * @param targetdata
@@ -225,7 +216,8 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> createQuestionAnswering( //
-			@RequestParam(value = QanaryStandardWebParameters.QUESTION, defaultValue = "", required = false) final String question, //
+			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
+		  	@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
 			@RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
@@ -235,9 +227,9 @@ public class QanaryQuestionAnsweringController {
 		// create a new question answering system
 		logger.info(
 				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
-				question, componentsToBeCalled, language, targetdata);
+				textquestion, componentsToBeCalled, language, targetdata);
 
-		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, question,
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
 				componentsToBeCalled, language, targetdata);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
@@ -256,7 +248,7 @@ public class QanaryQuestionAnsweringController {
 	 * @throws Exception
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
-			List<String> componentsToBeCalled, String language, String targetdata) throws Exception {
+				MultipartFile questionaudio, List<String> componentsToBeCalled, String language, String targetdata) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with \"{}\"", question,
@@ -265,7 +257,7 @@ public class QanaryQuestionAnsweringController {
 		// no question string was given, so it is tried to fetch it from the
 		// triplestore
 		QanaryQuestion qanaryQuestion;
-		if (question.trim().isEmpty()) {
+		if (question.trim().isEmpty() && questionaudio.isEmpty()) {
 			if (graph == null) {
 				throw new Exception(
 						"graph URI was not provided to retrieve information about the question (which also was not provided).");
@@ -274,12 +266,22 @@ public class QanaryQuestionAnsweringController {
 				qanaryQuestion = new QanaryQuestion<String>(graph, qanaryConfigurator);
 			}
 		} else {
-			// store the question on the current server
-			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
+			if (questionaudio.isEmpty()){
+				// store the question on the current server
+				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
 
-			// create a textual question in a new graph
-			qanaryQuestion = new QanaryQuestionTextual(qanaryQuestionCreated.getQuestionURI().toURL(),
-					qanaryConfigurator);
+				// create a textual question in a new graph
+				qanaryQuestion = new QanaryQuestionTextual(qanaryQuestionCreated.getQuestionURI().toURL(),
+						qanaryConfigurator);
+			} else {
+				// store the question on the current server
+				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(questionaudio);
+
+				// create an audio question in a new graph
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
+						qanaryConfigurator);
+			}
+
 		}
 		// store language definition for current question
 		if (language.compareTo("") != 0 && language != null) {
