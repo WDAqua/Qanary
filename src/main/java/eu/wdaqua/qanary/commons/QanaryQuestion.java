@@ -18,7 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import static eu.wdaqua.qanary.commons.QanaryUtils.loadTripleStore;
@@ -117,7 +119,7 @@ public class QanaryQuestion<T> {
 	 * graph (data is retrieved from the Qanary triplestore, see
 	 * application.properties)
 	 * 
-	 * @param graph
+	 * @param namedGraph
 	 * @param qanaryConfigurator
 	 * @throws URISyntaxException
 	 */
@@ -464,26 +466,47 @@ public class QanaryQuestion<T> {
 
 
 
-	public String getSparqlResult() {
+	public List<String> getSparqlResults() {
 		String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " + "SELECT ?sparql ?json " + "FROM <"
-				+ this.getInGraph() + "> " + "WHERE { " + "  ?a a qa:AnnotationOfAnswerSPARQL . "
-				+ "  ?a oa:hasBody ?sparql . " + "}";
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+				+ "SELECT ?sparql "
+				+ "FROM <" + this.getInGraph() + "> "
+				+ "WHERE { "
+				+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
+				+ "  OPTIONAL {?a oa:hasBody ?sparql . } "
+				+ "  OPTIONAL {?a qa:hasScore ?score . } "
+				+ "  ?a oa:annotatedAt ?time1 . "
+				+ "  { "
+				+ "   select ?time1 { "
+				+ "    ?a a qa:AnnotationOfAnswerSPARQL . "
+				+ "    ?a oa:annotatedAt ?time1 "
+				+ "    } order by DESC(?time1) limit 1 "
+				+ "  } "
+				+ "} "
+				+ "ORDER BY DESC(?score)";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 		int i = 0;
-		String sparqlAnnotation = null;
+		List<String> sparqlAnnotation = new ArrayList<String>();
 		while (resultset.hasNext()) {
-			sparqlAnnotation = resultset.next().get("sparql").asLiteral().toString();
+			sparqlAnnotation.add(resultset.next().get("sparql").asLiteral().toString());
 		}
 		return sparqlAnnotation;
 	}
 
+	public String getSparqlResult() {
+		return this.getSparqlResults().get(0);
+	}
+
 	public String getJsonResult() {
 		String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " + "SELECT ?sparql ?json " + "FROM <"
-				+ this.getInGraph() + "> " + "WHERE { " + "  ?a a qa:AnnotationOfAnswerJSON . "
-				+ "  ?a oa:hasBody ?json " + "}";
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+				+ "SELECT ?json "
+				+ "FROM <" + this.getInGraph() + "> "
+				+ "WHERE { "
+				+ "  ?a a qa:AnnotationOfAnswerJSON . "
+				+ "  ?a oa:hasBody ?json "
+				+ "}";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 		int i = 0;
@@ -506,11 +529,17 @@ public class QanaryQuestion<T> {
 		logger.info("store data in graph {}", this.qanaryMessage.getEndpoint());
 		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-				+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> " + "INSERT { " + "GRAPH <" + this.getOutGraph()
-				+ "> { " + "  ?a a qa:AnnotationOfTextualRepresentation . " + "  ?a oa:hasTarget <" + this.getUri()
-				+ "> . " + "  ?a oa:hasBody <" + uriTextRepresention + "> ;" + "     oa:annotatedBy <"
-				+ qanaryUtil.getComponentUri() + "> ; " + "	    oa:AnnotatedAt ?time  " + "}} " + "WHERE { "
-				+ "BIND (IRI(str(RAND())) AS ?a) ." + "BIND (now() as ?time) " + "}";
+				+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+				+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { "
+				+ "  ?a a qa:AnnotationOfTextualRepresentation . "
+				+ "  ?a oa:hasTarget <" + this.getUri() + "> . "
+				+ "  ?a oa:hasBody <" + uriTextRepresention + "> ;"
+				+ "     oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; "
+				+ "	    oa:AnnotatedAt ?time  " + "}} "
+				+ "WHERE { "
+				+ "BIND (IRI(str(RAND())) AS ?a) ."
+				+ "BIND (now() as ?time) "
+				+ "}";
 		logger.info("Sparql query {}", sparql);
 		this.qanaryUtil.updateTripleStore(sparql);
 	}
