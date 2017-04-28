@@ -46,7 +46,7 @@ public class QueryExecuter extends QanaryComponent {
                         + "    SELECT ?time { "
                         + "     ?a a qa:AnnotationOfAnswerSPARQL . "
                         + "     ?a oa:annotatedAt ?time . "
-  	                + "    } order by ?time limit 1 "
+  	                + "    } order by DESC(?time) limit 1 "
                         + "  } "
   			+ "} "
   			+ "ORDER BY DESC(?score) LIMIT 1"  ;
