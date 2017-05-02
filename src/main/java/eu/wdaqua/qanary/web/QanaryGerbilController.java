@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 
 /**
@@ -69,8 +70,10 @@ public class QanaryGerbilController {
         map.add("question", query);
         map.add("componentlist[]", "wdaqua-core0, QueryExecuter");
         RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getHost()+"/startquestionansweringwithtextquestion", map, String.class);
-        QanaryMessage myQanaryMessage = new QanaryMessage(response);
+        String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getPort()+"/startquestionansweringwithtextquestion", map, String.class);
+        org.json.JSONObject json = new org.json.JSONObject(response);
+        //retrive text representation, SPARQL and JSON result
+        QanaryMessage myQanaryMessage = new QanaryMessage((URI)json.get("endpoint"), (URI)json.get("inGraph"), (URI)json.get("outgraph"));
         QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
         //Generates the following output
     	/*{
