@@ -113,7 +113,7 @@ public class QanaryGerbilController {
             URI uri = new URI(
                     "http",
                     null,
-                    host.replace("http://",""),
+                    new URL(host).getHost(),
                     port,
                     components+"/",
                     null,
