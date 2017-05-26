@@ -558,7 +558,7 @@ public class QanaryQuestion<T> {
                                 + "GRAPH <"+ this.getOutGraph() + "> { "
 				+ "?a a qa:AnnotationOfQuestionLanguage . "
 				+ "?a oa:hasBody \"" + language + "\" . "
-				+ "?a oa:hasTarget <" + this.getUriTextualRepresentation() + "> ; "
+				+ "?a oa:hasTarget <" + this.getUri() + "> ; "
 				+ "   oa:annotatedBy <www.wdaqua.eu/qanary> ; "
 				+ "   oa:annotatedAt ?time  " 
                                 + " }} "
@@ -572,7 +572,7 @@ public class QanaryQuestion<T> {
 
 
 	/**
-	 * set a new language for the current question, stored in the Qanary
+	 * set a new knowledge-base for the current question, stored in the Qanary
 	 * triplestore
 	 *
 	 * @param targetData
