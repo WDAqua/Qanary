@@ -139,7 +139,7 @@ public class QanaryGerbilController {
         String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getPort()+"/startquestionansweringwithtextquestion", map, String.class);
         org.json.JSONObject json = new org.json.JSONObject(response);
         //retrive text representation, SPARQL and JSON result
-        QanaryMessage myQanaryMessage = new QanaryMessage((URI)json.get("endpoint"), (URI)json.get("inGraph"), (URI)json.get("outgraph"));
+        QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
         //Generates the following output
     	/*{
