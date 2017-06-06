@@ -3,6 +3,7 @@
 #set( $symbol_escape = '\' )
 package ${package};
 
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,19 +33,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import ${groupId}.QanaryMessage;
-import ${groupId}.QanaryService;
-import ${groupId}.QanaryServiceController;
-import ${groupId}.config.QanaryConfiguration;
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.component.QanaryService;
+import eu.wdaqua.qanary.component.QanaryServiceController;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { QanaryService.class }, loader = SpringApplicationContextLoader.class)
 @WebAppConfiguration
-/**
- * test class for the standard interface of Qanary components
- * in general there is no need to change something here
- */
 public class TestQanaryServiceController {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestQanaryServiceController.class);
@@ -99,9 +96,9 @@ public class TestQanaryServiceController {
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa commons
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
+		jsonObject.put("ingraph", testInGraph);
+		jsonObject.put("outgraph", testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
@@ -116,10 +113,13 @@ public class TestQanaryServiceController {
 		MvcResult res;
 		try {
 			res = mockMvc
-					.perform(post(QanaryConfiguration.annotatequestion).content(requestMessage.asJsonString())
-							.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk())
-					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).andReturn();
+					.perform( //
+							post(QanaryConfiguration.annotatequestion) //
+									.content(requestMessage.asJsonString()) //
+									.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk()) // ok
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
+					.andReturn();
 		} catch (Exception e) {
 			fail(e.getMessage());
 			return;
@@ -156,16 +156,16 @@ public class TestQanaryServiceController {
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa commons
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
+		jsonObject.put("ingraph", testInGraph);
+		jsonObject.put("outgraph", testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryMessage.endpointKey));
+			URI endpointKeyUrlFromMessage = message.getEndpoint();
 			Assert.notNull(endpointKeyUrlFromMessage);
 
 			URI endpointKeyUrlFromHere = new URI(testEndPoint);
@@ -180,4 +180,12 @@ public class TestQanaryServiceController {
 
 	}
 
+	@Test
+	public void testAnnotation() {
+
+		// QanaryMessage message = new QanaryMessage()
+		// mockMvc.perform
+	}
+
 }
+
