@@ -15,9 +15,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.wdaqua.qanary.component.QanaryComponent;
-import eu.wdaqua.qanary.component.QanaryMessage;
-import eu.wdaqua.qanary.component.QanaryQuestion;
-import eu.wdaqua.qanary.component.ontology.TextPositionSelector;
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.ontology.TextPositionSelector;
 
 @Component
 public class SmaphErd extends QanaryComponent {

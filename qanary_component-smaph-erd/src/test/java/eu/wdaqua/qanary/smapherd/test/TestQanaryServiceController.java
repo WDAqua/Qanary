@@ -1,4 +1,4 @@
-package TestQanaryServiceController;
+package eu.wdaqua.qanary.smapherd.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -29,10 +29,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import eu.wdaqua.qanary.component.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.component.QanaryService;
 import eu.wdaqua.qanary.component.QanaryServiceController;
-import eu.wdaqua.qanary.component.config.QanaryConfiguration;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -92,9 +92,9 @@ public class TestQanaryServiceController {
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
+		jsonObject.put(QanaryConfiguration.inGraphKey, testInGraph);
+		jsonObject.put(QanaryConfiguration.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
@@ -149,16 +149,16 @@ public class TestQanaryServiceController {
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
 		// TODO: replace key by URLs of the qa vocabulary
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
-		jsonObject.put(QanaryMessage.inGraphKey, testInGraph);
-		jsonObject.put(QanaryMessage.outGraphKey, testOutGraph);
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
+		jsonObject.put(QanaryConfiguration.inGraphKey, testInGraph);
+		jsonObject.put(QanaryConfiguration.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryMessage.endpointKey));
+			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryConfiguration.endpointKey));
 			Assert.notNull(endpointKeyUrlFromMessage);
 
 			URI endpointKeyUrlFromHere = new URI(testEndPoint);
