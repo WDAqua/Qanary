@@ -1,5 +1,10 @@
 package eu.wdaqua.qanary.test;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.component.QanaryService;
+import eu.wdaqua.qanary.component.QanaryServiceController;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,10 +34,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import eu.wdaqua.qanary.component.QanaryMessage;
-import eu.wdaqua.qanary.component.QanaryService;
-import eu.wdaqua.qanary.component.QanaryServiceController;
-import eu.wdaqua.qanary.component.config.QanaryConfiguration;
+
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -91,8 +93,8 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa vocabulary
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
+		// TODO: replace key by URLs of the qa commons
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
 		jsonObject.put("ingraph", testInGraph);
 		jsonObject.put("outgraph", testOutGraph);
 
@@ -151,8 +153,8 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa vocabulary
-		jsonObject.put(QanaryMessage.endpointKey, testEndPoint);
+		// TODO: replace key by URLs of the qa commons
+		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
 		jsonObject.put("ingraph", testInGraph);
 		jsonObject.put("outgraph", testOutGraph);
 
@@ -161,7 +163,7 @@ public class TestQanaryServiceController {
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryMessage.endpointKey));
+			URI endpointKeyUrlFromMessage = message.getEndpoint();
 			Assert.notNull(endpointKeyUrlFromMessage);
 
 			URI endpointKeyUrlFromHere = new URI(testEndPoint);

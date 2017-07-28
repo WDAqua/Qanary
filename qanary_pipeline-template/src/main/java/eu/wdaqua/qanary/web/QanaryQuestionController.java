@@ -1,7 +1,5 @@
 package eu.wdaqua.qanary.web;
 
-import com.hp.hpl.jena.tdb.base.StorageException;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,6 +36,8 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.message.QanaryQuestionInformation;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * controller for all service call w.r.t. questions
@@ -55,6 +56,12 @@ public class QanaryQuestionController {
 
     private final QanaryConfigurator qanaryConfigurator;
 
+    //Set this to allow browser requests from other websites
+    @ModelAttribute
+    public void setVaryResponseHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }
+
     // TODO: define directory in config
     private final String directoryForStoringQuestionRawData = "/tmp/questions";
 
@@ -72,7 +79,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createQuestion(
-            @RequestParam(value = "question", required = true) final String questionstring) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String questionstring) {
 
         logger.info("add received question: " + questionstring);
         // URI uriOfQuestion;
@@ -129,7 +136,7 @@ public class QanaryQuestionController {
     @RequestMapping(value = "/question_audio", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> createAudioQuestion(
-            @RequestParam(value = "question", required = true) final MultipartFile file) {
+            @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
         logger.info("new audio file recived: " + file.getName());
         // URI uriOfQuestion;
@@ -172,11 +179,11 @@ public class QanaryQuestionController {
         // Save the file locally
         try {
             if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + file.getOriginalFilename());
+                throw new IOException("Failed to store empty file " + file.getOriginalFilename());
             }
             Files.copy(file.getInputStream(), Paths.get(this.getDirectoryForStoringQuestionRawData(), filename));
         } catch (IOException e) {
-            throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
+            throw new IOException("Failed to store file " + file.getOriginalFilename(), e);
         }
 
         final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);

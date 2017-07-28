@@ -1,66 +1,36 @@
 package eu.wdaqua.qanary.web;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.json.simple.parser.ParseException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.core.DatasetImpl;
-import com.hp.hpl.jena.sparql.modify.GraphStoreBasic;
-import com.hp.hpl.jena.update.GraphStore;
-import com.hp.hpl.jena.update.UpdateExecutionFactory;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateProcessor;
-import com.hp.hpl.jena.update.UpdateRequest;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
 
 import javax.servlet.http.HttpServletResponse;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.business.QanaryQuestion;
-import eu.wdaqua.qanary.business.QanaryQuestionWithAudio;
-import eu.wdaqua.qanary.business.QanaryQuestionWithText;
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
-import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
 import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
-import eu.wdaqua.qanary.message.QanaryMessage;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 
@@ -74,123 +44,35 @@ import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 public class QanaryQuestionAnsweringController {
 	// the string used for the endpoints w.r.t. the question answering process
 	public static final String QUESTIONANSWERING = "/questionanswering";
-    private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
-    private final QanaryConfigurator qanaryConfigurator;
-    private final QanaryQuestionController qanaryQuestionController;
-    
-    @Value("${server.host}")
-	private String host;
-	@Value("${server.port}")
-	private String port;
+	public static final String QUESTIONANSWERINGFULL = "/questionansweringfull";
+	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
+	private final QanaryConfigurator qanaryConfigurator;
+	private final QanaryQuestionController qanaryQuestionController;
 
-    /**
-     * Jena model
-     */
-    private final GraphStore inMemoryStore;
-
-    //Set this to allow browser requests from other websites
-    @ModelAttribute
-    public void setVaryResponseHeader(HttpServletResponse response) {
-        response.setHeader("Access-Control-Allow-Origin", "*");
-    }
-
-    /**
-     * inject QanaryConfigurator
-     */
-    @Autowired
-    public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator,
-                                             final QanaryQuestionController qanaryQuestionController) {
-        this.qanaryConfigurator = qanaryConfigurator;
-        this.qanaryQuestionController = qanaryQuestionController;
-
-        inMemoryStore = new GraphStoreBasic(new DatasetImpl(ModelFactory.createDefaultModel()));
-    }
-
-    @RequestMapping(value="/qa",  method = RequestMethod.GET)
-    public String qa() {
-        return "qa_input";
-    }
-    
-    @RequestMapping(value="/qa",  method = RequestMethod.POST)
-	public String qa(
-			@RequestParam(value = "question", required = true) final String question,  Model model)
-					throws URISyntaxException, ParseException, UnsupportedEncodingException {
-    	logger.info("Asked question {}"+question);
-    	model.addAttribute("question", question);
-    	//Send the question to the startquestionansweringwithtextquestion interface, select as a component wdaqua-core0
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("question", question);
-		map.add("componentlist[]", "wdaqua-core0");
-		//map.add("componentlist[]", "Monolitic");
-		RestTemplate restTemplate = new RestTemplate();
-		String response = restTemplate.postForObject(host+":"+port+"/startquestionansweringwithtextquestion", map, String.class);
-       		org.json.JSONObject json = new org.json.JSONObject(response);
-		//TODO: replace previus line with QanaryQuestionAnsweringRun constructur
-		//Retrive the answers as JSON object from the triplestore
-    	String sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-            + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-            + "SELECT ?json "
-    		+ "FROM <"+  json.get("graph").toString() + "> "
-    		+ "WHERE { "
-    		+ "  ?a a qa:AnnotationOfAnswerJSON . "
-            	+ "  ?a oa:hasBody ?json " 
-    		+ "}";
-        	ResultSet r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
-        	//If there are answers give them back
-        String jsonAnswer = "";
-        if (r.hasNext()){
-        		jsonAnswer=r.next().getLiteral("json").toString();
-        		logger.info("JSONAnswer {}"+jsonAnswer);	
-		}
-        sparqlQuery =  "PREFIX qa: <http://www.wdaqua.eu/qa#> "
-                + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-                + "SELECT ?sparql "
-        	    + "FROM <"+  json.get("graph").toString() + "> "
-        	    + "WHERE { "
-        	    + "  ?a a qa:AnnotationOfAnswerSPARQL . "
-                + "  ?a oa:hasBody ?sparql "
-        	    + "}";
-        r = selectFromTripleStore(sparqlQuery, json.get("endpoint").toString());
-        String sparqlAnswer="";
-        if (r.hasNext()){
-    		sparqlAnswer=r.next().getLiteral("sparql").toString();
-    		logger.info("SPARQLAnswer {}"+sparqlAnswer);	
+        //Set this to allow browser requests from other websites
+        @ModelAttribute
+        public void setVaryResponseHeader(HttpServletResponse response) {
+                response.setHeader("Access-Control-Allow-Origin", "*");
         }
-        if (jsonAnswer.equals("")==false && sparqlAnswer.equals("")==false ){
-        	//Parse the json result set using jena
-    		ResultSetFactory factory = new ResultSetFactory();
-    		InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
-    		ResultSet result= factory.fromJSON(in);
-    		List<String> var= result.getResultVars();
-    		List<String> list = new ArrayList<>();
-    		while (result.hasNext()){
-        			for (String v:var){
-        				list.add(result.next().get(v).toString());
-        			}
-    		}
-			//Write the answers to the model such that it is available for the HTML template	
-    		model.addAttribute("answers", list);
-    		//Format the SPARQL query nicely
-    		Query query = QueryFactory.create(sparqlAnswer);
-        	query.setPrefix("dbr", "http://dbpedia.org/resource/");
-        	query.setPrefix("dbp", "http://dbpedia.org/property/");
-        	query.setPrefix("dbo", "http://dbpedia.org/ontology/");
-        	String formatted=query.serialize();
-        	formatted=formatted.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
-        	model.addAttribute("sparqlQuery", formatted);
-        	return "qa_output";
-    	}
-    	return "No answer";  	
+
+	/**
+	 * inject QanaryConfigurator
+	 */
+	@Autowired
+	public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator,
+			final QanaryQuestionController qanaryQuestionController) {
+		this.qanaryConfigurator = qanaryConfigurator;
+		this.qanaryQuestionController = qanaryQuestionController;
 	}
 
-    /**
-     * expose the model with the
-     */
-    @ModelAttribute("componentList")
-    public List<String> componentList() {
-        logger.info("available components: {}", qanaryConfigurator.getComponentNames());
-        return qanaryConfigurator.getComponentNames();
-    }
+	/**
+	 * expose the model with the component names
+	 */
+	@ModelAttribute("componentList")
+	public List<String> componentList() {
+		logger.info("available components: {}", qanaryConfigurator.getComponentNames());
+		return qanaryConfigurator.getComponentNames();
+	}
 
 	/**
 	 * a simple HTML input form for starting a question answering process with a
@@ -214,23 +96,17 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
-			@RequestParam(value = "question", required = true) final String question,
-			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
-					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
-					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
-					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+					throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
+				componentsToBeCalled, language, targetdata);
 
-		// you cannot pass without a question
-		if (question.trim().isEmpty()) {
-			throw new QanaryExceptionQuestionNotProvided();
-		} else {
-			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
-			QanaryMessage myQanaryMessage = createQuestionInTriplestore(qanaryQuestionCreated,
-					QanaryQuestionWithText.class);
-			return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
-		}
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
 	/**
@@ -255,63 +131,21 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> startquestionansweringwithaudioquestion(
-			@RequestParam(value = "question", required = true) final MultipartFile question,
-			@RequestParam(value = "componentlist[]", defaultValue="") final List<String> componentsToBeCalled)
-					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
-					IOException, QanaryExceptionQuestionNotProvided, InstantiationException, IllegalAccessException,
-					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile question,
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled, //
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+					throws Exception {
 
-		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
-		// you cannot pass without a valid question
-		if (question.isEmpty()) {
-			throw new QanaryExceptionQuestionNotProvided();
-		} else {
-			QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(question);
-			QanaryMessage myQanaryMessage = createQuestionInTriplestore(qanaryQuestionCreated,
-					QanaryQuestionWithAudio.class);
-			return this.questionanswering(componentsToBeCalled, myQanaryMessage.asJsonString());
-		}
+		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
+				componentsToBeCalled, language, targetdata);
+
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
 	/**
-	 * creates question in triplestore, including the correct annotation
-	 * depending on the passed class (needs to be a concrete implementation of
-	 * {@link QanaryQuestion}
-	 * 
-	 * @param qanaryQuestionCreated
-	 * @param myQanaryQuestionClass
-	 * @return
-	 * @throws URISyntaxException
-	 * @throws MalformedURLException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 * @throws NoSuchMethodException
-	 * @throws SecurityException
-	 */
-	private QanaryMessage createQuestionInTriplestore(QanaryQuestionCreated qanaryQuestionCreated,
-			Class<? extends QanaryQuestion> myQanaryQuestionClass)
-					throws URISyntaxException, MalformedURLException, InstantiationException, IllegalAccessException,
-					IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		QanaryMessage myQanaryMessage = initGraphInTripelStore(qanaryQuestionCreated.getQuestionURI().toURL());
-
-		// The question has a specific representation, therefore an anonymous
-		// type is used here, prepare anonymous constructor for {@link
-		// QanaryQuestion} class
-		Class[] argTypes = new Class[4];
-		argTypes[0] = URI.class;
-		argTypes[1] = URI.class;
-		argTypes[2] = URI.class;
-		argTypes[3] = this.getClass();
-		myQanaryQuestionClass.getDeclaredConstructor(argTypes).newInstance(myQanaryMessage.getEndpoint(),
-				myQanaryMessage.getInGraph(), qanaryQuestionCreated.getQuestionURI(), this);
-
-		return myQanaryMessage;
-	}
-
-	/**
-	 * exposing the oa vocabulary
+	 * exposing the oa commons
 	 */
 	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
 	@ResponseBody
@@ -337,150 +171,248 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public ResponseEntity<?> questionanswering(@PathVariable(value = "runId") final UUID runId) throws Exception {
+	public ResponseEntity<?> getQuestionAnsweringGraphInformation(@PathVariable(value = "runId") final UUID runId)
+			throws Exception {
 		throw new Exception("not yet implemented");
 	}
 
 	/**
-	 * start a configured process
+	 * returns information about the run identified by the provided runId
+	 * 
+	 * @param runId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = QUESTIONANSWERING
+			+ "/{runId}", method = RequestMethod.DELETE, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> deleteQuestionAnsweringGraph(@PathVariable(value = "runId") final UUID runId)
+			throws Exception {
+		throw new Exception("not yet implemented");
+	}
+
+	/**
+	 * returns information about the run identified by the provided runId
+	 * 
+	 * @param runId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.PUT, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> createOrUpdateQuestionAnsweringGraph(@PathVariable(value = "runId") final UUID runId)
+			throws Exception {
+		throw new Exception("not yet implemented");
+	}
+
+	/**
+	 * create a new Question Answering process
+	 * 
+	 * @param textquestion
+	 * @param audioquestion
+	 * @param componentsToBeCalled
+	 * @param language
+	 * @param targetdata
+	 * @return
+	 * @throws Exception
 	 */
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	public ResponseEntity<?> questionanswering(
-			@RequestParam(value = "componentlist[]") final List<String> componentsToBeCalled,
-			@RequestBody String jsonMessage // expected is a JSON message that
-										// contains ingraph, outgraph, endpoint
-	) throws QanaryComponentNotAvailableException, URISyntaxException, QanaryExceptionServiceCallNotOk {
+	public ResponseEntity<?> createQuestionAnswering( //
+			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
+		  	@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
+			@RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+					throws Exception {
 
-		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
-		// TODO: substitute with eu.wdaqua.qanary.component.QanaryMessage method when shared
-        String query = "SELECT ?question " +
-                "FROM <" + myQanaryMessage.getInGraph() + "> {" +
-                "?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>" +
-                "}";
-        ResultSet r = selectFromTripleStore(query, myQanaryMessage.getEndpoint());
-		URI question = new URI(r.next().getResource("question").toString());
+		// create a new question answering system
+		logger.info(
+				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
+				textquestion, componentsToBeCalled, language, targetdata);
 
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
+				componentsToBeCalled, language, targetdata);
 
-		final UUID runID = UUID.randomUUID();
-		logger.info("calling component: {} on named graph {} and endpoint {} ", componentsToBeCalled,
-				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph());
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
+	}
 
-		// execute synchronous calls to all components with the same message
-		// TODO: execute asynchronously?
-		if (componentsToBeCalled.isEmpty()==false) { //if no component is passed nothing is happening
-			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+	/**
+	 * create a new Question Answering process
+	 *
+	 * @param textquestion
+	 * @param audioquestion
+	 * @param componentsToBeCalled
+	 * @param language
+	 * @param targetdata
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = QUESTIONANSWERINGFULL, method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public ResponseEntity<?> createQuestionAnsweringFull( //
+													  @RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
+													  @RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
+													  @RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
+													  @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
+													  @RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
+													  @RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+			throws Exception {
+
+		// create a new question answering system
+		logger.info(
+				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
+				textquestion, componentsToBeCalled, language, targetdata);
+
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
+				componentsToBeCalled, language, targetdata);
+		//retrive text representation, SPARQL and JSON result
+		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(),qanaryConfigurator);
+
+		JSONObject obj = new JSONObject();
+		obj.put("endpoint", myRun.getEndpoint());
+		obj.put("namedgraph", myRun.getInGraph());
+		obj.put("textrepresentation", myQanaryQuestion.getTextualRepresentation());
+		JSONArray sparql = new JSONArray();
+		List<String> ss = myQanaryQuestion.getSparqlResults();
+		for (String s : ss){
+			sparql.add(s);
+		}
+		obj.put("sparql", sparql);
+		obj.put("json", myQanaryQuestion.getJsonResult());
+
+		return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);
+	}
+
+	/**
+	 * helper for creating or updating a Question Answering system (used for
+	 * POST and PUT requests) for a given textual question
+	 * 
+	 * @param graph
+	 * @param question
+	 * @param componentsToBeCalled
+	 * @param language
+	 * @param targetdata
+	 * @return
+	 * @throws Exception
+	 */
+	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
+				MultipartFile questionaudio, List<String> componentsToBeCalled, String language, String targetdata) throws Exception {
+
+		// create a QanaryQuestion from given question and graph
+		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with \"{}\"", question,
+				componentsToBeCalled);
+
+		// no question string was given, so it is tried to fetch it from the
+		// triplestore
+		QanaryQuestion qanaryQuestion;
+		if ((question == null || question.trim().isEmpty()) && questionaudio == null) {
+			if (graph == null) {
+				throw new Exception(
+						"graph URI was not provided to retrieve information about the question (which also was not provided).");
+			} else {
+				logger.info("question was empty, data is retrieved from graph \"{}\"", graph);
+				qanaryQuestion = new QanaryQuestion<String>(graph, qanaryConfigurator);
+			}
+		} else {
+			if (questionaudio == null){
+				// store the question on the current server
+				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
+
+				// create a textual question in a new graph
+				qanaryQuestion = new QanaryQuestionTextual(qanaryQuestionCreated.getQuestionURI().toURL(),
+						qanaryConfigurator);
+			} else {
+				// store the question on the current server
+				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(questionaudio);
+
+				// create question
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
+						qanaryConfigurator);
+
+				//add annotation saying that it is an audio question
+				qanaryQuestion.putAnnotationOfAudioRepresentation();
+
+			}
+
+		}
+		// store language definition for current question
+		if (language != null && language.compareTo("") != 0) {
+			qanaryQuestion.setLanguageText(language);
+		} else {
+			logger.info("no lanugage was given, no change for question \"{}\"", question);
 		}
 
-		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(runID, question,
-				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph(), qanaryConfigurator);
-		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
+		// store targetdata for the current question
+		if (targetdata != null && targetdata.compareTo("") != 0) {
+			qanaryQuestion.setTargetData(targetdata);
+		} else {
+			logger.info("no targetdata was given, no change for question \"{}\"", question);
+		}
+
+		QanaryMessage myQanaryMessage = new QanaryMessage(this.qanaryConfigurator.getEndpoint(),
+				qanaryQuestion.getNamedGraph());
+
+		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
+				myQanaryMessage.getInGraph(), myQanaryMessage.getEndpoint());
+
+		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
+				myQanaryMessage);
+		return myRun;
 	}
 
 	/**
-	 * init the graph in the triplestore (c.f., applicationproperties)
+	 * execute the components as defined by the parameters
 	 * 
-	 * TODO: needs to be extracted
+	 * @param question
+	 * @param componentsToBeCalled
+	 * @param myQanaryMessage
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws QanaryComponentNotAvailableException
+	 * @throws QanaryExceptionServiceCallNotOk
 	 */
-	private QanaryMessage initGraphInTripelStore(final URL questionUri) throws URISyntaxException {
-		// Create a new named graph and insert it into the triplestore
-		URI namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
+	private QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
+			QanaryMessage myQanaryMessage)
+					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
+		// execute synchronous calls to all components with the same message
+		// if no component is passed nothing is happening
+		if (componentsToBeCalled.isEmpty() == false) {
+			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+		} else {
+			logger.info("Executing components is not done, as the componentlist parameter was empty.");
+		}
 
-		final URI triplestore = qanaryConfigurator.getEndpoint();
-		logger.info("Triplestore " + triplestore);
-		String sparqlquery = "";
-		String namedGraphMarker = "<" + namedGraph.toString() + ">";
+		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(question, myQanaryMessage.getEndpoint(),
+				myQanaryMessage.getInGraph(), myQanaryMessage.getOutGraph(), qanaryConfigurator);
 
-		// Load the Open Annotation Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "
-				+ namedGraphMarker;
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-
-		// Load the Qanary Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "
-				+ namedGraphMarker;
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-
-		// Prepare the question, answer and dataset objects
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { <" + questionUri.toString() + "> a qa:Question}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
-				+ "<" + this.getQuestionAnsweringHostUrlString() + "/Answer> a qa:Answer}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
-				+ "  <" + qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort() + "/Dataset> a qa:Dataset} " //
-				+ "}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-
-		// Make the first two annotations
-		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA { " + "GRAPH " + namedGraphMarker + " { " //
-				+ "<anno1> a  oa:AnnotationOfQuestion; " //
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
-				+ "   oa:hasBody   <URIAnswer>   . " //
-				+ "<anno2> a  oa:AnnotationOfQuestion; " //
-				+ "   oa:hasTarget <" + questionUri.toString() + "> ; " //
-				+ "   oa:hasBody   <URIDataset> " + "}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-		return new QanaryMessage(triplestore, namedGraph);
-	}
-
-    /**
-     * query a SPARQL endpoint with a given query
-     */
-    public ResultSet selectFromTripleStore(String sparqlQuery, URI endpoint) {
-        logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
-        Query query = QueryFactory.create(sparqlQuery);
-        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint.toString(), query);
-        ResultSet resultset = qExe.execSelect();
-        return resultset;
-    }
-    
-    /**
-     * query a SPARQL endpoint with a given query
-     */
-    public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
-        logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
-        Query query = QueryFactory.create(sparqlQuery);
-        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-        ResultSet resultset = qExe.execSelect();
-        return resultset;
-    }
-
-	/**
-	 * insert into local Jena triplestore
-	 *
-	 * TODO: needs to be extracted
-	 */
-	public void insertSparqlIntoTriplestore(final String sparqlQuery) {
-		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
-		final UpdateProcessor updateProcessor = UpdateExecutionFactory.create(request, inMemoryStore);
-		updateProcessor.execute();
+		return myRun;
 	}
 
 	/**
-	 * executes a SPARQL INSERT into the triplestore
-	 *
-	 * TODO: needs to be extracted
-	 *
-	 * @return map
+	 * start a configured process
+	 * 
+	 * @param componentsToBeCalled
+	 * @param jsonMessage
+	 * @return
+	 * @throws Exception
+	 * 
 	 */
-	public static void loadTripleStore(final String sparqlQuery, final URI endpoint) {
-		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
-		final UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint.toString());
-		proc.execute();
+	@Deprecated
+	public ResponseEntity<?> questionansweringLegacy(final List<String> componentsToBeCalled, //
+			// expected is a JSON message contains ingraph, outgraph, endpoint
+			String jsonMessage) throws Exception {
+		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
+		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+		URI question = myQanaryQuestion.getUri();
+
+		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
+				myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph());
+
+		QanaryQuestionAnsweringRun myRun = this.executeComponentList(question, componentsToBeCalled, myQanaryMessage);
+
+		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.OK);
 	}
 
 	/**

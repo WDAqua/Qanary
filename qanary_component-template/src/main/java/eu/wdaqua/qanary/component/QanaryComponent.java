@@ -1,5 +1,9 @@
 package eu.wdaqua.qanary.component;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
