@@ -20,7 +20,6 @@
     <module>qanary_monolitic-wrapper</module>
     <module>qald-evaluator</module>
     <module>batmanquestion.annotator</module>
-    <module>qanary_component-speech-recognition</module>
     <module>qanary_component-smaph-erd</module>
   </modules>
 </project>
