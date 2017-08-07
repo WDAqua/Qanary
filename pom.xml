@@ -20,6 +20,16 @@
     <module>qanary_monolitic-wrapper</module>
     <module>qald-evaluator</module>
     <module>batmanquestion.annotator</module>
-
+    <module>qa.qanary_component-MyComponent</module>
+    <module>qanary_component-NER-EntityClassifier</module>
+    <module>qanary_component-NER-EntityClassifier2</module>
+    <module>qanary_component-NER-Babelfy</module>
+    <module>qanary_component-NED-Babelfy</module>
+    <module>qanary_component-NER-TextRazor</module>
+    <module>qanary_component-NER-MeaningCloud</module>
+    <module>qanary_component-NER-Dandelion</module>
+    <module>qanary_component-NED-Dandelion</module>
+    <module>qanary_component-NER-tagme</module>
+    <module>qanary_component-NED-tagme</module>
   </modules>
 </project>

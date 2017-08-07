@@ -1,0 +1,261 @@
+2017-07-29 17:28:37,471 [Worker-11] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-FOX:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/pom.xml.
+2017-07-29 17:28:43,346 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.ASR-kaldi:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/pom.xml.
+2017-07-29 17:28:44,593 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:44,601 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:44,629 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:44,642 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:44,642 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/src/test/resources
+2017-07-29 17:28:45,141 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.LD-Shuyo:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/pom.xml.
+2017-07-29 17:28:47,125 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:47,128 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:47,135 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 198 resources
+2017-07-29 17:28:47,536 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:47,536 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/src/test/resources
+2017-07-29 17:28:47,889 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-AGDISTIS:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/pom.xml.
+2017-07-29 17:28:49,206 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:49,208 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:49,211 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:49,214 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:49,215 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/src/test/resources
+2017-07-29 17:28:50,013 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-DBpedia-Spotlight:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/pom.xml.
+2017-07-29 17:28:50,537 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:50,537 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:50,539 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:50,542 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:50,542 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:28:50,873 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-DBpedia-Spotlight:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/pom.xml.
+2017-07-29 17:28:51,583 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:51,584 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:51,585 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:51,588 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:51,588 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:28:51,786 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qanary_component-NER-EntityClassifier2:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/pom.xml.
+2017-07-29 17:28:52,403 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:52,404 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:52,406 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:52,409 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:52,409 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/src/test/resources
+2017-07-29 17:28:53,244 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:53,245 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:53,246 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:53,250 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:53,250 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/src/test/resources
+2017-07-29 17:28:53,456 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-Standford:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/pom.xml.
+2017-07-29 17:28:54,271 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:54,272 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:54,274 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:54,280 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:54,280 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/src/test/resources
+2017-07-29 17:28:55,043 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NERD-Alchemy:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/pom.xml.
+2017-07-29 17:28:55,720 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:55,720 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:55,722 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:55,725 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:55,725 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/src/test/resources
+2017-07-29 17:28:56,023 [Worker-1] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NERD-Lucene-Linker:0.1.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Lucene-Linker/pom.xml.
+2017-07-29 17:28:56,761 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:56,761 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:56,762 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:56,765 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:56,765 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Lucene-Linker/src/test/resources
+2017-07-29 17:28:58,633 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:58,639 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:58,641 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:58,645 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:58,645 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/src/test/resources
+2017-07-29 17:28:59,346 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:59,352 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:28:59,364 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 198 resources
+2017-07-29 17:28:59,657 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:28:59,657 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/src/test/resources
+2017-07-29 17:29:00,300 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:00,301 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:00,303 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:00,306 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:00,306 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/src/test/resources
+2017-07-29 17:29:01,046 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:01,046 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:01,048 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:01,051 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:01,051 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:29:01,866 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:01,867 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:01,872 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:01,875 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:01,875 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:29:03,403 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:03,404 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:03,406 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:03,414 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:03,414 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/src/test/resources
+2017-07-29 17:29:04,088 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:04,089 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:04,091 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:04,093 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:04,094 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/src/test/resources
+2017-07-29 17:29:04,851 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:04,852 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:04,864 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:04,870 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:04,870 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/src/test/resources
+2017-07-29 17:29:06,480 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:06,481 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:06,482 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:06,485 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:06,486 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Lucene-Linker/src/test/resources
+2017-07-29 17:29:45,184 [Worker-9] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update started
+2017-07-29 17:29:45,407 [Worker-9] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qanary_component-NER-EntityClassifier:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier/pom.xml.
+2017-07-29 17:29:46,174 [Worker-9] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /qanary_component-NER-EntityClassifier/src/main/java
+2017-07-29 17:29:46,177 [Worker-9] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /qanary_component-NER-EntityClassifier/src/main/resources
+2017-07-29 17:29:46,373 [Worker-9] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /qanary_component-NER-EntityClassifier/src/main/resources
+2017-07-29 17:29:46,384 [Worker-9] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /qanary_component-NER-EntityClassifier/src/test/java
+2017-07-29 17:29:46,708 [Worker-9] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update completed: 1 sec
+2017-07-29 17:29:47,351 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:47,352 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:47,355 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:29:47,359 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:29:47,359 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier/src/test/resources
+2017-07-29 17:30:50,354 [Worker-18] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-FOX:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/pom.xml.
+2017-07-29 17:30:50,488 [Worker-10] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.qanary_component-MyComponent:0.0.1 @ /Users/arun/Projects/Git/Qanary/qa.qanary_component-MyComponent/pom.xml.
+2017-07-29 17:30:51,812 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:51,813 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:51,844 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:51,849 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:51,849 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qa.qanary_component-MyComponent/src/test/resources
+2017-07-29 17:30:52,346 [Worker-3] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-FOX:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/pom.xml.
+2017-07-29 17:30:52,562 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:52,570 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:52,572 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:52,575 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:52,575 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qa.qanary_component-MyComponent/src/test/resources
+2017-07-29 17:30:52,819 [Worker-26] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.ASR-kaldi:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/pom.xml.
+2017-07-29 17:30:53,285 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:53,286 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:53,287 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:53,290 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:53,290 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/src/test/resources
+2017-07-29 17:30:53,525 [Worker-26] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.LD-Shuyo:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/pom.xml.
+2017-07-29 17:30:53,965 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:53,966 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:53,969 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 198 resources
+2017-07-29 17:30:54,137 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:54,137 [Worker-26] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/src/test/resources
+2017-07-29 17:30:54,784 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:54,785 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:54,786 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:54,787 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:54,788 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/src/test/resources
+2017-07-29 17:30:54,988 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-FOX:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/pom.xml.
+2017-07-29 17:30:55,478 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:55,483 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:55,491 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 198 resources
+2017-07-29 17:30:55,665 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.LD-Shuyo:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/pom.xml.
+2017-07-29 17:30:55,674 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:55,675 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/src/test/resources
+2017-07-29 17:30:55,978 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.ASR-kaldi:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/pom.xml.
+2017-07-29 17:30:56,248 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-AGDISTIS:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/pom.xml.
+2017-07-29 17:30:56,489 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-Standford:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/pom.xml.
+2017-07-29 17:30:56,784 [Worker-24] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NERD-Alchemy:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/pom.xml.
+2017-07-29 17:30:56,800 [Worker-22] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-AGDISTIS:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/pom.xml.
+2017-07-29 17:30:57,356 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:57,357 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:57,358 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:57,360 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:57,360 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/src/test/resources
+2017-07-29 17:30:57,511 [Worker-22] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-DBpedia-Spotlight:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/pom.xml.
+2017-07-29 17:30:58,011 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:58,011 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:58,012 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:58,017 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:58,017 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:30:58,174 [Worker-22] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-DBpedia-Spotlight:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/pom.xml.
+2017-07-29 17:30:58,685 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:58,685 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:58,686 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:58,688 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:58,688 [Worker-22] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:30:59,017 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-FOX:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/pom.xml.
+2017-07-29 17:30:59,456 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:59,456 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:59,458 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:30:59,461 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:30:59,462 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/src/test/resources
+2017-07-29 17:30:59,702 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.LD-Shuyo:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/pom.xml.
+2017-07-29 17:30:59,924 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.ASR-kaldi:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/pom.xml.
+2017-07-29 17:31:00,166 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NED-AGDISTIS:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/pom.xml.
+2017-07-29 17:31:00,319 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:00,320 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:00,321 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:00,323 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:00,323 [Worker-25] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:31:00,384 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NER-Standford:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/pom.xml.
+2017-07-29 17:31:00,749 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NERD-Alchemy:1.0.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/pom.xml.
+2017-07-29 17:31:00,992 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.qanary_component-MyComponent:0.0.1 @ /Users/arun/Projects/Git/Qanary/qa.qanary_component-MyComponent/pom.xml.
+2017-07-29 17:31:01,230 [Worker-13] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qa.NERD-Lucene-Linker:0.1.0 @ /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Lucene-Linker/pom.xml.
+2017-07-29 17:31:02,608 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:02,608 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:02,609 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:02,611 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:02,611 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qa.qanary_component-MyComponent/src/test/resources
+2017-07-29 17:31:03,072 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,072 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,073 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,074 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,074 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-ASR-kaldi/src/test/resources
+2017-07-29 17:31:03,470 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,470 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,470 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,472 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,472 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-LD-Shuyo/src/test/resources
+2017-07-29 17:31:03,960 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,960 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,961 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2017-07-29 17:31:03,962 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:03,962 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NED-AGDISTIS/src/test/resources
+2017-07-29 17:31:04,425 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:04,426 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:04,429 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:04,433 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:04,434 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-DBpedia-Spotlight/src/test/resources
+2017-07-29 17:31:04,576 [Worker-18] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qanary_component-NER-EntityClassifier:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier/pom.xml.
+2017-07-29 17:31:05,136 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:05,137 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:05,142 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:05,144 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:05,145 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier/src/test/resources
+2017-07-29 17:31:05,284 [Worker-18] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: eu.wdaqua.qanary.component:qanary_component-NER-EntityClassifier2:0.0.1 @ /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/pom.xml.
+2017-07-29 17:31:05,650 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:05,650 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:05,651 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:05,655 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:05,655 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/src/test/resources
+2017-07-29 17:31:06,251 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:06,251 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:06,253 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:06,258 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:06,258 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier/src/test/resources
+2017-07-29 17:31:06,650 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:06,651 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:06,652 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:06,655 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:06,655 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-EntityClassifier2/src/test/resources
+2017-07-29 17:31:07,065 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:07,066 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:07,068 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:07,070 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:07,070 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-FOX/src/test/resources
+2017-07-29 17:31:07,531 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:07,532 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:07,533 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:07,535 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:07,535 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NER-stanford/src/test/resources
+2017-07-29 17:31:08,110 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:08,206 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:08,207 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:08,221 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:08,221 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Alchemy/src/test/resources
+2017-07-29 17:31:08,742 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:08,742 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:08,744 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2017-07-29 17:31:08,746 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2017-07-29 17:31:08,746 [Worker-7] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/arun/Projects/Git/Qanary/qanary_component-NERD-Lucene-Linker/src/test/resources
