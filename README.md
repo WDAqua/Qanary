@@ -158,3 +158,7 @@ If you want to inform yourself about the Qanary methodology in general, please u
  * After executing the run script, you can see Springboot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
 
  * Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
+ 
+ ### Using Qanary for your work
+ 
+ * Our Wiki page contains all the information about how to integrate a new component and also about the easy usability of Qanary framework. We have illustrated inclusion of a new component with example in Wiki page. Please refer to it.
