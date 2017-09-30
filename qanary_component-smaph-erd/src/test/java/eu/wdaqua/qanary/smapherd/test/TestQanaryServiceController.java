@@ -1,8 +1,4 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
-
+package eu.wdaqua.qanary.smapherd.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -34,9 +30,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
-import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.component.QanaryService;
 import eu.wdaqua.qanary.component.QanaryServiceController;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -95,10 +91,10 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa commons
+		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryConfiguration.inGraphKey, testInGraph);
+		jsonObject.put(QanaryConfiguration.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage requestMessage;
@@ -113,13 +109,10 @@ public class TestQanaryServiceController {
 		MvcResult res;
 		try {
 			res = mockMvc
-					.perform( //
-							post(QanaryConfiguration.annotatequestion) //
-									.content(requestMessage.asJsonString()) //
-									.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()) // ok
-					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
-					.andReturn();
+					.perform(post(QanaryConfiguration.annotatequestion).content(requestMessage.asJsonString())
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).andReturn();
 		} catch (Exception e) {
 			fail(e.getMessage());
 			return;
@@ -155,17 +148,17 @@ public class TestQanaryServiceController {
 
 		// create a JSON object with required properties
 		JSONObject jsonObject = new JSONObject();
-		// TODO: replace key by URLs of the qa commons
+		// TODO: replace key by URLs of the qa vocabulary
 		jsonObject.put(QanaryConfiguration.endpointKey, testEndPoint);
-		jsonObject.put("ingraph", testInGraph);
-		jsonObject.put("outgraph", testOutGraph);
+		jsonObject.put(QanaryConfiguration.inGraphKey, testInGraph);
+		jsonObject.put(QanaryConfiguration.outGraphKey, testOutGraph);
 
 		// create message from json string
 		QanaryMessage message;
 		try {
 			message = new QanaryMessage(jsonObject.toJSONString());
 
-			URI endpointKeyUrlFromMessage = message.getEndpoint();
+			URI endpointKeyUrlFromMessage = message.getValues().get(new URI(QanaryConfiguration.endpointKey));
 			Assert.notNull(endpointKeyUrlFromMessage);
 
 			URI endpointKeyUrlFromHere = new URI(testEndPoint);
@@ -188,4 +181,3 @@ public class TestQanaryServiceController {
 	}
 
 }
-

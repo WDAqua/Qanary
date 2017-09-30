@@ -48,6 +48,8 @@ public class QanaryQuestion<T> {
 	private URI uriAudioRepresentation;
 	private byte[] audioRepresentation;
 	private final URI namedGraph; // where the question is stored
+	private String language;
+	private String knwoledgeBase;
 
 	/**
 	 * init the graph in the triplestore (c.f., application.properties) a new
@@ -569,6 +571,51 @@ public class QanaryQuestion<T> {
 		qanaryUtil.updateTripleStore(sparql);
 	}
 
+	/**
+	 * get the language of the question, enabled for feedback
+	 */
+	public String getLanguage() throws Exception {
+		if (this.language == null) {
+			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+					+ "SELECT ?uri " //
+					+ "FROM <" + this.getInGraph() + "> " //
+					+ "WHERE { " //
+					+ "  ?a a qa:AnnotationOfQuestionLanguage . " //
+					+ "  OPTIONAL {?a oa:hasBody ?uri . } " //look for a bug in stardog
+					+ "  ?a oa:annotatedAt ?time . "
+					+ "  { "
+					+ "    SELECT ?time { "
+					+ "     ?a a qa:AnnotationOfQuestionLanguage . "
+					+ "     ?a oa:annotatedAt ?time . "
+					+ "    } order by ?time limit 1 "
+					+ "  } "
+					+ "}";
+
+			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+
+			int i = 0;
+			String language = null;
+			while (resultset.hasNext()) {
+				language = resultset.next().get("uri").toString();
+				logger.debug("{}: qa#Language = {}", i++, language);
+			}
+			if (i > 1) {
+				throw new Exception("More than 1 language (count: " + i + ") in graph " + this.getInGraph()
+						+ " at " + this.getEndpoint());
+			} else if (i == 0) {
+				throw new Exception("No language available in graph " + this.getInGraph() + " at "
+						+ this.getEndpoint());
+			}
+
+			logger.info("language {} found in {} at {}", language, this.getInGraph(),
+					this.getEndpoint());
+			this.language = language;
+		}
+		return this.language;
+	}
+
 
 	/**
 	 * set a new knowledge-base for the current question, stored in the Qanary
@@ -593,6 +640,51 @@ public class QanaryQuestion<T> {
 				+ "}";
                 System.out.println(sparql);
 		qanaryUtil.updateTripleStore(sparql);
+	}
+
+	/**
+	 * get the knwoledge base of the question, enabled for feedback
+	 */
+	public String getTargetData() throws Exception {
+		if (this.knwoledgeBase == null) {
+			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+					+ "SELECT ?uri " //
+					+ "FROM <" + this.getInGraph() + "> " //
+					+ "WHERE { " //
+					+ "  ?a a qa:AnnotationDataset . " //
+					+ "  OPTIONAL {?a oa:hasBody ?uri . } " //look for a bug in stardog
+					+ "  ?a oa:annotatedAt ?time . "
+					+ "  { "
+					+ "    SELECT ?time { "
+					+ "     ?a a qa:AnnotationDataset . "
+					+ "     ?a oa:annotatedAt ?time . "
+					+ "    } order by ?time limit 1 "
+					+ "  } "
+					+ "}";
+
+			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+
+			int i = 0;
+			String knowledgeBase = null;
+			while (resultset.hasNext()) {
+				knowledgeBase = resultset.next().get("uri").toString();
+				logger.debug("{}: qa#Language = {}", i++, knowledgeBase);
+			}
+			if (i > 1) {
+				throw new Exception("More than 1 knowledge base (count: " + i + ") in graph " + this.getInGraph()
+						+ " at " + this.getEndpoint());
+			} else if (i == 0) {
+				throw new Exception("No knwoledgebase available in graph " + this.getInGraph() + " at "
+						+ this.getEndpoint());
+			}
+
+			logger.info("knowledge base {} found in {} at {}", knowledgeBase, this.getInGraph(),
+					this.getEndpoint());
+			this.knwoledgeBase = knowledgeBase;
+		}
+		return this.knwoledgeBase;
 	}
 
 }
