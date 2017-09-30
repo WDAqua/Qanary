@@ -566,7 +566,6 @@ public class QanaryQuestion<T> {
 				+ "BIND (IRI(str(RAND())) AS ?a) . "
 				+ "BIND (now() as ?time) . "
 				+ "}";
-                System.out.println(sparql);
 		qanaryUtil.updateTripleStore(sparql);
 	}
 
@@ -583,8 +582,8 @@ public class QanaryQuestion<T> {
 				+ "INSERT { "
 				+ "GRAPH <" + this.getOutGraph() + "> { "
 				+ "?a a qa:AnnotationDataset . "
-				+ "?a oa:hasBody \"" + targetData + "\" ;"
-				+ "?a oa:hasTarget " + this.getUri()
+				+ "?a oa:hasBody \"" + targetData + "\" . "
+				+ "?a oa:hasTarget <" + this.getUri() +"> ; "
 				+ "   oa:annotatedBy <www.wdaqua.eu/qa> ; "
 				+ "   oa:annotatedAt ?time ; "
 				+ " }} "
@@ -592,6 +591,7 @@ public class QanaryQuestion<T> {
 				+ "BIND (IRI(str(RAND())) AS ?a) . "
 				+ "BIND (now() as ?time) . "
 				+ "}";
+                System.out.println(sparql);
 		qanaryUtil.updateTripleStore(sparql);
 	}
 
