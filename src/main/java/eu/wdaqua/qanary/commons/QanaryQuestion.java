@@ -6,6 +6,7 @@ import eu.wdaqua.qanary.commons.ontology.TextPositionSelector;
 
 import org.apache.jena.atlas.json.JSON;
 import org.apache.jena.atlas.json.JsonObject;
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -466,17 +467,17 @@ public class QanaryQuestion<T> {
 		}
 	}
 
-
-
-	public List<String> getSparqlResults() {
+	public List<SparqlAnnotation> getSparqlResults() {
 		String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> "
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
-				+ "SELECT ?sparql "
+				+ "SELECT ?sparql ?confidence ?kb "
 				+ "FROM <" + this.getInGraph() + "> "
 				+ "WHERE { "
 				+ "  ?a a qa:AnnotationOfAnswerSPARQL . "
 				+ "  OPTIONAL {?a oa:hasBody ?sparql . } "
 				+ "  OPTIONAL {?a qa:hasScore ?score . } "
+				+ "  OPTIONAL {?a qa:hasConfidence ?confidence . } "
+				+ "  OPTIONAL {?a qa:overKB ?kb . } "
 				+ "  ?a oa:annotatedAt ?time1 . "
 				+ "  { "
 				+ "   select ?time1 { "
@@ -489,15 +490,26 @@ public class QanaryQuestion<T> {
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 		int i = 0;
-		List<String> sparqlAnnotation = new ArrayList<String>();
+		List<SparqlAnnotation> annotationList = new ArrayList<SparqlAnnotation>();
 		while (resultset.hasNext()) {
-			sparqlAnnotation.add(resultset.next().get("sparql").asLiteral().toString());
+			QuerySolution next = resultset.next();
+			SparqlAnnotation sparqlAnnotation = new SparqlAnnotation();
+			sparqlAnnotation.query = next.get("sparql").asLiteral().toString();
+			sparqlAnnotation.confidence = next.get("confidence").asLiteral().toString();
+			sparqlAnnotation.kb = next.get("kb").asLiteral().toString();
+			annotationList.add(sparqlAnnotation);
 		}
-		return sparqlAnnotation;
+		return annotationList;
+	}
+
+	public class SparqlAnnotation {
+		public String query;
+		public String confidence;
+		public String kb;
 	}
 
 	public String getSparqlResult() {
-		return this.getSparqlResults().get(0);
+		return this.getSparqlResults().get(0).query;
 	}
 
 	public String getJsonResult() {
@@ -686,5 +698,23 @@ public class QanaryQuestion<T> {
 		}
 		return this.knwoledgeBase;
 	}
+
+	public String getAnswerFound(){
+        String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+                + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+                + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+                + "SELECT ?found " //
+                + "FROM <" + this.getInGraph() + "> " //
+                + "WHERE { " //
+                + "  <URIAnswer> qa:found ?found .  "
+                + "}";
+        ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+
+        String found="undefined";
+        while (resultset.hasNext()) {
+            found = resultset.next().get("found").toString();
+        }
+        return found;
+    }
 
 }
