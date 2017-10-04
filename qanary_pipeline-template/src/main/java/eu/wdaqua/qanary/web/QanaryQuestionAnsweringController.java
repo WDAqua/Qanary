@@ -274,10 +274,15 @@ public class QanaryQuestionAnsweringController {
 		obj.put("endpoint", myRun.getEndpoint());
 		obj.put("namedgraph", myRun.getInGraph());
 		obj.put("textrepresentation", myQanaryQuestion.getTextualRepresentation());
+		obj.put("answer_found", myQanaryQuestion.getAnswerFound());
 		JSONArray sparql = new JSONArray();
-		List<String> ss = myQanaryQuestion.getSparqlResults();
-		for (String s : ss){
-			sparql.add(s);
+		List<QanaryQuestion.SparqlAnnotation> ss = myQanaryQuestion.getSparqlResults();
+		for (QanaryQuestion.SparqlAnnotation s : ss){
+			JSONObject o = new JSONObject();
+			o.put("query", s.query);
+			o.put("confidence", s.confidence);
+			o.put("kb", s.kb);
+			sparql.add(o);
 		}
 		obj.put("sparql", sparql);
 		obj.put("json", myQanaryQuestion.getJsonResult());
