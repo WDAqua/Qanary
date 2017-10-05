@@ -2,6 +2,8 @@ package eu.wdaqua.qanary.languagedetection;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,7 @@ public class LanguageDetection extends QanaryComponent {
         
 	//STEP 3: The language tag is pushed to the triple store
         logger.info("store data in graph {}", myQanaryMessage.getEndpoint());
-        myQanaryQuestion.setLanguageText(lang);
+        myQanaryQuestion.setLanguageText(new ArrayList<String>(Arrays.asList(lang)));
         //        + "     oa:annotatedBy <https://code.google.com/archive/p/language-detection/> ; "
 		return myQanaryMessage;
 	}

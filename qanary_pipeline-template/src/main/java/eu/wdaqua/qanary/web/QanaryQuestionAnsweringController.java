@@ -98,8 +98,8 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> startquestionansweringwithtextquestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
-			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
-			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
 					throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
@@ -133,8 +133,8 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> startquestionansweringwithaudioquestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile question,
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled, //
-			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
-			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
 					throws Exception {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
@@ -223,8 +223,8 @@ public class QanaryQuestionAnsweringController {
 		  	@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
 			@RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
-			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
-			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
 					throws Exception {
 
 		// create a new question answering system
@@ -256,8 +256,8 @@ public class QanaryQuestionAnsweringController {
 													  @RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
 													  @RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
 													  @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
-													  @RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
-													  @RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final String targetdata)
+													  @RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
+													  @RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
 			throws Exception {
 
 		// create a new question answering system
@@ -303,7 +303,7 @@ public class QanaryQuestionAnsweringController {
 	 * @throws Exception
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
-				MultipartFile questionaudio, List<String> componentsToBeCalled, String language, String targetdata) throws Exception {
+				MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language, List<String> targetdata) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with \"{}\"", question,
@@ -343,14 +343,14 @@ public class QanaryQuestionAnsweringController {
 
 		}
 		// store language definition for current question
-		if (language != null && language.compareTo("") != 0) {
+		if (language != null && language.isEmpty() == false) {
 			qanaryQuestion.setLanguageText(language);
 		} else {
 			logger.info("no lanugage was given, no change for question \"{}\"", question);
 		}
 
 		// store targetdata for the current question
-		if (targetdata != null && targetdata.compareTo("") != 0) {
+		if (targetdata != null && targetdata.isEmpty() == false) {
 			qanaryQuestion.setTargetData(targetdata);
 		} else {
 			logger.info("no targetdata was given, no change for question \"{}\"", question);

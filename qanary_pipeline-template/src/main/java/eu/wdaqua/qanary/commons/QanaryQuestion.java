@@ -49,8 +49,8 @@ public class QanaryQuestion<T> {
 	private URI uriAudioRepresentation;
 	private byte[] audioRepresentation;
 	private final URI namedGraph; // where the question is stored
-	private String language;
-	private String knwoledgeBase;
+	private List<String> language;
+	private List<String> knwoledgeBase;
 
 	/**
 	 * init the graph in the triplestore (c.f., application.properties) a new
@@ -569,13 +569,17 @@ public class QanaryQuestion<T> {
 	 *
 	 * @param language
 	 */
-	public void setLanguageText(String language) throws Exception {
+	public void setLanguageText(List<String> language) throws Exception {
+		String part = "";
+		for (int i=0; i<language.size(); i++){
+			part += "?a oa:hasBody \"" + language.get(i) + "\" . ";
+		}
 		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 				+ "INSERT { " 
                                 + "GRAPH <"+ this.getOutGraph() + "> { "
 				+ "?a a qa:AnnotationOfQuestionLanguage . "
-				+ "?a oa:hasBody \"" + language + "\" . "
+				+ part
 				+ "?a oa:hasTarget <" + this.getUri() + "> ; "
 				+ "   oa:annotatedBy <www.wdaqua.eu/qanary> ; "
 				+ "   oa:annotatedAt ?time  " 
@@ -590,7 +594,7 @@ public class QanaryQuestion<T> {
 	/**
 	 * get the language of the question, enabled for feedback
 	 */
-	public String getLanguage() throws Exception {
+	public List<String> getLanguage() throws Exception {
 		if (this.language == null) {
 			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
@@ -612,9 +616,9 @@ public class QanaryQuestion<T> {
 			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 			int i = 0;
-			String language = null;
+			List<String> language = null;
 			while (resultset.hasNext()) {
-				language = resultset.next().get("uri").toString();
+				language.add(resultset.next().get("uri").toString());
 				logger.debug("{}: qa#Language = {}", i++, language);
 			}
 			if (i > 1) {
@@ -639,13 +643,17 @@ public class QanaryQuestion<T> {
 	 *
 	 * @param targetData
 	 */
-	public void setTargetData(String targetData) throws Exception {
+	public void setTargetData(List<String> targetData) throws Exception {
+		String part = "";
+		for (int i=0; i<targetData.size(); i++){
+			part += "?a oa:hasBody \"" + targetData.get(i) + "\" . ";
+		}
 		String sparql = "prefix qa: <http://www.wdaqua.eu/qa#> "
 				+ "prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 				+ "INSERT { "
 				+ "GRAPH <" + this.getOutGraph() + "> { "
 				+ "?a a qa:AnnotationDataset . "
-				+ "?a oa:hasBody \"" + targetData + "\" . "
+				+ part
 				+ "?a oa:hasTarget <" + this.getUri() +"> ; "
 				+ "   oa:annotatedBy <www.wdaqua.eu/qa> ; "
 				+ "   oa:annotatedAt ?time ; "
@@ -661,7 +669,7 @@ public class QanaryQuestion<T> {
 	/**
 	 * get the knwoledge base of the question, enabled for feedback
 	 */
-	public String getTargetData() throws Exception {
+	public List<String> getTargetData() throws Exception {
 		if (this.knwoledgeBase == null) {
 			String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
@@ -683,15 +691,11 @@ public class QanaryQuestion<T> {
 			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 			int i = 0;
-			String knowledgeBase = null;
+			List<String> knowledgeBase = new ArrayList<String>();
 			while (resultset.hasNext()) {
-				knowledgeBase = resultset.next().get("uri").toString();
-				logger.debug("{}: qa#Language = {}", i++, knowledgeBase);
+				knowledgeBase.add(resultset.next().get("uri").toString());
 			}
-			if (i > 1) {
-				throw new Exception("More than 1 knowledge base (count: " + i + ") in graph " + this.getInGraph()
-						+ " at " + this.getEndpoint());
-			} else if (i == 0) {
+			if (i == 0) {
 				throw new Exception("No knwoledgebase available in graph " + this.getInGraph() + " at "
 						+ this.getEndpoint());
 			}
