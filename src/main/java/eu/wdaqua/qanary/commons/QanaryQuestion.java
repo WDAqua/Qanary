@@ -477,7 +477,7 @@ public class QanaryQuestion<T> {
 				+ "  OPTIONAL {?a oa:hasBody ?sparql . } "
 				+ "  OPTIONAL {?a qa:hasScore ?score . } "
 				+ "  OPTIONAL {?a qa:hasConfidence ?confidence . } "
-				+ "  OPTIONAL {?a qa:overKB ?kb . } "
+				+ "  OPTIONAL {?a qa:overKb ?kb . } "
 				+ "  ?a oa:annotatedAt ?time1 . "
 				+ "  { "
 				+ "   select ?time1 { "
@@ -495,8 +495,12 @@ public class QanaryQuestion<T> {
 			QuerySolution next = resultset.next();
 			SparqlAnnotation sparqlAnnotation = new SparqlAnnotation();
 			sparqlAnnotation.query = next.get("sparql").asLiteral().toString();
-			sparqlAnnotation.confidence = next.get("confidence").asLiteral().toString();
-			sparqlAnnotation.kb = next.get("kb").asLiteral().toString();
+			if (next.get("confidence")!=null){
+                            sparqlAnnotation.confidence = next.get("confidence").asLiteral().toString();
+                        }
+                        if (next.get("kb")!=null){
+			    sparqlAnnotation.kb = next.get("kb").asLiteral().toString();
+                        }
 			annotationList.add(sparqlAnnotation);
 		}
 		return annotationList;
