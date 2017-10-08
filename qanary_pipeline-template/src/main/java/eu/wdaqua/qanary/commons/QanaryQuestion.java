@@ -616,10 +616,10 @@ public class QanaryQuestion<T> {
 			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 			int i = 0;
-			List<String> language = null;
+			List<String> language = new ArrayList();
 			while (resultset.hasNext()) {
-				language.add(resultset.next().get("uri").toString());
-				logger.debug("{}: qa#Language = {}", i++, language);
+                                language.add(resultset.next().get("uri").toString());
+                                i++;
 			}
 			if (i > 1) {
 				throw new Exception("More than 1 language (count: " + i + ") in graph " + this.getInGraph()
@@ -687,13 +687,14 @@ public class QanaryQuestion<T> {
 					+ "    } order by ?time limit 1 "
 					+ "  } "
 					+ "}";
-
+                        System.out.println(sparql);
 			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 			int i = 0;
 			List<String> knowledgeBase = new ArrayList<String>();
 			while (resultset.hasNext()) {
 				knowledgeBase.add(resultset.next().get("uri").toString());
+                                i++;
 			}
 			if (i == 0) {
 				throw new Exception("No knwoledgebase available in graph " + this.getInGraph() + " at "
