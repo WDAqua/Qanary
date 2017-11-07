@@ -3,11 +3,11 @@
 # A Reference Implementation for Creating Question Answering Systems following the Qanary Methodology
 ## Qanary in a Nutshell
 
-Qanary is a Methodology for Creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.informatik.uni-bonn.de) where question answering systems are researched and developed. For all the publications related to Qanary, you can visit: https://scholar.google.de/citations?hl=en&user=23EKFE4AAAAJ&view_op=list_works&sortby=pubdate. Any questions related to Qanary, please send them to: Dennis Diefenbach(dennis.diefenbach@googlemail.com) or Kuldeep Singh(kskuldeepvit@gmail.com). However, if you like to see a flavor of QA system, Dennis has build a complete end to end QA system that employs linked data technologies: http://wdaqua.eu/qa.
+Qanary is a methodology for creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.eu) where question answering systems are researched and developed. For all the publications related to Qanary, you can visit: https://scholar.google.de/citations?hl=en&user=23EKFE4AAAAJ&view_op=list_works&sortby=pubdate. Any questions related to Qanary please do not hesitate to [contact the core developers](https://github.com/WDAqua/Qanary/wiki/Who-do-I-talk-to%3F). However, if you like to see a QA system built using the Qanary frameork, one of our core developers has build a complete end-to-end QA system which allows to query several RDF data stores: http://wdaqua.eu/qa.
 
-#Please go to GitHub Wiki page of this repository to get more insights on how to use this framework, how to add new component etc.
+Please go to the [GitHub Wiki page](https://github.com/WDAqua/Qanary/wiki) of this repository to get more insights on how to use this framework, how to add new component etc.
 
-Here, we are providing our key contributions on-top of the [RDF vocabulary qa](https://github.com/WDAqua/QAOntology) the reference implementation of the Qanary methodology. This repository contributes several sub-resources for Question Answring Community to build knowledge driven QA systems incorporating a standard [RDF vocabulary qa](https://github.com/WDAqua/QAOntology). All the resources are reusable. For detailed description of individual resources, kindly refer to Wiki section of this repository. In brief, the following sub-projects are available all aiming at establishing an ecosystem for question answering systems.
+Here, we provide our key contributions on-top of the [RDF vocabulary qa](https://github.com/WDAqua/QAOntology): the reference implementation of the Qanary methodology. This repository contributes several sub-resources for the Question Answring Community to build knowledge-driven QA systems incorporating a standard [RDF vocabulary named "qa"](https://github.com/WDAqua/QAOntology). All the resources are reusable. For detailed description of individual resources, kindly refer to Wiki section of this repository. In brief, the following sub-projects are available all aiming at establishing an ecosystem for question answering systems. However, many more will soon be published.
 
  * [**Qanary Pipeline**](#qanarypipeline) implementation: a central component where components for question answering systems are connected automatically and can be called by Web UIs
  * Qanary component implementations: components providing wrappers to existing functionality or implement new question answering approaches
@@ -84,8 +84,9 @@ We implemented a component following the idea of the QA system SINA which is bas
 The Stanford Named Entity Recognition Tool is a popular tool from NLP. It uses a machine learning algorithm based on Conditional Random Fields to spot Named Entities in a text. The decision to tag a word as named entity or not is based mainly on syntactic features like: the POS tag of the word and of the surrounding words, n-gram sequences of characters of the word (to detect for example particular endings) and the shape of the word (to detect for example capital letters). This tool can be potentially used to spot entities for any ontology but can be used only for the languages where a model is available (currently English, German, Spanish and Chinese).
 [source](https://github.com/WDAqua/Qanary/tree/master/qanary_component-stanford-NER)
 
-## Additional Resources
 
+
+## Additional Resource
 
 <a name="qaldevaluator"></a>
 ### QALD evaluator
@@ -103,6 +104,8 @@ More details follow soon.
 ## Publications / References
 
 If you want to inform yourself about the Qanary methodology in general, please use this publication:  *Andreas Both, Dennis Diefenbach, Kuldeep Singh, Saedeeh Shekarpour, Didier Cherix and Christoph Lange: Qanary - A Methodology for Vocabulary-driven Open Question Answering Systems* appearing in [13th Extended Semantic Web Conference](http://2016.eswc-conferences.org), 2016.
+
+For additional publication we suggest to [follow this list of publications](https://scholar.google.de/scholar?q=%22qanary%22+question+%22answering%22)
 
 
 ## Stuff used to make this:
