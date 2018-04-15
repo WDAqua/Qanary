@@ -8,6 +8,7 @@ import de.codecentric.boot.admin.event.ClientApplicationEvent;
 import de.codecentric.boot.admin.event.ClientApplicationRegisteredEvent;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,8 +43,8 @@ public class QanaryPipeline {
     @Bean
     public QanaryConfigurator configurator(@Value("#{'${qanary.components}'.split(',')}") final List<String> components,
                                            @Value("${server.host}") @NotNull final String host, @Value("${server.port}") @NotNull final int port,
-                                           @Value("${qanary.triplestore}") @NotNull final URI endpoint) {
-        return new QanaryConfigurator(restTemplate(), components, host, port, endpoint);
+                                           @Value("${qanary.triplestore}") @NotNull final URI endpoint, TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier ) {
+        return new QanaryConfigurator(restTemplate(), components, host, port, endpoint, myTriplestoreEndpointIdentifier);
     }
 
     @Bean

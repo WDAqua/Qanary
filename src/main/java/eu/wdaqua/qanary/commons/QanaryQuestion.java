@@ -29,7 +29,7 @@ import static eu.wdaqua.qanary.commons.QanaryUtils.loadTripleStore;
 /**
  * represents the access to a question in a triplestore
  *
- * TODO: should be refactored to disctinguished class for different
+ * TODO: should be refactored to distinguished class for different
  * representations like text, audio, ...
  *
  * @param <T>
@@ -51,6 +51,8 @@ public class QanaryQuestion<T> {
 	private final URI namedGraph; // where the question is stored
 	private List<String> language;
 	private List<String> knwoledgeBase;
+	
+	private QanaryConfigurator myQanaryConfigurator;
 
 	/**
 	 * init the graph in the triplestore (c.f., application.properties) a new
@@ -65,42 +67,43 @@ public class QanaryQuestion<T> {
 		// in this graph the data is stored
 		this.namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
 		this.uri = questionUri.toURI();
+		this.myQanaryConfigurator = qanaryConfigurator;
 
 		final URI triplestore = qanaryConfigurator.getEndpoint();
-		logger.info("Triplestore " + triplestore);
+		logger.info("Triplestore: {}", triplestore);
 		String sparqlquery = "";
 		String namedGraphMarker = "<" + namedGraph.toString() + ">";
 
 		// Load the Open Annotation Ontology
 		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "
 				+ namedGraphMarker;
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Load the Qanary Ontology
 		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "
 				+ namedGraphMarker;
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Prepare the question, answer and dataset objects
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { <" + questionUri.toString() + "> a qa:Question}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
 				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
 				+ "<http://localhost/Answer> a qa:Answer}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
 				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
 				+ "  <http://localhost/Dataset> a qa:Dataset} " //
 				+ "}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Make the first two annotations
 		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
@@ -112,9 +115,9 @@ public class QanaryQuestion<T> {
 				+ "<anno2> a  oa:AnnotationOfQuestion; " //
 				+ "   oa:hasTarget <" + questionUri.toString() + "> ; " //
 				+ "   oa:hasBody   <URIDataset> " + "}}";
-		logger.info("Sparql query " + sparqlquery);
-		loadTripleStore(sparqlquery, triplestore);
-		initFromTriplestore(triplestore);
+		logger.info("Sparql query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
+		initFromTriplestore(qanaryConfigurator);
 	}
 
 	/**
@@ -127,7 +130,7 @@ public class QanaryQuestion<T> {
 	 * @throws URISyntaxException
 	 */
 	public QanaryQuestion(URI namedGraph, QanaryConfigurator qanaryConfigurator) throws URISyntaxException {
-		this.initFromTriplestore(qanaryConfigurator.getEndpoint());
+		this.initFromTriplestore(qanaryConfigurator);
 		this.qanaryMessage = new QanaryMessage(qanaryConfigurator.getEndpoint(), namedGraph);
 		// save where the answer is stored
 		this.namedGraph = namedGraph;
@@ -151,8 +154,8 @@ public class QanaryQuestion<T> {
 	 * @param triplestore
 	 * @throws URISyntaxException
 	 */
-	private void initFromTriplestore(final URI triplestore) throws URISyntaxException {
-		this.qanaryMessage = new QanaryMessage(triplestore, namedGraph);
+	private void initFromTriplestore(final QanaryConfigurator myQanaryConfigurator) throws URISyntaxException {
+		this.qanaryMessage = new QanaryMessage(myQanaryConfigurator.getEndpoint(), namedGraph);
 		this.qanaryUtil = new QanaryUtils(this.qanaryMessage);
 	}
 
@@ -194,6 +197,16 @@ public class QanaryQuestion<T> {
 	 */
 	public URI getNamedGraph() {
 		return this.namedGraph;
+	}
+
+	
+	/**
+	 * retrieves current instance of configurator
+	 * 
+	 * @return
+	 */
+	private QanaryConfigurator getQanaryConfigurator() {
+		return this.myQanaryConfigurator;
 	}
 
 	/**
@@ -247,7 +260,7 @@ public class QanaryQuestion<T> {
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
-		this.qanaryUtil.updateTripleStore(sparqlquery);
+		this.qanaryUtil.updateTripleStore(sparqlquery, this.getQanaryConfigurator());
 	}
 
 	/**
@@ -268,7 +281,7 @@ public class QanaryQuestion<T> {
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
-		this.qanaryUtil.updateTripleStore(sparqlquery);
+		this.qanaryUtil.updateTripleStore(sparqlquery, this.getQanaryConfigurator());
 	}
 
 	/**
@@ -463,7 +476,7 @@ public class QanaryQuestion<T> {
 					+ "     BIND (now() as ?time) " //
 					+ "}";
 
-			qanaryUtil.updateTripleStore(sparql);
+			qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
 		}
 	}
 
@@ -559,7 +572,7 @@ public class QanaryQuestion<T> {
 				+ "BIND (now() as ?time) "
 				+ "}";
 		logger.info("Sparql query {}", sparql);
-		this.qanaryUtil.updateTripleStore(sparql);
+		this.qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
 	}
 
 
@@ -588,7 +601,7 @@ public class QanaryQuestion<T> {
 				+ "BIND (IRI(str(RAND())) AS ?a) . "
 				+ "BIND (now() as ?time) . "
 				+ "}";
-		qanaryUtil.updateTripleStore(sparql);
+		qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
 	}
 
 	/**
@@ -663,11 +676,11 @@ public class QanaryQuestion<T> {
 				+ "BIND (now() as ?time) . "
 				+ "}";
                 System.out.println(sparql);
-		qanaryUtil.updateTripleStore(sparql);
+		qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
 	}
 
 	/**
-	 * get the knwoledge base of the question, enabled for feedback
+	 * get the knowledge base of the question, enabled for feedback
 	 */
 	public List<String> getTargetData() throws Exception {
 		if (this.knwoledgeBase == null) {
