@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>eu.wdaqua.qanary</groupId>
+  <artifactId>mvn.reactor</artifactId>
+  <version>0.1.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>qanary_pipeline-template</module>
+    <module>qanary_component-template</module>
+    <module>qanary_component-ASR-kaldi</module>
+    <module>qanary_component-LD-Shuyo</module>
+    <module>qanary_component-NER-stanford</module>
+    <module>qanary_component-NER-DBpedia-Spotlight</module>
+    <module>qanary_component-NER-FOX</module>
+    <module>qanary_component-NED-AGDISTIS</module>
+    <module>qanary_component-NED-DBpedia-Spotlight</module>
+    <module>qanary_component-NERD-Alchemy</module>
+    <module>qanary_component-NERD-Lucene-Linker</module>
+    <module>qanary_monolitic-wrapper</module>
+    <module>qald-evaluator</module>
+    <module>batmanquestion.annotator</module>
+    <module>qanary_component-smaph-erd</module>
+  </modules>
+</project>
