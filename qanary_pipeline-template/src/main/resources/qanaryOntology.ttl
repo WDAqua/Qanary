@@ -1,0 +1,173 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix terms: <http://purl.org/dc/terms/> .
+
+#Introducing new prefix
+@prefix qa: <https://w3id.org/wdaqua/qanary#> .
+
+# Introducing new ontology
+<https://w3id.org/wdaqua/qanary#> rdf:type :Ontology ;
+				rdfs:label "Qanary ontology"@en ;
+				rdfs:comment "Ontology to annotate a question with typical informations generated during a QA process"@en ;
+				terms:title "Qanary"@en ;
+				terms:created "2015-10-01"^^xsd:date ;
+				terms:creator <http://wdaqua.informatik.uni-bonn.de> ;
+				owl:versionInfo 1.0 ;
+				terms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+ 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> .
+
+# Introducing classes for question, answer and dataset
+
+qa:Question	rdf:type owl:Class .
+qa:Answer	rdf:type owl:Class .
+qa:Dataset	rdf:type owl:Class .
+
+#Introducing additional properties
+qa:score  rdf:type owl:DatatypeProperty ;
+		rdfs:comment "Describes the confidence/trust we have in the Annotation."@en ;
+               rdfs:range xsd:decimal ;
+               rdfs:domain <http://www.w3.org/ns/oa#Annotation> .
+
+# Introducing specific annotations for question, answer and datasets
+
+qa:AnnotationQuestion  rdf:type owl:Class ;
+			owl:equivalentClass [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/oa#hasTarget> ;
+                                        owl:someValuesFrom qa:Question
+                                      ] ;
+                    	rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> .
+
+qa:AnnotationAnswer rdf:type owl:Class ;
+			owl:equivalentClass [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/oa#hasTarget> ;
+                                        owl:someValuesFrom qa:Answer
+                                      ] ;
+			rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> .
+
+qa:AnnotationDataset rdf:type owl:Class ;  
+			owl:equivalentClass [ rdf:type owl:Restriction ;
+                                         owl:onProperty <http://www.w3.org/ns/oa#hasTarget> ;
+                                         owl:someValuesFrom qa:Dataset
+                                       ] ;
+			rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> .
+
+#Annotations for Answer
+## Annotation for answer type
+
+qa:AnswerType rdf:type owl:Class .
+qa:AnnotationOfAnswerType rdf:type owl:Class ;    
+                               owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                                     owl:someValuesFrom qa:AnswerType
+                                                   ] ;
+                               
+                               rdfs:subClassOf qa:AnnotationAnswer .
+
+## Annotation for answer format
+
+qa:AnswerFormat rdf:type owl:Class .
+qa:AnnotationOfAnswerFormat rdf:type owl:Class ;      
+                               owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                       owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                                       owl:someValuesFrom qa:AnswerFormat
+                                                     ] ;
+                               rdfs:subClassOf qa:AnnotationAnswer .
+
+
+# Annotations for Dataset
+## Annotation for endpoint
+qa:Endpoint rdf:type owl:Class .
+
+qa:AnnoOfEndpointOfDataset rdf:type owl:Class ;
+                                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                                      owl:someValuesFrom qa:Endpoint
+                                                    ] ;
+                                rdfs:subClassOf qa:AnnotationDataset .
+
+
+## Annotation for helper dataset
+qa:HelperDataset rdf:type owl:Class ;      
+                 rdfs:subClassOf qa:Dataset .
+
+qa:TargetDataset rdf:type owl:Class ;
+                  rdfs:subClassOf qa:Dataset .
+
+# Annotations for Question
+
+qa:PosTag rdf:type owl:Class .
+
+qa:AnnoOfPosTag rdf:type owl:Class ;
+                
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:PosTag
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationQuestion .
+
+
+
+##Annotation for spotting entities, instances, relations and classes
+qa:AnnotationOfSpotEntity rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationQuestion .
+
+qa:AnnotationOfSpotInstance rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
+
+qa:AnnotationOfSpotRelation rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
+
+qa:AnnotationOfSpotClass rdf:type owl:Class ;
+                rdfs:subClassOf qa:AnnotationOfSpotEntity .
+
+
+##Annotation for assigning to specific parts of the question a uri
+qa:Entity rdf:type owl:Class .
+qa:AnnotationOfEntity rdf:type owl:Class ;
+
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:Entity
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationQuestion .
+
+qa:Instance rdf:type owl:Class .
+qa:Instance rdfs:subClassOf qa:Entity .
+
+##Annotation for assigning to named entities in a question a uri
+qa:Instance rdf:type owl:Class .
+qa:AnnotationOfInstance rdf:type owl:Class ;
+
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:Instance
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationOfEntity .
+
+qa:Relation rdf:type owl:Class .
+qa:Relation rdfs:subClassOf qa:Entity .
+
+##Annotation for assigning to relations in a question a uri
+qa:AnnotationOfRelation rdf:type owl:Class ;
+
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:Relation
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationOfEntity .
+
+##Annotation for assigning to a class in a question a uri
+qa:Class rdf:type owl:Class .
+qa:Class rdfs:subClassOf qa:Entity .
+
+qa:AnnotationOfClass rdf:type owl:Class ;
+
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:Class
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationOfEntity .
+

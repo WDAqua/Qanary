@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Qanary Helper: Generate a url-endpoint to evalutate with the Gerbil for QA platform</title>
+ 	<meta th:replace="lib/header"/>        
+</head>
+<body>
+        <h1>Generate a url-endpoint to evalutate with the Gerbil for QA platform</h1>
+        <form action="/gerbil" method="POST">
+				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
+                <button id="submit">Generate Gerbil for QA endpoint &#xf135;</button>
+                <div> Url for the "Gerbil for QA" endpoint (at <a>http://gerbil-qa.aksw.org/gerbil/config</a>): </div>
+                <input type="text" name="question" id="question" value="" th:value="${url}"/>
+                <div th:replace="lib/footer"/>
+        </form>
+
+</body>
+</html>

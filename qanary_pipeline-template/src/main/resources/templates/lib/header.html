@@ -1,0 +1,158 @@
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+                <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+                <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+                <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style>
+    body { 
+        font-family:Open Sans; 
+        font-size:12pt; 
+        background-color: #f1f1f1; 
+        font-color: #333; 
+        margin: 0; 
+        padding: 0;
+    }
+    h1 { 
+	    /* TODO: Github is used here, should be replaced by SVG */
+        background-size: 100px auto;
+        background: url(https://raw.githubusercontent.com/WDAqua/Qanary/master/doc/logo-qanary_s.png) no-repeat left/120px;
+        padding-top: 1ex;
+	    padding-bottom: 1.1ex;
+	    padding-left: 16ex;
+	    font-size: 14pt; 
+	    font-weight: 600; 
+    }
+    .applicationheader { 
+        background-color: #34302D; 
+        color:#f1f1f1; 
+        padding:0.25ex; 
+    }
+    header { background-color: #34302D; }
+    form { margin-left: 1ex; }
+        input[type=text] { 
+                width:50%; 
+                display:block; 
+                margin-bottom:2ex; 
+                max-width:500px; 
+                font-size: 13pt; 
+                padding:5px;
+                border: 1px solid #999;
+        }
+    input[type=text].isempty {
+        background-color:#FFC; 
+    }
+    #sortable {  
+        list-style-type: none; 
+        margin: 0; 
+        padding: 0; 
+        border: 1px solid #34302D;
+    } 
+    #sortable.missingcomponentselection {
+    	border-color: #FFC;
+    }  
+    
+    div.selection {
+        margin: 0; 
+        width: 500px; 
+        padding:0;
+    }
+    #sortable li {
+        margin:0.25ex; 
+        padding: 0.25ex; 
+        border: 0; 
+        font-size:13pt; 
+        background-color: #f1f1f1; 
+        color: #333; 
+        cursor:ns-resize;
+    }
+    #sortable li.selected {
+        background-color:#FFF;
+        color:#000;
+    }
+    #sortable li:hover {
+        background-color:#FFFFF0;
+    }
+    #sortable li.selected:hover {
+        background-color:#FFFFF9;
+    }
+    
+    button { 
+        font: normal normal normal 14px/1 FontAwesome; 
+        margin-top: 1ex; 
+        padding:1ex 1ex; 
+        transition: background-position .1s linear;
+        color: #FFF;
+        border-radius: 4px;
+        border: 1px solid #999; 
+        background-color:#6db33f; 
+    } 
+    button:hover { 
+                border: 1px solid #333; 
+        background-color:#73bc42;
+    }
+    footer {
+    	border-top: 1px solid #999;
+    	margin-top: 7ex;
+    	padding-left: 1ex;
+    	padding-top: 4ex;
+    	font-size:80%;
+    }
+    footer a {
+    	color:#00F;
+    }
+    footer a:visited {
+    	color:#00F;
+    }
+    footer a:hover {
+    	color:#66F;
+    }
+    footer h3 {
+    	font-size:90%;
+    }
+    </style>
+    <script>
+       	// TODO: move minimumNumberOfSelectedComponents to config
+       	minimumNumberOfSelectedComponents = 1;
+       	
+        $(function() {
+        		// make the li elements sortable (by drag and drop)
+                $( "#sortable" ).sortable();
+                // disable text selection on draggable elements 
+                $( "#sortable" ).disableSelection();
+                // change style of selected elements
+                $( "#sortable li input").click( function(){
+                        if( $(this).prop("checked") == true ){
+                                $(this).addClass("selected");
+                                $(this).parents("li").addClass("selected");     
+                        } else {
+                                $(this).removeClass("selected");
+                                $(this).parents("li").removeClass("selected");
+                        }                       
+                });
+                // check the value of the question input
+                $("#question").focusout( function(){
+                	checkQuestionUriInput(this);
+                });
+                // check the selections within the component list
+                $("#submit").mouseover(function(){
+                	checkQuestionUriInput($("#question"));
+                	checkComponentList("#sortable",minimumNumberOfSelectedComponents);
+                });
+        });
+        
+        function checkQuestionUriInput(inputelement){
+                if( $(inputelement).val().trim() == "" ){
+                        $(inputelement).addClass("isempty");
+                } else {
+                        $(inputelement).removeClass("isempty");
+                } 
+        }
+        
+        function checkComponentList(blockElementContainingCheckboxes, minimumNumberOfSelectedComponents){
+			if( $(blockElementContainingCheckboxes).find("input:checked").length >= minimumNumberOfSelectedComponents){
+                $(blockElementContainingCheckboxes).removeClass("missingcomponentselection");
+			} else {
+				$(blockElementContainingCheckboxes).addClass("missingcomponentselection");
+			}	
+        }
+    </script>

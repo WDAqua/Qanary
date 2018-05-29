@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Qanary Helper: Start question answering with an existing question URI</title> 
+ 	<meta th:replace="lib/header"/>        
+</head>
+<body>
+	    <h1>Start a QA process with a new textual question</h1>
+        <form action="/questionanswering" method="POST">
+                <div>
+                        Please insert an existing question URI (where the question raw data is exposed): <input type="text" name="question" id="question" />
+                </div>
+				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
+                <button id="submit">start QA process provided by Qanary &#xf135;</button>               
+        </form>
+ 		<div th:replace="lib/footer"/>        
+</body>
+</html>

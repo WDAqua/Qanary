@@ -1,0 +1,227 @@
+     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+                <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+                <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+                <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style>
+    body {
+        font-size:14pt; 
+        background-color: #FFFFFF; 
+        font-color: #333;
+    	font: small-caption;
+        font-size: larger; 
+        margin: 0; 
+        padding: 0;
+        height: 100% ;
+    }
+    div.container {
+    	text-align: center;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+    	position: absolute;
+    	display: table ;
+	}
+	div.padding{
+		padding:1%;
+	}
+	div.space {
+		padding-top: 2%;
+	}
+    #logo-img { 
+    	height: 110px;
+    }
+    #logo-img-small { 
+    	height: 50px;
+    }
+    /*
+    form {
+    	margin-left: 1ex;
+		vertical-align: middle ; 
+		margin-top: 10px;
+	}*/
+    input[type=text] {
+	     max-width:500px; 
+	     font-size: 13pt; 
+	     padding:5px;
+	     border: 1px solid #999;
+	     width:90%; 
+     }
+    .inner-container {
+    	margin-top: 10%;
+    }
+    #text-question {
+	    text-transform: uppercase;
+	    font-family: "Verdana", Times, Sans-serif;
+	    font-weight: bold;
+	    font-size: 15px;
+	    color: #595959;
+	    /*margin-top:2ex;
+	     margin-bottom:2ex;*/ 
+    }
+    div.selection {
+        margin: 0; 
+        width: 500px; 
+        padding:0;
+    }
+    div.feedback {
+     	margin: 0;
+	    padding: 0;
+    	border-top: 1px solid #ccc;
+    	width: 100%;
+    }
+    #left{
+    	float:left;
+    	 width: 50%;
+    	 display: inline-block;
+    }
+    
+    button { 
+        text-transform: uppercase;
+	    font-family: "Verdana", Times, Sans-serif;
+	    font-size: 17px;
+    	font-weight: bold; 
+        text-shadow: 1px 1px #457128;
+        letter-spacing: 1px;
+        transition: background-position .1s linear;
+        color: #FFF;
+        border-radius: 4px;
+        border: 1px solid #999; 
+        background-color: #51842e; 
+        //background-color:#6db33f; 
+        width: 130px;
+    	height: 30px;
+    }
+    button.yes {
+    	text-transform: none;
+    	color: #FFF;
+    	font-size: 15px;
+    } 
+    button.no {
+    	text-transform: none;
+    	background-color: #DC143C;
+    	font-size: 15px;
+    } 
+    button:hover { 
+		border: 1px solid #457128; 
+        background-color:#457128;
+    }
+     button.no:hover { 
+		border: 1px solid #af1f3c; 
+        background-color:#af1f3c;
+    }
+    button:focus {
+    	outline:0;
+    	background-color:  #68aa3c;
+    	border: 1px solid #5c9735;	
+    }
+	ul.tab {
+	    list-style-type: none;
+	    margin: 0;
+	    padding: 0;
+	    height: 40px;
+	    overflow: hidden;
+	    border: 1px solid #ccc;
+	    background-color: #f1f1f1;
+	}
+	
+	ul.tab li {
+		float: left;
+		vertical-align: middle ; 
+	}
+	
+	ul.tab li a {
+	    display: inline-block;
+	    color: black;
+	    text-align: center;
+	    padding: 10px 12px;
+	    text-decoration: none;
+	    transition: 0.3s;
+	    font-size: 17px;
+	}
+	
+	ul {
+  		margin: 0;
+  		padding: 0;
+	}
+li {
+  list-style-type: none;
+}
+#nav {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  padding-top: 1%;
+  padding-bottom: 1%;
+}
+#nav li {
+  display: table-cell;
+  padding-right: 1px;
+  height: auto;
+  vertical-align: middle;
+}
+#search {
+  width: 80%;
+}
+#logo {
+  text-align: center;
+  width: 20%;
+}
+#nav a {
+  display: block;
+  min-height: 100%;
+  color: white;
+}
+	
+	
+	/* Style the tab content */
+	.tabcontent {
+	    display: none;
+	    border: 1px solid #ccc;
+	    border-top: none;
+	}
+	#Answers{
+		display: block;
+	}
+    </style>
+    <script th:inline="javascript">
+    	/*<![CDATA[*/
+       	
+        $(function() {
+                // check the value of the question input
+                $("#question").focusout( function(){
+                	checkQuestionUriInput(this);
+                });
+        });
+        
+        function checkQuestionUriInput(inputelement){
+                if( $(inputelement).val().trim() == "" ){
+                        $(inputelement).addClass("isempty");
+                } else {
+                        $(inputelement).removeClass("isempty");
+                } 
+        }
+        
+        function openTab(evt, tab) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the link that opened the tab
+            document.getElementById(tab).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        /*]]>*/
+    </script>

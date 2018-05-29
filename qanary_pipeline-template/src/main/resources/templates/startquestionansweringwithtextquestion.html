@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Qanary Helper: Start question answering with a new textual question</title> 
+ 	<meta th:replace="lib/header"/>        
+</head>
+<body>
+        <h1>Start a QA process with a new textual question</h1>
+        <form action="/startquestionansweringwithtextquestion" method="POST">
+		        <div th:replace="lib/reusableforms::textquestioninput"/>
+				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
+                <button id="submit">start QA process provided by Qanary &#xf135;</button>               
+        </form>
+ 		<div th:replace="lib/footer"/>        
+</body>
+</html>
