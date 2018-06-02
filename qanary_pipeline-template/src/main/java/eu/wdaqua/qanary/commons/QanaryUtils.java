@@ -83,13 +83,32 @@ public class QanaryUtils {
 	 * query a SPARQL endpoint with a given SELECT query
 	 */
 	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
-		logger.debug("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
+		logger.info("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
 		long start = getTime();
 		Query query = QueryFactory.create(sparqlQuery);
-		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-		ResultSet resultset = qExe.execSelect();
-		this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
-		return resultset;
+		
+		
+		try {
+			
+			QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+			ResultSet resultset = qExe.execSelect();
+			this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
+			return resultset;
+			
+		} catch (Exception e) {
+			
+			// problem might be the Stardog v5+ infamous endpoint distinction for update and select queries 
+			logger.warn("select query failed on {}: {}", endpoint, e.getMessage() );
+			
+			String endpointForStardogToBeTested = endpoint.concat("/query");
+			logger.info("try select query on {}", endpointForStardogToBeTested);
+
+			QueryExecution qExe = QueryExecutionFactory.sparqlService(endpointForStardogToBeTested, query);
+			ResultSet resultset = qExe.execSelect();
+			this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
+			return resultset;
+		}
+		
 	}
 
 	/**
@@ -120,8 +139,22 @@ public class QanaryUtils {
 		logger.debug("updateTripleStore on {}: {}", endpoint, sparqlQuery);
 		long start = getTime();
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
-		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-		proc.execute();
+		UpdateProcessor proc;
+		
+		try {
+			proc = UpdateExecutionFactory.createRemote(request, endpoint);
+			proc.execute();
+		} catch (Exception e) {
+			// problem might be the Stardog v5+ infamous endpoint distinction for update and select queries 
+			logger.warn("update query failed on {}: {}", endpoint, e.getMessage() );
+			
+			// re-try with extended endpoint URL 
+			String endpointForStardogToBeTested = endpoint.concat("/update");
+			logger.info("try update query on {}", endpointForStardogToBeTested);
+			proc = UpdateExecutionFactory.createRemote(request, endpointForStardogToBeTested);
+			proc.execute();			
+		}
+		
 		this.logTime(getTime() - start, "updateTripleStore: " + sparqlQuery);
 	}
 
