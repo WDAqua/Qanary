@@ -9,7 +9,7 @@ Please go to the [GitHub Wiki page](https://github.com/WDAqua/Qanary/wiki) of th
 
 Here, we provide our key contributions on-top of the [RDF vocabulary qa](https://github.com/WDAqua/QAOntology): the reference implementation of the Qanary methodology. This repository contributes several sub-resources for the Question Answering Community to build knowledge-driven QA systems incorporating a standard [RDF vocabulary named "qa"](https://github.com/WDAqua/QAOntology). 
 
-All the resources are reusable. For detailed description of individual resources, kindly refer to Wiki section of this repository. The [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components) maintained by the core developers are available [here](https://github.com/WDAqua/Qanary-question-answering-components). They require to first clone this repository (of the Qanary framework) and do ``mvn install``.
+All the resources are reusable. For detailed description of individual resources, kindly refer to Wiki section of this repository. The [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components) maintained by the core developers are available [here](https://github.com/WDAqua/Qanary-question-answering-components) (in a separated Git repository). They require to first clone this repository (of the Qanary framework) and execute ``mvn install``.
 However, this is just the beginning, many more components will soon be published.
 
 The following sub-project are part of the Qanary core frameworks:
