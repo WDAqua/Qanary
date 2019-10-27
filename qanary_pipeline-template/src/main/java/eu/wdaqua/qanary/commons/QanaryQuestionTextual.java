@@ -7,13 +7,15 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 
 public class QanaryQuestionTextual extends QanaryQuestion<Object> {
 
-	public QanaryQuestionTextual(QanaryMessage qanaryMessage) throws QanaryExceptionNoOrMultipleQuestions, URISyntaxException {
+	public QanaryQuestionTextual(QanaryMessage qanaryMessage)
+			throws QanaryExceptionNoOrMultipleQuestions, URISyntaxException {
 		super(qanaryMessage);
 		// ensure that the question is marked as textual question
 		this.putAnnotationOfTextRepresentation();
 	}
 
-	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator) throws URISyntaxException, QanaryExceptionNoOrMultipleQuestions {
+	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator)
+			throws URISyntaxException, QanaryExceptionNoOrMultipleQuestions {
 		super(questionUrl, qanaryConfigurator);
 		// ensure that the question is marked as textual question
 		this.putAnnotationOfTextRepresentation();

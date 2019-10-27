@@ -72,15 +72,18 @@ public class QanaryConfigurator {
 	}
 
 	/**
-	 * call the provided components sequentially, pass throught a QanaryMessage
+	 * call the provided components sequentially, as demanded by the provided QanaryMessage
 	 */
-	private QanaryQuestionAnsweringFinished callServices(List<QanaryComponent> myComponents, QanaryMessage message)
-			throws QanaryExceptionServiceCallNotOk {
+	private QanaryQuestionAnsweringFinished callServices( //
+			List<QanaryComponent> myComponents, //
+			QanaryMessage message //
+	) throws QanaryExceptionServiceCallNotOk {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
 
 		logger.info("QanaryMessage for current process: {}", message.asJsonString());
 
+		// run the process for all demanded components
 		for (QanaryComponent component : myComponents) {
 
 			URI myURI;
@@ -90,13 +93,14 @@ public class QanaryConfigurator {
 				e.printStackTrace();
 				return result;
 			}
+
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
 
 			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
-			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange(myURI, HttpMethod.POST, request,
-					QanaryMessage.class);
+			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange( //
+					myURI, HttpMethod.POST, request, QanaryMessage.class);
 
 			result.appendProtocol(component);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {

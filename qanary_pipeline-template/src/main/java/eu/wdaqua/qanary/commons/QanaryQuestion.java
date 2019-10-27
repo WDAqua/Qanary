@@ -55,8 +55,8 @@ public class QanaryQuestion<T> {
 	private QanaryConfigurator myQanaryConfigurator;
 
 	/**
-	 * init the graph in the triplestore (c.f., application.properties) a new
-	 * graph is constructed
+	 * init the graph in the triplestore (c.f., application.properties), a new graph
+	 * is constructed
 	 * 
 	 * @param questionUri
 	 * @param qanaryConfigurator
@@ -70,9 +70,12 @@ public class QanaryQuestion<T> {
 		this.myQanaryConfigurator = qanaryConfigurator;
 
 		final URI triplestore = qanaryConfigurator.getEndpoint();
-		logger.info("Triplestore: {}", triplestore);
 		String sparqlquery = "";
 		String namedGraphMarker = "<" + namedGraph.toString() + ">";
+		logger.info("Triplestore: {}, Current graph: {}", triplestore, namedGraph.toString());
+
+		// IMPORTANT: The following processing steps will fail if the used
+		// triplestore is not allowed to access data from the Web
 
 		// Load the Open Annotation Ontology
 		sparqlquery = "" //
@@ -93,35 +96,51 @@ public class QanaryQuestion<T> {
 
 		// Prepare the question, answer and dataset objects
 		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { <" + questionUri.toString() + "> a qa:Question}}";
-		logger.info("Sparql query: {}", sparqlquery);
-		loadTripleStore(sparqlquery, qanaryConfigurator);
-
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
-				+ "<http://localhost/Answer> a qa:Answer}}";
-		logger.info("Sparql query: {}", sparqlquery);
-		loadTripleStore(sparqlquery, qanaryConfigurator);
-
-		sparqlquery = "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
-				+ "INSERT DATA {GRAPH " + namedGraphMarker + " { " //
-				+ "  <http://localhost/Dataset> a qa:Dataset} " //
+				+ "INSERT DATA { " //
+				+ "	GRAPH " + namedGraphMarker + " {" //
+				+ "		<" + questionUri.toString() + "> a qa:Question " //
+				+ "	}" //
 				+ "}";
-		logger.info("Sparql query: {}", sparqlquery);
+		logger.info("SPARQL query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
+
+		sparqlquery = "" //
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
+				+ "INSERT DATA { " //
+				+ "	GRAPH " + namedGraphMarker + " { " //
+				+ "		<http://localhost/Answer> a qa:Answer" //
+				+ "	}" //
+				+ "}";
+		logger.info("SPARQL query: {}", sparqlquery);
+		loadTripleStore(sparqlquery, qanaryConfigurator);
+
+		sparqlquery = "" //
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#>" //
+				+ "INSERT DATA {" //
+				+ "	GRAPH " + namedGraphMarker + " { " //
+				+ "		<http://localhost/Dataset> a qa:Dataset" //
+				+ "	} " //
+				+ "}";
+		logger.info("SPARQL query: {}", sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Make the first two annotations
-		sparqlquery = "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+		sparqlquery = "" //
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA { " + "GRAPH " + namedGraphMarker + " { " //
-				+ "<anno1> a  oa:AnnotationOfQuestion; " //
+				+ "INSERT DATA { " //
+				+ "	GRAPH " + namedGraphMarker + " { " //
+				+ "	<anno1> a  oa:AnnotationOfQuestion; " //
 				+ "   oa:hasTarget <" + questionUri.toString() + "> ;" //
-				+ "   oa:hasBody   <URIAnswer>   . " //
-				+ "<anno2> a  oa:AnnotationOfQuestion; " //
+				+ "   oa:hasBody   <URIAnswer> . " //
+				+ "	<anno2> a  oa:AnnotationOfQuestion; " //
 				+ "   oa:hasTarget <" + questionUri.toString() + "> ; " //
-				+ "   oa:hasBody   <URIDataset> " + "}}";
-		logger.info("Sparql query: {}", sparqlquery);
+				+ "   oa:hasBody   <URIDataset> ." //
+				+ "	}" //
+				+ "}";
+		logger.info("SPARQL query: {}", sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
+
 		initFromTriplestore(qanaryConfigurator);
 	}
 
