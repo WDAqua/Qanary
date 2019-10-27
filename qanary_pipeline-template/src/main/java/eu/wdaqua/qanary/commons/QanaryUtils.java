@@ -2,11 +2,14 @@ package eu.wdaqua.qanary.commons;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.HttpException;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -83,32 +86,36 @@ public class QanaryUtils {
 	 * query a SPARQL endpoint with a given SELECT query
 	 */
 	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
-		logger.info("selectTripleStore on {} execute {}", endpoint, sparqlQuery);
-		long start = getTime();
-		Query query = QueryFactory.create(sparqlQuery);
+		logger.info("SELECT on {}: {}", endpoint, sparqlQuery);
+		sparqlQuery = "X"+sparqlQuery;
 		
-		
-		try {
-			
-			QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
-			ResultSet resultset = qExe.execSelect();
-			this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
-			return resultset;
-			
+		try {			
+			return selectFromTripleStoreHelper(sparqlQuery, endpoint);
 		} catch (Exception e) {
 			
 			// problem might be the Stardog v5+ infamous endpoint distinction for update and select queries 
-			logger.warn("select query failed on {}: {}", endpoint, e.getMessage() );
+			logger.warn("SELECT query failed on {}: {}", endpoint, e.getMessage() );
 			
 			String endpointForStardogToBeTested = endpoint.concat("/query");
-			logger.info("try select query on {}", endpointForStardogToBeTested);
+			logger.info("try SELECT query on {}", endpointForStardogToBeTested);
 
-			QueryExecution qExe = QueryExecutionFactory.sparqlService(endpointForStardogToBeTested, query);
-			ResultSet resultset = qExe.execSelect();
-			this.logTime(getTime() - start, "selectFromTripleStore: " + sparqlQuery);
-			return resultset;
+			return selectFromTripleStoreHelper(sparqlQuery, endpointForStardogToBeTested);
 		}
-		
+	}
+	
+	/**
+	 * Execute a given query on the provided triplestore endpoint
+	 * 
+	 * @param sparqlQuery
+	 * @param endpoint
+	 * @return
+	 */
+	private ResultSet selectFromTripleStoreHelper(String sparqlQuery, String endpoint) {
+		long start = getTime();		
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery);
+		ResultSet resultset = qExe.execSelect();
+		this.logTime(getTime() - start, "SELECT on " + endpoint + ": " + sparqlQuery);
+		return resultset;
 	}
 
 	/**
@@ -126,35 +133,41 @@ public class QanaryUtils {
 
 	/**
 	 * insert data into triplestore, endpoint is taken from QanaryMessage
-	 * @throws URISyntaxException 
+	 * 
+	 * @throws URISyntaxException
+	 * @throws SparqlQueryFailed
 	 */
-	public void updateTripleStore(String sparqlQuery, QanaryConfigurator myQanaryConfigurator) throws URISyntaxException {
+	public void updateTripleStore(String sparqlQuery, QanaryConfigurator myQanaryConfigurator)
+			throws URISyntaxException, SparqlQueryFailed {
 		this.updateTripleStore(sparqlQuery, myQanaryConfigurator.getLoadEndpoint().toString());
 	}
 
 	/**
 	 * insert data into triplestore
+	 * 
+	 * @throws SparqlQueryFailed
 	 */
-	public void updateTripleStore(String sparqlQuery, String endpoint) {
+	public void updateTripleStore(String sparqlQuery, String endpoint) throws SparqlQueryFailed {
 		logger.debug("updateTripleStore on {}: {}", endpoint, sparqlQuery);
 		long start = getTime();
 		UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		UpdateProcessor proc;
-		
+
 		try {
 			proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			proc.execute();
+			executeUpdateTripleStore(proc, sparqlQuery, endpoint);
 		} catch (Exception e) {
-			// problem might be the Stardog v5+ infamous endpoint distinction for update and select queries 
-			logger.warn("update query failed on {}: {}", endpoint, e.getMessage() );
-			
-			// re-try with extended endpoint URL 
+			// problem might be the Stardog v5+ infamous endpoint distinction for update and
+			// select queries
+			logger.warn("update query failed on {}: {}", endpoint, e.getMessage());
+
+			// re-try with extended endpoint URL
 			String endpointForStardogToBeTested = endpoint.concat("/update");
 			logger.info("try update query on {}", endpointForStardogToBeTested);
 			proc = UpdateExecutionFactory.createRemote(request, endpointForStardogToBeTested);
-			proc.execute();			
+			executeUpdateTripleStore(proc, sparqlQuery, endpointForStardogToBeTested);
 		}
-		
+
 		this.logTime(getTime() - start, "updateTripleStore: " + sparqlQuery);
 	}
 
@@ -162,17 +175,19 @@ public class QanaryUtils {
 	 * executes a SPARQL INSERT into the triplestore
 	 *
 	 * TODO: needs to be extracted
+	 * TODO: add timeout
 	 *
 	 * @return map
+	 * @throws SparqlQueryFailed 
 	 */
-	public static void loadTripleStore(final String sparqlQuery, final URI loadEndpoint) {
+	public static void loadTripleStore(final String sparqlQuery, final URI loadEndpoint) throws SparqlQueryFailed {
 		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		final UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, loadEndpoint.toString());
-		proc.execute();
+		executeUpdateTripleStore(proc, sparqlQuery, loadEndpoint);
 	}
 
 	public static void loadTripleStore(final String sparqlQuery, final QanaryConfigurator myQanaryConfigurator)
-			throws URISyntaxException {
+			throws URISyntaxException, SparqlQueryFailed {
 		loadTripleStore(sparqlQuery, myQanaryConfigurator.getLoadEndpoint());
 	}
 
@@ -182,6 +197,30 @@ public class QanaryUtils {
 	public String getComponentUri() {
 		return QanaryConfiguration.getServiceUri().toString();
 	}
+
+	
+	/**
+	 * executes an UPDATE SPARQL query and creates a corresponding exception on errors (wrapper)
+	 */
+	private static void executeUpdateTripleStore(UpdateProcessor proc, String sparqlQuery, URI updateEndpoint)
+			throws SparqlQueryFailed {
+		executeUpdateTripleStore(proc, sparqlQuery, updateEndpoint.toString());
+	}
+	
+	/**
+	 * executes an UPDATE SPARQL query and creates a corresponding exception on errors
+	 */
+	private static void executeUpdateTripleStore(UpdateProcessor proc, String sparqlQuery, String updateEndpoint)
+			throws SparqlQueryFailed {
+		try {
+			proc.execute(); // Execute the update
+		} catch (Exception e) {
+			logger.error("Execution of SPARQL query failed with error: {} \n SPARQL: {} \n Stacktrace {}", //
+					e.getMessage(), sparqlQuery, ExceptionUtils.getStackTrace(e));
+			throw new SparqlQueryFailed(sparqlQuery, updateEndpoint, e);
+		}
+	}
+	
 
 	/**
 	 * wrapper for retrieving the URI where the service is currently running
