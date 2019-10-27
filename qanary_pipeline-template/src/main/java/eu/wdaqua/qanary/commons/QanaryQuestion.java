@@ -75,15 +75,20 @@ public class QanaryQuestion<T> {
 		String namedGraphMarker = "<" + namedGraph.toString() + ">";
 
 		// Load the Open Annotation Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/oa.owl> INTO GRAPH "
-				+ namedGraphMarker;
-		logger.info("Sparql query: {}", sparqlquery);
+		sparqlquery = "" //
+				+ "LOAD <http://www.w3.org/ns/oa.rdf> " //
+				+ "INTO GRAPH " + namedGraphMarker;
+		logger.info("SPARQL query: {}", sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
-		// Load the Qanary Ontology
-		sparqlquery = "LOAD <http://localhost:" + qanaryConfigurator.getPort() + "/qanaryOntology.ttl> INTO GRAPH "
-				+ namedGraphMarker;
-		logger.info("Sparql query: {}", sparqlquery);
+		// Load the Qanary Ontology using the permanent GitHub location
+		// be aware that
+		// https://raw.githubusercontent.com/WDAqua/QAOntology/master/qanary.owl does
+		// not work due to header issues on behalf of GitHub
+		sparqlquery = "" //
+				+ "LOAD <https://rawcdn.githack.com/WDAqua/QAOntology/6d25ebc8970b93452b5bb970a8e2f526be9841a5/qanary.owl> " //
+				+ "INTO GRAPH " + namedGraphMarker;
+		logger.warn("SPARQL query: {}", sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Prepare the question, answer and dataset objects
