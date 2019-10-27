@@ -49,20 +49,26 @@ public class QanaryConfigurator {
 	// parameter required to create the correct triplestore endpoint, particularly due to Stardog v5+
 	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
 
-	public QanaryConfigurator(RestTemplate restTemplate, List<String> defaultComponents, String host, int port,
-			URI endpoint, TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier) {
-
+	public QanaryConfigurator( //
+			RestTemplate restTemplate, //
+			List<String> defaultComponents, //
+			String serverhost, //
+			int serverport, //
+			URI triplestoreendpoint, //
+			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier //
+	) {
 		this.restTemplate = restTemplate;
 		this.components = Lists.newArrayList();
 		this.componentsToIndexMap = Maps.newHashMap();
-		
+
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 
-		// from config
 		this.setDefaultComponentNames(defaultComponents);
-		this.port = port;
-		this.host = host;
-		this.endpoint = endpoint;
+		this.port = serverport;
+		this.host = serverhost;
+		this.endpoint = triplestoreendpoint;
+		
+		logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
 	}
 
 	/**

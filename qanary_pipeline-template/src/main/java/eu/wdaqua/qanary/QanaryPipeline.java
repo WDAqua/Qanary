@@ -9,6 +9,7 @@ import de.codecentric.boot.admin.event.ClientApplicationRegisteredEvent;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
+import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 @SpringBootApplication
 @EnableAdminServer
-@EnableDiscoveryClient // registers itself as client for the admin server,
+@EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
 @ComponentScan({"eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web"})
 public class QanaryPipeline {
@@ -40,12 +41,28 @@ public class QanaryPipeline {
         SpringApplication.run(QanaryPipeline.class, args);
     }    
     
-    @Bean
-    public QanaryConfigurator configurator(@Value("#{'${qanary.components}'.split(',')}") final List<String> components,
-                                           @Value("${server.host}") @NotNull final String host, @Value("${server.port}") @NotNull final int port,
-                                           @Value("${qanary.triplestore}") @NotNull final URI endpoint, TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier ) {
-        return new QanaryConfigurator(restTemplate(), components, host, port, endpoint, myTriplestoreEndpointIdentifier);
-    }
+	@Bean
+	public QanaryConfigurator configurator( //
+			@Value("#{'${qanary.components}'.split(',')}") final List<String> availablecomponents, //
+			@Value("${server.host}") @NotNull final String serverhost, //
+			@Value("${server.port}") @NotNull final int serverport, //
+			@Value("${qanary.triplestore}") @NotNull final URI triplestoreendpoint, //
+			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier //
+	) throws TripleStoreNotProvided {
+
+		if (triplestoreendpoint == null || triplestoreendpoint.toASCIIString().compareTo("") == 0) {
+			throw new TripleStoreNotProvided(triplestoreendpoint);
+		}
+
+		return new QanaryConfigurator( //
+				restTemplate(), //
+				availablecomponents, // from config
+				serverhost, // from config
+				serverport, // from config
+				triplestoreendpoint, // from config
+				myTriplestoreEndpointIdentifier //
+		);
+	}
 
     @Bean
     public RestTemplate restTemplate() {
