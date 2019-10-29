@@ -87,8 +87,7 @@ public class QanaryUtils {
 	 */
 	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) {
 		logger.info("SELECT on {}: {}", endpoint, sparqlQuery);
-		sparqlQuery = "X"+sparqlQuery;
-		
+	
 		try {			
 			return selectFromTripleStoreHelper(sparqlQuery, endpoint);
 		} catch (Exception e) {
