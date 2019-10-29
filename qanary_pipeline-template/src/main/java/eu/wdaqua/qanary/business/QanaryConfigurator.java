@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -23,8 +24,9 @@ import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.model.Application;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
-import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 
 /**
@@ -99,17 +101,30 @@ public class QanaryConfigurator {
 			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
 
 			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
-			ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange( //
-					myURI, HttpMethod.POST, request, QanaryMessage.class);
+			
+			long start = QanaryUtils.getTime();
+			try {
+				
+				ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange( //
+						myURI, HttpMethod.POST, request, QanaryMessage.class);
 
-			result.appendProtocol(component);
-			if (responseEntity.getStatusCode() == HttpStatus.OK) {
-				message = responseEntity.getBody();
-				logger.debug("received: {}", message);
-			} else {
-				logger.error("call to {} return HTTP {}", component.getName(), responseEntity.getStatusCode());
-				throw new QanaryExceptionServiceCallNotOk(component.getName(), responseEntity.getStatusCode());
+				result.appendProtocol(component);
+				if (responseEntity.getStatusCode() == HttpStatus.OK) {
+					message = responseEntity.getBody();
+					logger.debug("received: {}", message);
+				} else {
+					logger.error("call to {} return HTTP {}", component.getName(), responseEntity.getStatusCode());
+					throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start, responseEntity.getStatusCode());
+				}
+			} catch (QanaryExceptionServiceCallNotOk e) {
+				logger.error("called {} catched {}", component.getName(), e.getMessage());
+				throw e;
+			} catch (Exception e) {
+				logger.error("called {} catched {} -> throws {}", // 
+						component.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start, e.getMessage(), ExceptionUtils.getStackTrace(e));
 			}
+
 
 		}
 		result.endQuestionAnswering();

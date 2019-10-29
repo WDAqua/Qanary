@@ -1,8 +1,8 @@
 package eu.wdaqua.qanary.web;
 
+import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
-import eu.wdaqua.qanary.message.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 
 import org.json.simple.JSONObject;
