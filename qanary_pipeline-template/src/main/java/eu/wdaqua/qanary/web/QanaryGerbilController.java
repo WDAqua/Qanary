@@ -1,37 +1,35 @@
 package eu.wdaqua.qanary.web;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.List;
 
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
+import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
-import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 
 /**
@@ -104,11 +102,11 @@ public class QanaryGerbilController {
             for (String component : componentsToBeCalled) {
                 components += component + ", ";
             }
-            System.out.println(components);
+            logger.info("components (0): {}",components);
             if (components.length() > 0) {
                 components = components.substring(0, components.length() - 2);
             }
-            System.out.println(components);
+            logger.info("compoents (1): {}",components);
             //urlStr += URLEncoder.encode(components, "UTF-8")+"/";
             URI uri = new URI(
                     "http",
@@ -119,7 +117,7 @@ public class QanaryGerbilController {
                     null,
                     null);
             URL url = uri.toURL();
-            System.out.println(url.toString());
+            logger.info("created URL: {}", url.toString());
             model.addAttribute("url", url.toString());
         }
         return "generategerbilendpoint";
@@ -129,7 +127,7 @@ public class QanaryGerbilController {
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
             @PathVariable("components") final String componentsToBeCalled
-    ) throws URISyntaxException {
+    ) throws URISyntaxException, SparqlQueryFailed {
     	logger.info("Asked question: {}", query);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
     	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -138,7 +136,7 @@ public class QanaryGerbilController {
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getPort()+"/startquestionansweringwithtextquestion", map, String.class);
         org.json.JSONObject json = new org.json.JSONObject(response);
-        //retrive text representation, SPARQL and JSON result
+        //retrieve text representation, SPARQL and JSON result
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
         //Generates the following output
