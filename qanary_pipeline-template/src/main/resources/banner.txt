@@ -1,0 +1,27 @@
+
+${AnsiColor.GREEN}       :]KBQQ@QB9z:                                                                                             
+     rN@@D;`,-:Z@@@K,                                                                                           
+    k@@@k  `]:  |Q@@Q,                                                                                          
+${AnsiColor.BRIGHT_GREEN}   E@@@o        `?Q@@D                                                                                          
+  r@@Q;         #@@@@@`                                                                                         
+  #Q| :>        Q@@@@@`    ;jDQ@@QHvQQQQQ>   iQQQQQ*FgQ@@Qm'       :2&Q@@QKvQBB##:   `RRDdOv.?2EEF,;e]   `uuuff|
+${AnsiColor.CYAN} ,d-rNQ'        a@@@@Q   ^B@@@@kr;c@@@@@@`   Q@@@@@@QQ@@@@@@`    ;B@@@@e^:J@@@@@#    |QBB#Nd9odDHdZ X;   ;wmmeZ,
+ .:R@@*         F@@@@e  m@@@@Q:   ,@@@@@S   ^@@@@@B~  6@@@@@'   e@@@@Q,   :@@@@QL   `RQB#N$'  ;dde:;E`   jmmZZF 
+ ^@@@$          D@@@@, k@@@@Q:    a@@@@@'   R@@@@@.   K@@@@Q   X@@@@@'    k@@@QQ`   ?BB#NNr   -\*|j$\   ~meeZZ; 
+${AnsiColor.BRIGHT_BLUE}r@@@@:         ;@@@@j |@@@@@\    `@@@@@d   ,@@@@@S   -@@@@@v  >@@@@@i    .@@@QQ2    dB#NND    \OK9$6.   7mZZaS` 
+g@@@@`        ,Q@@@O  Q@@@@@     i@@@@@;   Z@@@@@'   F@@@@Q`  B@@@@@`    t@@QQQ,   :B#NNgi    6K9$6J   .meZaa?  
+Q@@@@: `.`   ^Q@@@$  .@@@@@R     Q@@@@Q   `@@@@@d   `@@@@@f  -@@@@@&    `Q@QQQK    e#NNg&.   ;K9$$k_   |eZaaa'  
+${AnsiColor.BLUE}k@@@@QKe9QQEK@@@@L   `@@@@@Q`  'K@@@@@w   S@@@@@;   ;@@@@@r  ,@@@@@Q`  ,O@QQQQv   z#NNggj    z9$$kX-  ^eZaaa7   
+.R@@@@Buz$@@@@QF`     m@@@@@@NQ@&N@@@@@HKQ@@@@@Q    ,@@@@@@#B@Q@@@@@QgB@$NQQQQQma&#NNggR:    ?$$kEXotaeZaaaa_   
+  *KQ@@@@@Q@@@Q*       /N@@@@Q$; 'K@@@@@Kw@@@@@c     ;&@@@@@D? \N@@@@Qe: ,9QQQQ&j;&NggRE      ?ZEXwev^uaaaau    
+     `'''` J@@@@Qac/`     ''`       .'`                 .'.       .'`       ..`                 `:|L|7Zaoaa^    
+            LQ@@@@Q*                                                                           'fj:  /aoaao`    
+              '::,                                                                             ]w;  :aaaaa^     
+                                                                                               \meJFaaaaor      
+                                                                                                :LuoSfc;-       
+
+${AnsiBackground.WHITE}Application Title:   Qanary Question Answering System component                                                       ${AnsiBackground.DEFAULT}
+${AnsiBackground.WHITE}Description:         Provides central functionality for each Qanary component (registration) and endpoints for users. ${AnsiBackground.DEFAULT}
+${AnsiBackground.WHITE}Framework@GitHub:    https://github.com/WDAqua/Qanary                                                                 ${AnsiBackground.DEFAULT}
+${AnsiBackground.DEFAULT}${AnsiColor.DEFAULT}Spring Boot Version: ${spring-boot.version}                                                     ${AnsiBackground.DEFAULT}
+                                                                                                
