@@ -6,11 +6,31 @@
 </head>
 <body>
         <h1>Start a QA process with a new textual question</h1>
-        <form action="/startquestionansweringwithtextquestion" method="POST">
+        <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
 		        <div th:replace="lib/reusableforms::textquestioninput"/>
 				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
-                <button id="submit">start QA process provided by Qanary &#xf135;</button>               
+                <button id="submit">start Question Answering process provided by Qanary <i class="fa fa-rocket"></i></button>               
         </form>
+        <div id="results">
+        	<h2>Results (provided from backend as JSON)</h2>
+        	<table>
+        		<tr class="header">
+        			<th>key</th><th>value</th>
+        		</tr>
+        		<tr title="connect to this endpoint to retrieve question analysis data">
+        			<td>Qanary triplestore endpoint</td><td id="endpoint" class="resultdata"></td>
+        		</tr>
+        		<tr title="might be the same as the outgraph, it represents earlier processing steps">
+        			<td>Qanary question analysis ingraph</td><td id="inGraph" class="resultdata"></td>
+        		</tr>
+        		<tr title="contains the analysis data, query this graph to retrieve question analysis data">
+        			<td>Qanary question analysis outgraph</td><td id="outGraph" class="resultdata"></td>
+        		</tr>
+        		<tr title="the created ID of the question you just have provided">
+        			<td>Question URI</td><td id="questionuri" class="resultdata"></td>
+        		</tr>
+        	</table>
+        </div>
  		<div th:replace="lib/footer"/>        
 </body>
 </html>

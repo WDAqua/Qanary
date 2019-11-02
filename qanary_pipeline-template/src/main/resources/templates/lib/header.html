@@ -1,6 +1,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
                 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
                 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
                 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <style>
@@ -16,11 +17,18 @@
 	    /* TODO: Github is used here, should be replaced by SVG */
         background-size: 100px auto;
         background: url(https://raw.githubusercontent.com/WDAqua/Qanary/master/doc/logo-qanary_s.png) no-repeat left/120px;
+        background-position-x: 1ex;
         padding-top: 1ex;
 	    padding-bottom: 1.1ex;
 	    padding-left: 16ex;
 	    font-size: 14pt; 
 	    font-weight: 600; 
+    }
+    h2 {
+    	font-size: 12pt;
+	    font-weight: 600; 
+	    margin-top: 2ex;
+    	margin-bottom: 1ex;
     }
     .applicationheader { 
         background-color: #34302D; 
@@ -84,12 +92,20 @@
         color: #FFF;
         border-radius: 4px;
         border: 1px solid #999; 
-        background-color:#6db33f; 
+        background-color: #00bc7c; 
+        cursor: pointer;
     } 
     button:hover { 
-                border: 1px solid #333; 
-        background-color:#73bc42;
+        border: 1px solid #333; 
+        filter: opacity(0.9);
     }
+    button:disabled, button[disabled] {
+  		background-color: #005173;
+  		cursor:not-allowed;
+	}
+    button:disabled.inprogress, button[disabled].inprogress {
+		cursor:progress;
+	}
     footer {
     	border-top: 1px solid #999;
     	margin-top: 7ex;
@@ -108,6 +124,29 @@
     }
     footer h3 {
     	font-size:90%;
+    }
+    #results {
+    	border-top: 1px dashed #00bc7c;
+    	margin: 1ex;
+    	margin-top: 2ex;
+    }
+    #results table {
+    	font-size: 90%;
+    	border: 1px solid #333;
+    	margin-top: 1ex;
+    }
+    #results th {
+    	font-weight: bold;
+    	color: #FFFFFF;
+    }
+    #results tr:nth-child(even) {
+    	background-color: #f2f2f2;
+    }
+    #results tr:nth-child(odd) {
+    	background-color: #FFFFFF;
+    }
+    #results tr.header {
+    	background-color: #000000;
     }
     </style>
     <script>
@@ -128,31 +167,73 @@
                                 $(this).removeClass("selected");
                                 $(this).parents("li").removeClass("selected");
                         }                       
+                    	checkInputAndOptionallyDisableSubmitButton("#submit");
                 });
-                // check the value of the question input
+                // check the value of the question input, might disable the submit button
                 $("#question").focusout( function(){
-                	checkQuestionUriInput(this);
+                	checkInputAndOptionallyDisableSubmitButton("#submit");
                 });
                 // check the selections within the component list
                 $("#submit").mouseover(function(){
-                	checkQuestionUriInput($("#question"));
-                	checkComponentList("#sortable",minimumNumberOfSelectedComponents);
+                	checkInputAndOptionallyDisableSubmitButton("#submit");
+                });
+
+                $("#results").hide(); // hide results table
+                
+                // add AJAX action to form
+                $("#startForm").submit(function(event){
+                	event.preventDefault(); // prevent default action 
+                	$("#submit").attr("disabled", true); // disable button
+                	$("#submit").addClass("inprogress"); // change cursor
+                	$("#results").hide(); // hide last results
+                	
+                	$.ajax({
+                		url : $(this).attr("action"), // get action url
+                		type: $(this).attr("method"), //get method
+                		data: $(this).serialize() // encode form elements 
+                	}).done(function(response){ 
+                		console.log(response);
+                    	$("#submit").attr("disabled", false); // reactivate button
+                    	$("#submit").removeClass("inprogress");
+                		$("#endpoint").html(response.endpoint);
+                		$("#questionuri").html(response.question);
+                		$("#inGraph").html(response.inGraph);
+                		$("#outGraph").html(response.outGraph);
+                    	$("#results").show();
+                	});
                 });
         });
+        
+        function checkInputAndOptionallyDisableSubmitButton(buttonID){
+        	// disable button if the minimum number of components was not activated or question was not given
+        	if(!checkComponentList("#sortable",minimumNumberOfSelectedComponents)){
+        		$("#submit").attr("disabled", true);
+        	} else if(!checkQuestionUriInput($("#question"))){
+        		$("#submit").attr("disabled", true);
+        	} else {
+        		// everything ok
+        		$("#submit").attr("disabled", false);
+        	}
+        }
         
         function checkQuestionUriInput(inputelement){
                 if( $(inputelement).val().trim() == "" ){
                         $(inputelement).addClass("isempty");
+                        return false;
                 } else {
                         $(inputelement).removeClass("isempty");
+                        return true;
                 } 
         }
         
         function checkComponentList(blockElementContainingCheckboxes, minimumNumberOfSelectedComponents){
 			if( $(blockElementContainingCheckboxes).find("input:checked").length >= minimumNumberOfSelectedComponents){
                 $(blockElementContainingCheckboxes).removeClass("missingcomponentselection");
+                return true;
 			} else {
 				$(blockElementContainingCheckboxes).addClass("missingcomponentselection");
+				return false;
 			}	
         }
+        
     </script>
