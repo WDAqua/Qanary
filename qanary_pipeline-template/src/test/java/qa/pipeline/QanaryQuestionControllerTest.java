@@ -1,19 +1,18 @@
 package qa.pipeline;
 
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.QanaryQuestionController;

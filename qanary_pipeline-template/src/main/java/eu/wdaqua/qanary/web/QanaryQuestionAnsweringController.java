@@ -25,10 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
+import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
+import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
@@ -48,6 +49,7 @@ public class QanaryQuestionAnsweringController {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 	private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryQuestionController qanaryQuestionController;
+	private final QanaryComponentRegistrationChangeNotifier myComponentNotifier;
 
         //Set this to allow browser requests from other websites
         @ModelAttribute
@@ -60,9 +62,10 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@Autowired
 	public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator,
-			final QanaryQuestionController qanaryQuestionController) {
+			final QanaryQuestionController qanaryQuestionController, final  QanaryComponentRegistrationChangeNotifier myComponentNotifier) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
+		this.myComponentNotifier = myComponentNotifier;
 	}
 
 	/**
@@ -70,8 +73,8 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@ModelAttribute("componentList")
 	public List<String> componentList() {
-		logger.info("available components: {}", qanaryConfigurator.getComponentNames());
-		return qanaryConfigurator.getComponentNames();
+		logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
+		return myComponentNotifier.getAvailableComponentNames();
 	}
 
 	/**
@@ -249,6 +252,7 @@ public class QanaryQuestionAnsweringController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = QUESTIONANSWERINGFULL, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> createQuestionAnsweringFull( //
@@ -276,8 +280,9 @@ public class QanaryQuestionAnsweringController {
 		obj.put("textrepresentation", myQanaryQuestion.getTextualRepresentation());
 		obj.put("answer_found", myQanaryQuestion.getAnswerFound());
 		JSONArray sparql = new JSONArray();
+		@SuppressWarnings("rawtypes")
 		List<QanaryQuestion.SparqlAnnotation> ss = myQanaryQuestion.getSparqlResults();
-		for (QanaryQuestion.SparqlAnnotation s : ss){
+		for (@SuppressWarnings("rawtypes") QanaryQuestion.SparqlAnnotation s : ss){
 			JSONObject o = new JSONObject();
 			o.put("query", s.query);
 			o.put("confidence", s.confidence);
@@ -311,7 +316,7 @@ public class QanaryQuestionAnsweringController {
 
 		// no question string was given, so it is tried to fetch it from the
 		// triplestore
-		QanaryQuestion qanaryQuestion;
+		QanaryQuestion<?> qanaryQuestion;
 		if ((question == null || question.trim().isEmpty()) && questionaudio == null) {
 			if (graph == null) {
 				throw new Exception(
@@ -384,7 +389,8 @@ public class QanaryQuestionAnsweringController {
 		// execute synchronous calls to all components with the same message
 		// if no component is passed nothing is happening
 		if (componentsToBeCalled.isEmpty() == false) {
-			qanaryConfigurator.callServicesByName(componentsToBeCalled, myQanaryMessage);
+			List<QanaryComponent> components = this.myComponentNotifier.getAvailableComponentsFromNames(componentsToBeCalled);
+			qanaryConfigurator.callServices(components, myQanaryMessage);
 		} else {
 			logger.info("Executing components is not done, as the componentlist parameter was empty.");
 		}
@@ -409,7 +415,7 @@ public class QanaryQuestionAnsweringController {
 			// expected is a JSON message contains ingraph, outgraph, endpoint
 			String jsonMessage) throws Exception {
 		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
-		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
 		URI question = myQanaryQuestion.getUri();
 
 		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,

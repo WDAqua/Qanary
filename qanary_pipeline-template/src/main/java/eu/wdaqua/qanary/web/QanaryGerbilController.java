@@ -26,9 +26,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
+import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 
@@ -42,12 +43,13 @@ public class QanaryGerbilController {
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryGerbilController.class);
     private final QanaryConfigurator qanaryConfigurator;
-    private final QanaryQuestionController qanaryQuestionController;
+	private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
  
      @Value("${server.host}")
      private String host;
      @Value("${server.port}")
      private int port;
+     
  
     //Set this to allow browser requests from other websites
     @ModelAttribute
@@ -60,9 +62,10 @@ public class QanaryGerbilController {
      */
     @Autowired
     public QanaryGerbilController(final QanaryConfigurator qanaryConfigurator,
-                                  final QanaryQuestionController qanaryQuestionController) {
+                                  final QanaryQuestionController qanaryQuestionController,
+                                  final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier) {
         this.qanaryConfigurator = qanaryConfigurator;
-        this.qanaryQuestionController = qanaryQuestionController;
+        this.qanaryComponentRegistrationChangeNotifier = qanaryComponentRegistrationChangeNotifier;
     }
 
     /**
@@ -70,8 +73,9 @@ public class QanaryGerbilController {
      */
     @ModelAttribute("componentList")
     public List<String> componentList() {
-        logger.info("available components: {}", qanaryConfigurator.getComponentNames());
-        return qanaryConfigurator.getComponentNames();
+    	List<String> components = qanaryComponentRegistrationChangeNotifier.getAvailableComponentNames();
+        logger.info("available components: {}", components);
+        return components;
     }
 
     /**
@@ -123,7 +127,8 @@ public class QanaryGerbilController {
         return "generategerbilendpoint";
     }
 
-    @RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
             @PathVariable("components") final String componentsToBeCalled
@@ -138,7 +143,8 @@ public class QanaryGerbilController {
         org.json.JSONObject json = new org.json.JSONObject(response);
         //retrieve text representation, SPARQL and JSON result
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
-        QanaryQuestion myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+        @SuppressWarnings("rawtypes")
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
         //Generates the following output
     	/*{
  		   "questions":[

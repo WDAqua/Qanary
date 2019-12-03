@@ -3,7 +3,6 @@ package eu.wdaqua.qanary.web;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -13,6 +12,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,6 @@ import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.message.QanaryQuestionInformation;
 
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * controller for all service call w.r.t. questions
  *
@@ -54,8 +53,6 @@ public class QanaryQuestionController {
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
 
-    private final QanaryConfigurator qanaryConfigurator;
-
     //Set this to allow browser requests from other websites
     @ModelAttribute
     public void setVaryResponseHeader(HttpServletResponse response) {
@@ -70,7 +67,6 @@ public class QanaryQuestionController {
      */
     @Autowired
     public QanaryQuestionController(final QanaryConfigurator qanaryConfigurator) {
-        this.qanaryConfigurator = qanaryConfigurator;
     }
 
     /**
@@ -165,8 +161,6 @@ public class QanaryQuestionController {
 
         // store the received question in a file
         final String filename = UUID.randomUUID().toString();
-        final String filepath = Paths.get(this.getDirectoryForStoringQuestionRawData(), filename).toString();
-
         // check if question directory is actually existing
         if (!Files.isDirectory(Paths.get(this.getDirectoryForStoringQuestionRawData()))) {
             File dir = new File(this.getDirectoryForStoringQuestionRawData());

@@ -14,12 +14,14 @@ import org.apache.http.client.ClientProtocolException;
 //import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
  *
  * @author AnBo
  */
+@Component
 public abstract class QanaryComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryComponent.class);

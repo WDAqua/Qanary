@@ -3,6 +3,8 @@ package eu.wdaqua.qanary.component;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Properties;
@@ -10,6 +12,8 @@ import java.util.Properties;
 @SpringBootApplication
 @EnableAutoConfiguration
 @RestController
+@Configuration
+@ComponentScan("eu.wdaqua.qanary.component")
 public class QanaryService {
 
     /**

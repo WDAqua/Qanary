@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
+// import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController; // TODO
 
 /**
  * represents the message send back to the client after starting a QA process
@@ -15,15 +15,10 @@ import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 public class QanaryQuestionAnsweringRun {
 
 	private final URI questionAnsweringRunUri;
-
 	private final URI endpoint;
-
 	private final URI inGraph;
 	private final URI outGraph;
-
 	private final URI question;
-
-	private QanaryConfigurator configurator;
 
 	public QanaryQuestionAnsweringRun(UUID runId, URI question, URI endpoint, URI inGraph, URI outGraph,
 			QanaryConfigurator configurator) throws URISyntaxException {
@@ -31,8 +26,7 @@ public class QanaryQuestionAnsweringRun {
 			runId = UUID.randomUUID();
 		}
 
-		this.questionAnsweringRunUri = new URI(configurator.getHost() + ":" + configurator.getPort()
-				+ QanaryQuestionAnsweringController.QUESTIONANSWERING + "/" + runId.toString());
+		this.questionAnsweringRunUri = null; // TODO
 		this.endpoint = endpoint;
 		this.inGraph = inGraph;
 		this.outGraph = outGraph;

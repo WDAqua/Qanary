@@ -3,6 +3,9 @@ package eu.wdaqua.qanary.exceptions;
 import java.net.URI;
 
 public class TripleStoreNotProvided extends Exception {
+
+	private static final long serialVersionUID = 3076968575465370941L;
+
 	public TripleStoreNotProvided(URI triplestore) {
 		super("" //
 				+ "No triplestore provided: " //
