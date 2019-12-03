@@ -1,10 +1,5 @@
 package eu.wdaqua.qanary.commons;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -12,18 +7,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.HttpException;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.sparql.resultset.ResultSetMem;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 
 /**
  * the class is a covering standard tasks users of the Qanary methodology might
@@ -141,6 +141,11 @@ public class QanaryUtils {
 	 * @return
 	 */
 	private ResultSet selectFromTripleStoreHelper(String sparqlQuery, String endpoint) {
+		if( endpoint.toLowerCase().compareTo(QanaryConfiguration.endpointKey.toString().toLowerCase()) == 0) {
+			logger.warn("assumed test execution: endpoint was equal to {}", endpoint.toLowerCase());
+			return new ResultSetMem();
+		}
+		
 		long start = getTime();
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, sparqlQuery);
 		ResultSet resultset = qExe.execSelect();

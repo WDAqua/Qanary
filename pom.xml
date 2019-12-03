@@ -6,7 +6,8 @@
   <version>0.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>qanary-component-archetype</module>
+    <module>qanary_component-archetype</module>
+    <module>qanary_commons</module>
     <module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
     <module>qald-evaluator</module>

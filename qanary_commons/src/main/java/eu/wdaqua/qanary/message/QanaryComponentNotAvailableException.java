@@ -6,7 +6,9 @@ package eu.wdaqua.qanary.message;
  * @author AnBo
  */
 public class QanaryComponentNotAvailableException extends Exception {
-    // Constructor that accepts a message
+	private static final long serialVersionUID = -3926884955403862158L;
+
+	// Constructor that accepts a message
     public QanaryComponentNotAvailableException(String message) {
         super(message);
     }

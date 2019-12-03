@@ -2,8 +2,6 @@ package eu.wdaqua.qanary.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +38,6 @@ public class QanaryEmbeddedQaWebFrontendController {
 	public static final String FRONTENDENDPOINT = "/qa";
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 	private final QanaryConfigurator qanaryConfigurator;
-	private final QanaryQuestionController qanaryQuestionController;
 	private final QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
 
 	/**
@@ -59,7 +56,6 @@ public class QanaryEmbeddedQaWebFrontendController {
 			final QanaryQuestionController qanaryQuestionController,
 			final QanaryQuestionAnsweringController qanaryQuestionAnsweringController) {
 		this.qanaryConfigurator = qanaryConfigurator;
-		this.qanaryQuestionController = qanaryQuestionController;
 		this.qanaryQuestionAnsweringController = qanaryQuestionAnsweringController;
 
 		logger.warn("default question answering system will run with the following components: {}",
@@ -105,7 +101,8 @@ public class QanaryEmbeddedQaWebFrontendController {
 		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
 		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
 
-		QanaryQuestion myQanaryQuestion = new QanaryQuestion(run.getInGraph(),qanaryConfigurator);
+		@SuppressWarnings("rawtypes")
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(run.getInGraph(),qanaryConfigurator);
 
 		// retrieve the answers as JSON object from the triplestore
 		String jsonAnswer = myQanaryQuestion.getJsonResult();
@@ -114,10 +111,8 @@ public class QanaryEmbeddedQaWebFrontendController {
 
 		// check for results and compute the information for the model
 		if (jsonAnswer.equals("") == false && sparqlAnswer.equals("") == false) {
-			// Parse the JSON result set using Jena
-			ResultSetFactory factory = new ResultSetFactory();
 			InputStream in = new ByteArrayInputStream(jsonAnswer.getBytes());
-			ResultSet result = factory.fromJSON(in);
+			ResultSet result = ResultSetFactory.fromJSON(in);
 			List<String> var = result.getResultVars();
 			List<String> list = new ArrayList<>();
 			while (result.hasNext()) {

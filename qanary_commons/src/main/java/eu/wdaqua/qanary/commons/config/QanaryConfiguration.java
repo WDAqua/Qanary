@@ -12,9 +12,9 @@ public class QanaryConfiguration {
     public static final String questionRawDataUrlSuffix = "/raw";
     public static final String questionRawDataProperyName = "raw";
 
-    public static final String endpointKey = "http://qanary/#endpoint";
-    public static final String inGraphKey = "http://qanary/#inGraph";
-    public static final String outGraphKey = "http://qanary/#outGraph";
+    public static final String endpointKey = "urn:qanary#endpoint";
+    public static final String inGraphKey = "urn:qanary#inGraph";
+    public static final String outGraphKey = "urn:qanary#outGraph";
 
     private static URI serviceUri;
     private static URI hostUri;

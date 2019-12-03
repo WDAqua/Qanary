@@ -39,9 +39,10 @@ public class QanaryFeedbackController {
     }
 
     /**
-     * recives a message and stores it locally
+     * Receives a message and stores it locally
      */
-    @RequestMapping(value = "/feedback", method = RequestMethod.POST, produces = "application/json")
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/feedback", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> startquestionansweringwithtextquestion(
         @RequestParam(value = "question", required = true) final String question,

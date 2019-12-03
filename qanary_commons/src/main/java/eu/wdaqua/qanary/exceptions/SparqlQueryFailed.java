@@ -1,7 +1,5 @@
 package eu.wdaqua.qanary.exceptions;
 
-import java.net.URI;
-
 @SuppressWarnings("serial")
 public class SparqlQueryFailed extends Exception {
 

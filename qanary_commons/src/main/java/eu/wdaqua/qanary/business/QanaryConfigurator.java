@@ -2,9 +2,7 @@ package eu.wdaqua.qanary.business;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -18,15 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import de.codecentric.boot.admin.model.Application;
-
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
-import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 
 /**
@@ -38,17 +30,16 @@ public class QanaryConfigurator {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryConfigurator.class);
 	private final RestTemplate restTemplate;
-	private List<QanaryComponent> components;
 	// default configuration defined in the currently used in application
 	// context (e.g., defined in application.properties)
 	private List<String> defaultComponentNames;
 
-	private final Map<String, Integer> componentsToIndexMap;
 	private final int port;
 	private final String host;
 	private final URI endpoint;
-	
-	// parameter required to create the correct triplestore endpoint, particularly due to Stardog v5+
+
+	// parameter required to create the correct triplestore endpoint, particularly
+	// due to Stardog v5+
 	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
 
 	public QanaryConfigurator( //
@@ -60,30 +51,27 @@ public class QanaryConfigurator {
 			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier //
 	) {
 		this.restTemplate = restTemplate;
-		this.components = Lists.newArrayList();
-		this.componentsToIndexMap = Maps.newHashMap();
-
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
-
 		this.setDefaultComponentNames(defaultComponents);
 		this.port = serverport;
 		this.host = serverhost;
 		this.endpoint = triplestoreendpoint;
-		
+
 		logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
 	}
 
 	/**
-	 * call the provided components sequentially, as demanded by the provided QanaryMessage
+	 * call the provided components sequentially, as demanded by the provided
+	 * QanaryMessage
 	 */
-	private QanaryQuestionAnsweringFinished callServices( //
+	public QanaryQuestionAnsweringFinished callServices( //
 			List<QanaryComponent> myComponents, //
 			QanaryMessage message //
 	) throws QanaryExceptionServiceCallNotOk {
 		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
 		result.startQuestionAnswering();
 
-		logger.info("QanaryMessage for current process: {}", message.asJsonString());
+		logger.info("QanaryMessage for current process: {} (components={})", message.asJsonString(), myComponents);
 
 		// run the process for all demanded components
 		for (QanaryComponent component : myComponents) {
@@ -101,10 +89,10 @@ public class QanaryConfigurator {
 			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
 
 			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
-			
+
 			long start = QanaryUtils.getTime();
 			try {
-				
+
 				ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange( //
 						myURI, HttpMethod.POST, request, QanaryMessage.class);
 
@@ -114,98 +102,23 @@ public class QanaryConfigurator {
 					logger.debug("received: {}", message);
 				} else {
 					logger.error("call to {} return HTTP {}", component.getName(), responseEntity.getStatusCode());
-					throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start, responseEntity.getStatusCode());
+					throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
+							responseEntity.getStatusCode());
 				}
 			} catch (QanaryExceptionServiceCallNotOk e) {
 				logger.error("called {} catched {}", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("called {} catched {} -> throws {}", // 
+				logger.error("called {} catched {} -> throws {}", //
 						component.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
-				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start, e.getMessage(), ExceptionUtils.getStackTrace(e));
+				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
+						e.getMessage(), ExceptionUtils.getStackTrace(e));
 			}
-
 
 		}
 		result.endQuestionAnswering();
 		logger.info("callServices finished: {}", result);
 		return result;
-	}
-
-	/**
-	 * create a list of components from the
-	 */
-	private List<QanaryComponent> getComponentsByName(List<String> myComponentNames)
-			throws QanaryComponentNotAvailableException {
-		// check if the list contains valid IDs of components if not all are
-		// available throw an exception
-		List<QanaryComponent> qanaryComponents = new LinkedList<>();
-		for (String componentName : myComponentNames) {
-			try {
-				QanaryComponent qanaryComponent = this.getComponent(componentName);
-				if (qanaryComponent == null) {
-					throw new NullPointerException("qanaryComponent was null.");
-				}
-				qanaryComponents.add(qanaryComponent);
-			} catch (Exception e) {
-				throw new QanaryComponentNotAvailableException(componentName
-						+ " (currently) not available. Please check the name and that the component is still online.\n"
-						+ e + "\nplease take only one of the following list: " + this.getComponentNames().toString());
-			}
-		}
-
-		return qanaryComponents;
-	}
-
-	/**
-	 * call of all components (identified by String)
-	 */
-	public QanaryQuestionAnsweringFinished callServicesByName(List<String> myComponentNames, QanaryMessage message)
-			throws QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
-
-		List<QanaryComponent> qanaryComponents = this.getComponentsByName(myComponentNames);
-		return this.callServices(qanaryComponents, message);
-	}
-
-	public void addComponent(Application application) {
-		logger.info("addComponent: id={} name={}", application.getId(), application.getName());
-		if (componentsToIndexMap.containsKey(application.getName())) {
-			Integer index = Math.min(components.size(), componentsToIndexMap.get(application.getName()));
-			components.add(index, new QanaryComponent(application, true));
-		}
-		components.add(new QanaryComponent(application, false));
-		logger.info("availableComponents: {}", this.getComponentNames());
-	}
-
-	/**
-	 * delivers a list of all components currently been available in the
-	 * pipeline
-	 */
-	public List<String> getComponentNames() {
-		List<String> componentsNames = new LinkedList<>();
-
-		for (QanaryComponent qanaryComponent : this.components) {
-			componentsNames.add(qanaryComponent.getName());
-		}
-
-		return componentsNames;
-	}
-
-	/**
-	 * get the component for a given name
-	 */
-	private QanaryComponent getComponent(String componentName) {
-		for (QanaryComponent qanaryComponent : this.components) {
-			if (qanaryComponent.getName().compareTo(componentName) == 0) {
-				logger.info("found component: " + componentName);
-				return qanaryComponent;
-			}
-		}
-		return null;
-	}
-
-	public void removeComponent(Application application) {
-		components.removeIf(qanaryComponent -> qanaryComponent.getName().equals(application.getName()));
 	}
 
 	public int getPort() {
@@ -219,15 +132,14 @@ public class QanaryConfigurator {
 	public URI getEndpoint() {
 		return this.endpoint;
 	}
-	
-	public URI getAskEndpoint() throws URISyntaxException{
-		return myTriplestoreEndpointIdentifier.getAskEndpoint(this.endpoint);		
+
+	public URI getAskEndpoint() throws URISyntaxException {
+		return myTriplestoreEndpointIdentifier.getAskEndpoint(this.endpoint);
 	}
 
-	public URI getLoadEndpoint() throws URISyntaxException{
-		return myTriplestoreEndpointIdentifier.getLoadEndpoint(this.endpoint);		
+	public URI getLoadEndpoint() throws URISyntaxException {
+		return myTriplestoreEndpointIdentifier.getLoadEndpoint(this.endpoint);
 	}
-	
 
 	/**
 	 * get the predefined component names
