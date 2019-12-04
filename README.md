@@ -104,7 +104,7 @@ For additional publication we suggest to [follow this list of publications](http
 
  * Build your project using maven: `mvn clean install` (note: you might also add `-Ddockerfile.skip=false` to express that Docker images are created)
    * The _install_ goal will compile, test, and package your project’s code and then copy it into the local dependency repository. Additionally, it will generate docker images for each component that will be stored in your local repository.
-
+   
  * Start the Qanary Docker containers.
    
  * Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
