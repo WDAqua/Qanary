@@ -101,15 +101,15 @@ public class QanaryConfigurator {
 					message = responseEntity.getBody();
 					logger.debug("received: {}", message);
 				} else {
-					logger.error("call to {} return HTTP {}", component.getName(), responseEntity.getStatusCode());
+					logger.error("call to \"{}\" return HTTP {}", component.getName(), responseEntity.getStatusCode());
 					throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
 							responseEntity.getStatusCode());
 				}
 			} catch (QanaryExceptionServiceCallNotOk e) {
-				logger.error("called {} catched {}", component.getName(), e.getMessage());
+				logger.error("called \"{}\" catched {}", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("called {} catched {} -> throws {}", //
+				logger.error("called \"{}\" catched {} -> throws {}", //
 						component.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
 				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
 						e.getMessage(), ExceptionUtils.getStackTrace(e));

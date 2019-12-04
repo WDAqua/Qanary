@@ -36,7 +36,14 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 				logger.info("Instance {} ({}) is {}", instance.getRegistration().getName(), instance.getId(), status);
 				// only show components as available that are actually UP
 				if (status.toUpperCase().compareTo("UP") == 0) {
-					availableComponents.put(instanceName, instance);
+					if (instance.getRegistration().getServiceUrl() != null) {
+						logger.debug("registering component \"{}\" has URL ({})", instanceName,
+								instance.getRegistration().getServiceUrl());
+						availableComponents.put(instanceName, instance);
+					} else {
+						logger.warn("registering component \"{}\" has no callable URL ({})", instanceName,
+								instance.getRegistration().getServiceUrl());
+					}
 				} else {
 					availableComponents.put(instanceName, null);
 				}
@@ -66,6 +73,9 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 			logger.warn("getAvailableComponentsFromNames: found 0 components");
 		} else {
 			logger.info("getAvailableComponentsFromNames: found {} components", components.size());
+			for (QanaryComponent myQanaryComponent : components) {
+				logger.debug("{}: url={}", myQanaryComponent.getName(), myQanaryComponent.getUrl());
+			}
 		}
 
 		return components;

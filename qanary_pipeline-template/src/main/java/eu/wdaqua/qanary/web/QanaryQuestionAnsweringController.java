@@ -271,7 +271,7 @@ public class QanaryQuestionAnsweringController {
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
 				componentsToBeCalled, language, targetdata);
-		//retrive text representation, SPARQL and JSON result
+		// retrieve text representation, SPARQL and JSON result
 		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(),qanaryConfigurator);
 
 		JSONObject obj = new JSONObject();
@@ -392,7 +392,7 @@ public class QanaryQuestionAnsweringController {
 			List<QanaryComponent> components = this.myComponentNotifier.getAvailableComponentsFromNames(componentsToBeCalled);
 			qanaryConfigurator.callServices(components, myQanaryMessage);
 		} else {
-			logger.info("Executing components is not done, as the componentlist parameter was empty.");
+			logger.warn("Executing components is not done, as the componentlist parameter was empty.");
 		}
 
 		QanaryQuestionAnsweringRun myRun = new QanaryQuestionAnsweringRun(question, myQanaryMessage.getEndpoint(),

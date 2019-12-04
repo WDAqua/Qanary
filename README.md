@@ -78,15 +78,17 @@ For additional publication we suggest to [follow this list of publications](http
  5. Switch to Qanary directoy: `cd Qanary`
  
  6. Build the components (creating Docker images is skipped):
-   ```
+```
    mvn clean install -Ddockerfile.skip=true
-   ```
+```
  
  7. Run the pipeline component:
-   ```
+```
    cd qanary_pipeline-template/target/
-   java -jar target/qa.pipeline-<version>.jar
-   ```
+   java -jar target/qa.pipeline-<version>.jar --qanary.triplestore=ENDPOINT-OF-YOUR-TRIPLESTORE
+```
+
+   * while using Stardog on your local system using the default configuration you might use as triplestore endpoint: `http://admin:admin@localhost:5820/YOUR-DATABASE-NAME` (of course, you have to create a database by yourself)
   
  8. After running corresponding component JAR files, you can see Spring Boot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
    * To run components you need to build and run Qanary components, see the components repository for details: [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components)
