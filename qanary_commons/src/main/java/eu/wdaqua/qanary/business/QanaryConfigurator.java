@@ -109,8 +109,8 @@ public class QanaryConfigurator {
 				logger.error("called \"{}\" catched {}", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("called \"{}\" catched {} -> throws {}", //
-						component.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+				logger.error("called {} catched {} (using URI {}) -> throws {}", //
+						component.getName(), e.getMessage(), myURI, ExceptionUtils.getStackTrace(e));
 				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
 						e.getMessage(), ExceptionUtils.getStackTrace(e));
 			}
