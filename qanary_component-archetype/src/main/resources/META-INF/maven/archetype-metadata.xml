@@ -9,12 +9,6 @@
   </requiredProperties>
   <fileSets>
     <fileSet filtered="true" packaged="true" encoding="UTF-8">
-      <directory>docker</directory>
-      <includes>
-        <include>**/Dockerfile</include>
-      </includes>
-    </fileSet>
-    <fileSet filtered="true" packaged="true" encoding="UTF-8">
       <directory>src/main/java</directory>
       <includes>
         <include>**/*.java</include>
@@ -25,6 +19,7 @@
       <includes>
         <include>**/*.html</include>
         <include>**/*.properties</include>
+        <include>**/*.txt</include>
       </includes>
     </fileSet>
     <fileSet filtered="true" packaged="true" encoding="UTF-8">
@@ -32,6 +27,13 @@
       <includes>
         <include>**/*.java</include>
       </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory></directory>
+        <includes>
+            <include>.gitignore</include>
+            <include>Dockerfile</include>
+        </includes>
     </fileSet>
   </fileSets>
 </archetype-descriptor>

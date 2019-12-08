@@ -5,7 +5,7 @@
 
     <groupId>eu.wdaqua.qanary.component</groupId>
     <artifactId>qa.qanarycomponent-archetype</artifactId>
-    <version>0.1.2</version>
+    <version>1.0.0</version>
     <packaging>maven-archetype</packaging>
 
     <name>qanary-component-archetype</name>
@@ -29,6 +29,6 @@
         </pluginManagement>
     </build>
 
-    <description>Archetype for qanary component</description>
+    <description>Archetype for a Qanary component written using the Spring Boot framework</description>
     <url>https://github.com/WDAqua/Qanary</url>
 </project>
