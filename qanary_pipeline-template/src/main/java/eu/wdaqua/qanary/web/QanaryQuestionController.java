@@ -50,6 +50,8 @@ public class QanaryQuestionController {
 	private String host;
 	@Value("${server.port}")
 	private String port;
+	@Value("${qanary.questions.directory:/tmp/questions}")
+    private String directoryForStoringQuestionRawData;
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
 
@@ -59,8 +61,6 @@ public class QanaryQuestionController {
         response.setHeader("Access-Control-Allow-Origin", "*");
     }
 
-    // TODO: define directory in config
-    private final String directoryForStoringQuestionRawData = "/tmp/questions";
 
     /**
      * inject QanaryConfigurator
