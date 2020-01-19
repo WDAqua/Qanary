@@ -51,7 +51,7 @@ public class QanaryQuestionController {
 	@Value("${server.port}")
 	private String port;
 	@Value("${qanary.questions.directory:/tmp/questions}")
-    private String directoryForStoringQuestionRawData;
+    private String directoryForStoringQuestionRawData = System.getProperty("user.dir");
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
 
@@ -134,7 +134,7 @@ public class QanaryQuestionController {
     public ResponseEntity<?> createAudioQuestion(
             @RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
-        logger.info("new audio file recived: " + file.getName());
+        logger.info("new audio file received: {}", file.getName());
         // URI uriOfQuestion;
         QanaryQuestionCreated responseMessage;
         try {
@@ -181,7 +181,7 @@ public class QanaryQuestionController {
         }
 
         final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
-        logger.info("uriOfQuestion: " + uriOfQuestion);
+        logger.info("uriOfQuestion: {}", uriOfQuestion);
 
         return new QanaryQuestionCreated(filename, uriOfQuestion);
     }
