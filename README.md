@@ -63,7 +63,10 @@ For additional publication we suggest to [follow this list of publications](http
 
  * [Spring Boot](http://projects.spring.io/spring-boot/) project
 
+
 ## How to run the code
+
+How to build a complete *tiny Question Answering system* driven by Qanary is described [here](https://github.com/WDAqua/Qanary-question-answering-components/blob/master/README.md#build-and-run-a-minimal-set-of-components).
 
 ### Without creating Docker images 
 
@@ -96,7 +99,7 @@ For additional publication we suggest to [follow this list of publications](http
  9. Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
 
 
-### Inlcuding the creation of Docker instances
+### Including the creation of Docker instances
 
  * Follow the steps described in the previous section.
 
