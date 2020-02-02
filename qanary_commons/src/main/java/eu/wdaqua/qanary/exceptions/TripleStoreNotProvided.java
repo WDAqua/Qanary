@@ -13,4 +13,12 @@ public class TripleStoreNotProvided extends Exception {
 				+ " (check application.properties or command line parameters)." //
 		);
 	}
+
+	public TripleStoreNotProvided(String triplestore) {
+		super("" //
+				+ "No triplestore provided: " //
+				+ (triplestore == null ? "null" : triplestore) //
+				+ " (check application.properties or command line parameters)." //
+		);		
+	}
 }
