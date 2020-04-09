@@ -200,6 +200,10 @@
                 		$("#inGraph").html(response.inGraph);
                 		$("#outGraph").html(response.outGraph);
                     	$("#results").show();
+                	}).error(function (jqXHR) {
+                        $("#submit").attr("disabled", false); // reactivate button
+                        $("#submit").removeClass("inprogress");
+                        alert("The process failed.\nPlease check your implementation!");
                 	});
                 });
         });
