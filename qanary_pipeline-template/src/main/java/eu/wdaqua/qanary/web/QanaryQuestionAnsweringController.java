@@ -31,6 +31,7 @@ import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
+import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
@@ -50,22 +51,30 @@ public class QanaryQuestionAnsweringController {
 	private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryQuestionController qanaryQuestionController;
 	private final QanaryComponentRegistrationChangeNotifier myComponentNotifier;
+	private final QanaryPipelineConfiguration myQanaryPipelineConfiguration;
+	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
 
-        //Set this to allow browser requests from other websites
-        @ModelAttribute
-        public void setVaryResponseHeader(HttpServletResponse response) {
-                response.setHeader("Access-Control-Allow-Origin", "*");
-        }
+	// Set this to allow browser requests from other websites
+	@ModelAttribute
+	public void setVaryResponseHeader(HttpServletResponse response) {
+		response.setHeader("Access-Control-Allow-Origin", "*");
+	}
 
 	/**
 	 * inject QanaryConfigurator
 	 */
 	@Autowired
-	public QanaryQuestionAnsweringController(final QanaryConfigurator qanaryConfigurator,
-			final QanaryQuestionController qanaryQuestionController, final  QanaryComponentRegistrationChangeNotifier myComponentNotifier) {
+	public QanaryQuestionAnsweringController( //
+			final QanaryConfigurator qanaryConfigurator, //
+			final QanaryQuestionController qanaryQuestionController, //
+			final QanaryComponentRegistrationChangeNotifier myComponentNotifier, //
+			final QanaryPipelineConfiguration myQanaryPipelineConfiguration,
+			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier ) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
 		this.myComponentNotifier = myComponentNotifier;
+		this.myQanaryPipelineConfiguration = myQanaryPipelineConfiguration;
+		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 	}
 
 	/**
@@ -75,6 +84,22 @@ public class QanaryQuestionAnsweringController {
 	public List<String> componentList() {
 		logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
 		return myComponentNotifier.getAvailableComponentNames();
+	}
+
+	/**
+	 * expose the model with the Qanary triplestore endpoint
+	 * @throws URISyntaxException 
+	 * @throws TripleStoreNotProvided 
+	 */
+	@ModelAttribute("triplestoreEndpointOfCurrentQanaryPipeline")
+	public String triplestoreEndpointOfCurrentQanaryPipeline() throws TripleStoreNotProvided {		
+		try {
+			String selectEndpoint = this.myTriplestoreEndpointIdentifier.getSelectEndpoint(this.myQanaryPipelineConfiguration.getTriplestoreAsURI()).toString();
+			logger.info("set available endpoint in frontend to {}.", selectEndpoint);
+			return selectEndpoint;
+		} catch (Exception e) {
+			throw new TripleStoreNotProvided(this.myQanaryPipelineConfiguration.getTriplestore());
+		} 
 	}
 
 	/**
@@ -103,7 +128,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
-					throws Exception {
+			throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
@@ -138,7 +163,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
-					throws Exception {
+			throws Exception {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
@@ -223,20 +248,20 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ResponseEntity<?> createQuestionAnswering( //
 			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
-		  	@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
+			@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
 			@RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
-					throws Exception {
+			throws Exception {
 
 		// create a new question answering system
 		logger.info(
 				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
 				textquestion, componentsToBeCalled, language, targetdata);
 
-		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
-				componentsToBeCalled, language, targetdata);
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
+				audioquestion, componentsToBeCalled, language, targetdata);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -256,12 +281,12 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = QUESTIONANSWERINGFULL, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> createQuestionAnsweringFull( //
-													  @RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
-													  @RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
-													  @RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
-													  @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
-													  @RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
-													  @RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
+			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
+			@RequestParam(value = QanaryStandardWebParameters.AUDIOQUESTION, required = false) final MultipartFile audioquestion, //
+			@RequestParam(value = QanaryStandardWebParameters.GRAPH, defaultValue = "", required = false) final URI graph, //
+			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
+			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
+			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata)
 			throws Exception {
 
 		// create a new question answering system
@@ -269,10 +294,10 @@ public class QanaryQuestionAnsweringController {
 				"create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
 				textquestion, componentsToBeCalled, language, targetdata);
 
-		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion, audioquestion,
-				componentsToBeCalled, language, targetdata);
+		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
+				audioquestion, componentsToBeCalled, language, targetdata);
 		// retrieve text representation, SPARQL and JSON result
-		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(),qanaryConfigurator);
+		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(), qanaryConfigurator);
 
 		JSONObject obj = new JSONObject();
 		obj.put("endpoint", myRun.getEndpoint());
@@ -282,7 +307,8 @@ public class QanaryQuestionAnsweringController {
 		JSONArray sparql = new JSONArray();
 		@SuppressWarnings("rawtypes")
 		List<QanaryQuestion.SparqlAnnotation> ss = myQanaryQuestion.getSparqlResults();
-		for (@SuppressWarnings("rawtypes") QanaryQuestion.SparqlAnnotation s : ss){
+		for (@SuppressWarnings("rawtypes")
+		QanaryQuestion.SparqlAnnotation s : ss) {
 			JSONObject o = new JSONObject();
 			o.put("query", s.query);
 			o.put("confidence", s.confidence);
@@ -292,12 +318,12 @@ public class QanaryQuestionAnsweringController {
 		obj.put("sparql", sparql);
 		obj.put("json", myQanaryQuestion.getJsonResult());
 
-		return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);
+		return new ResponseEntity<JSONObject>(obj, HttpStatus.OK);
 	}
 
 	/**
-	 * helper for creating or updating a Question Answering system (used for
-	 * POST and PUT requests) for a given textual question
+	 * helper for creating or updating a Question Answering system (used for POST
+	 * and PUT requests) for a given textual question
 	 * 
 	 * @param graph
 	 * @param question
@@ -308,7 +334,8 @@ public class QanaryQuestionAnsweringController {
 	 * @throws Exception
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
-				MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language, List<String> targetdata) throws Exception {
+			MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language,
+			List<String> targetdata) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with \"{}\"", question,
@@ -326,7 +353,7 @@ public class QanaryQuestionAnsweringController {
 				qanaryQuestion = new QanaryQuestion<String>(graph, qanaryConfigurator);
 			}
 		} else {
-			if (questionaudio == null){
+			if (questionaudio == null) {
 				// store the question on the current server
 				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
 
@@ -335,13 +362,13 @@ public class QanaryQuestionAnsweringController {
 						qanaryConfigurator);
 			} else {
 				// store the question on the current server
-				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeAudioQuestion(questionaudio);
+				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController
+						.storeAudioQuestion(questionaudio);
 
 				// create question
-				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(),
-						qanaryConfigurator);
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator);
 
-				//add annotation saying that it is an audio question
+				// add annotation saying that it is an audio question
 				qanaryQuestion.putAnnotationOfAudioRepresentation();
 
 			}
@@ -385,11 +412,12 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
 			QanaryMessage myQanaryMessage)
-					throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
+			throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
 		// execute synchronous calls to all components with the same message
 		// if no component is passed nothing is happening
 		if (componentsToBeCalled.isEmpty() == false) {
-			List<QanaryComponent> components = this.myComponentNotifier.getAvailableComponentsFromNames(componentsToBeCalled);
+			List<QanaryComponent> components = this.myComponentNotifier
+					.getAvailableComponentsFromNames(componentsToBeCalled);
 			qanaryConfigurator.callServices(components, myQanaryMessage);
 		} else {
 			logger.warn("Executing components is not done, as the componentlist parameter was empty.");

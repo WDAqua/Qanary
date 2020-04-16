@@ -1,16 +1,13 @@
 package eu.wdaqua.qanary;
 
-import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-// import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +18,7 @@ import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
+import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 
 @SpringBootApplication
 @de.codecentric.boot.admin.server.config.EnableAdminServer
@@ -29,41 +27,45 @@ import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 @ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web" })
 public class QanaryPipeline {
 
-	@Autowired
-	public QanaryConfigurator configurator;
+	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
 
 	@Autowired
 	public QanaryComponentRegistrationChangeNotifier myComponentRegistrationChangeNotifier;
+	
+	@Autowired
+	public QanaryPipelineConfiguration qanaryPipelineConfiguration;  
 
 	public static void main(final String[] args) {
-		SpringApplication.run(QanaryPipeline.class, args);
+		// define usage of configuration file 'application.local.properties'
+		new SpringApplicationBuilder(QanaryPipeline.class).properties("spring.config.name:application,application.local").run(args);
 	}
 
 	@Bean
-	public QanaryComponentRegistrationChangeNotifier getComponentRegistrationChangeNotifier(InstanceRepository repository) {
+	ApplicationRunner applicationRunner() {
+		return (args) -> {
+			logger.info("host and port: {}:{}", this.qanaryPipelineConfiguration.getHost(), this.qanaryPipelineConfiguration.getPort());
+			logger.info("triplestore endpoint: {}", this.qanaryPipelineConfiguration.getTriplestore());
+			logger.info("questions directory: {}", this.qanaryPipelineConfiguration.getQuestionsDirectory());
+		};
+	}
+
+	@Bean
+	public QanaryComponentRegistrationChangeNotifier getComponentRegistrationChangeNotifier(
+			InstanceRepository repository) {
 		return new QanaryComponentRegistrationChangeNotifier(repository);
 	}
 
 	@Bean
 	public QanaryConfigurator configurator( //
-			@Value("#{'${qanary.components}'.split(',')}") final List<String> availablecomponents, //
-			@Value("${server.host}") @NotNull final String serverhost, //
-			@Value("${server.port}") @NotNull final int serverport, //
-			@Value("${qanary.triplestore}") @NotNull final URI triplestoreendpoint, //
 			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
 			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier //
 	) throws TripleStoreNotProvided {
-
-		if (triplestoreendpoint == null || triplestoreendpoint.toASCIIString().compareTo("") == 0) {
-			throw new TripleStoreNotProvided(triplestoreendpoint);
-		}
-
 		return new QanaryConfigurator( //
 				restTemplate(), //
-				availablecomponents, // from config
-				serverhost, // from config
-				serverport, // from config
-				triplestoreendpoint, // from config
+				qanaryPipelineConfiguration.getPredefinedComponents(), // from config
+				qanaryPipelineConfiguration.getHost(), // from config
+				qanaryPipelineConfiguration.getPort(), // from config
+				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
 				myTriplestoreEndpointIdentifier //
 		);
 	}
@@ -74,11 +76,10 @@ public class QanaryPipeline {
 	}
 
 	@Bean
-	public Map<String, Integer> componentsToIndexMap(
-			@Value("'${qanary.components}'.split(',')") final List<String> components) {
+	public Map<String, Integer> componentsToIndexMap() {
 		int i = 0;
 		final Map<String, Integer> componentsToIndexMap = Maps.newHashMap();
-		for (final String component : components) {
+		for (final String component : qanaryPipelineConfiguration.getPredefinedComponents()) {
 			componentsToIndexMap.put(component, i);
 			i++;
 		}

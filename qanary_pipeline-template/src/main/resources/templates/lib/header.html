@@ -30,14 +30,22 @@
 	    margin-top: 2ex;
     	margin-bottom: 1ex;
     }
+    h3 {
+    	font-size: 11pt;
+	    font-weight: 600; 
+	    margin-top: 2ex;
+    	margin-bottom: 1ex;
+    }
     .applicationheader { 
         background-color: #34302D; 
         color:#f1f1f1; 
         padding:0.25ex; 
     }
     header { background-color: #34302D; }
-    form { margin-left: 1ex; }
-        input[type=text] { 
+    form, #SPARQLqueryeditorblock { 
+    	margin-left: 1ex; 
+    }
+    input[type=text] { 
                 width:50%; 
                 display:block; 
                 margin-bottom:2ex; 
@@ -106,6 +114,14 @@
     button:disabled.inprogress, button[disabled].inprogress {
 		cursor:progress;
 	}
+	button.helpers { 
+        font: normal normal normal 12px/1 FontAwesome; 
+        color: #000;
+        border: 1px solid #999; 
+        background-color: #CCC; 
+		margin: 0.1ex;
+		padding: 0.5ex;	
+    }   
     footer {
     	border-top: 1px solid #999;
     	margin-top: 7ex;
@@ -125,7 +141,7 @@
     footer h3 {
     	font-size:90%;
     }
-    #results {
+    #results, #SPARQLqueryeditorblock {
     	border-top: 1px dashed #00bc7c;
     	margin: 1ex;
     	margin-top: 2ex;
@@ -148,6 +164,9 @@
     #results tr.header {
     	background-color: #000000;
     }
+    .yasqe .yasqe_buttons .yasqe_queryButton .queryIcon svg {
+    	fill: #00bc7c
+    }
     </style>
     <script>
        	// TODO: move minimumNumberOfSelectedComponents to config
@@ -169,8 +188,12 @@
                         }                       
                     	checkInputAndOptionallyDisableSubmitButton("#submit");
                 });
-                // check the value of the question input, might disable the submit button
+                // check the value of the question input -> might disable the submit button
                 $("#question").focusout( function(){
+                	checkInputAndOptionallyDisableSubmitButton("#submit");
+                });
+                // check the value of the question input, while typing -> might disable the submit button
+                $("#question").keypress( function(){
                 	checkInputAndOptionallyDisableSubmitButton("#submit");
                 });
                 // check the selections within the component list
@@ -185,7 +208,7 @@
                 	event.preventDefault(); // prevent default action 
                 	$("#submit").attr("disabled", true); // disable button
                 	$("#submit").addClass("inprogress"); // change cursor
-                	$("#results").hide(); // hide last results
+                	$("#results").slideUp(500); // hide last results with animation
                 	
                 	$.ajax({
                 		url : $(this).attr("action"), // get action url
@@ -199,7 +222,7 @@
                 		$("#questionuri").html(response.question);
                 		$("#inGraph").html(response.inGraph);
                 		$("#outGraph").html(response.outGraph);
-                    	$("#results").show();
+                    	$("#results").slideDown("fast"); // show results with animation
                 	});
                 });
         });

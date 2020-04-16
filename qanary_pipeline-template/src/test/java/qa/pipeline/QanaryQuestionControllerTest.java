@@ -1,6 +1,5 @@
 package qa.pipeline;
 
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -9,17 +8,25 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.multipart.MultipartFile;
 
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
+import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 import eu.wdaqua.qanary.web.QanaryQuestionController;
 
-public class QanaryQuestionControllerTest {
+@ExtendWith(SpringExtension.class)
+@WebAppConfiguration
+class QanaryQuestionControllerTest {
+	@Autowired
+	public Environment environment;
 
 	/**
 	 * test if a text question (string) is written correctly
@@ -29,7 +36,8 @@ public class QanaryQuestionControllerTest {
 	@Test
 	public void testCreateTextQuestion() throws IOException {
 
-		QanaryQuestionController qanaryQuestionController = new QanaryQuestionController(null);
+		QanaryQuestionController qanaryQuestionController = new QanaryQuestionController(null,
+				new QanaryPipelineConfiguration(this.environment));
 
 		String testquestion = "foo bar?";
 
@@ -37,31 +45,33 @@ public class QanaryQuestionControllerTest {
 		ResponseEntity<QanaryQuestionCreated> response = (ResponseEntity<QanaryQuestionCreated>) qanaryQuestionController
 				.createQuestion(testquestion);
 
-		FileSystemResource returnedquestion = qanaryQuestionController.getQuestionRawData(response.getBody().getQuestionID());
+		FileSystemResource returnedquestion = qanaryQuestionController
+				.getQuestionRawData(response.getBody().getQuestionID());
 		assertTrue(returnedquestion.contentLength() == testquestion.length());
 	}
 
 	@Test
 	public void testCreateAudioQuestion() throws IOException {
 
-		QanaryQuestionController qanaryQuestionController = new QanaryQuestionController(null);
+		QanaryQuestionController qanaryQuestionController = new QanaryQuestionController(null,
+				new QanaryPipelineConfiguration(this.environment));
+		// FileSystemResource testquestion = new
+		// FileSystemResource("src/test/resources/bill_gates-TED.mp3");
 
-        //FileSystemResource testquestion = new FileSystemResource("src/test/resources/bill_gates-TED.mp3");
+		File file = new File("src/test/resources/bill_gates-TED.mp3");
+		FileInputStream input = new FileInputStream(file);
+		MultipartFile testquestion = new MockMultipartFile("file", file.getName(), "text/plain",
+				IOUtils.toByteArray(input));
 
-        File file = new File("src/test/resources/bill_gates-TED.mp3");
-        FileInputStream input = new FileInputStream(file);
-        MultipartFile testquestion = new MockMultipartFile("file",
-                file.getName(), "text/plain", IOUtils.toByteArray(input));
-
-
-        //MultipartFile testquestion = new MockMultipartFile("src/test/resources/bill_gates-TED.mp3");
+		// MultipartFile testquestion = new
+		// MockMultipartFile("src/test/resources/bill_gates-TED.mp3");
 
 		@SuppressWarnings("unchecked")
 		ResponseEntity<QanaryQuestionCreated> response = (ResponseEntity<QanaryQuestionCreated>) qanaryQuestionController
 				.createAudioQuestion(testquestion);
 
-		FileSystemResource returnedquestion = qanaryQuestionController.getQuestionRawData(response.getBody().getQuestionID());
+		FileSystemResource returnedquestion = qanaryQuestionController
+				.getQuestionRawData(response.getBody().getQuestionID());
 		assertTrue(returnedquestion.contentLength() == file.length());
 	}
-	
 }

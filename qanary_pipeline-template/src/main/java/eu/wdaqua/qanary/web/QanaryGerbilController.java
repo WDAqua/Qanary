@@ -45,9 +45,7 @@ public class QanaryGerbilController {
     private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
  
-     @Value("${server.host}")
      private String host;
-     @Value("${server.port}")
      private int port;
      
  
@@ -62,10 +60,13 @@ public class QanaryGerbilController {
      */
     @Autowired
     public QanaryGerbilController(final QanaryConfigurator qanaryConfigurator,
+    							  final QanaryPipelineConfiguration qanaryPipelineConfiguration, 
                                   final QanaryQuestionController qanaryQuestionController,
                                   final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier) {
         this.qanaryConfigurator = qanaryConfigurator;
         this.qanaryComponentRegistrationChangeNotifier = qanaryComponentRegistrationChangeNotifier;
+        this.host = qanaryPipelineConfiguration.getHost();
+        this.port = qanaryPipelineConfiguration.getPort();
     }
 
     /**
@@ -171,6 +172,6 @@ public class QanaryGerbilController {
     	item.put("question", question);
     	questions.add(item);
     	obj.put("questions", questions);
-    	return new ResponseEntity<org.json.simple.JSONObject>(obj,HttpStatus.OK);  	
+    	return new ResponseEntity<JSONObject>(obj,HttpStatus.OK);
 	}
 }
