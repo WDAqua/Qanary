@@ -2,14 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head> 
     <title>Qanary Helper: Start question answering with a new textual question</title> 
- 	<meta th:replace="lib/header"/>        
+ 	<meta th:replace="lib/header"/>
+	<link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+	<script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 </head>
 <body>
         <h1>Start a QA process with a new textual question</h1>
         <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
 		        <div th:replace="lib/reusableforms::textquestioninput"/>
 				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
-                <button id="submit">start Question Answering process provided by Qanary <i class="fa fa-rocket"></i></button>               
+                <button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
         </form>
         <div id="results">
         	<h2>Results (provided from backend as JSON)</h2>
@@ -30,7 +32,235 @@
         			<td>Question URI</td><td id="questionuri" class="resultdata"></td>
         		</tr>
         	</table>
+        	<div class="helpers">
+	        	<h3>Helpers: get typical SPARQL queries for your recent Question Answering process</h3>
+	        	<ul>
+					<li>
+						<button class="helpers" id="fetchOutgraph" onclick="autofillStardogTab()" title="copy the outgraph URI of the current Qanary pipeline process to the query in tab 'find computed query'">Paste the &quot;Qanary question analysis outgraph&quot; URI to the tab &quot;find computed query&quot;</button>
+					</li>
+					<li>
+						<button class="helpers" id="displayQuery" onclick="autofillDBpediaTab()" title="Open a new tab containing the query used to fetch the answer for the recent pipeline process from DBpedia">Add the computed SPARQL query of your Question Answering process as a new SPARQL query tab</button>
+					</li>
+				</ul>
+			</div>
         </div>
+		<!--front end YASGYUI implementation - BETA-->
+        <div id="SPARQLqueryeditorblock">
+        	<h2>SPARQL query editor</h2>
+			<div id="yasgui"></div>
+		</div>
  		<div th:replace="lib/footer"/>        
 </body>
+	<script th:inline="javascript">
+
+		const yasgui = new Yasgui(document.getElementById("yasgui"), {
+				copyEndpointOnNewTab: false,
+				endpointCatalogueOptions: {
+					getData: () => {
+						return [
+							// list of endpoints to be suggested in the endpoint input field
+							{
+								endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf"
+							},
+							{   // default DBpedia SPARQL endpoint
+								endpoint: "https://dbpedia.org/sparql"
+							},
+							{   // default Wikidata SPARQL endpoint
+								endpoint: " https://query.wikidata.org/bigdata/namespace/wdq/sparql"
+							}
+						];
+					},
+					keys: [],
+					renderItem: (data, source) => {
+						const contentDiv = document.createElement("div");
+						contentDiv.innerText = data.value.endpoint;
+						source.appendChild(contentDiv);
+					}
+				}
+			}
+		);
+
+		// define the custom tabs and their values
+		let customTabNames = {
+			"customtab0":{
+				name:"find computed query",
+				query:"" +
+						"# find the SPARQL query that is the result of the current process\n" +
+						"# use Qanary question analysis outgraph from the result table\n" +
+						"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+						"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+						"SELECT *\n" +
+						"#FROM <"+"$questionAnalysisOutgraph$"+">\n" +
+						"WHERE {\n" +
+						"    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
+						"    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
+						"}\n",
+				used:false,
+				requestConfig: {
+					endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+					headers: () => ({
+						Accept:'application/sparql-results+json',
+						Authorization: 'Basic YWRtaW46YWRtaW4=' // Stardog specific
+					}),
+					method: 'GET'
+				},
+			},
+			"customtab1":{
+				name:"DBpedia SELECT",
+				query:"" +
+						"#generic resource SELECT for DBpedia\n" +
+						"PREFIX dbp: <http://dbpedia.org/property/>\n" +
+						"#define more prefixes for specific properties\n" +
+						"SELECT ?sub ?name WHERE {\n" +
+						"  VALUES ?sub {\n" +
+						"     <$resourceURL$>\n" +
+						"  }.\n" +
+						"  ?sub"+" prefix:property "+"?name.\n" +
+						"} ",
+				used:false,
+				requestConfig: {
+					endpoint: 'https://dbpedia.org/sparql',
+					headers: () => ({
+						Accept:'application/sparql-results+json'
+					}),
+					method: 'POST'
+				},
+			}
+		};
+
+		for(var id in customTabNames){
+			name = customTabNames[id].name;
+			requestConfig = customTabNames[id].requestConfig;
+			endpoint = customTabNames[id].endpoint;
+			if(yasgui.getTab(id)==null){
+				console.debug("create: id="+id+", name="+name);
+				yasgui.addTab(
+						false,
+						{...Yasgui.Tab.getDefaults(), name:name, id:id, requestConfig:requestConfig}
+				);
+			}
+		};
+
+		// set the initial values of a tab when it is selected by the user
+		yasgui.on("tabSelect", function(instance,tab){
+			Object.keys(customTabNames).forEach(function(key) {
+				// only reset values if it was not used already -> do not overwrite values defined by the user
+				if (tab in customTabNames && customTabNames[tab].used != true) {
+					console.debug("Set custom query for \""+customTabNames[tab].name+"\".");
+					instance.getTab(tab).yasqe.setValue(customTabNames[tab].query);
+					customTabNames[tab].used = true;
+				} else {
+					console.debug("Selected tab not not changed.");
+				}
+			});
+		});
+
+		function autofillStardogTab(){
+
+			try {
+				let stardogQuery = createStardogQuery();
+				yasgui.getTab("customtab0").yasqe.setValue(stardogQuery);
+			} catch (getQueryException) {
+				alert(getQueryException.toString());
+			}
+		}
+
+		// using the outgraph of the recent pipeline process, fetch the computed query (the answer of your process) from the triplestore
+		function autofillDBpediaTab(){
+			// fill only pre-defined DBpedia tab
+			// let id = customTabNames[1];
+			getDBpediaQueryFromStardog(function (getQueryException, dbpediaQuery) {
+				if(getQueryException==null){
+					// add a new tab containing the computed query
+
+					yasgui.addTab(
+							true, // set as active tab
+							{ ...Yasgui.Tab.getDefaults(), name:"answer query", value:dbpediaQuery}
+					).yasqe.setValue(dbpediaQuery);
+
+				} else {
+					alert(getQueryException.toString());
+				}
+			});
+		}
+
+		// wrap functions for creating and sending Stardog query
+		function getDBpediaQueryFromStardog(callback){
+			console.log("fetching the computed SPARQL query (the answer of your current Question Answering process) from the given triplestore ...");
+
+			try {
+				let stardogQuery = createStardogQuery();
+				console.log("sending query \n" + stardogQuery);
+
+				queryStardog(stardogQuery, function (getQueryException, computedQuery) {
+					callback(getQueryException, computedQuery);
+				});
+			} catch (getQueryException) {
+				callback(getQueryException);
+			}
+		}
+
+		// create a valid query with the computed outgraph of the recent Question Answering process
+		function createStardogQuery() {
+			outgraph = getOutgraph();
+			console.log("recent outgraph: \n" + outgraph);
+			let stardogQuery =
+					"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+					"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+					"SELECT *\n" +
+					"FROM <"+outgraph+">\n" +
+					"WHERE {\n" +
+					"    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
+					"    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
+					"}\n";
+			return stardogQuery;
+		}
+
+		// get the computed Qanary outgraph of the current process
+		// if no outgraph available permeate exception
+		function getOutgraph() {
+			let outgraph = document.getElementById("outGraph").innerHTML;
+			if(outgraph==""){
+				throw new GetQueryException("no outgraph found");
+			}
+			return outgraph;
+		}
+
+		// AJAX request to triplestore endpoint with created query
+		function queryStardog(stardogQuery, callback) {
+			// TODO: configurations might be specific to the Stardog triplestore -> need to be tested on different triplestores  
+			console.log("querying triplestore ...");
+			let triplestoreQueryUrl = /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf";
+			let url = triplestoreQueryUrl + "?reasoning=false&query=" + encodeURIComponent(stardogQuery);
+			$.ajax({
+				type: 'GET',
+				url:url,
+				success: [function (response) {
+					console.log(response);
+					try {
+						let dbpediaQuery = response.results.bindings[0].resultAsSparqlQuery.value.toString();
+						callback(null, dbpediaQuery);
+					} catch (e) {
+						callback(new GetQueryException("no computed SPARQL query (the answer of the recent process) found in the given triplestore " + url));
+					}
+				}],
+				headers:{
+					Accept:'application/sparql-results+json',
+					Authorization: 'Basic YWRtaW46YWRtaW4='
+				},
+			});
+		}
+
+		// custom exception for fetching the computed query
+		function GetQueryException(message){
+			this.message = message;
+			this.name = "Unable to get query"
+		}
+		GetQueryException.prototype.toString = function () {
+			return this.name + ': ' + this.message;
+		}
+		
+	</script>
 </html>
