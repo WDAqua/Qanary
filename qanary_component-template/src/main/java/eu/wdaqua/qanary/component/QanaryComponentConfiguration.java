@@ -21,7 +21,7 @@ public class QanaryComponentConfiguration {
             "spring.boot.admin.client.url"
     };
     //add any required parameters
-    private final String[] requiredParameters = {"spring.application.name","spring.boot.admin.url"};
+    private final String[] requiredParameters = {"server.port","spring.application.name","spring.boot.admin.url"};
 
     public QanaryComponentConfiguration(@Autowired Environment environment){
         this.environment = environment;
