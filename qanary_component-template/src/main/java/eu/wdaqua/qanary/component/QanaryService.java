@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.component;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -19,6 +20,7 @@ public class QanaryService {
     /**
      * default main, can be removed later
      */
+
     public static void main(String[] args) {
         Properties p = new Properties();
         new SpringApplicationBuilder(QanaryService.class).properties(p).run(args);
