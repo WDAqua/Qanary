@@ -44,7 +44,7 @@ public class QanaryPipelineConfiguration {
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = { "qanary.triplestore" };
+	private final String[] requiredParameterNames = { "qanary.triplestore", "server.host", "server.port" };
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
