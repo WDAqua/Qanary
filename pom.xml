@@ -11,6 +11,5 @@
     <module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
     <module>qald-evaluator</module>
-    <module>qanary_component-QB-MyOwnSimpleRealNameOfSuperHero</module>
   </modules>
 </project>
