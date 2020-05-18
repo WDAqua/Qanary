@@ -20,7 +20,7 @@
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 
 			a artifactId not following the naming conventions, (c.f., https://maven.apache.org/guides/mini/guide-naming-conventions.html) -->
-		<docker.image.name>${artifactId}</docker.image.name>
+		<docker.image.name>${artifactId.toLowerCase()}</docker.image.name>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 	</properties>
 
