@@ -16,7 +16,7 @@ The following sub-project are part of the Qanary core frameworks:
 
  * [**Qanary Pipeline**](#qanarypipeline) implementation: a central component where components for question answering systems are connected automatically and can be called by Web UIs
  * Qanary component implementations: components providing wrappers to existing functionality or implement new question answering approaches
-    * a [**Qanary component template**](#qanarycomponenttemplate) implementation: use this to build you own component ([howto]()) as it provides [several features]()
+    * a [**Qanary component template**](#qanarycomponenttemplate) implementation: use this to build you own component ([howto](https://github.com/WDAqua/Qanary/wiki/How-do-I-create-a-new-Qanary-component%3F)) as it provides [several features]()
  * the additional resource [**QALD evaluator**](#qaldevaluator): a client for the Qanary Pipeline evaluating the capabilities w.r.t. named entity recognition and disambiguation of a given Qanary Pipeline configuration with the [QALD benchmark](http://qald.sebastianwalter.org/) (Question Answering over Linked Data) data
     * [**QALD annotated with named entities**](#qaldnerddataset): questions of [QALD](http://qald.sebastianwalter.org/) annotated with named entities containing
 
