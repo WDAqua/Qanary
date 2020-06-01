@@ -1,7 +1,4 @@
-package eu.wdaqua.qanary.qald.evaluator.metrics;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+package eu.wdaqua.qanary.qald.evaluator.evaluation;
 
 import java.util.List;
 
@@ -9,9 +6,6 @@ public class Metrics {
     private Double precision = 0.0;
     private Double recall = 0.0;
     private Double fMeasure = 0.0;
-
-    @Value("${server.uri}")
-    public String uriServer;
 
     public Double getPrecision() {
         return precision;

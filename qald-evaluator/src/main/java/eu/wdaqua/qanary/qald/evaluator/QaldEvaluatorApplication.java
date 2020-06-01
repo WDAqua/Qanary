@@ -1,6 +1,6 @@
 package eu.wdaqua.qanary.qald.evaluator;
 
-import eu.wdaqua.qanary.qald.evaluator.metrics.Metrics;
+import eu.wdaqua.qanary.qald.evaluator.evaluation.Metrics;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
 import org.apache.jena.query.*;
@@ -15,9 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -36,9 +34,17 @@ public class QaldEvaluatorApplication {
     @Value(value = "${qanary.triplestore.stardog5}")
     private boolean stadog5;
 
-    private int maxQuestions = 350;
+    @Value(value = "${qanary.component.ner}")
+    private List<String> nerComponents;
 
-    private void evaluate(String components, int maxQuestionsToBeProcessed) throws UnsupportedEncodingException, IOException {
+    @Value(value = "${qanary.component.ned}")
+    private List<String> nedComponents;
+
+    @Value(value = "${qanary.component.configuration}")
+    private List<String> componentConfigurations;
+
+
+    private void evaluate(String components) throws IOException {
         Double globalPrecision = 0.0;
         Double globalRecall = 0.0;
         Double globalFMeasure = 0.0;
@@ -49,23 +55,19 @@ public class QaldEvaluatorApplication {
 
         FileReader filereader = new FileReader();
 
-        filereader.getQuestion(1).getUris();
-
         // send to pipeline
-        List<QaldQuestion> questions = new LinkedList<>(filereader.getQuestions());
+        for (QaldQuestion question : filereader.getQuestions()) {
+            List<String> expectedAnswers = question.getResourceUrisAsString();
+            logger.info("{}. Question: {}", question.getQaldId(), question.getQuestion());
 
-        for (int i = 0; i < questions.size(); i++) {
-            List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
-            logger.info("{}. Question: {}", questions.get(i).getQaldId(), questions.get(i).getQuestion());
-
-            // questions.get(0).setQuestion("How many goals did Pelé score?");
+            // question.setQuestion("How many goals did Pelé score?");
 
             // Send the question
             RestTemplate restTemplate = new RestTemplate();
             UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(this.uriServer);
 
             MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
-            bodyMap.add("question", questions.get(i).getQuestion());
+            bodyMap.add("question", question.getQuestion());
             bodyMap.add("componentlist[]", components);
             String response = restTemplate.postForObject(service.build().encode().toUri(), bodyMap, String.class);
             logger.info("Response pipline: {}", response);
@@ -74,17 +76,10 @@ public class QaldEvaluatorApplication {
             JSONObject responseJson = new JSONObject(response);
             String endpoint = responseJson.getString("endpoint");
             String namedGraph = responseJson.getString("outGraph");
-            logger.debug("{}. named graph: {}", questions.get(i).getQaldId(), namedGraph);
-            String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-                    + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
-                    + "SELECT ?uri { " //
-                    + "  GRAPH <" + namedGraph + "> { " //
-                    + "    ?a a qa:AnnotationOfInstance . " //
-                    + "    ?a oa:hasBody ?uri " //
-                    + "} }";
-            logger.debug("SPARQL: {}", sparql);
-            ResultSet r = this.selectTripleStore(sparql, endpoint);
+            logger.debug("{}. named graph: {}", question.getQaldId(), namedGraph);
+            ResultSet r = this.selectTripleStore(namedGraph, endpoint);
+
+            //Process answers
             List<String> systemAnswers = new ArrayList<String>();
             while (r.hasNext()) {
                 QuerySolution s = r.next();
@@ -95,7 +90,6 @@ public class QaldEvaluatorApplication {
             }
 
             // Retrieve the expected resources from the SPARQL query
-            //List<String> expectedAnswers = questions.get(i).getResourceUrisAsString();
             for (String expected : expectedAnswers) {
                 logger.info("Expected answers: {} ", expected);
             }
@@ -119,47 +113,35 @@ public class QaldEvaluatorApplication {
         logger.info("Global F-measure={}", globalFMeasure / count);
     }
 
-    private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
+    private ResultSet selectTripleStore(String namedGraph, String endpoint) {
+        String sparqlQuery = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
+                + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+                + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
+                + "SELECT ?uri { " //
+                + "  GRAPH <" + namedGraph + "> { " //
+                + "    ?a a qa:AnnotationOfInstance . " //
+                + "    ?a oa:hasBody ?uri " //
+                + "} }";
+        logger.debug("SPARQL: {}", sparqlQuery);
         Query query = QueryFactory.create(sparqlQuery);
+
         if (this.stadog5) endpoint += "/query";
         QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
         return qExe.execSelect();
     }
 
-    public void process() throws UnsupportedEncodingException, IOException {
+    public void process() throws IOException {
 
-        // TODO:
-
-
-//        QaldEvaluatorApplication app = new QaldEvaluatorApplication();
-
-        List<String> componentConfigurations = new LinkedList<>();
-
-        List<String> nerComponents = new LinkedList<>();
-        List<String> nedComponents = new LinkedList<>();
-
-        // TODO: move to config
-        //nerComponents.add("StanfordNER");
-        //nerComponents.add("DBpediaSpotlightSpotter");
-        //nerComponents.add("FOX");
-
-        // TODO: move to config
-        //nedComponents.add("agdistis");
-        //nedComponents.add("DBpediaSpotlightNED");
-
-        // monolithic configurations (NER+NED)
-        componentConfigurations.add("NED-DBpediaSpotlight");
-        //componentConfigurations.add("luceneLinker");
-
-        // create all configurations
-        for (String ner : nerComponents) {
-            for (String ned : nedComponents) {
-                componentConfigurations.add(ner + "," + ned);
+        // create all NER+NED configurations
+        for (String ner : this.nerComponents) {
+            for (String ned : this.nedComponents) {
+                this.componentConfigurations.add(ner + "," + ned);
             }
         }
 
-        for (String componentConfiguration : componentConfigurations) {
-            this.evaluate(componentConfiguration, this.maxQuestions);
+        for (String componentConfiguration : this.componentConfigurations) {
+            logger.info("Component configuration: {}", componentConfiguration);
+            this.evaluate(componentConfiguration);
         }
     }
 }
