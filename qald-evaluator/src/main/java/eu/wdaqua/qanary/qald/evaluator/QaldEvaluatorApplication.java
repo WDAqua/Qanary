@@ -1,21 +1,14 @@
 package eu.wdaqua.qanary.qald.evaluator;
 
+import eu.wdaqua.qanary.qald.evaluator.metrics.Metrics;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
-
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -32,17 +25,17 @@ import java.util.List;
  *
  * @author AnBo
  */
-@SpringBootApplication
-@Configuration
-@ComponentScan
-@EnableAutoConfiguration
+
+@Component
 public class QaldEvaluatorApplication {
     private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
 
-    String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
+    @Value(value = "${server.uri}")
+    private String uriServer;
 
-    private void process(String components, int maxQuestionsToBeProcessed)
-            throws UnsupportedEncodingException, IOException {
+    private int maxQuestions = 350;
+
+    private void evaluate(String components, int maxQuestionsToBeProcessed) throws UnsupportedEncodingException, IOException {
         Double globalPrecision = 0.0;
         Double globalRecall = 0.0;
         Double globalFMeasure = 0.0;
@@ -50,8 +43,6 @@ public class QaldEvaluatorApplication {
 
         ArrayList<Integer> fullRecall = new ArrayList<Integer>();
         ArrayList<Integer> fullFMeasure = new ArrayList<Integer>();
-
-        String uriServer = "http://localhost:8080/startquestionansweringwithtextquestion";
 
         FileReader filereader = new FileReader();
 
@@ -68,7 +59,7 @@ public class QaldEvaluatorApplication {
 
             // Send the question
             RestTemplate restTemplate = new RestTemplate();
-            UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(uriServer);
+            UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(this.uriServer);
 
             MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
             bodyMap.add("question", questions.get(i).getQuestion());
@@ -90,7 +81,7 @@ public class QaldEvaluatorApplication {
                     + "    ?a oa:hasBody ?uri " //
                     + "} }";
             logger.debug("SPARQL: {}", sparql);
-            ResultSet r = selectTripleStore(sparql, endpoint);
+            ResultSet r = this.selectTripleStore(sparql, endpoint);
             List<String> systemAnswers = new ArrayList<String>();
             while (r.hasNext()) {
                 QuerySolution s = r.next();
@@ -109,12 +100,12 @@ public class QaldEvaluatorApplication {
             // Compute precision and recall
             Metrics m = new Metrics();
             m.compute(expectedAnswers, systemAnswers);
-            globalPrecision += m.precision;
-            globalRecall += m.recall;
-            globalFMeasure += m.fMeasure;
+            globalPrecision += m.getPrecision();
+            globalRecall += m.getRecall();
+            globalFMeasure += m.getfMeasure();
             count++;
 
-            if (m.recall == 1) {
+            if (m.getRecall() == 1) {
                 fullRecall.add(1);
             } else {
                 fullRecall.add(0);
@@ -125,60 +116,18 @@ public class QaldEvaluatorApplication {
         logger.info("Global F-measure={}", globalFMeasure / count);
     }
 
-    class Metrics {
-        private Double precision = 0.0;
-        private Double recall = 0.0;
-        private Double fMeasure = 0.0;
-
-
-        public void compute(List<String> expectedAnswers, List<String> systemAnswers) {
-            //Compute the number of retrieved answers
-            int correctRetrieved = 0;
-            for (String s : systemAnswers) {
-                if (expectedAnswers.contains(s)) {
-                    correctRetrieved++;
-                }
-            }
-            //Compute precision and recall following the evaluation metrics of QALD
-            if (expectedAnswers.size() == 0) {
-                if (systemAnswers.size() == 0) {
-                    recall = 1.0;
-                    precision = 1.0;
-                    fMeasure = 1.0;
-                } else {
-                    recall = 0.0;
-                    precision = 0.0;
-                    fMeasure = 0.0;
-                }
-            } else {
-                if (systemAnswers.size() == 0) {
-                    recall = 0.0;
-                    precision = 1.0;
-                } else {
-                    precision = (double) correctRetrieved / systemAnswers.size();
-                    recall = (double) correctRetrieved / expectedAnswers.size();
-                }
-                if (precision == 0 && recall == 0) {
-                    fMeasure = 0.0;
-                } else {
-                    fMeasure = (2 * precision * recall) / (precision + recall);
-                }
-            }
-        }
-    }
-
     private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
         Query query = QueryFactory.create(sparqlQuery);
         QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
         return qExe.execSelect();
     }
 
-    public static void main(String... args) throws UnsupportedEncodingException, IOException {
+    public void process() throws UnsupportedEncodingException, IOException {
 
         // TODO:
-        int maxQuestions = 350;
 
-        QaldEvaluatorApplication app = new QaldEvaluatorApplication();
+
+//        QaldEvaluatorApplication app = new QaldEvaluatorApplication();
 
         List<String> componentConfigurations = new LinkedList<>();
 
@@ -195,7 +144,7 @@ public class QaldEvaluatorApplication {
         //nedComponents.add("DBpediaSpotlightNED");
 
         // monolithic configurations (NER+NED)
-        componentConfigurations.add("Alchemy-NERD");
+        componentConfigurations.add("NED-DBpediaSpotlight");
         //componentConfigurations.add("luceneLinker");
 
         // create all configurations
@@ -206,7 +155,7 @@ public class QaldEvaluatorApplication {
         }
 
         for (String componentConfiguration : componentConfigurations) {
-            app.process(componentConfiguration, maxQuestions);
+            this.evaluate(componentConfiguration, this.maxQuestions);
         }
     }
 }
