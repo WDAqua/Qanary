@@ -33,6 +33,9 @@ public class QaldEvaluatorApplication {
     @Value(value = "${server.uri}")
     private String uriServer;
 
+    @Value(value = "${qanary.triplestore.stardog5}")
+    private boolean stadog5;
+
     private int maxQuestions = 350;
 
     private void evaluate(String components, int maxQuestionsToBeProcessed) throws UnsupportedEncodingException, IOException {
@@ -70,7 +73,7 @@ public class QaldEvaluatorApplication {
             // Retrieve the computed uris
             JSONObject responseJson = new JSONObject(response);
             String endpoint = responseJson.getString("endpoint");
-            String namedGraph = responseJson.getString("graph");
+            String namedGraph = responseJson.getString("outGraph");
             logger.debug("{}. named graph: {}", questions.get(i).getQaldId(), namedGraph);
             String sparql = "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
                     + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
@@ -118,6 +121,7 @@ public class QaldEvaluatorApplication {
 
     private ResultSet selectTripleStore(String sparqlQuery, String endpoint) {
         Query query = QueryFactory.create(sparqlQuery);
+        if (this.stadog5) endpoint += "/query";
         QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
         return qExe.execSelect();
     }
