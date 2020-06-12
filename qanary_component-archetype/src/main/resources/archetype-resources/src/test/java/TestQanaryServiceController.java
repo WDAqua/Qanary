@@ -3,12 +3,7 @@
 #set( $symbol_escape = '\' )
 package ${package};
 
-import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.endpointKey;
-import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.inGraphKey;
-import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.outGraphKey;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -35,6 +30,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.endpointKey;
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.inGraphKey;
+import static eu.wdaqua.qanary.commons.config.QanaryConfiguration.outGraphKey;
+
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.component.QanaryServiceController;
@@ -53,7 +52,7 @@ public class TestQanaryServiceController {
 
 	/**
 	 * initialize local controller enabled for tests
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Before
@@ -67,7 +66,7 @@ public class TestQanaryServiceController {
 
 	/**
 	 * test description interface
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -82,12 +81,13 @@ public class TestQanaryServiceController {
 	 * QanaryConfiguration.annotatequestion, check if the values are the same
 	 */
 	@Test
-	@Ignore // this test cannot be executed as the triplestore needs to be mocked first
+	@Ignore //TODO this test cannot be executed as the triplestore needs to be mocked first
 	public void testMessageReceiveAndSend() {
 
 		QanaryMessage requestMessage;
 		try {
 			requestMessage = new QanaryMessage(new URI(endpointKey), new URI(inGraphKey), new URI(outGraphKey));
+			logger.info("Message {}" + requestMessage);
 		} catch (URISyntaxException e) {
 			fail(e.getMessage());
 			return;
@@ -99,8 +99,8 @@ public class TestQanaryServiceController {
 			res = mockMvc.perform( //
 					post(QanaryConfiguration.annotatequestion) //
 							.content(requestMessage.asJsonString()) //
-							.contentType(MediaType.APPLICATION_JSON)) //
-					.andExpect(status().is(500)).andExpect(status().isOk()) // ok
+							.contentType(MediaType.APPLICATION_JSON))
+					// .andExpect(status().is2xxSuccessful()) //
 					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)) //
 					.andReturn();
 		} catch (Exception e) {
@@ -151,12 +151,4 @@ public class TestQanaryServiceController {
 
 	}
 
-	@Test
-	public void testAnnotation() {
-
-		// QanaryMessage message = new QanaryMessage()
-		// mockMvc.perform
-	}
-
 }
-
