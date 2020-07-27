@@ -10,7 +10,7 @@
         <h1>Start a QA process with a new textual question</h1>
         <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
 		        <div th:replace="lib/reusableforms::textquestioninput"/>
-				<div th:include="lib/reusableforms::componentlistcheckboxes"/>
+				<div th:include="lib/reusableforms::componentlistcheckboxes" />
                 <button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
         </form>
         <div id="results">
@@ -49,9 +49,68 @@
         	<h2>SPARQL query editor</h2>
 			<div id="yasgui"></div>
 		</div>
- 		<div th:replace="lib/footer"/>        
+ 		<div th:replace="lib/footer"/>
+		<!-- load React -->
+		<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 </body>
 	<script th:inline="javascript">
+
+		const e = React.createElement;
+
+		/* fetches an object containing the number of annotations created by a component on a specified graph
+		* only annotationCount is rendered, but attributes
+		*   usedGraph,
+		*   componentUrl and
+		*   used query
+		* may also be accessed
+		 */
+		class AnnotationCount extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					response: [],
+					count: 0,
+					fetched: this.props.fetched
+				}
+				console.log(this.props)
+			}
+
+			callBackend() {
+				let graph = this.props.graph
+				let component = this.props.component
+
+				let requestString = "http://localhost:8080/numberOfAnnotations/?component=" + component + "&graph=" + graph;
+
+				fetch(requestString).then(response => {
+					if (response.status == 500) {
+						this.setState({count: 0, response: response, fetched: true})
+						return Promise.reject();
+					}
+					return response.json();
+				}).then(
+						data => {
+							this.setState({count: data.annotationCount, response: data, fetched: true})
+							console.log(this.state.response);
+						}
+				).catch(function (error) {
+					console.log(error)
+				})
+			}
+
+			render() {
+				if (this.state.fetched) {
+					// don't perform another backend call
+					console.log("data already fetched")
+				} else {
+					this.callBackend();
+					console.log("fetching data")
+
+				}
+				// display only the number of annotations
+				return "(created "+this.state.count+" annotations)"
+			}
+		}
 
 		const yasgui = new Yasgui(document.getElementById("yasgui"), {
 				copyEndpointOnNewTab: false,

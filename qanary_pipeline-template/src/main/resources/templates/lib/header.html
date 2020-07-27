@@ -46,10 +46,10 @@
     	margin-left: 1ex; 
     }
     input[type=text] { 
-                width:50%; 
+                width:50%;
                 display:block; 
                 margin-bottom:2ex; 
-                max-width:500px; 
+                max-width:500px;
                 font-size: 13pt; 
                 padding:5px;
                 border: 1px solid #999;
@@ -168,7 +168,7 @@
     	fill: #00bc7c
     }
     </style>
-    <script>
+    <script th:inline="javascript">
        	// TODO: move minimumNumberOfSelectedComponents to config
        	minimumNumberOfSelectedComponents = 1;
        	
@@ -202,15 +202,15 @@
                 });
 
                 $("#results").hide(); // hide results table
-                
+
                 // add AJAX action to form
                 $("#startForm").submit(function(event){
                 	event.preventDefault(); // prevent default action 
                 	$("#submit").attr("disabled", true); // disable button
                 	$("#submit").addClass("inprogress"); // change cursor
                 	$("#results").slideUp(500); // hide last results with animation
-                	
-                	$.ajax({
+                    removeAnnotationCount(); // clear old annotation count values
+                    $.ajax({
                 		url : $(this).attr("action"), // get action url
                 		type: $(this).attr("method"), //get method
                 		data: $(this).serialize() // encode form elements 
@@ -224,6 +224,7 @@
                 		$("#outGraph").html(response.outGraph);
                     	$("#results").slideDown("fast"); // show results with animation
                     	$("#results").show();
+                        getNumberOfAnnotations(response.outGraph); // get new number of annotations
                 	}).error(function (jqXHR) {
                         $("#submit").attr("disabled", false); // reactivate button
                         $("#submit").removeClass("inprogress");
@@ -231,6 +232,39 @@
                 	});
                 });
         });
+
+        // remove any AnnotationCount components so that props can be updated correctly
+        function removeAnnotationCount() {
+            /*<![CDATA[*/
+            let components = [[${componentList}]]
+            for (i = 0; i < components.length; i++) {
+                let element = document.getElementById("annotationcount"+components[i]);
+                if(element){
+                    ReactDOM.unmountComponentAtNode(element);
+                }
+            }
+            /*]]>*/
+        }
+
+        // mount individual AnnotationCount to every component checklist item
+        function getNumberOfAnnotations(graph) {
+            console.log(graph)
+            /*<![CDATA[*/
+            let components = [[${componentList}]]
+            for (i = 0; i < components.length; i++) {
+                console.log(components[i]);
+                console.log(graph)
+                props = {
+                    component: components[i],
+                    graph: graph,
+                    fetched: false,
+                    annotationID: ("annotationcount"+components[i])
+                }
+                let annotationElement = e(AnnotationCount,props)
+                ReactDOM.render(annotationElement, document.getElementById("annotationcount"+components[i]));
+            }
+            /*]]>*/
+        }
         
         function checkInputAndOptionallyDisableSubmitButton(buttonID){
         	// disable button if the minimum number of components was not activated or question was not given
