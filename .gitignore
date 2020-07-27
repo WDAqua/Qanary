@@ -2,10 +2,14 @@
 ### Example user template
 
 # IntelliJ project files
-.idea
+.idea/
+.idea_modules/
 *.iml
+*.ipr
+*.iws
 out
 gen
+
 ### Maven template
 target/
 pom.xml.tag
@@ -18,6 +22,33 @@ buildNumber.properties
 .mvn/timing.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
+
+### Eclipse
+.settings/
+bin/
+tmp/
+.metadata
+.classpath
+.project
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# OS X
+.DS_Store
+
 
 ### Java template
 # Compiled class file
@@ -44,6 +75,9 @@ buildNumber.properties
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-###Local Files
-
+### locally stored files
 stored-question*
+
+
+**/error
+**/output
