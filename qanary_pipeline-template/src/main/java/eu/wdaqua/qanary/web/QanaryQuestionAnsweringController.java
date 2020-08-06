@@ -1,8 +1,18 @@
 package eu.wdaqua.qanary.web;
 
+import java.awt.image.Kernel;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -482,6 +492,57 @@ public class QanaryQuestionAnsweringController {
 		}
 
 		return new ResponseEntity<>(json, HttpStatus.OK);
+	}
+
+	// TODO: refactor this and the method above to separate controller file
+
+	/**
+	 * writes values to application.local.properties
+	 */
+	@RequestMapping(value = "/configuration", method = RequestMethod.POST)
+	public void updateLocalPipelineProperties(@RequestBody org.json.JSONObject json) {
+
+
+		logger.info("Config Object:"+json.keySet());
+
+		String pathString = "qanary_pipeline-template/src/main/resources/application.local.properties";
+		Path localConfigPath = Paths.get(pathString);
+
+		try {
+			boolean replace = Files.deleteIfExists(localConfigPath);
+
+			logger.info("overwrite existing file: {}", replace);
+
+			File file = new File(pathString);
+
+			if (file.createNewFile()) {
+				logger.info("created new local property file");
+			} else {
+				logger.info("local config file could not be written");
+			}
+		} catch (IOException e) {
+			logger.error("local config could not be created");
+			e.printStackTrace();
+		}
+
+
+
+		try {
+			FileWriter writer = new FileWriter(pathString);
+
+			for( Object key : json.keySet()) {
+				String value = json.get(key.toString()).toString();
+				logger.info("writing {} = {}",key,value);
+				writer.write(key+"="+value+"\n");
+			}
+			logger.info("finished writing");
+			writer.close();
+
+		} catch (IOException e) {
+			logger.error("local config file could not be written");
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
