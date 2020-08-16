@@ -14,12 +14,14 @@
 	</parent>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
 		<qanary.version>[2.0.0,3.0.0)</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<docker.image.name>qapipeline</docker.image.name>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -92,14 +94,14 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-        <dependency>
-            <groupId>eu.wdaqua.qanary</groupId>
-            <artifactId>qa.commons</artifactId>
-            <version>2.0.3</version>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>eu.wdaqua.qanary</groupId>
+			<artifactId>qa.commons</artifactId>
+			<version>2.0.3</version>
+			<scope>compile</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -140,6 +142,13 @@
 					<buildArgs>
 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
 					</buildArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<release>11</release>
 				</configuration>
 			</plugin>
 		</plugins>
