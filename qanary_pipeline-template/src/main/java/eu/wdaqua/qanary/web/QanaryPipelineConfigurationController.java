@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.Map;
 /**
  * controller for service w.r.t pipeline configuration
  */
+@CrossOrigin
 @RestController
 public class QanaryPipelineConfigurationController {
 
@@ -27,7 +29,7 @@ public class QanaryPipelineConfigurationController {
     private final Environment environment;
     private final QanaryPipelineConfiguration qanaryPipelineConfiguration;
     // define properties that should not be configurable using this controller
-    private final String[] notConfigurable = {"server.host", "server.port", "qanary.components"};
+    private final String[] notConfigurable = {"server.host", "server.port", "qanary.components", "spring.config.name"};
 
     @Autowired
     public QanaryPipelineConfigurationController(
@@ -48,7 +50,6 @@ public class QanaryPipelineConfigurationController {
     /**
      * returns configurable properties and their values based on the Environment
      */
-    @CrossOrigin
     @RequestMapping(value = "/configuration", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<JSONObject> getConfigurablePipelineProperties() {
 
@@ -64,29 +65,29 @@ public class QanaryPipelineConfigurationController {
 
     /**
      * writes changes in pipeline property values to application.local.properties
-     * TODO better logging outputs
      */
-    @CrossOrigin
     @RequestMapping(value = "/configuration", method = RequestMethod.POST, consumes = "application/json")
     public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) {
 
-        String filePath = "qanary_pipeline-template/src/main/resources/application.local.properties";
+        String filePath = "qanary_pipeline-template/target/classes/application.local.properties";
         Path localConfigPath = Paths.get(filePath);
 
         logger.info("Request pipeline configuration change");
 
-        // TODO implement fail save with tmp file
+        // TODO implement fail save
         try {
             boolean replace = Files.deleteIfExists(localConfigPath);
             File file = new File(filePath);
             logger.info(replace?
-                    "Overwriting application.local.properties":"application.local.properties was not found");
+                    "Replacing application.local.properties":"Creating new application.local.properties");
 
             if (file.createNewFile()) {
-                logger.info("Saved changes to application.local.properties");
+                logger.info("File was created");
             } else {
+                logger.info("File was not created!");
             }
         } catch (IOException e) {
+            logger.error("An error occurred creating application.local.properties!");
             e.printStackTrace();
         }
 
@@ -97,9 +98,11 @@ public class QanaryPipelineConfigurationController {
                 String value = configJson.get(key.toString()).toString();
                 writer.write(key+"="+value+"\n");
             }
+            logger.info("saved configuration to application.local.properties");
             writer.close();
 
         } catch (IOException e) {
+            logger.error("An error occurred writing changes to application.local.properties!");
             e.printStackTrace();
         }
     }

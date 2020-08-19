@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import './styling.css';
 
 export default class FormElement extends Component{
 
@@ -16,17 +17,10 @@ export default class FormElement extends Component{
 
 
     render() {
-        const style = {
-            'margin-left': '1rem',
-            'margin-bottom': '2px',
-            'margin-top': '3px',
-            'width': '300px'
-        }
-
         return (
             <div>
-                <label style={style}>{this.state.name}:
-                    <input value={this.state.value} onChange={this.handleChange} style={style}/>
+                <label className={'label'}>{this.state.name}:
+                    <input value={this.state.value} onChange={this.handleChange} className={'input'}/>
                 </label>
             </div>
         )

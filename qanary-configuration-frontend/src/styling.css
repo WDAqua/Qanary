@@ -1,0 +1,18 @@
+.label {
+    margin-left: 1rem;
+    margin-bottom: 2px;
+    margin-top: 3px;
+}
+
+.input {
+    margin-left: 1rem;
+    margin-bottom: 2px;
+    margin-top: 3px;
+    width: 300px
+}
+
+.button {
+    margin: 1rem;
+    width: 100px;
+    padding: 5px;
+}
