@@ -69,7 +69,7 @@ public class QanaryPipelineConfigurationController {
     @RequestMapping(value = "/configuration", method = RequestMethod.POST, consumes = "application/json")
     public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) {
 
-        String filePath = "qanary_pipeline-template/target/classes/application.local.properties";
+        String filePath = "src/main/resources/application.local.properties";
         Path localConfigPath = Paths.get(filePath);
 
         logger.info("Request pipeline configuration change");
