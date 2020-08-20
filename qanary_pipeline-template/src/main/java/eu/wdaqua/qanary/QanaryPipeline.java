@@ -1,12 +1,17 @@
 package eu.wdaqua.qanary;
 
+import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -84,6 +89,20 @@ public class QanaryPipeline {
 			i++;
 		}
 		return componentsToIndexMap;
+	}
+
+	/**
+	 * check property file modification
+	 */
+	@Bean
+	@ConditionalOnProperty(name="spring.config.location", matchIfMissing = false)
+	public PropertiesConfiguration propertiesConfiguration(
+			@Value("${spring.config.location}") String path) throws Exception {
+		logger.info("PATH: "+path);
+		String filePath = new File(path.substring("file:".length())).getCanonicalPath();
+		PropertiesConfiguration configuration = new PropertiesConfiguration(new File(filePath));
+		configuration.setReloadingStrategy(new FileChangedReloadingStrategy()); // scheduled refresh -> on demand possible?
+		return configuration;
 	}
 
 	/*

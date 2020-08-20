@@ -44,6 +44,7 @@ export default class Form extends Component{
             e.preventDefault();
             const input = this.state.configurations;
 
+            // TODO make port configurable in docker command
             axios.post("http://localhost:8080/configuration", input, {
                 headers: {
                     'Content-Type': 'application/json'
