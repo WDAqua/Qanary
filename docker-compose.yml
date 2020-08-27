@@ -1,0 +1,7 @@
+version: '3'
+services:
+  pipeline:
+    build: qanary_pipeline-template
+    image: qanary-pipeline-compose
+    ports:
+    - "8080:8080"
