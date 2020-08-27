@@ -4,4 +4,9 @@ services:
     build: qanary_pipeline-template
     image: qanary-pipeline-compose
     ports:
-    - "8080:8080"
+    - "8080"
+  config-ui:
+    build: qanary-configuration-frontend
+    image: configuration-ui-compose
+    ports:
+    - "8086:80"
