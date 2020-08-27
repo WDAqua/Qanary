@@ -90,6 +90,7 @@ public class QanaryPipeline {
 		}
 		return componentsToIndexMap;
 	}
+
 	/*
 	 * @EventListener(ClientApplicationRegisteredEvent.class) public void
 	 * addComponent(final ClientApplicationEvent event) {
