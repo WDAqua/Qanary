@@ -8,6 +8,10 @@ COPY package-lock.json ./
 RUN npm ci
 RUN npm install react-scripts@3.4.1 -g
 COPY . ./
+
+ARG REACT_APP_SERVICE_IP
+ENV REACT_APP_SERVICE_IP $REACT_APP_SERVICE_IP
+
 RUN npm run build
 
 # production
