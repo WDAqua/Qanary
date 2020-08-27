@@ -7,11 +7,15 @@ export default class Form extends Component{
 
     state = {
         error: null,
-        configurations: {}
+        configurations: {},
+        serviceIp: process.env.REACT_APP_SERVICE_IP
     };
 
     componentDidMount() {
-        axios.get("http://localhost:8080/configuration").then(
+
+        console.log("http://"+this.state.serviceIp+"/configuration");
+
+        axios.get("http://"+this.state.serviceIp+"/configuration").then(
             result => {
                 this.setState({
                     loaded: true,
@@ -45,7 +49,7 @@ export default class Form extends Component{
             const input = this.state.configurations;
 
             // TODO make port configurable in docker command
-            axios.post("http://localhost:8080/configuration", input, {
+            axios.post("http://"+this.state.serviceIp+"/configuration", input, {
                 headers: {
                     'Content-Type': 'application/json'
                 }}).then(
