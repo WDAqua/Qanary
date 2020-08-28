@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +72,8 @@ public class QanaryPipelineConfigurationController {
     public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) {
 
         String filePath = environment.getProperty("spring.config.location");
-        Path localConfigPath = Paths.get(filePath);
+        //Path localConfigPath = Paths.get(filePath);
+        Path localConfigPath = Paths.get(new ClassPathResource(filePath).getPath());
 
         logger.info("Request pipeline configuration change");
 

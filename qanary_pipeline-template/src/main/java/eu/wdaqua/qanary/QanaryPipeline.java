@@ -91,6 +91,17 @@ public class QanaryPipeline {
 		return componentsToIndexMap;
 	}
 
+	@Bean
+	@ConditionalOnProperty(name = "spring.config.location", matchIfMissing = false)
+	public PropertiesConfiguration propertiesConfiguration(
+			@Value("${spring.config.location}") String path) throws Exception {
+		String filePath = new File(path.substring("classpath:".length())).getCanonicalPath();
+		PropertiesConfiguration configuration = new PropertiesConfiguration(
+				new File(filePath));
+		configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
+		return configuration;
+	}
+
 	/*
 	 * @EventListener(ClientApplicationRegisteredEvent.class) public void
 	 * addComponent(final ClientApplicationEvent event) {
