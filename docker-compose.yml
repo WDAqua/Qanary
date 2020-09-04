@@ -1,12 +1,20 @@
 version: '3'
 services:
   pipeline:
-    build: qanary_pipeline-template
-    image: qanary-pipeline-compose
+    build:
+      context: ./qanary_pipeline-template
+      args:
+        JAR_FILE: ${JAR_FILE}
+    image: qapipeline:2.1.4
     ports:
-    - "8080"
+      - "${PORT}:8080"
+
   config-ui:
-    build: qanary-configuration-frontend
-    image: configuration-ui-compose
+    build:
+      context: ./qanary-configuration-frontend
+      args:
+        REACT_APP_HOST: ${HOST}
+        REACT_APP_PORT: ${PORT}
+    image: configuration-ui:latest
     ports:
-    - "8086:80"
+      - "8086:80"
