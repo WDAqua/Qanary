@@ -1,6 +1,8 @@
 package eu.wdaqua.qanary;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -15,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.Maps;
@@ -95,9 +98,13 @@ public class QanaryPipeline {
 	@ConditionalOnProperty(name = "spring.config.location", matchIfMissing = false)
 	public PropertiesConfiguration propertiesConfiguration(
 			@Value("${spring.config.location}") String path) throws Exception {
-		String filePath = new File(path.substring("classpath:".length())).getCanonicalPath();
+
+		Path localConfigPath = Paths.get(new ClassPathResource(path).getPath());
+		//String filePath = new File(path).getCanonicalPath();
+
+		logger.warn("new property source: {}", localConfigPath.toString());
 		PropertiesConfiguration configuration = new PropertiesConfiguration(
-				new File(filePath));
+				new File(localConfigPath.toString()));
 		configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
 		return configuration;
 	}

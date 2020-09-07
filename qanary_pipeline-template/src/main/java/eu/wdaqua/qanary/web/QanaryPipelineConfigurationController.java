@@ -72,12 +72,10 @@ public class QanaryPipelineConfigurationController {
     public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) {
 
         String filePath = environment.getProperty("spring.config.location");
-        //Path localConfigPath = Paths.get(filePath);
         Path localConfigPath = Paths.get(new ClassPathResource(filePath).getPath());
 
-        logger.info("Request pipeline configuration change");
+        logger.warn("Reloading the configuration. URL is file:{}", localConfigPath);
 
-        // TODO implement fail save
         try {
             boolean replace = Files.deleteIfExists(localConfigPath);
             File file = new File(filePath);

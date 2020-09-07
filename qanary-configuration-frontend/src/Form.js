@@ -8,7 +8,7 @@ export default class Form extends Component{
     state = {
         error: null,
         configurations: {},
-        serviceIp: process.env.REACT_APP_SERVICE_IP
+        serviceIp: process.env.REACT_APP_HOST+":"+process.env.REACT_APP_PORT
     };
 
     componentDidMount() {
