@@ -55,6 +55,7 @@
 		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 </body>
 	<script th:inline="javascript">
+		// TODO: move to a JS file
 
 		const e = React.createElement;
 
@@ -64,7 +65,7 @@
 		*   componentUrl and
 		*   used query
 		* may also be accessed
-		 */
+		*/
 		class AnnotationCount extends React.Component {
 			constructor(props) {
 				super(props);
@@ -80,7 +81,8 @@
 				let graph = this.props.graph
 				let component = this.props.component
 
-				let requestString = "http://localhost:8080/numberOfAnnotations/?component=" + component + "&graph=" + graph;
+				// TODO: replace with POST request
+				let requestString = window.location.origin + "/numberOfAnnotations/?component=" + component + "&graph=" + graph;
 
 				fetch(requestString).then(response => {
 					if (response.status == 500) {
@@ -101,15 +103,19 @@
 			render() {
 				if (this.state.fetched) {
 					// don't perform another backend call
-					console.log("data already fetched")
+					console.log("data already fetched");
 				} else {
 					this.callBackend();
-					console.log("fetching data")
+					console.log("fetching data");
 
 				}
-				// display only the number of annotations
-				return "(created "+this.state.count+" annotations)"
-			}
+				// display the number of annotations
+				return React.createElement("span", {
+  					"data-count": this.state.count,
+  					"class": "annotationCount",
+  					"title": "This component has created  " + this.state.count + " annotations in the graph " + this.props.graph + " during the recent QA process execution."
+					}, "(created " + this.state.count + " annotations)");
+				}
 		}
 
 		const yasgui = new Yasgui(document.getElementById("yasgui"), {
@@ -269,7 +275,7 @@
 					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
 					"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
 					"SELECT *\n" +
-					"FROM <"+outgraph+">\n" +
+					"FROM <" + outgraph + ">\n" +
 					"WHERE {\n" +
 					"    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
 					"    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
