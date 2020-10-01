@@ -69,7 +69,8 @@
     
     div.selection {
         margin: 0; 
-        width: 500px; 
+        min-width: 800px;
+        width: 50%; 
         padding:0;
     }
     #sortable li {
@@ -90,6 +91,20 @@
     }
     #sortable li.selected:hover {
         background-color:#FFFFF9;
+    }
+    
+    .annotationCount{
+		font-size:80%;
+    }
+    
+    .annotationCount[data-count]{
+    	background-color:#CFC;
+    	color:#000;
+    }
+
+    .annotationCount[data-count="0"]{
+    	background-color:transparent;
+    	color:#999;
     }
     
     button { 
@@ -254,14 +269,15 @@
             for (i = 0; i < components.length; i++) {
                 console.log(components[i]);
                 console.log(graph)
+                elementID = "annotationcount" + components[i];
                 props = {
                     component: components[i],
                     graph: graph,
                     fetched: false,
-                    annotationID: ("annotationcount"+components[i])
+                    annotationID: (elementID)
                 }
-                let annotationElement = e(AnnotationCount,props)
-                ReactDOM.render(annotationElement, document.getElementById("annotationcount"+components[i]));
+                let annotationElement = e(AnnotationCount,props);
+                ReactDOM.render(annotationElement, document.getElementById(elementID));
             }
             /*]]>*/
         }
