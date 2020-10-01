@@ -20,7 +20,7 @@ public class ReloadablePropertySource extends PropertySource {
             this.propertiesConfiguration = new PropertiesConfiguration(path);
             this.propertiesConfiguration.setReloadingStrategy(new FileChangedReloadingStrategy());
         } catch (Exception e){
-            throw new RuntimeException(e); //PropertiesException?
+            throw new RuntimeException(e);
         }
     }
 
