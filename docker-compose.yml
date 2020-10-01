@@ -4,17 +4,17 @@ services:
     build:
       context: ./qanary_pipeline-template
       args:
-        JAR_FILE: ${JAR_FILE}
-    image: qapipeline:2.1.4
+        JAR_FILE: ${PIPELINE_NAME}-${PIPELINE_VERSION}.jar
+    image: ${PIPELINE_IMAGE}:${PIPELINE_VERSION}
     ports:
-      - "${PORT}:8080"
+      - "${PIPELINE_PORT}:8080"
 
   config-ui:
     build:
       context: ./qanary-configuration-frontend
       args:
-        REACT_APP_HOST: ${HOST}
-        REACT_APP_PORT: ${PORT}
-    image: configuration-ui:latest
+        REACT_APP_HOST: ${PIPELINE_HOST}
+        REACT_APP_PORT: ${PIPELINE_PORT}
+    image: ${UI_IMAGE}:${UI_VERSION}
     ports:
-      - "8086:80"
+      - "${UI_PORT}:80"
