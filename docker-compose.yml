@@ -1,0 +1,20 @@
+version: '3'
+services:
+  pipeline:
+    build:
+      context: ./qanary_pipeline-template
+      args:
+        JAR_FILE: ${PIPELINE_NAME}-${PIPELINE_VERSION}.jar
+    image: ${PIPELINE_IMAGE}:${PIPELINE_VERSION}
+    ports:
+      - "${PIPELINE_PORT}:8080"
+
+  config-ui:
+    build:
+      context: ./qanary-configuration-frontend
+      args:
+        REACT_APP_HOST: ${PIPELINE_HOST}
+        REACT_APP_PORT: ${PIPELINE_PORT}
+    image: ${UI_IMAGE}:${UI_VERSION}
+    ports:
+      - "${UI_PORT}:80"

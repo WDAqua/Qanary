@@ -1,22 +1,35 @@
 package eu.wdaqua.qanary.web;
 
+import java.awt.image.Kernel;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import net.sf.json.JSON;
-import org.apache.jena.atlas.json.JsonArray;
+import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.json.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +49,7 @@ import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
+import org.thymeleaf.util.EvaluationUtils;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -51,6 +65,7 @@ public class QanaryQuestionAnsweringController {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
 	private final QanaryConfigurator qanaryConfigurator;
 	private final QanaryQuestionController qanaryQuestionController;
+	// TODO include QanaryPipelineConfigurationController
 	private final QanaryComponentRegistrationChangeNotifier myComponentNotifier;
 	private final QanaryPipelineConfiguration myQanaryPipelineConfiguration;
 	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
