@@ -171,6 +171,32 @@
 					method: 'GET'
 				},
 			},
+			"customtab2":{
+				name:"find all created annotations",
+				query:"" +
+						"# retrieve all annotations contained in the Qanary triplestore\n" +
+						"# to show the created information artefacts for the current process \n" +
+						"# use Qanary question analysis outgraph from the result table\n" +
+						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+						"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+						"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+						"SELECT *\n" +
+						"#FROM <"+"$questionAnalysisOutgraph$"+">\n" +
+						"WHERE {\n" +
+						"    ?annotationId rdf:type ?type.\n" +
+						"    ?annotationId oa:hasBody ?body.\n" +
+						"    ?annotationId oa:hasTarget ?target.\n" +
+						"}\n",
+				used:false,
+				requestConfig: {
+					endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+					headers: () => ({
+						Accept:'application/sparql-results+json',
+						Authorization: 'Basic YWRtaW46YWRtaW4=' // Stardog specific
+					}),
+					method: 'GET'
+				},
+			},
 			"customtab1":{
 				name:"DBpedia SELECT",
 				query:"" +
@@ -216,7 +242,7 @@
 					instance.getTab(tab).yasqe.setValue(customTabNames[tab].query);
 					customTabNames[tab].used = true;
 				} else {
-					console.debug("Selected tab not not changed.");
+					console.debug("Selected tab not changed.");
 				}
 			});
 		});
