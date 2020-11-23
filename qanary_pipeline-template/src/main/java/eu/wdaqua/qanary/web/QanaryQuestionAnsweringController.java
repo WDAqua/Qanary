@@ -457,14 +457,14 @@ public class QanaryQuestionAnsweringController {
 		JSONObject json = new JSONObject();
 		URI graphUri = URI.create(graph);
 
-		String sparqlGet ="" +
-				"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>" +
-				"SELECT (COUNT(*) AS ?NumberOfAnnotations)" +
-				"(SAMPLE(STR(?componentname)) AS ?ComponentName)" +
-				"FROM <"+graph+">" +
-				"WHERE {    ?s oa:annotatedBy ?componentname .    " +
-				"FILTER REGEX(STR(?componentname), \""+component+"\") . " +
-				"}";
+		String sparqlGet ="" //
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>" //
+				+ "SELECT (COUNT(*) AS ?NumberOfAnnotations)" //
+				+ "(SAMPLE(STR(?componentname)) AS ?ComponentName)" //
+				+ "FROM <"+graph+">" //
+				+ "WHERE {    ?s oa:annotatedBy ?componentname .    " //
+				+ "FILTER REGEX (STR(?componentname), \".*:"+component+"$\") . " //
+				+ "}";
 
 		QanaryMessage qanaryMessage= new QanaryMessage( qanaryConfigurator.getEndpoint(), graphUri);
 		QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage);
