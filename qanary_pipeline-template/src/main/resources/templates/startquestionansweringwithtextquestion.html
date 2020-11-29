@@ -57,15 +57,21 @@
 	<script th:inline="javascript">
 		// TODO: move to a JS file
 
+		// sets autofocus to question input field
+		window.onload = function() {
+			document.getElementById("question").focus();
+		}
+
 		const e = React.createElement;
 
-		/* fetches an object containing the number of annotations created by a component on a specified graph
-		* only annotationCount is rendered, but attributes
-		*   usedGraph,
-		*   componentUrl and
-		*   used query
-		* may also be accessed
-		*/
+		/*
+		fetches an object containing the number of annotations created by a component on a specified graph
+		only annotationCount is rendered, but attributes
+  		  - usedGraph
+  		  - componentUrl
+  		  - used query
+  		 may also be accessed
+		 */
 		class AnnotationCount extends React.Component {
 			constructor(props) {
 				super(props);
@@ -120,6 +126,7 @@
 
 		const yasgui = new Yasgui(document.getElementById("yasgui"), {
 				copyEndpointOnNewTab: false,
+				autofocus: false,
 				endpointCatalogueOptions: {
 					getData: () => {
 						return [
