@@ -189,7 +189,7 @@ public class QanaryQuestionController {
 			URI uri = getUriOfCurrentReqest();
 			return uri.getScheme() + "://" + uri.getAuthority();
 		} catch (NullPointerException | URISyntaxException e) {
-			logger.info("current request uri could not be found");
+			logger.error("Current request uri could not be found!");
 			logger.debug(e.getMessage());
 		}
         assert false;
