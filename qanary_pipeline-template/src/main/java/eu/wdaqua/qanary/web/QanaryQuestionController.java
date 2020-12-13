@@ -1,9 +1,6 @@
 package eu.wdaqua.qanary.web;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
@@ -27,13 +25,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -43,8 +40,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 public class QanaryQuestionController {
-	private String host;
-	private Integer port;
 	private String directoryForStoringQuestionRawData;
 	private final String storedQuestionPrefix = "stored-question_";
 
@@ -63,8 +58,6 @@ public class QanaryQuestionController {
 	public QanaryQuestionController(final QanaryConfigurator qanaryConfigurator,
 			final QanaryPipelineConfiguration myQanaryPipelineConfiguration) {
 		this.directoryForStoringQuestionRawData = myQanaryPipelineConfiguration.getQuestionsDirectory();
-		this.host = myQanaryPipelineConfiguration.getHost();
-		this.port = myQanaryPipelineConfiguration.getPort();
 	}
 
 	/**
@@ -195,12 +188,39 @@ public class QanaryQuestionController {
 	}
 
 	/**
-	 * returns the current name of the host
+	 * returns the host (scheme and authority) based on the current request
+	 *
+	 * host and port are not taken from application.properties because
+	 * this would not return the correct values for a containerized service
 	 */
 	private String getHost() {
-		// @TODO: replace by configuration
+		try {
+			URI uri = getUriOfCurrentReqest();
+			return uri.getScheme() + "://" + uri.getAuthority();
+		} catch (NullPointerException | URISyntaxException e) {
+			logger.info("current request uri could not be found");
+			logger.debug(e.getMessage());
+		}
+        assert false;
+		return null;
+	}
 
-		return host + ":" + port;
+	private URI getUriOfCurrentReqest() throws URISyntaxException {
+		HttpServletRequest request = getCurrentHttpServletRequest();
+		Assert.notNull(request, "No request was found!");
+		return new URI(request.getRequestURL().toString());
+	}
+
+	/**
+	 * static method to get HttpServletRequest of the current request
+	 */
+	public static HttpServletRequest getCurrentHttpServletRequest() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			return ((ServletRequestAttributes)requestAttributes).getRequest();
+		}
+		logger.debug("Method not called in context of HTTP request!");
+		return null;
 	}
 
 	/**
