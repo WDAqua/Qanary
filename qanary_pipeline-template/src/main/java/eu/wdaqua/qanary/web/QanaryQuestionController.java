@@ -64,16 +64,15 @@ public class QanaryQuestionController {
 	 * synchronous call to start the QA process (POST), return the URL of the
 	 * created question
 	 */
-	@RequestMapping(value = "/question", method = RequestMethod.POST, produces = "application/json")
+	@PostMapping(value = "/question", produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> createQuestion(
-			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String questionstring) {
+			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true)
+			final String questionstring) {
 
-		logger.info("add received question: " + questionstring);
-		// URI uriOfQuestion;
+		logger.info("add received question: {}", questionstring);
 		QanaryQuestionCreated responseMessage;
 		try {
-			// uriOfQuestion = this.storeQuestion(questionstring);
 			responseMessage = this.storeQuestion(questionstring);
 		} catch (IOException e) {
 			// will be caused by problems with file writing
@@ -84,9 +83,6 @@ public class QanaryQuestionController {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-
-		// final QanaryQuestionCreated responseMessage = new
-		// QanaryQuestionCreated(uriOfQuestion);
 
 		// send a HTTP 201 CREATED message back
 		return new ResponseEntity<QanaryQuestionCreated>(responseMessage, HttpStatus.CREATED);
@@ -108,12 +104,12 @@ public class QanaryQuestionController {
 		}
 
 		// Save the file locally
-		final BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)));
-		stream.write(questionstring.getBytes(Charset.defaultCharset()));
-		stream.close();
+		try (final BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)))){
+			stream.write(questionstring.getBytes(Charset.defaultCharset()));
+		}
 
 		final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
-		logger.info("uriOfQuestion: " + uriOfQuestion);
+		logger.info("uriOfQuestion: {}", uriOfQuestion);
 
 		return new QanaryQuestionCreated(filename, uriOfQuestion);
 	}
@@ -122,16 +118,14 @@ public class QanaryQuestionController {
 	 * synchronous call to start the QA process (POST) with an audio file, return
 	 * the URL of the created question
 	 */
-	@RequestMapping(value = "/question_audio", method = RequestMethod.POST, produces = "application/json")
+	@PostMapping(value = "/question_audio", produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<?> createAudioQuestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
 		logger.info("new audio file received: {}", file.getName());
-		// URI uriOfQuestion;
 		QanaryQuestionCreated responseMessage;
 		try {
-			// uriOfQuestion = this.storeQuestion(questionstring);
 			responseMessage = this.storeAudioQuestion(file);
 		} catch (IOException e) {
 			// will be caused by problems with file writing
@@ -142,9 +136,6 @@ public class QanaryQuestionController {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-
-		// final QanaryQuestionCreated responseMessage = new
-		// QanaryQuestionCreated(uriOfQuestion);
 
 		// send a HTTP 201 CREATED message back
 		return new ResponseEntity<QanaryQuestionCreated>(responseMessage, HttpStatus.CREATED);
@@ -227,7 +218,7 @@ public class QanaryQuestionController {
 	 * synchronous call to start the QA process (POST), return the URL of the
 	 * created question
 	 */
-	@RequestMapping(value = "/question/{questionid}", method = RequestMethod.DELETE, produces = "application/json")
+	@DeleteMapping(value = "/question/{questionid}", produces = "application/json")
 	@ResponseBody
 	public String deleteQuestion(@PathVariable final String questionid) throws HttpRequestMethodNotSupportedException {
 		// TODO: please implement deletion of file if and only if they are in
@@ -238,7 +229,7 @@ public class QanaryQuestionController {
 	/**
 	 * return links to all questions
 	 */
-	@RequestMapping(value = "/question/", method = RequestMethod.GET)
+	@GetMapping(value = "/question/")
 	@ResponseBody
 	public QanaryAvailableQuestions getQuestions() throws IOException {
 
@@ -254,7 +245,7 @@ public class QanaryQuestionController {
 	/**
 	 * return links to all information of one given question
 	 */
-	@RequestMapping(value = "/question/{questionid}", method = RequestMethod.GET)
+	@GetMapping(value = "/question/{questionid}")
 	@ResponseBody
 	public QanaryQuestionInformation getQuestion(@PathVariable final String questionid) throws MalformedURLException {
 		return new QanaryQuestionInformation(questionid, this.getHost());
@@ -263,9 +254,9 @@ public class QanaryQuestionController {
 	/**
 	 * question for a given id, raw return of the data
 	 */
-	@RequestMapping(value = "/question/{questionid}/raw", method = RequestMethod.GET, produces = MediaType.ALL_VALUE)
+	@GetMapping(value = "/question/{questionid}/raw", produces = MediaType.ALL_VALUE)
 	@ResponseBody
-	public FileSystemResource getQuestionRawData(@PathVariable final String questionid) throws IOException {
+	public FileSystemResource getQuestionRawData(@PathVariable final String questionid) {
 
 		// TODO: move outside of this class
 		final String filename = Paths.get(this.getDirectoryForStoringQuestionRawData(), questionid).toString();
@@ -275,7 +266,7 @@ public class QanaryQuestionController {
 	/**
 	 * fetch the processing status of a given question
 	 */
-	@RequestMapping(value = "/question/{question}/status", headers = "Accept=application/json", method = RequestMethod.GET, produces = {
+	@GetMapping(value = "/question/{question}/status", headers = "Accept=application/json", produces = {
 			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public String getStatusOfQuestion(@PathVariable final URL questionuri) {
