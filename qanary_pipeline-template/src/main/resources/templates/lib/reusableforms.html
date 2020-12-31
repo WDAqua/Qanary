@@ -7,14 +7,16 @@
 			<div th:fragment="componentlistcheckboxes">
                 Activate the components to be executed and drag them in the intended execution order: 
                 <div class="selection">
-                    <div class="applicationheader">Currently available Qanary components
-                        <ul id="sortable">
-	                        <li th:each="component : ${componentList}">
-	                        	<input type="checkbox" name="componentlist[]" th:id="'componentlist'+${component}" th:value="${component}" />
-                                <label th:for="'componentlist'+${component}" th:title="'activate '+${component}+' for the QA pipeline'" th:text="${component}" />
-                                <span th:id="'annotationcount'+${component}"></span>
-                            </li>
-                        </ul>
+                    <div class="applicationheader">
+                    	<h2>Currently available Qanary components</h2>
+                    	<div id="componentfilterbox"><input title="filter components" type="text" id="componentfilterinput" onkeyup="filterComponentList()" name="componentfilterinput" placeholder="filter components"></div>
                 	</div>
+                    <ul id="sortable">
+                        <li th:each="component : ${componentList}">
+                        	<input type="checkbox" name="componentlist[]" th:id="'componentlist'+${component}" th:value="${component}" />
+                            <label th:for="'componentlist'+${component}" th:title="'activate '+${component}+' for the QA pipeline'" th:text="${component}" />
+                            <span th:id="'annotationcount'+${component}"></span>
+                        </li>
+                    </ul>
 				</div>
 			</div>
