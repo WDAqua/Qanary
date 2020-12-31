@@ -30,6 +30,13 @@
 	    margin-top: 2ex;
     	margin-bottom: 1ex;
     }
+    .applicationheader h2 {
+	    width: 75%;
+	    float: left;
+	    margin-block: 0;
+	    margin-inline-start: 0;
+	    margin-inline-end: 0;    
+    }
     h3 {
     	font-size: 11pt;
 	    font-weight: 600; 
@@ -40,6 +47,7 @@
         background-color: #34302D; 
         color:#f1f1f1; 
         padding:0.25ex; 
+        height: 2.75ex;
     }
     header { background-color: #34302D; }
     form, #SPARQLqueryeditorblock { 
@@ -72,14 +80,15 @@
         min-width: 800px;
         width: 50%; 
         padding:0;
+        border: 2px solid #34302D;
     }
     #sortable li {
         margin:0.25ex; 
         padding: 0.25ex; 
-        border: 0; 
+        border: 1px solid #34302D; 
         font-size:13pt; 
         background-color: #f1f1f1; 
-        color: #333; 
+        color: #34302D; 
         cursor:ns-resize;
     }
     #sortable li.selected {
@@ -137,6 +146,19 @@
 		margin: 0.1ex;
 		padding: 0.5ex;	
     }   
+    #componentfilterbox {
+	    width: 25%;
+	    text-align: right;
+	    float: right;
+	    padding: 0;    	
+    }
+    #componentfilterinput {
+	    width: 100%;
+	    max-width: 20ex;
+	    margin: 0;
+	    padding: 0ex;
+	    padding-left:0.5ex;
+    }
     footer {
     	border-top: 1px solid #999;
     	margin-top: 7ex;
@@ -314,4 +336,40 @@
 			}	
         }
         
+		function filterComponentList() {
+		  // Declare variables
+		  var input, filter, ul, li, txtValue, hidden, speed;
+		  speed = 333;
+		  input = document.getElementById('componentfilterinput');
+		   
+		  filter = input.value.toUpperCase();
+		  ul = document.getElementById("sortable");
+		  li = ul.getElementsByTagName("li");
+
+		  showEverything = false;
+		  if( filter.trim().length == 0 ){
+		  	showEverything = true;
+		  }
+		  
+		  // Loop through all list items, and hide those who don't match the search query
+		  hidden = 0;
+		  for (i = 0; i < li.length; i++) {
+		  	if( showEverything ){
+		      // li[i].style.display = "";
+		      $(li[i]).fadeIn(speed);
+		  	} else {
+			    txtValue = li[i].innerText;
+			    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+			      // li[i].style.display = "";
+			      $(li[i]).fadeIn(speed);
+			    } else {
+			      // li[i].style.display = "none";
+			      $(li[i]).fadeOut(speed);
+			      hidden++;
+			    }
+		    }
+		  }
+
+		  console.debug("filter", filter, "showEverything", showEverything, "li.length", li.length, "hidden", hidden);
+		}   
     </script>
