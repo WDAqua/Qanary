@@ -18,8 +18,24 @@ In order to connect to the Qanary pipeline service, the two environment variable
 
 ## Docker
 
+### Dockerfile: Run as standalone system
+
 A [Dockerfile](./Dockerfile) is included. Please keep in mind that any changes to the environment
 variables will only take effect *after rebuilding* the Docker image.
+
+#### Configure Docker Container
+
+```
+docker run -e REACT_APP_HOST=<host> -e REACT_APP_PORT=<port> qanary/qanary-configuration-frontend:<version>
+```
+
+Example:
+
+```
+docker run -e REACT_APP_HOST=localhost -e REACT_APP_PORT=8080 qanary/qanary-configuration-frontend:1.0.0
+```
+
+### docker-compose: Run as part of the whole system
 
 The Qanary pipeline and Qanary Configuration UI can easily be started together using [this Docker compose file](../docker-compose.yml). 
 It is meant as a foundation to expand upon as needed. The variables used are defined in an external [.env file](../.env).
