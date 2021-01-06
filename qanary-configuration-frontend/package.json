@@ -1,6 +1,6 @@
 {
   "name": "qanary-configuration-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -35,6 +35,6 @@
   },
   "devDependencies": {
     "@babel/core": "latest",
-    "axios": "^0.19.2"
+    "axios": "^0.21.1"
   }
 }
