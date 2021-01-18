@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.commons;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -17,7 +18,12 @@ public class QanaryQuestionTextual extends QanaryQuestion<Object> {
 
 	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator)
 			throws URISyntaxException, QanaryExceptionNoOrMultipleQuestions, SparqlQueryFailed {
-		super(questionUrl, qanaryConfigurator);
+		this(questionUrl, qanaryConfigurator, null);
+	}
+
+	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator, URI previousProcessGraph)
+			throws URISyntaxException, SparqlQueryFailed, QanaryExceptionNoOrMultipleQuestions {
+		super(questionUrl, qanaryConfigurator, previousProcessGraph);
 		// ensure that the question is marked as textual question
 		this.putAnnotationOfTextRepresentation();
 	}
