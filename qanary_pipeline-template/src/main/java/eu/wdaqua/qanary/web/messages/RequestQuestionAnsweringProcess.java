@@ -10,7 +10,7 @@ import java.util.List;
  * 
  * Example: { "question":"What is the real name of Batman?", "componentList":
  * ["NED-DBpediaSpotlight","QueryBuilderSimpleRealNameOfSuperHero"],
- * "previousProcessGraph": "urn:graph:806261d9-4601-4c8c-8603-926eee707c38", }
+ * "priorConversation": "urn:graph:806261d9-4601-4c8c-8603-926eee707c38", }
  * 
  * @author anbo-de
  *
@@ -20,7 +20,7 @@ public class RequestQuestionAnsweringProcess {
 	private List<String> componentlist = new ArrayList<>();
 	private List<String> language = new ArrayList<>();
 	private List<String> targetdata = new ArrayList<>();
-	private URI previousProcessGraph;
+	private URI priorConversation;
 
 	public RequestQuestionAnsweringProcess() {
 		// pass
@@ -58,12 +58,12 @@ public class RequestQuestionAnsweringProcess {
 		this.targetdata = targetdata;
 	}
 
-	public URI getPreviousProcessGraph() {
-		return previousProcessGraph;
+	public URI getPriorConversation() {
+		return priorConversation;
 	}
 
-	public void setPreviousProcessGraph(URI previousProcessGraph) {
-		this.previousProcessGraph = previousProcessGraph;
+	public void setPriorConversation(URI priorConversation) {
+		this.priorConversation = priorConversation;
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class RequestQuestionAnsweringProcess {
 		return "RequestQuestionAnsweringProcess " //
 				+ " -- question: \"" + getQuestion() + "\"" //
 				+ " -- componentList: " + Arrays.toString(getcomponentlist().toArray()) //
-				+ " -- previousGraph: " + getPreviousProcessGraph();
+				+ " -- priorConversation: " + getPriorConversation();
 	}
 
 }

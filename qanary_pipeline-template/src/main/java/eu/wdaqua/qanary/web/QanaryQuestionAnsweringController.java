@@ -147,12 +147,12 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
-			@RequestParam(value = QanaryStandardWebParameters.PREVIOUSPROCESSGRAPH, defaultValue = "", required = false) final URI previousProcessGraph //			
+			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
 			) throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
-				componentsToBeCalled, language, targetdata, previousProcessGraph);
+				componentsToBeCalled, language, targetdata, priorConversation);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -191,12 +191,12 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
-			@RequestParam(value = QanaryStandardWebParameters.PREVIOUSPROCESSGRAPH, defaultValue = "", required = false) final URI previousProcessGraph //						
+			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
 			) throws Exception {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
-				componentsToBeCalled, language, targetdata, previousProcessGraph);
+				componentsToBeCalled, language, targetdata, priorConversation);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -282,7 +282,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
-			@RequestParam(value = QanaryStandardWebParameters.PREVIOUSPROCESSGRAPH, defaultValue = "", required = false) final URI previousProcessGraph //
+			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
 			) throws Exception {
 
 		// create a new question answering system
@@ -291,7 +291,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, previousProcessGraph);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -317,7 +317,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "", required = false) final List<String> componentsToBeCalled, //
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
-			@RequestParam(value = QanaryStandardWebParameters.PREVIOUSPROCESSGRAPH, defaultValue = "", required = false) final URI previousProcessGraph //
+			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
 			)
 			throws Exception {
 
@@ -327,7 +327,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, previousProcessGraph);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation);
 		// retrieve text representation, SPARQL and JSON result
 		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(), qanaryConfigurator);
 
@@ -367,11 +367,11 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
 			MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language,
-			List<String> targetdata, URI previousProcessGraph) throws Exception {
+			List<String> targetdata, URI priorConversation) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
-		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (previousProcessGraph: {})", //
-				question, componentsToBeCalled, previousProcessGraph);
+		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
+				question, componentsToBeCalled, priorConversation);
 
 		// no question string was given, so it is tried to fetch it from the
 		// triplestore
@@ -392,14 +392,14 @@ public class QanaryQuestionAnsweringController {
 
 				// create a textual question in a new graph
 				qanaryQuestion = new QanaryQuestionTextual(qanaryQuestionCreated.getQuestionURI().toURL(),
-						qanaryConfigurator, previousProcessGraph);
+						qanaryConfigurator, priorConversation);
 			} else {
 				// store the question on the current server
 				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController
 						.storeAudioQuestion(questionaudio);
 
 				// create question
-				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator, previousProcessGraph);
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator, priorConversation);
 
 				// add annotation saying that it is an audio question
 				qanaryQuestion.putAnnotationOfAudioRepresentation();
@@ -447,7 +447,7 @@ public class QanaryQuestionAnsweringController {
 				myRequestQuestionAnsweringProcess.getcomponentlist(), // 
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
-				myRequestQuestionAnsweringProcess.getPreviousProcessGraph() //
+				myRequestQuestionAnsweringProcess.getPriorConversation() //
 			);			
 	}
 

@@ -62,7 +62,7 @@ public class QanaryQuestion<T> {
 	 * @throws URISyntaxException
 	 * @throws SparqlQueryFailed
 	 */
-	public QanaryQuestion(final URL questionUri, QanaryConfigurator qanaryConfigurator, URI previousProcessGraph)
+	public QanaryQuestion(final URL questionUri, QanaryConfigurator qanaryConfigurator, URI priorConversation)
 			throws URISyntaxException, SparqlQueryFailed {
 		// Create a new named graph and insert it into the triplestore
 		// in this graph the data is stored
@@ -76,11 +76,11 @@ public class QanaryQuestion<T> {
 		String questionUrlString = questionUri.toString();
 		logger.info("Triplestore: {}, Current graph: {}", triplestore, namedGraph.toString());
 
-		String addPreviousProcessGraph = "";
-		if( previousProcessGraph != null ) {
-			addPreviousProcessGraph = "<" + questionUrlString + "> qa:priorConversation <" + previousProcessGraph.toASCIIString() + "> . ";
+		String addPriorConversation = "";
+		if( priorConversation != null ) {
+			addPriorConversation = "<" + questionUrlString + "> qa:priorConversation <" + priorConversation.toASCIIString() + "> . ";
 		} else {
-			logger.info("No previous graph (qa:priorConversation) provided: {}", previousProcessGraph);
+			logger.info("No previous graph (qa:priorConversation) provided: {}", priorConversation);
 		}
 		
 		// IMPORTANT: The following processing steps will fail if the used
@@ -118,7 +118,7 @@ public class QanaryQuestion<T> {
 				+ "		<" + questionUrlString + "#Annotation:2> a  oa:AnnotationOfQuestion; \n" //
 				+ "				oa:hasTarget <" + questionUrlString + "> ; \n" //
 				+ "				oa:hasBody   <" + questionUrlString + "#Dataset> . \n" //
-				+ "		" + addPreviousProcessGraph + "\n" //
+				+ "		" + addPriorConversation + "\n" //
 				+ "	} \n" // end: graph
 				+ "}";
 		logger.info("SPARQL query (initial annotations for question {}):\n{}", questionUrlString, sparqlquery);

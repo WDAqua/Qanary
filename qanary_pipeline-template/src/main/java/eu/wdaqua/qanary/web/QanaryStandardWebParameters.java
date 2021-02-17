@@ -14,5 +14,5 @@ public interface QanaryStandardWebParameters {
 	final String LANGUAGE = "language";
 	final String TARGETDATA = "targetdata";
 	final String GRAPH = "graph";
-	final String PREVIOUSPROCESSGRAPH = "previousProcessGraph";
+	final String PRIORCONVERSATION = "previousProcessGraph";
 }

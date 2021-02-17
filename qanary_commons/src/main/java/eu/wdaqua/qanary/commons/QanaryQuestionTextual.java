@@ -21,9 +21,9 @@ public class QanaryQuestionTextual extends QanaryQuestion<Object> {
 		this(questionUrl, qanaryConfigurator, null);
 	}
 
-	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator, URI previousProcessGraph)
+	public QanaryQuestionTextual(URL questionUrl, QanaryConfigurator qanaryConfigurator, URI priorConversation)
 			throws URISyntaxException, SparqlQueryFailed, QanaryExceptionNoOrMultipleQuestions {
-		super(questionUrl, qanaryConfigurator, previousProcessGraph);
+		super(questionUrl, qanaryConfigurator, priorConversation);
 		// ensure that the question is marked as textual question
 		this.putAnnotationOfTextRepresentation();
 	}
