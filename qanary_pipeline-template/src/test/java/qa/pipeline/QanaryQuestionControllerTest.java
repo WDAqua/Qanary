@@ -1,10 +1,13 @@
 package qa.pipeline;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -39,15 +42,23 @@ class QanaryQuestionControllerTest {
 		QanaryQuestionController qanaryQuestionController = new QanaryQuestionController(null,
 				new QanaryPipelineConfiguration(this.environment));
 
-		String testquestion = "foo bar?";
+		testCreateTextQuestion(qanaryQuestionController, "foo bar?");
+		testCreateTextQuestion(qanaryQuestionController, "Wie viele Länder gibt es?");
+		testCreateTextQuestion(qanaryQuestionController, "La reunión se celebrará a las 16:00 horas en la biblioteca.");
+	}
 
+	private void testCreateTextQuestion(QanaryQuestionController qanaryQuestionController, String testquestion) throws IOException {
 		@SuppressWarnings("unchecked")
 		ResponseEntity<QanaryQuestionCreated> response = (ResponseEntity<QanaryQuestionCreated>) qanaryQuestionController
 				.createQuestion(testquestion);
 
 		FileSystemResource returnedquestion = qanaryQuestionController
 				.getQuestionRawData(response.getBody().getQuestionID());
-		assertTrue(returnedquestion.contentLength() == testquestion.length());
+		String returnedquestionContent = Files.readString(Path.of(returnedquestion.getURI()));
+		assertEquals(testquestion.trim().length(), returnedquestionContent.trim().length(), //
+				"expected: '" + testquestion + "' != '" + returnedquestionContent + "'");
+		assertEquals(testquestion, returnedquestionContent, //
+				"expected: '" + testquestion + "' != '" + returnedquestionContent + "'");
 	}
 
 	@Test

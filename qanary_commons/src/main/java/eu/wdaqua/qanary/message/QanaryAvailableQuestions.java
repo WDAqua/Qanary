@@ -24,11 +24,15 @@ public class QanaryAvailableQuestions {
      * create list of available questions in given directory
      */
     public QanaryAvailableQuestions(String directoryForStoringQuestionRawData, String host) throws IOException {
+    	if( directoryForStoringQuestionRawData.isBlank() ) {
+    		directoryForStoringQuestionRawData = "."; // fallback if no custom configuration was defined
+    	}
+    	
         File folder = new File(directoryForStoringQuestionRawData);
-
+        
         if (!folder.isDirectory()) {
-            throw new IOException(directoryForStoringQuestionRawData
-                    + " is not accessible. Create it? Or change path in config file.");
+            throw new IOException("directory '" + directoryForStoringQuestionRawData + "'" //
+                    + " is not accessible. Create it? Or change path in config file (application.properties).");
         }
 
         for (final File fileEntry : folder.listFiles()) {

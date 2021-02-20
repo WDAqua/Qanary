@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -236,7 +235,7 @@ public class QanaryQuestionController {
 		final QanaryAvailableQuestions questions = new QanaryAvailableQuestions(
 				this.getDirectoryForStoringQuestionRawData(), this.getHost());
 
-		logger.debug("Number of available questions in {}: {}", this.getDirectoryForStoringQuestionRawData(),
+		logger.debug("Number of available questions in '{}': {}", this.getDirectoryForStoringQuestionRawData(),
 				questions.getAvailableQuestions().size());
 
 		return questions;
@@ -254,7 +253,7 @@ public class QanaryQuestionController {
 	/**
 	 * question for a given id, raw return of the data
 	 */
-	@GetMapping(value = "/question/{questionid}/raw", produces = MediaType.ALL_VALUE)
+	@GetMapping(value = "/question/{questionid}/raw", produces = "text/plain;charset=UTF-8")
 	@ResponseBody
 	public FileSystemResource getQuestionRawData(@PathVariable final String questionid) {
 
