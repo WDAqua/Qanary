@@ -92,8 +92,8 @@ public class QanaryEmbeddedQaWebFrontendController {
 		// the component from the default list in the currently used
 		// application.properties
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add(QanaryStandardWebParameters.QUESTION, question);
-		map.add(QanaryStandardWebParameters.QUESTION, qanaryConfigurator.getDefaultComponentNamesAsString());
+		map.add(eu.wdaqua.qanary.web.QanaryStandardWebParameters.QUESTION, question);
+		map.add(eu.wdaqua.qanary.web.QanaryStandardWebParameters.QUESTION, qanaryConfigurator.getDefaultComponentNamesAsString());
 
 		// Send the question to the startquestionansweringwithtextquestion
 		ResponseEntity<?> response = qanaryQuestionAnsweringController.startquestionansweringwithtextquestion(question,

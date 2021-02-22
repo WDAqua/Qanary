@@ -1,58 +1,50 @@
 package eu.wdaqua.qanary.web;
 
-import java.awt.image.Kernel;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.Key;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.wdaqua.qanary.commons.QanaryUtils;
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.apache.jena.atlas.json.JsonObject;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.json.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-
+import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
+import eu.wdaqua.qanary.business.QanaryComponent;
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
-import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
-import eu.wdaqua.qanary.business.*;
+import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
-
-import org.thymeleaf.util.EvaluationUtils;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -392,14 +384,14 @@ public class QanaryQuestionAnsweringController {
 
 				// create a textual question in a new graph
 				qanaryQuestion = new QanaryQuestionTextual(qanaryQuestionCreated.getQuestionURI().toURL(),
-						qanaryConfigurator, previousProcessGraph);
+						qanaryConfigurator);
 			} else {
 				// store the question on the current server
 				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController
 						.storeAudioQuestion(questionaudio);
 
 				// create question
-				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator, previousProcessGraph);
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator);
 
 				// add annotation saying that it is an audio question
 				qanaryQuestion.putAnnotationOfAudioRepresentation();

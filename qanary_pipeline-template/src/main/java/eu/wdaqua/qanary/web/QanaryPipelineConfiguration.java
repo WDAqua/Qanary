@@ -1,7 +1,5 @@
 package eu.wdaqua.qanary.web;
 
-import java.io.File;
-import java.io.FileReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +11,9 @@ import java.util.TreeMap;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
