@@ -21,28 +21,26 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.MockedStatic;
 
-class QanaryQuestionTest {
+class PriorConversationTest {
 
     @Test
     void testStatic() {
         try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
-            // mocked behaviour
-            doNothing().when(QanaryUtils.class);
-
-            // setup new Question
-            URL questionUri = new URI("http://localhost/question").toURL();
-            QanaryConfigurator qanaryConfigurator = new QanaryConfigurator(new RestTemplate(),
-                    new ArrayList<>(),
-                    "http://localhost",
-                    8080,
-                       new URI("http://localhost:8081"), new TriplestoreEndpointIdentifier());
-            // prior conversation dummy for this test
+            // given a question with a prior conversation
             URI priorConversation = new URI("urn:priorConversation");
+            URL questionUri = new URI("http://localhost/question").toURL();
+            QanaryConfigurator qanaryConfigurator = new QanaryConfigurator(
+                    null,
+                    null,
+                    null,
+                    0,
+                    null,
+                    null);
 
-            // sut
-            QanaryQuestion qanaryQuestion = new QanaryQuestion(questionUri, qanaryConfigurator, priorConversation);
+            // when QanaryQuestion is instantiated
+            new QanaryQuestion(questionUri, qanaryConfigurator, priorConversation);
 
-            // verify that prior conversation dummy is annotated
+            // then prior conversation should be included in the Question annotation
             mockedStatic.verify(() -> QanaryUtils.loadTripleStore(matches(
                     ".*<http://localhost/question> qa:priorConversation <urn:priorConversation> \\..*"),
                     any(QanaryConfigurator.class)), times(1));
