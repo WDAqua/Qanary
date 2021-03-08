@@ -32,7 +32,7 @@ class QanaryQuestionTest {
             // setup new Question
             URL questionUri = new URI("http://localhost/question").toURL();
             QanaryConfigurator qanaryConfigurator = new QanaryConfigurator(new RestTemplate(),
-                    new ArrayList<String>(),
+                    new ArrayList<>(),
                     "http://localhost",
                     8080,
                        new URI("http://localhost:8081"), new TriplestoreEndpointIdentifier());
