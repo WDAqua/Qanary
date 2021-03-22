@@ -391,7 +391,7 @@ public class QanaryQuestionAnsweringController {
 						.storeAudioQuestion(questionaudio);
 
 				// create question
-				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator);
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI(), qanaryConfigurator);
 
 				// add annotation saying that it is an audio question
 				qanaryQuestion.putAnnotationOfAudioRepresentation();
