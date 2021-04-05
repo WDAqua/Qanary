@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.commons.config.CacheConfig;
 
@@ -17,7 +17,7 @@ import eu.wdaqua.qanary.commons.config.CacheConfig;
  * of actually executed requests (i.e., the number of requests that could not be
  * cached)
  */
-@Service
+@Component
 public class CacheOfRestTemplateResponse {
 	private static Logger logger = LoggerFactory.getLogger(CacheOfRestTemplateResponse.class);
 	private static long numberOfExecutedRequests = 0;

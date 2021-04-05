@@ -18,12 +18,12 @@ public class RestClientConfig {
 	Logger logger = LoggerFactory.getLogger(RestClientConfig.class);
 
 	@Bean
-	CacheOfRestTemplateResponse cacheResponse() throws NoSuchMethodException, SecurityException {
+	public CacheOfRestTemplateResponse cacheResponse() throws NoSuchMethodException, SecurityException {
 		return new CacheOfRestTemplateResponse();
 	}
 
 	@Bean
-	RestTemplateWithCaching restTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
+	public RestTemplateWithCaching restTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
 		return new RestTemplateWithCaching(myCacheResponse);
 	}
 
