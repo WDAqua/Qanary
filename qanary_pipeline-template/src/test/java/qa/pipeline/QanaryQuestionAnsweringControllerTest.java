@@ -65,13 +65,14 @@ class QanaryQuestionAnsweringControllerTest {
 
     @Test
     void testQuestionAnsweringControllerPriorConversation() throws Exception {
+        String json = "{\"question\": \"foo?\"}";
         try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
             mvc.perform(
                     MockMvcRequestBuilders.post("/startquestionansweringwithtextquestion")
                             .contentType("application/json")
-                            .param("question", "foo?")
+                            .content(json)
                             .accept(MediaType.APPLICATION_JSON)
-            ).andExpect(status().isOk()); // fails with status 404
+            ).andExpect(status().is2xxSuccessful()); // fails with status 404
 
             // todo: assert prior conversation stored
             mockedStatic.verify(() -> QanaryUtils.loadTripleStore(matches(".*"), any(QanaryConfigurator.class)),
@@ -79,29 +80,4 @@ class QanaryQuestionAnsweringControllerTest {
         }
     }
 
-    @Test
-    @Ignore
-    void testPriorConversationController() throws Exception {
-        QanaryQuestionAnsweringController controller = new QanaryQuestionAnsweringController(
-                null,
-                null,
-                null,
-                null,
-                null);
-        String testQuestion = "foo?";
-        URI priorConversation = new URI("urn:priorConversation");
-
-        try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
-            ResponseEntity<?> response = controller.startquestionansweringwithtextquestion(
-                    testQuestion,
-                    null,
-                    null,
-                    null,
-                    priorConversation);
-
-            // todo: assert prior conversation stored
-            mockedStatic.verify(() -> QanaryUtils.loadTripleStore(matches(".*"), any(QanaryConfigurator.class)),
-                    times(1));
-        }
-    }
 }
