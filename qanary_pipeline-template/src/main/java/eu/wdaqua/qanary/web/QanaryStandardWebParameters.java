@@ -7,11 +7,12 @@ package eu.wdaqua.qanary.web;
  *
  */
 public interface QanaryStandardWebParameters {
-	String COMPONENTLIST = "componentlist[]";
-	String QUESTION = "question";
-	String TEXTQUESTION = "textquestion";
-	String AUDIOQUESTION = "audioquestion";
-	String LANGUAGE = "language";
-	String TARGETDATA = "targetdata";
-	String GRAPH = "graph";
+	final String COMPONENTLIST = "componentlist[]";
+	final String QUESTION = "question";
+	final String TEXTQUESTION = "textquestion";
+	final String AUDIOQUESTION = "audioquestion";
+	final String LANGUAGE = "language";
+	final String TARGETDATA = "targetdata";
+	final String GRAPH = "graph";
+	final String PRIORCONVERSATION = "previousProcessGraph";
 }

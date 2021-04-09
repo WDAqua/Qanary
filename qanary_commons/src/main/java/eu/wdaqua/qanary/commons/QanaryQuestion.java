@@ -49,7 +49,7 @@ public class QanaryQuestion<T> {
 	private URI uriAudioRepresentation;
 	private final URI namedGraph; // where the question is stored
 	private List<String> language;
-	private List<String> knwoledgeBase;
+	private List<String> knowledgeBase;
 
 	private QanaryConfigurator myQanaryConfigurator;
 
@@ -62,7 +62,7 @@ public class QanaryQuestion<T> {
 	 * @throws URISyntaxException
 	 * @throws SparqlQueryFailed
 	 */
-	public QanaryQuestion(final URL questionUri, QanaryConfigurator qanaryConfigurator)
+	public QanaryQuestion(final URL questionUri, QanaryConfigurator qanaryConfigurator, URI priorConversation)
 			throws URISyntaxException, SparqlQueryFailed {
 		// Create a new named graph and insert it into the triplestore
 		// in this graph the data is stored
@@ -76,6 +76,13 @@ public class QanaryQuestion<T> {
 		String questionUrlString = questionUri.toString();
 		logger.info("Triplestore: {}, Current graph: {}", triplestore, namedGraph.toString());
 
+		String addPriorConversation = "";
+		if( priorConversation != null ) {
+			addPriorConversation = "<" + questionUrlString + "> qa:priorConversation <" + priorConversation.toASCIIString() + "> . ";
+		} else {
+			logger.info("No previous graph (qa:priorConversation) provided: {}", priorConversation);
+		}
+		
 		// IMPORTANT: The following processing steps will fail if the used
 		// triplestore is not allowed to access data from the Web
 
@@ -98,22 +105,23 @@ public class QanaryQuestion<T> {
 
 		// Prepare the question, answer and dataset objects
 		sparqlquery = "" //
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "INSERT DATA { " //
-				+ "	GRAPH " + namedGraphMarker + " {" //
-				+ "		<" + questionUrlString + "> a qa:Question ." //
-				+ "		<" + questionUrlString + "#Answer> a qa:Answer . " //
-				+ "		<" + questionUrlString + "#Dataset> a qa:Dataset . " //
-				+ "		<" + questionUrlString + "#Annotation:1> a  oa:AnnotationOfQuestion; " //
-				+ "   		oa:hasTarget <" + questionUrlString + "> ;" //
-				+ "   		oa:hasBody   <" + questionUrlString + "#Answer> . " //
-				+ "		<" + questionUrlString + "#Annotation:2> a  oa:AnnotationOfQuestion; " //
-				+ "   		oa:hasTarget <" + questionUrlString + "> ; " //
-				+ "   		oa:hasBody   <" + questionUrlString + "#Dataset>." //
-				+ "	}" // end: graph
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" //
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> \n" //
+				+ "INSERT DATA { \n" //
+				+ "	GRAPH " + namedGraphMarker + " { \n" //
+				+ "		<" + questionUrlString + "> a qa:Question .\n" //
+				+ "		<" + questionUrlString + "#Answer> a qa:Answer . \n" //
+				+ "		<" + questionUrlString + "#Dataset> a qa:Dataset . \n" //
+				+ "		<" + questionUrlString + "#Annotation:1> a  oa:AnnotationOfQuestion; \n" //
+				+ "				oa:hasTarget <" + questionUrlString + "> ; \n" //
+				+ "				oa:hasBody   <" + questionUrlString + "#Answer> . \n" //
+				+ "		<" + questionUrlString + "#Annotation:2> a  oa:AnnotationOfQuestion; \n" //
+				+ "				oa:hasTarget <" + questionUrlString + "> ; \n" //
+				+ "				oa:hasBody   <" + questionUrlString + "#Dataset> . \n" //
+				+ "		" + addPriorConversation + "\n" //
+				+ "	} \n" // end: graph
 				+ "}";
-		logger.info("SPARQL query (initial annotations for question {}): {}", questionUrlString, sparqlquery);
+		logger.info("SPARQL query (initial annotations for question {}):\n{}", questionUrlString, sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		initFromTriplestore(qanaryConfigurator);
@@ -696,7 +704,7 @@ public class QanaryQuestion<T> {
 	 * get the knowledge base of the question, enabled for feedback
 	 */
 	public List<String> getTargetData() throws Exception {
-		if (this.knwoledgeBase == null) {
+		if (this.knowledgeBase == null) {
 			String sparql = "" //
 					+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
@@ -728,9 +736,9 @@ public class QanaryQuestion<T> {
 			}
 
 			logger.info("knowledge base {} found in {} at {}", knowledgeBase, this.getInGraph(), this.getEndpoint());
-			this.knwoledgeBase = knowledgeBase;
+			this.knowledgeBase = knowledgeBase;
 		}
-		return this.knwoledgeBase;
+		return this.knowledgeBase;
 	}
 
 	public String getAnswerFound() throws SparqlQueryFailed {
