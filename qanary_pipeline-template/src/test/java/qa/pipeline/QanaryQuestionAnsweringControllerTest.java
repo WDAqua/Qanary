@@ -7,6 +7,7 @@ import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ class QanaryQuestionAnsweringControllerTest {
     }
 
     @Test
+    @Disabled
     void testQuestionAnsweringControllerPriorConversation() throws Exception {
         String json = "{\"question\": \"foo?\"}";
         try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
