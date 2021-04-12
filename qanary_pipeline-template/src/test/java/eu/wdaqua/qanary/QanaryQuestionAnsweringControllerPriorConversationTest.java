@@ -20,7 +20,7 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class QanaryQuestionAnsweringControllerPriorConversation {
+public class QanaryQuestionAnsweringControllerPriorConversationTest {
 	@LocalServerPort
 	private int port;
 
@@ -29,10 +29,6 @@ public class QanaryQuestionAnsweringControllerPriorConversation {
 
 	@Autowired
 	private MockMvc mvc;
-
-	public String getQueryUrl() {
-		return "http://localhost:" + port + "/startquestionansweringwithtextquestion";
-	}
 
 	@Test
 	void testTestEnvironment() {
@@ -44,7 +40,9 @@ public class QanaryQuestionAnsweringControllerPriorConversation {
 		String json = "{\"question\": \"foo?\"}";
 		try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
 			mvc.perform(MockMvcRequestBuilders.post("/startquestionansweringwithtextquestion")
-					.contentType("application/json").content(json).accept(MediaType.APPLICATION_JSON))
+					.contentType("application/json") // 
+					.content(json) // 
+					.accept(MediaType.APPLICATION_JSON)) // 
 					.andExpect(status().is2xxSuccessful()); // returns 201
 		}
 	}

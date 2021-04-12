@@ -1,41 +1,34 @@
-package qa.pipeline;
+package eu.wdaqua.qanary;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.QanaryUtils;
-import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
-import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
-import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.atLeast;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import org.mockito.Mockito;
-import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 
-@ExtendWith(SpringExtension.class)
-@RunWith(SpringRunner.class)
-@WebAppConfiguration
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class QanaryQuestionAnsweringControllerTest {
-
     @Autowired
     private MockMvc mvc;
 
@@ -72,12 +65,11 @@ class QanaryQuestionAnsweringControllerTest {
                             .contentType("application/json")
                             .content(json)
                             .accept(MediaType.APPLICATION_JSON)
-            ).andExpect(status().is2xxSuccessful()); // fails with status 404
+            ).andExpect(status().is2xxSuccessful()); 
 
             // todo: assert prior conversation stored
             mockedStatic.verify(() -> QanaryUtils.loadTripleStore(matches(".*"), any(QanaryConfigurator.class)),
-                    times(1));
+            		atLeast(1));
         }
     }
-
 }

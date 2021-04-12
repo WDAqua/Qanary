@@ -1,4 +1,4 @@
-package qa.pipeline;
+package eu.wdaqua.qanary;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
