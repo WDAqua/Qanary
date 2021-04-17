@@ -16,7 +16,8 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
-		<qanary.version>[2.0.0,3.0.0)</qanary.version>
+<!-- 	<qanary.version>[2.1.0,3.0.0)</qanary.version> -->
+		<qanary.version>2.1.0</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<docker.image.name>qapipeline</docker.image.name>
@@ -28,7 +29,7 @@
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qa.commons</artifactId>
-			<version>${qanary.version}</version>
+			<version>2.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>de.codecentric</groupId>
@@ -62,6 +63,19 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>

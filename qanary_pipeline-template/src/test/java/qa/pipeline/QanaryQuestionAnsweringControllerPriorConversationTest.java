@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary;
+package qa.pipeline;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,7 +20,7 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class QanaryQuestionAnsweringControllerPriorConversation {
+public class QanaryQuestionAnsweringControllerPriorConversationTest {
 	@LocalServerPort
 	private int port;
 
