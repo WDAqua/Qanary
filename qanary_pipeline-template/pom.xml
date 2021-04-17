@@ -16,7 +16,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
-<!-- 	<qanary.version>[2.1.0,3.0.0)</qanary.version> -->
+		<qanary.version>[2.1.0,3.0.0)</qanary.version>
 		<qanary.version>2.1.0</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qa.commons</artifactId>
-			<version>2.0.3</version>
+			<version>${qanary.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.codecentric</groupId>
