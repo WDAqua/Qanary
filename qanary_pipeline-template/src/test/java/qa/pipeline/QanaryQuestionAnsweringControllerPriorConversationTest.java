@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary;
+package qa.pipeline;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,6 +30,10 @@ public class QanaryQuestionAnsweringControllerPriorConversationTest {
 	@Autowired
 	private MockMvc mvc;
 
+	public String getQueryUrl() {
+		return "http://localhost:" + port + "/startquestionansweringwithtextquestion";
+	}
+
 	@Test
 	void testTestEnvironment() {
 		assertNotEquals(null, restTemplate, "Test enviroment initialization failed.");
@@ -40,9 +44,7 @@ public class QanaryQuestionAnsweringControllerPriorConversationTest {
 		String json = "{\"question\": \"foo?\"}";
 		try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
 			mvc.perform(MockMvcRequestBuilders.post("/startquestionansweringwithtextquestion")
-					.contentType("application/json") // 
-					.content(json) // 
-					.accept(MediaType.APPLICATION_JSON)) // 
+					.contentType("application/json").content(json).accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().is2xxSuccessful()); // returns 201
 		}
 	}
