@@ -57,7 +57,6 @@ class QanaryQuestionAnsweringControllerTest {
     }
 
     @Test
-    @Disabled
     void testQuestionAnsweringControllerPriorConversation() throws Exception {
         String json = "{\"question\": \"foo?\"}";
         try (MockedStatic<QanaryUtils> mockedStatic = Mockito.mockStatic(QanaryUtils.class)) {
