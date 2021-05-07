@@ -35,6 +35,7 @@ class PriorConversationTest {
                     null,
                     0,
                     null,
+                    null,
                     null);
 
             // when QanaryQuestion is instantiated

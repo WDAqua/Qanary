@@ -44,7 +44,7 @@ public class QanaryPipelineConfiguration {
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = { "qanary.triplestore", "server.host", "server.port" };
+	private final String[] requiredParameterNames = { "qanary.triplestore", "server.host", "server.port", "qanary.ontology"};
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -178,6 +178,11 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
+	/**
+	 * required attribute
+	 * 
+	 * @return
+	 */
 	public URI getTriplestoreAsURI() throws TripleStoreNotProvided {
 		try {
 			return new URI(getTriplestore());
@@ -186,6 +191,15 @@ public class QanaryPipelineConfiguration {
 					"triplestore value '" + getTriplestore() + "' was no URI.\n(error: " + e.getMessage() + ")");
 		}
 	}
+
+	public URI getQanaryOntologyAsURI() {
+		try {
+			return new URI(this.getProperty("qanary.ontology"));
+		} catch (Exception e) {
+			throw new MissingRequiredConfiguration("qanary.ontology");
+		}
+	}
+
 
 	/**
 	 * default value is System.getProperty("user.dir") if configuration is not

@@ -12,6 +12,7 @@ import org.apache.jena.query.ResultSet;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -94,13 +95,11 @@ public class QanaryQuestion<T> {
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Load the Qanary Ontology using the permanent GitHub location
-		// be aware that
-		// https://raw.githubusercontent.com/WDAqua/QAOntology/master/qanary.owl does
-		// not work due to header issues on behalf of GitHub
+		// specified in application.properties
 		sparqlquery = "" //
-				+ "LOAD <https://rawcdn.githack.com/WDAqua/QAOntology/6d25ebc8970b93452b5bb970a8e2f526be9841a5/qanary.owl> " //
+				+ "LOAD <"+qanaryConfigurator.getQanaryOntology()+"> " //
 				+ "INTO GRAPH " + namedGraphMarker;
-		logger.warn("SPARQL query: {}", sparqlquery);
+		logger.info("SPARQL query: {}", sparqlquery);
 		loadTripleStore(sparqlquery, qanaryConfigurator);
 
 		// Prepare the question, answer and dataset objects
