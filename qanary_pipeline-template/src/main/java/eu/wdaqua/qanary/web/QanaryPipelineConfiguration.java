@@ -38,7 +38,8 @@ public class QanaryPipelineConfiguration {
 			"server.port", //
 			"qanary.triplestore", //
 			"qanary.questions.directory", //
-			"qanary.components" };
+			"qanary.components", //
+			"qanary.ontology"};
 	private final String[] debugPropertiesPrefixesToBeShowOnStartup = { //
 			"qanary", //
 			"server", //
