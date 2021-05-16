@@ -30,13 +30,15 @@ public class QanaryConfigurator {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryConfigurator.class);
 	private final RestTemplate restTemplate;
-	// default configuration defined in the currently used in application
+	// default configuration defined in the currently used application
 	// context (e.g., defined in application.properties)
 	private List<String> defaultComponentNames;
 
 	private final int port;
 	private final String host;
 	private final URI endpoint;
+
+	private final URI qanaryOntology;
 
 	// parameter required to create the correct triplestore endpoint, particularly
 	// due to Stardog v5+
@@ -48,7 +50,8 @@ public class QanaryConfigurator {
 			String serverhost, //
 			int serverport, //
 			URI triplestoreendpoint, //
-			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier //
+			URI qanaryOntology, //
+			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier 
 	) {
 		this.restTemplate = restTemplate;
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
@@ -56,6 +59,7 @@ public class QanaryConfigurator {
 		this.port = serverport;
 		this.host = serverhost;
 		this.endpoint = triplestoreendpoint;
+		this.qanaryOntology = qanaryOntology;
 
 		logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
 	}
@@ -119,6 +123,10 @@ public class QanaryConfigurator {
 		result.endQuestionAnswering();
 		logger.info("callServices finished: {}", result);
 		return result;
+	}
+
+	public URI getQanaryOntology() {
+		return this.qanaryOntology;
 	}
 
 	public int getPort() {

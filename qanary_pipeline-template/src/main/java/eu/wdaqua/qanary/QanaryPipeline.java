@@ -74,6 +74,7 @@ public class QanaryPipeline {
 				qanaryPipelineConfiguration.getHost(), // from config
 				qanaryPipelineConfiguration.getPort(), // from config
 				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
+				qanaryPipelineConfiguration.getQanaryOntologyAsURI(), // from config
 				myTriplestoreEndpointIdentifier //
 		);
 	}
