@@ -553,10 +553,11 @@ public class QanaryQuestion<T> {
 		String sparql = "" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " //
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "	 ?a a qa:AnnotationJson . " //
+				+ "	 ?a a qa:AnnotationOfAnswerJson . " //
 				+ "  ?a oa:hasBody ?answer . " //
 				+ "  ?answer rdf:value ?json . " //
 //				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
