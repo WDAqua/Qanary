@@ -545,6 +545,7 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
+		//TODO: this can throw index out of bounds if no query was annotated
 		return this.getSparqlResults().get(0).query;
 	}
 
@@ -552,11 +553,16 @@ public class QanaryQuestion<T> {
 		String sparql = "" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " //
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
-				+ "  ?a oa:hasBody ?json " //
+				+ "	 ?a a qa:AnnotationOfAnswerJson . " //
+				+ "  ?a oa:hasBody ?answer . " //
+				+ "  ?answer rdf:value ?json . " //
+//				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
+//				+ "  ?a oa:hasBody ?json " //
+//				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
