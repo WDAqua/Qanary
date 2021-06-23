@@ -17,7 +17,8 @@ import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 
 /**
- * Controller for Qanary pipeline service w.r.t. components
+ * Controller for Qanary pipeline service w.r.t. components intended to offer configuration information, 
+ * s.t., an integration in other applications is possible
  */
 @CrossOrigin
 @RestController
@@ -39,8 +40,7 @@ public class QanaryConfigurationController {
 		for (QanaryComponent component : components) {
 			JSONObject object = new JSONObject();
 			String name = component.getName();
-			//String url = component.getUrl(); use the url provided by the component configuration
-			String url = "/components/"+name; // create a relative url components/name
+			String url = "/components/" + name; // create a relative url components/name
 			object.put("name", name);
 			object.put("url", url);
 			json.add(object);
