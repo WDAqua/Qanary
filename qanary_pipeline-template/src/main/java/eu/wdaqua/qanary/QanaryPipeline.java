@@ -20,6 +20,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.apache.catalina.connector.Connector;
+
 import com.google.common.collect.Maps;
 
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
@@ -109,6 +113,24 @@ public class QanaryPipeline {
 		configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
 		return configuration;
 	}
+
+	// TODO: re-evaluate
+	// if it is not intended to provide both HTTP and HTTPS connection at the same time
+	// an additional connector is not required. 
+	// Spring handles the change automatically depending on applicaton.properties
+//	@Bean
+//	public ServletWebServerFactory servletContainer() {
+//		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
+//		tomcat.addAdditionalTomcatConnectors(createStandardConnector());
+//		logger.info("additional connector configured");
+//		return tomcat;
+//	}
+//
+//	private Connector createStandardConnector() {
+//		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+//		connector.setPort(qanaryPipelineConfiguration.getPort());
+//		return connector;
+//	}
 
 	/*
 	 * @EventListener(ClientApplicationRegisteredEvent.class) public void
