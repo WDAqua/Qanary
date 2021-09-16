@@ -545,8 +545,14 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
-		//TODO: this can throw index out of bounds if no query was annotated
-		return this.getSparqlResults().get(0).query;
+		// added try and catch to prevent indexOutOfBoundsException, returns empty String if no Query was found
+		String sparqlResult = "";
+		try {
+			sparqlResult = this.getSparqlResults().get(0).query;
+		} catch (IndexOutOfBoundsException e) {
+			logger.warn("No SPARQL Query found, index out of bounds");
+		}
+		return sparqlResult;
 	}
 
 	public String getJsonResult() throws SparqlQueryFailed {
