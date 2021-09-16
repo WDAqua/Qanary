@@ -572,7 +572,7 @@ public class QanaryQuestion<T> {
 				+ "}";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
-		String sparqlAnnotation = null;
+		String sparqlAnnotation = "";
 		while (resultset.hasNext()) {
 			sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
 		}
