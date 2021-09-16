@@ -133,12 +133,15 @@ public class QanaryGerbilController {
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
+            @RequestParam(value = "lang", required = true) final String queryLanguage,
             @PathVariable("components") final String componentsToBeCalled
     ) throws URISyntaxException, Exception, SparqlQueryFailed, ParseException {
     	logger.info("Asked question: {}", query);
+    	logger.info("Language of question: {}", queryLanguage);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
     	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
         map.add("question", query);
+        map.add("language", queryLanguage);
         map.add("componentlist[]", componentsToBeCalled);
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getPort()+"/startquestionansweringwithtextquestion", map, String.class);
@@ -162,7 +165,16 @@ public class QanaryGerbilController {
         }*/
         // retrieve the content (question, SPARQL Query and answer)
         // getTextualRepresentation needs Exception to be thrown
+        // tries to retrieve the language from Triplestore, if not retrievable use "en" as default
         String language = "en";
+        try {
+            String annotatedLang = myQanaryQuestion.getLanguage();
+            if (annotatedLang != null && !annotatedLang.isEmpty()) {
+                language = annotatedLang;
+            }
+        } catch (Exception e) {
+            logger.warn("Could not retrieve language from triplestore, using \"{}\" instead", language);
+        }
         String questionText = myQanaryQuestion.getTextualRepresentation();
         String sparqlQueryString = myQanaryQuestion.getSparqlResult();      // returns empty String if no Query was found
         String jsonAnswerString = myQanaryQuestion.getJsonResult();         // returns empty String if no answer was found
