@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +134,7 @@ public class QanaryGerbilController {
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
             @PathVariable("components") final String componentsToBeCalled
-    ) throws URISyntaxException, SparqlQueryFailed {
+    ) throws URISyntaxException, Exception, SparqlQueryFailed, ParseException {
     	logger.info("Asked question: {}", query);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
     	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -146,31 +148,59 @@ public class QanaryGerbilController {
         @SuppressWarnings("rawtypes")
 		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
         //Generates the following output
-    	/*{
- 		   "questions":[
- 		      "question":{
- 		         "answers":"...",
- 		         "language":[
- 		            {
- 		               "SPARQL":"..."
- 		            }
- 		         ]
- 		      }
- 		   ]
- 		}*/
+        /*{
+            "questions": [{
+                "question": [{
+                    "language": "en",   //(ISO 639-1)
+          			"string": "..."     //(textual representation of asked Question)
+          			    }],
+          		"query": {
+          		    "sparql": "..."     //(SPARQL Query constructed by QB component)
+                },
+          		"answers": [{"..."}]    //(Answers returned by QE component)
+            }]
+        }*/
+        // retrieve the content (question, SPARQL Query and answer)
+        // getTextualRepresentation needs Exception to be thrown
+        String language = "en";
+        String questionText = myQanaryQuestion.getTextualRepresentation();
+        String sparqlQueryString = myQanaryQuestion.getSparqlResult();      // returns empty String if no Query was found
+        String jsonAnswerString = myQanaryQuestion.getJsonResult();         // returns empty String if no answer was found
+
+        // create the question array and object and add the content
+        JSONArray questionDataArray = new JSONArray();
+        JSONObject questionData = new JSONObject();
+        questionData.put("language", language);
+        questionData.put("string", questionText);
+        questionDataArray.add(questionData);
+
+        // create the query object and add the content
+        JSONObject queryObj = new JSONObject();
+        queryObj.put("sparql", sparqlQueryString);
+
+        // transform the answer String to JSON, if an answer was found
+        JSONObject answersObj = new JSONObject();
+        if (jsonAnswerString.length() > 0) {
+            JSONParser parser = new JSONParser();
+            answersObj = (JSONObject) parser.parse(jsonAnswerString);
+        }
+
+        // create the answers array and add the content
+        JSONArray answersArray = new JSONArray();
+        answersArray.add(answersObj);
+
+        // create the wrapper object and the array and add all JSON to it
+        JSONArray questionsArray = new JSONArray();
+        JSONObject questionObject = new JSONObject();
+        questionObject.put("question", questionDataArray);
+        questionObject.put("query", queryObj);
+        questionObject.put("answers", answersArray);
+        questionsArray.add(questionObject);
+
+        // add all to the wrapper object
         JSONObject obj = new JSONObject();
-        JSONArray questions = new JSONArray();
-        JSONObject item = new JSONObject();
-        JSONObject question = new JSONObject();
-        JSONArray language = new JSONArray();
-        JSONObject sparql = new JSONObject();
-        sparql.put("SPARQL", myQanaryQuestion.getSparqlResult());
-    	language.add(sparql);
-    	question.put("answers", myQanaryQuestion.getJsonResult());
-    	question.put("language", language);
-    	item.put("question", question);
-    	questions.add(item);
-    	obj.put("questions", questions);
-    	return new ResponseEntity<JSONObject>(obj,HttpStatus.OK);
+        obj.put("questions", questionsArray);
+
+        return new ResponseEntity<JSONObject>(obj,HttpStatus.OK);
 	}
 }
