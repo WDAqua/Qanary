@@ -572,7 +572,8 @@ public class QanaryQuestion<T> {
 				+ "}";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
-		String sparqlAnnotation = "";
+		// the default value has to be null to distinguish missing values from empty values
+		String sparqlAnnotation = null; 
 		while (resultset.hasNext()) {
 			sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
 		}

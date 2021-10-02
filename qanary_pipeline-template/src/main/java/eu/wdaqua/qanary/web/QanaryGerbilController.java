@@ -192,7 +192,7 @@ public class QanaryGerbilController {
 
         // transform the answer String to JSON, if an answer was found
         JSONObject answersObj = new JSONObject();
-        if (jsonAnswerString.length() > 0) {
+        if (jsonAnswerString != null && jsonAnswerString.length() > 0) {
             JSONParser parser = new JSONParser();
             answersObj = (JSONObject) parser.parse(jsonAnswerString);
         }
