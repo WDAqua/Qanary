@@ -18,7 +18,7 @@ import java.util.List;
 public class RequestQuestionAnsweringProcess {
 	private String question;
 	private List<String> componentlist = new ArrayList<>();
-	private String language = "";
+	private String language = null;
 	private List<String> targetdata = new ArrayList<>();
 	private URI priorConversation;
 
@@ -71,7 +71,8 @@ public class RequestQuestionAnsweringProcess {
 		return "RequestQuestionAnsweringProcess " //
 				+ " -- question: \"" + getQuestion() + "\"" //
 				+ " -- componentList: " + Arrays.toString(getcomponentlist().toArray()) //
-				+ " -- priorConversation: " + getPriorConversation();
+				+ " -- priorConversation: " + getPriorConversation() // 
+				+ " -- language: " + getLanguage();
 	}
 
 }
