@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -337,7 +338,7 @@ public class QanaryQuestionAnsweringController {
 			o.put("query", s.query);
 			o.put("confidence", s.confidence);
 			o.put("kb", s.kb);
-			sparql.add(o);
+			sparql.put(o);
 		}
 		obj.put("sparql", sparql);
 		obj.put("json", myQanaryQuestion.getJsonResult());
@@ -480,7 +481,7 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> getNumberOfAnnotationsForComponent(
 			@RequestParam String component,
 			@RequestParam String graph
-	) throws URISyntaxException {
+	) throws URISyntaxException, JSONException {
 
 		JSONObject json = new JSONObject();
 		URI graphUri = URI.create(graph);

@@ -5,7 +5,8 @@ import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryExceptionQuestionNotProvided;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,6 @@ public class QanaryFeedbackController {
     /**
      * Receives a message and stores it locally
      */
-    @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/feedback", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> startquestionansweringwithtextquestion(
@@ -51,13 +51,13 @@ public class QanaryFeedbackController {
 	@RequestParam(value = "language", required = false, defaultValue ="en") final String language,
 	@RequestParam(value = "knowledgebase",required = false, defaultValue = "dbpedia") final String knowledgebase)
         throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk,
-        IOException, QanaryExceptionQuestionNotProvided {
+        IOException, QanaryExceptionQuestionNotProvided, JSONException {
         JSONObject obj = new JSONObject();
         obj.put("question", question);
         obj.put("sparql", sparql);
         obj.put("correct", correct);
-	obj.put("language", language);
-	obj.put("knowledgebase", knowledgebase);
+        obj.put("language", language);
+        obj.put("knowledgebase", knowledgebase);
         logger.info("feedback: {}", obj.toString());
         return new ResponseEntity<QanaryQuestionCreated>(HttpStatus.OK);
     }
