@@ -7,8 +7,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,12 +128,11 @@ public class QanaryGerbilController {
         return "generategerbilendpoint";
     }
 
-    @SuppressWarnings("unchecked")
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
             @PathVariable("components") final String componentsToBeCalled
-    ) throws URISyntaxException, SparqlQueryFailed {
+    ) throws URISyntaxException, SparqlQueryFailed, JSONException {
     	logger.info("Asked question: {}", query);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
     	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -165,11 +165,11 @@ public class QanaryGerbilController {
         JSONArray language = new JSONArray();
         JSONObject sparql = new JSONObject();
         sparql.put("SPARQL", myQanaryQuestion.getSparqlResult());
-    	language.add(sparql);
+    	language.put(sparql);
     	question.put("answers", myQanaryQuestion.getJsonResult());
     	question.put("language", language);
     	item.put("question", question);
-    	questions.add(item);
+    	questions.put(item);
     	obj.put("questions", questions);
     	return new ResponseEntity<JSONObject>(obj,HttpStatus.OK);
 	}

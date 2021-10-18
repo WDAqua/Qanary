@@ -5,19 +5,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>2.4.0</version>
+	<version>3.0.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.6.RELEASE</version>
+		<version>2.5.5</version>
 	</parent>
 
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
+		<spring-boot-admin.version>2.5.2</spring-boot-admin.version>
 		<qanary.version>[2.1.0,3.0.0)</qanary.version>
-		<qanary.version>2.2.0</qanary.version>
+		<qanary.version>3.0.0</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<docker.image.name>qapipeline</docker.image.name>
@@ -69,13 +69,9 @@
 			<artifactId>spring-webmvc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>		
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20090211</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -125,6 +121,27 @@
 			<version>3.8.0</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-web -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-config -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-test -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -142,10 +159,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>

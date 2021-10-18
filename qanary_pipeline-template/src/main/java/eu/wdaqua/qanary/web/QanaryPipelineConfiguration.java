@@ -19,6 +19,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import eu.wdaqua.qanary.exceptions.MissingRequiredConfiguration;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
@@ -34,8 +35,9 @@ public class QanaryPipelineConfiguration {
 	private Environment environment;
 	private final String[] commonPropertiesToBeShownOnStartup = { //
 			"spring.application.name", //
-			"server.host", //
+			//"server.host", // TODO: re-enable if getHost() works on application start
 			"server.port", //
+			"server.ssl.enabled", //
 			"qanary.triplestore", //
 			"qanary.questions.directory", //
 			"qanary.components", //
@@ -45,7 +47,7 @@ public class QanaryPipelineConfiguration {
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = { "qanary.triplestore", "server.host", "server.port", "qanary.ontology"};
+	private final String[] requiredParameterNames = { "qanary.triplestore", "server.port", "qanary.ontology"};
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -147,13 +149,25 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
-	public String getHost() {
-		String name = "server.host";
-		if (this.hasProperty(name) && !this.environment.getProperty(name).isEmpty()) {
-			return this.environment.getProperty(name);
-		} else {
+	public String getBaseUrl() {
+		try {
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+				.toUriString();
+			return baseUrl;
+		} catch (Exception e) {
+			logger.warn("could not get base url: {}", e.getMessage());
 			return null;
 		}
+	}
+
+	// TODO: return the host on startup
+	// currently the context is only available after the application started
+	public String getHost() {
+		String baseUrl = this.getBaseUrl();
+		if (baseUrl != null) {
+			return baseUrl.substring(0, baseUrl.lastIndexOf(":"));
+		}
+		return null;
 	}
 
 	public Integer getPort() {
