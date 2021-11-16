@@ -49,7 +49,7 @@ public class QanaryQuestion<T> {
 	private URI uriTextualRepresentation;
 	private URI uriAudioRepresentation;
 	private final URI namedGraph; // where the question is stored
-	private List<String> language;
+	private String language;
 	private List<String> knowledgeBase;
 
 	private QanaryConfigurator myQanaryConfigurator;
@@ -545,8 +545,14 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
-		//TODO: this can throw index out of bounds if no query was annotated
-		return this.getSparqlResults().get(0).query;
+		// added try and catch to prevent indexOutOfBoundsException, returns empty String if no Query was found
+		String sparqlResult = "";
+		try {
+			sparqlResult = this.getSparqlResults().get(0).query;
+		} catch (IndexOutOfBoundsException e) {
+			logger.warn("No SPARQL Query found, index out of bounds");
+		}
+		return sparqlResult;
 	}
 
 	public String getJsonResult() throws SparqlQueryFailed {
@@ -566,7 +572,8 @@ public class QanaryQuestion<T> {
 				+ "}";
 		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
-		String sparqlAnnotation = null;
+		// the default value has to be null to distinguish missing values from empty values
+		String sparqlAnnotation = null; 
 		while (resultset.hasNext()) {
 			sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
 		}
@@ -606,10 +613,10 @@ public class QanaryQuestion<T> {
 	 *
 	 * @param language
 	 */
-	public void setLanguageText(List<String> language) throws Exception {
+	public void setLanguageText(String language) throws Exception {
 		String part = "";
-		for (int i = 0; i < language.size(); i++) {
-			part += "?a oa:hasBody \"" + language.get(i) + "\" . ";
+		if (language != null && !language.isEmpty()) {
+			part = "?a oa:hasBody \"" + language + "\" . ";
 		}
 		String sparql = "" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
@@ -633,7 +640,7 @@ public class QanaryQuestion<T> {
 	/**
 	 * get the language of the question, enabled for feedback
 	 */
-	public List<String> getLanguage() throws Exception {
+	public String getLanguage() throws Exception {
 		if (this.language == null) {
 			String sparql = "" //
 					+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
@@ -656,12 +663,16 @@ public class QanaryQuestion<T> {
 			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
 
 			int i = 0;
-			List<String> language = new ArrayList<>();
+			List<String> languageArray = new ArrayList<>();
+			String language = "";
 			while (resultset.hasNext()) {
-				language.add(resultset.next().get("uri").toString());
+				languageArray.add(resultset.next().get("uri").toString());
 				i++;
 			}
-			if (i > 1) {
+			if (i == 1) {
+				language = languageArray.get(0);
+			}
+			else if (i > 1) {
 				throw new Exception("More than 1 language (count: " + i + ") in graph " + this.getInGraph() + " at "
 						+ this.getEndpoint());
 			} else if (i == 0) {
