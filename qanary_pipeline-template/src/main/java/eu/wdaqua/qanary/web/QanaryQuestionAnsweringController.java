@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +46,7 @@ import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
+import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -142,13 +142,12 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, //
-			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALPREFIXES, defaultValue = "", required = false) final String additionalPrefixes, //
-			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final String additionalTriples //
+			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final AdditionalTriples additionalTriples //
 			) throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
-				componentsToBeCalled, language, targetdata, priorConversation, additionalPrefixes, additionalTriples);
+				componentsToBeCalled, language, targetdata, priorConversation, additionalTriples);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -192,7 +191,7 @@ public class QanaryQuestionAnsweringController {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
-				componentsToBeCalled, language, targetdata, priorConversation, null, null); 
+				componentsToBeCalled, language, targetdata, priorConversation, null); 
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -287,7 +286,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null, null);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -323,7 +322,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null, null);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
 		// retrieve text representation, SPARQL and JSON result
 		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(), qanaryConfigurator);
 
@@ -363,7 +362,7 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
 			MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language,
-			List<String> targetdata, URI priorConversation, String additionalPrefixes, String additionalTriples) throws Exception {
+			List<String> targetdata, URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
@@ -423,8 +422,8 @@ public class QanaryQuestionAnsweringController {
 		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
 				myQanaryMessage.getInGraph(), myQanaryMessage.getEndpoint());
 
-		if (additionalTriples != null && additionalTriples.trim().length() > 0) {
-			loadAdditionalTriples(additionalPrefixes, additionalTriples, myQanaryMessage);
+		if (myQanaryPipelineConfiguration.getInsertQueriesAllowed() && additionalTriples != null) {
+			if (additionalTriples.getInsertQuery() != null) loadAdditionalTriples(additionalTriples, myQanaryMessage);
 		}
 
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
@@ -440,62 +439,17 @@ public class QanaryQuestionAnsweringController {
 	 * @param additionalTriples
 	 * @param myQanaryMessage
 	 */
-	private void loadAdditionalTriples(String additionalPrefixes, String additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed{
+	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed{
 
-		String sparqlBinds = "";
 
-		List<String> unnamed = findAdditionalVaraibles(additionalTriples);
+		String sparqlInsert = additionalTriples.getInsertQuery();
 
-		for (String i : unnamed) {
-			logger.info("adding URI bind for var {}", i);
-			sparqlBinds += "BIND (IRI(str(RAND())) AS "+i+") . ";
-		}
+		logger.info("loading additional triples into graph \"{}\" with query: {}\n", myQanaryMessage.getEndpoint(), sparqlInsert);
 
-		String sparqlInsert = "" //
-			+ additionalPrefixes + " " //
-			+ "INSERT " //
-			+ "{ " //
-			+ " GRAPH <"+myQanaryMessage.getInGraph().toString()+"> { " //
-			+ additionalTriples //
-			+ " } " //
-			+ "} " //
-			+ "WHERE { " //
-			+ sparqlBinds //
-			+ " } "; 
-
-			logger.info("loading additional triples into graph \"{}\" with query: {}\n", myQanaryMessage.getEndpoint(), sparqlInsert);
-
-			QanaryUtils qanaryUtils = new QanaryUtils(myQanaryMessage);
-			qanaryUtils.updateTripleStore(sparqlInsert, myQanaryMessage.getEndpoint());
+		QanaryUtils qanaryUtils = new QanaryUtils(myQanaryMessage);
+		qanaryUtils.updateTripleStore(sparqlInsert, myQanaryMessage.getEndpoint());
 	}
 
-	/**
-	 * return a list of all variables used in a group of SPARQL triples
-	 *
-	 * @param additionalTriples
-	 * @return variables
-	 */
-	private List<String> findAdditionalVaraibles(String additionalTriples) {
-		int lastIdx = 0;
-		String varString;
-		List<String> variables = new ArrayList<String>();
-
-		while (lastIdx != -1) {
-			lastIdx = additionalTriples.indexOf("?", lastIdx);
-			int end = additionalTriples.indexOf(" ", lastIdx);
-
-			if (lastIdx != -1) {
-				varString = additionalTriples.substring(lastIdx, end);
-				if (!variables.contains(varString)) {
-					logger.info("found new var {} at ({},{})", varString, lastIdx, end);
-					variables.add(varString);
-				}
-				lastIdx += varString.length();
-			}
-		}
-		return variables;
-	}
-	
 	/**
 	 * wrapper: create new Question Answering process for a given textual question 
 	 * 
@@ -512,7 +466,7 @@ public class QanaryQuestionAnsweringController {
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
 				myRequestQuestionAnsweringProcess.getPriorConversation(),
-				null, null // addtional triples
+				null // addtional triples
 			);			
 	}
 
