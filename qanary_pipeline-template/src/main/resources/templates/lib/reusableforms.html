@@ -4,6 +4,35 @@
                 </div>
 			</div>
 
+            <div th:fragment="additionaltripleinput">
+                INSERT query:
+                <div>
+                    <textarea rows=10 cols=60 type="text" name="additionaltriples" id="additionaltriples"></textarea>
+                </div>
+                <div>
+                    Exmaple: 
+                    <p>
+                    This example adds an AnnotationOfQuestionLanguage. 
+                    <urn:qanary:currentGraph> and <urn:qanary:currentQuestion> will automatically
+                    point to the correct URIs for this question answering process. 
+                    Variables (?a) will be replaced by a random IRI. 
+                    I you decide to not use any variables, opt for INSERT DATA instead of INSERT.
+                    </p>
+                    <textarea readonly rows=10 cols=60 type="text" id="additionaltriplesexample">
+PREFIX qa: <http://www.wdaqua.eu/qa#> 
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+INSERT { 
+    GRAPH <urn:qanary:currentGraph> {
+        ?a a qa:AnnotationOfQuestionLanguage . 
+        ?a oa:hasBody "en" .
+        ?a oa:hasTarget <urn:qanary:currentQuestion> ;
+        oa:annotatedAt ?time  
+ } 
+} 
+                    </textarea>
+                </div>
+            </div>
+
 			<div th:fragment="componentlistcheckboxes">
                 Activate the components to be executed and drag them in the intended execution order: 
                 <div class="selection">

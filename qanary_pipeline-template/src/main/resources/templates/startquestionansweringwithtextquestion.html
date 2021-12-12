@@ -9,9 +9,21 @@
 <body>
         <h1>Start a QA process with a new textual question</h1>
         <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
-		        <div th:replace="lib/reusableforms::textquestioninput"/>
-				<div th:include="lib/reusableforms::componentlistcheckboxes" />
-                <button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
+			<div th:replace="lib/reusableforms::textquestioninput"/>
+			<div th:if="${@environment.getProperty('qanary.process.allow-insert-queries') == 'true'}">
+				<button type="button" id="showadditionalinput" onclick="showAdditionalInput()">
+					Load additional Triples
+				</button>
+				<div id="additionalinput" style="display:none;">
+					<p>Insert additional Triples into the triplestore before processing the 
+					question.
+					</p>
+					<div th:include="lib/reusableforms::additionaltripleinput"/>
+				</div>
+			</div>
+			<br/>
+			<div th:include="lib/reusableforms::componentlistcheckboxes" />
+			<button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
         </form>
         <div id="results">
         	<h2>Results (provided from backend as JSON)</h2>
@@ -56,6 +68,16 @@
 </body>
 	<script th:inline="javascript">
 		// TODO: move to a JS file
+
+		// function for toggling additional input fields
+		function showAdditionalInput() {
+			var additionals = document.getElementById("additionalinput");
+			if (additionals.style.display === "none") {
+				additionals.style.display = "block";
+			} else {
+				additionals.style.display = "none";
+			}
+		}
 
 		// sets autofocus to question input field
 		window.onload = function() {
@@ -359,6 +381,6 @@
 		GetQueryException.prototype.toString = function () {
 			return this.name + ': ' + this.message;
 		}
-		
+			
 	</script>
 </html>

@@ -39,6 +39,7 @@ public class QanaryPipelineConfiguration {
 			"server.port", //
 			"server.ssl.enabled", //
 			"qanary.triplestore", //
+			"qanary.process.allow-insert-queries", //
 			"qanary.questions.directory", //
 			"qanary.components", //
 			"qanary.ontology"};
@@ -64,6 +65,8 @@ public class QanaryPipelineConfiguration {
 			}
 		}
 		logger.info("Current Configuration: \n{}", this);
+
+		this.printConfigurationWarnings();
 
 		// log all properties that are important (see
 		// debugPropertiesPrefixesToBeShowOnStartup) to DEBUG log
@@ -215,6 +218,10 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
+	public boolean getInsertQueriesAllowed() {
+		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
+	}
+
 
 	/**
 	 * default value is System.getProperty("user.dir") if configuration is not
@@ -255,5 +262,14 @@ public class QanaryPipelineConfiguration {
 					this.getProperty(commonPropertiesToBeShownOnStartup[i]));
 		}
 		return result;
+	}
+
+	/**
+	 * warn users of potentially unwanted configurations
+	 */
+	public void printConfigurationWarnings() {
+		if (this.getInsertQueriesAllowed()) {
+			logger.warn("enabling qanary.process.allow-insert-queries may pose a security risk");
+		}
 	}
 }
