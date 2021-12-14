@@ -229,12 +229,7 @@ public class QanaryQuestionAnsweringController {
 		InputStream in = new FileInputStream("additional-triples.ttl");
 		return new InputStreamResource(in);
 	}
-	@RequestMapping(value = "/additional-triples.ttl", method = RequestMethod.GET, produces = "text/plain")
-	@ResponseBody
-	public InputStreamResource getAdditionalTriplesRaw() throws FileNotFoundException {
-		InputStream in = new FileInputStream("additional-triples.ttl");
-		return new InputStreamResource(in);
-	}
+
 
 	/**
 	 * returns information about the run identified by the provided runId

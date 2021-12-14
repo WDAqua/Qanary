@@ -4,13 +4,13 @@
                 </div>
 			</div>
 
-            <div th:fragment="additionaltripleinput">
+            <div th:fragmenmt="additionalqueryinput"> 
                 INSERT query:
                 <div>
-                    <textarea rows=10 cols=60 type="text" name="additionaltriples" id="additionaltriples"></textarea>
+                    <textarea rows=10 cols=60 type="text" name="additionalquery" id="additionalquery"></textarea>
                 </div>
                 <div>
-                    Exmaple: 
+                    Example: 
                     <p>
                     This example adds an AnnotationOfQuestionLanguage. 
                     <urn:qanary:currentGraph> and <urn:qanary:currentQuestion> will automatically
@@ -18,7 +18,7 @@
                     Variables (?a) will be replaced by a random IRI. 
                     I you decide to not use any variables, opt for INSERT DATA instead of INSERT.
                     </p>
-                    <textarea readonly rows=10 cols=60 type="text" id="additionaltriplesexample">
+                    <textarea readonly rows=10 cols=60 type="text" id="additionalqueryexample">
 PREFIX qa: <http://www.wdaqua.eu/qa#> 
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 INSERT { 
@@ -29,6 +29,27 @@ INSERT {
         oa:annotatedAt ?time  
  } 
 } 
+                    </textarea>
+                </div>
+            </div>
+
+            <div th:fragment="additionaltripleinput" style="border:1px solid black">
+                Additional Triples:
+                <p>
+                The example on the right adds an AnnotationOfQuestionLanguage to the currentGraph.
+                <urn:qanary:currentQuestion> will automatically
+                point to the correct URIs for this question answering process. 
+                </p>
+                <div style="float:left">
+                    <textarea rows=10 cols=60 type="text" name="additionaltriples" id="additionaltriples"></textarea>
+                </div>
+                <div>
+                    <textarea readonly rows=10 cols=60 type="text" id="additionalqueryexample">
+@prefix qa: <http://www.wdaqua.eu/qa#> .
+@prefix oa: <http://www.w3.org/ns/openannotation/core/> .
+?a a qa:AnnotationOfQuestionLanguage . 
+?a oa:hasBody "en" .
+?a oa:hasTarget <urn:qanary:currentQuestion> .
                     </textarea>
                 </div>
             </div>
