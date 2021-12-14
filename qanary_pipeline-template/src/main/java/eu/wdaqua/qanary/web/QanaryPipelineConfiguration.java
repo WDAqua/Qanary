@@ -222,6 +222,10 @@ public class QanaryPipelineConfiguration {
 		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
 	}
 
+	public boolean getAdditionalTriplesAllowed() {
+		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples"));
+	}
+
 
 	/**
 	 * default value is System.getProperty("user.dir") if configuration is not
