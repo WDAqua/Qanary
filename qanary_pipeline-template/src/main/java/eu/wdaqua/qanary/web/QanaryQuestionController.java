@@ -32,6 +32,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * controller for all service call w.r.t. questions
  *
@@ -246,6 +248,12 @@ public class QanaryQuestionController {
 	 */
 	@GetMapping(value = "/question/{questionid}")
 	@ResponseBody
+	@Operation(
+		summary = "Return links to all information of a given question", //
+		operationId = "getQuestion",//
+		description = "Specify the question with its ID. " //
+			+ "Example: \"/question/1\""
+	)
 	public QanaryQuestionInformation getQuestion(@PathVariable final String questionid) throws MalformedURLException {
 		return new QanaryQuestionInformation(questionid, this.getHost());
 	}

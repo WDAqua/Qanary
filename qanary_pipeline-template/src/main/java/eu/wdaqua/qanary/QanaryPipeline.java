@@ -22,6 +22,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.Maps;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
@@ -109,6 +113,19 @@ public class QanaryPipeline {
 		configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
 		return configuration;
 	}
+
+	@Bean
+	public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) { // TODO:should this be sprindoc or qanary pipeline version?
+		return new OpenAPI().info(new Info() //
+				.title("Qanary Question Answering System component") // TODO: use application properties?
+				.version(appVersion) //
+				.description("Provides central functionality for each Qanary component (registration) "
+						+ "and endpoints for users.")
+				.termsOfService("http://swagger.io/terms/") //
+				.license(new License().name("Apache 2.0").url("http://springdoc.org")) //
+		);
+	}
+
 
 	/*
 	 * @EventListener(ClientApplicationRegisteredEvent.class) public void
