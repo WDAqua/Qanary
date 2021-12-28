@@ -43,19 +43,26 @@ public class QanaryUtils {
 	private final URI outGraph;
 	private static Map<String, String> updateTriplestoreEndpointMapper = new HashMap<>();
 	private static Map<String, String> selectTriplestoreEndpointMapper = new HashMap<>();
+	private final QanaryTripleStoreConnector qanaryTripleStoreConnector;
 
-	public QanaryUtils(QanaryMessage qanaryMessage) {
+	public QanaryUtils(QanaryMessage qanaryMessage) { // TODO: QanaryTripleStoreConnector qanaryTripleStoreConnector
 		this.endpoint = qanaryMessage.getEndpoint();
 		this.inGraph = qanaryMessage.getInGraph();
 		this.outGraph = qanaryMessage.getOutGraph();
+		this.qanaryTripleStoreConnector = createQanaryTripleStoreConnector();
 	}
 
 	public QanaryUtils(QanaryQuestionAnsweringRun qanaryRun) {
 		this.endpoint = qanaryRun.getEndpoint();
 		this.inGraph = qanaryRun.getInGraph();
 		this.outGraph = qanaryRun.getOutGraph();
+		this.qanaryTripleStoreConnector = createQanaryTripleStoreConnector();
 	}
 
+	public QanaryTripleStoreConnector createQanaryTripleStoreConnector() {
+		return new QanaryTripleStoreConnectorStardog(endpoint, "admin", "admin", this.inGraph.toASCIIString(), false);
+	}
+	
 	/**
 	 * returns the endpoint provided by the QanaryMessage object provided via
 	 * constructor
@@ -85,7 +92,7 @@ public class QanaryUtils {
 	 * @throws SparqlQueryFailed 
 	 */
 	public ResultSet selectFromTripleStore(String sparqlQuery) throws SparqlQueryFailed {
-		return this.selectFromTripleStore(sparqlQuery, this.getEndpoint().toString());
+		return this.selectFromTripleStore(sparqlQuery);
 	}
 
 	/**
@@ -94,6 +101,7 @@ public class QanaryUtils {
 	 * @throws SparqlQueryFailed
 	 */
 	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) throws SparqlQueryFailed {
+		/*
 		logger.info("selectFromTripleStore: SELECT on {}: {}", endpoint, sparqlQuery);
 		ResultSet resultSet;
 
@@ -129,8 +137,9 @@ public class QanaryUtils {
 				e2.printStackTrace();
 				throw new SparqlQueryFailed(sparqlQuery, endpoint, e);
 			}
-
 		}
+		*/
+		return this.qanaryTripleStoreConnector.select(sparqlQuery);
 	}
 
 	/**
@@ -262,11 +271,13 @@ public class QanaryUtils {
 	public static void loadTripleStore(final String sparqlQuery, final URI loadEndpoint) throws SparqlQueryFailed {
 		final UpdateRequest request = UpdateFactory.create(sparqlQuery);
 		final UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, loadEndpoint.toString());
+		logger.debug("loadTripleStore with sparql:\n{}",sparqlQuery);
 		executeUpdateTripleStore(proc, sparqlQuery, loadEndpoint);
 	}
 
 	public static void loadTripleStore(final String sparqlQuery, final QanaryConfigurator myQanaryConfigurator)
 			throws URISyntaxException, SparqlQueryFailed {
+		logger.debug("loadTripleStore with sparql:\n{}",sparqlQuery);
 		loadTripleStore(sparqlQuery, myQanaryConfigurator.getLoadEndpoint());
 	}
 

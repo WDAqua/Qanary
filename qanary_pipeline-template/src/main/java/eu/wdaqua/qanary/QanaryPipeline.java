@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
+import eu.wdaqua.qanary.commons.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 
@@ -32,11 +35,11 @@ import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 @de.codecentric.boot.admin.server.config.EnableAdminServer
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
-@ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web" })
+@ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web", "eu.wdaqua.qanary.commons" })
 public class QanaryPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
-
+	
 	@Autowired
 	public QanaryComponentRegistrationChangeNotifier myComponentRegistrationChangeNotifier;
 	
@@ -66,8 +69,18 @@ public class QanaryPipeline {
 	@Bean
 	public QanaryConfigurator configurator( //
 			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
-			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier //
+			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier, //
+			QanaryTripleStoreConnector myQanaryTripleStoreConnector
 	) throws TripleStoreNotProvided {
+		try {
+			ResultSet myResultSet = myQanaryTripleStoreConnector.select("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 1");
+			while(myResultSet.hasNext()) {
+				logger.warn("{}. {}", myResultSet.getRowNumber(), myResultSet.next().toString()); // TODO: remove
+			}
+		} catch (SparqlQueryFailed e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return new QanaryConfigurator( //
 				restTemplate(), //
 				qanaryPipelineConfiguration.getPredefinedComponents(), // from config
