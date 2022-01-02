@@ -44,7 +44,7 @@ public class QanaryPipelineConfiguration {
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = { "qanary.triplestore", "server.host", "server.port" };
+	private final String[] requiredParameterNames = { "server.host", "server.port" };
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -165,13 +165,18 @@ public class QanaryPipelineConfiguration {
 	}
 
 	/**
-	 * required attribute
+	 * required attribute: triplestore
+	 * 
+	 * there are two options: if defined in environment, it needs to be not empty, else (not defined) it will be created automatically from the host and the internal endpoint  
 	 * 
 	 * @return
 	 */
 	public String getTriplestore() {
 		String triplestore = this.environment.getProperty("qanary.triplestore");
-		if (triplestore == null) {
+		logger.debug("qanary.triplestore from env: {}", triplestore);
+		if (triplestore == null) { // not defined, so use the automatically created internal endpoint
+			return  this.getHost().concat(":").concat(this.getPort().toString()).concat("/").concat(QanarySparqlProtocolController.SPARQL_ENDPOINT);
+		} else if (triplestore.isEmpty()) {
 			throw new MissingRequiredConfiguration("qanary.triplestore");
 		} else {
 			return triplestore;

@@ -1,9 +1,6 @@
 package eu.wdaqua.qanary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.matches;
-import static org.mockito.Mockito.atLeast;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
@@ -19,42 +16,51 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ContextConfiguration(name = "contextWithFakeBean")
 class QanaryQuestionAnsweringControllerTest {
+	
+	static {
+		// TODO: needs to be replaced by mocked version
+		System.setProperty("stardog.url", "https://webengineering.ins.hs-anhalt.de:40159"); 
+		System.setProperty("stardog.username", "admin");
+		System.setProperty("stardog.password", "admin");
+	}
+	
     @Autowired
     private MockMvc mvc;
-
+    
     @Test
-    void testRequestQuestionAnsweringProcessToString() throws URISyntaxException {
-        RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
+	void testRequestQuestionAnsweringProcessToString() throws URISyntaxException {
+		RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
 
-        String question = "What is the real name of Batman";
-        List<String> componentList = new ArrayList<>();
-        componentList.add("NED-DBpediaSpotlight");
-        componentList.add("QueryBuilderSimpleRealNameOfSuperHero");
-        URI priorConversation = new URI("urn:graph:806261d9-4601-4c8c-8603-926eee707c38");
+		String question = "What is the real name of Batman";
+		List<String> componentList = new ArrayList<>();
+		componentList.add("NED-DBpediaSpotlight");
+		componentList.add("QueryBuilderSimpleRealNameOfSuperHero");
+		URI priorConversation = new URI("urn:graph:806261d9-4601-4c8c-8603-926eee707c38");
 
-        qaProcess.setQuestion(question);
-        qaProcess.setcomponentlist(componentList);
-        qaProcess.setPriorConversation(priorConversation);
+		qaProcess.setQuestion(question);
+		qaProcess.setcomponentlist(componentList);
+		qaProcess.setPriorConversation(priorConversation);
 
-        String expected = "RequestQuestionAnsweringProcess " +
-                " -- question: \"What is the real name of Batman\"" +
-                " -- componentList: [NED-DBpediaSpotlight, QueryBuilderSimpleRealNameOfSuperHero]" +
-                " -- priorConversation: urn:graph:806261d9-4601-4c8c-8603-926eee707c38";
+		String expected = "RequestQuestionAnsweringProcess " //
+				+ " -- question: \"What is the real name of Batman\"" //
+				+ " -- componentList: [NED-DBpediaSpotlight, QueryBuilderSimpleRealNameOfSuperHero]" //
+				+ " -- priorConversation: urn:graph:806261d9-4601-4c8c-8603-926eee707c38";
 
-        String actual = qaProcess.toString();
+		String actual = qaProcess.toString();
 
-        assertEquals(expected, actual);
-    }
+		assertEquals(expected, actual);
+	}
 
     @Test
     void testQuestionAnsweringControllerPriorConversation() throws Exception {
@@ -67,9 +73,8 @@ class QanaryQuestionAnsweringControllerTest {
                             .accept(MediaType.APPLICATION_JSON)
             ).andExpect(status().is2xxSuccessful()); 
 
-            // todo: assert prior conversation stored
-            mockedStatic.verify(() -> QanaryUtils.loadTripleStore(matches(".*"), any(QanaryConfigurator.class)),
-            		atLeast(1));
+            
+            // TODO: assert prior conversation stored by checking the parameter of QanaryTripleStoreConnector.update
         }
     }
 }

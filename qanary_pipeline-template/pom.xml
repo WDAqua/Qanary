@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>2.4.0</version>
+	<version>3.0.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -16,7 +16,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
-		<qanary.version>[2.4.0,3.0.0)</qanary.version>
+		<qanary.version>[3.,4.0.0)</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<docker.image.name>qapipeline</docker.image.name>
@@ -71,7 +71,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -123,6 +123,10 @@
 			<artifactId>mockito-core</artifactId>
 			<version>3.8.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 	</dependencies>
 

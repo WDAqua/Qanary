@@ -38,6 +38,7 @@ import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
@@ -64,6 +65,7 @@ public class QanaryQuestionAnsweringController {
 	private final QanaryComponentRegistrationChangeNotifier myComponentNotifier;
 	private final QanaryPipelineConfiguration myQanaryPipelineConfiguration;
 	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
+	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 
 	// Set this to allow browser requests from other websites
 	@ModelAttribute
@@ -79,13 +81,16 @@ public class QanaryQuestionAnsweringController {
 			final QanaryConfigurator qanaryConfigurator, //
 			final QanaryQuestionController qanaryQuestionController, //
 			final QanaryComponentRegistrationChangeNotifier myComponentNotifier, //
-			final QanaryPipelineConfiguration myQanaryPipelineConfiguration,
-			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier ) {
+			final QanaryPipelineConfiguration myQanaryPipelineConfiguration, //
+			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, // 
+			final QanaryTripleStoreConnector myQanaryTripleStoreConnector // 
+		) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
 		this.myComponentNotifier = myComponentNotifier;
 		this.myQanaryPipelineConfiguration = myQanaryPipelineConfiguration;
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
+		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
 	}
 
 	/**
@@ -403,7 +408,7 @@ public class QanaryQuestionAnsweringController {
 		if (language != null && language.isEmpty() == false) {
 			qanaryQuestion.setLanguageText(language);
 		} else {
-			logger.info("no lanugage was given, no change for question \"{}\"", question);
+			logger.info("no language was given, no change for question \"{}\"", question);
 		}
 
 		// store targetdata for the current question
@@ -495,7 +500,7 @@ public class QanaryQuestionAnsweringController {
 				+ "}";
 
 		QanaryMessage qanaryMessage= new QanaryMessage( qanaryConfigurator.getEndpoint(), graphUri);
-		QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage);
+		QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, myQanaryTripleStoreConnector);
 
 		try {
 			logger.info("fetching number of annotations with query: {}",sparqlGet);
@@ -541,7 +546,7 @@ public class QanaryQuestionAnsweringController {
 			// expected is a JSON message contains ingraph, outgraph, endpoint
 			String jsonMessage) throws Exception {
 		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
-		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
 		URI question = myQanaryQuestion.getUri();
 
 		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,

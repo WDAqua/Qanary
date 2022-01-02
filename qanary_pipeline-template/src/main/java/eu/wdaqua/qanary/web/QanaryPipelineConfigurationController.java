@@ -59,7 +59,7 @@ public class QanaryPipelineConfigurationController {
 
         Map<String, Object> configurationMap = qanaryPipelineConfiguration.getAllKnownProperties(this.environment);
 
-       this.excludeProperties(this.notConfigurable, configurationMap);
+        this.excludeProperties(this.notConfigurable, configurationMap);
 
         JSONObject json = new JSONObject(configurationMap);
         ResponseEntity<JSONObject> response = new ResponseEntity<>(json, HttpStatus.OK);

@@ -1,4 +1,4 @@
- package eu.wdaqua.qanary.commons;
+package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -27,23 +27,27 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * 
  * @author both
  * 
- * the component is initialized if and only if the required information is available
+ *         the component is initialized if and only if the required information
+ *         is available
  * 
- * required parameters
- * <pre>
+ *         required parameters
+ * 
+ *         <pre>
  * <code>
  * stardog.url=
  * stardog.username=
  * stardog.password=
  * </code>
- * </pre>
- * optional parameters:
- * <pre>
+ *         </pre>
+ * 
+ *         optional parameters:
+ * 
+ *         <pre>
  * <code>
  * stardog.database= (default: qanary)
  * stardog.reasoningType= (default: false)
  * </code>
- * </pre>
+ *         </pre>
  */
 @Component
 public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnector {
@@ -54,20 +58,34 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 	private final String database;
 	private final boolean reasoningType;
 	private ConnectionPool connectionPool;
+	private final int minPool;
+	private final int maxPool;
+	private final int expirationTime;
+	private final int blockCapacityTime;
 
 	public QanaryTripleStoreConnectorStardog( //
 			@Value("${stardog.url}") URI url, //
 			@Value("${stardog.username}") String username, //
 			@Value("${stardog.password}") String password, //
 			@Value("${stardog.database:qanary}") String database, //
-			@Value("${stardog.reasoningType:false}") boolean reasoningType //
+			@Value("${stardog.reasoningType:false}") boolean reasoningType, //
+			@Value("${stardog.minPool:1}") int minPool, //
+			@Value("${stardog.maxPool:50}") int maxPool, //
+			@Value("${stardog.expirationTime:60}") int expirationTime, //
+			@Value("${stardog.blockCapacityTime:5}") int blockCapacityTime //
 	) {
 		this.url = url;
 		this.username = username;
 		this.password = password;
 		this.database = database;
 		this.reasoningType = reasoningType;
-		this.getLogger().info("Stardog Connection initialized: url:{}, username:{}, password:{}, database:{}, reasoningType:{}", url, username, password, database, reasoningType);
+		this.minPool = minPool;
+		this.maxPool = maxPool;
+		this.expirationTime = expirationTime;
+		this.blockCapacityTime = blockCapacityTime;
+		this.getLogger().debug(
+				"Stardog Connection initialized: url:{}, username:{}, password:{}, database:{}, reasoningType:{}, minPool:{}, maxPool:{}, expirationTime:{}s, blockCapacityTime:{}s",
+				url, username, password, database, reasoningType, minPool, maxPool, expirationTime, blockCapacityTime);
 		this.connect();
 		this.getLogger().info("Stardog Connection created.");
 	}
@@ -99,17 +117,12 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 	public void setConnectionPool(ConnectionPool connectionPool) {
 		this.connectionPool = connectionPool;
 	}
-	
-	private ConnectionPool createConnectionPool(ConnectionConfiguration connectionConfig) {
 
-		// TODO: move to application.properties, update constructor
-		int minPool = 1;
-		int maxPool = 3;
-		long expirationTime = 600;
+	private ConnectionPool createConnectionPool(ConnectionConfiguration connectionConfig) {
 		TimeUnit expirationTimeUnit = TimeUnit.SECONDS;
-		long blockCapacityTime = 60;
 		TimeUnit blockCapacityTimeUnit = TimeUnit.SECONDS;
 
+		// c.f.,
 		// https://docs.stardog.com/archive/7.5.0/developing/programming-with-stardog/java#using-sesame
 		ConnectionPoolConfig poolConfig = ConnectionPoolConfig.using(connectionConfig) //
 				.minPool(minPool).maxPool(maxPool) //
@@ -127,17 +140,6 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 	}
 
 	@Override
-	public void importData(String turtleFormat, URI graph) {
-		Connection connection = this.getConnectionPool().obtain();
-		connection.begin();
-		// declare the transaction
-		// TODO: implement me
-		// connection.add().io().format(RDFFormat.N3).stream(new FileInputStream("src/main/resources/marvel.rdf"));
-		// and commit the change
-		connection.commit();
-	}
-
-	@Override
 	public ResultSet select(String sparql) throws SparqlQueryFailed {
 		long start = getTime();
 		Connection connection = this.getConnectionPool().obtain();
@@ -151,18 +153,55 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 			throw new SparqlQueryFailed(sparql, this.getUrl().toASCIIString(), e);
 		}
 	}
-	
-	@Override 
-	public void update(String sparql, URI graph) {
+
+	@Override
+	public boolean ask(String sparql) throws SparqlQueryFailed {
+		long start = getTime();
 		Connection connection = this.getConnectionPool().obtain();
-		UpdateQuery query = connection.update(sparql, graph.toASCIIString());
-		query.execute();
+		Model aModel = SDJenaFactory.createModel(connection);
+		Query aQuery = QueryFactory.create(sparql);
+		try (QueryExecution aExec = QueryExecutionFactory.create(aQuery, aModel)) {
+			boolean result = aExec.execAsk();
+			this.logTime(getTime() - start, "ASK on " + this.getUrl().toASCIIString() + ": " + sparql);
+			return result;
+		} catch (Exception e) {
+			throw new SparqlQueryFailed(sparql, this.getUrl().toASCIIString(), e);
+		}
 	}
 
-	@Override 
-	public void update(String sparql) {
+	@Override
+	public void update(String sparql, URI graph) {
+		this.getLogger().debug("execute update on {}: {}", graph, sparql);
+		long start = getTime();
 		Connection connection = this.getConnectionPool().obtain();
-		UpdateQuery query = connection.update(sparql);
+		UpdateQuery query;
+		String graphReadable;
+		if (graph != null) {
+			graphReadable = graph.toASCIIString();
+			query = connection.update(sparql, graphReadable);
+		} else {
+			graphReadable = null;
+			query = connection.update(sparql);
+		}
 		query.execute();
+		this.logTime(getTime() - start,
+				"UPDATE on " + this.getUrl().toASCIIString() + " with Graph " + graphReadable + ": " + sparql);
 	}
+
+	/**
+	 * if no graph is given, then just redirect to update method
+	 */
+	@Override
+	public void update(String sparql) {
+		this.update(sparql, null);
+	}
+
+	/**
+	 * returns a readable description of the endpoint
+	 */
+	@Override
+	public String getFullEndpointDescription() {
+		return ("'" + this.getUrl().toASCIIString() + "' with database '" + getDatabase() + "'");
+	}
+
 }

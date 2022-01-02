@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.commons;
+package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import java.net.URI;
 
@@ -13,13 +13,20 @@ public abstract class QanaryTripleStoreConnector {
 
 	public abstract void connect(); // TODO: add exception
 
-	public abstract void importData(String turtleFormat, URI graph); // TODO: add throws
-
 	public abstract ResultSet select(String sparql) throws SparqlQueryFailed;
+
+	public abstract boolean ask(String sparql) throws SparqlQueryFailed;
 
 	public abstract void update(String sparql, URI graph) throws SparqlQueryFailed;
 
 	public abstract void update(String sparql) throws SparqlQueryFailed;
+
+	/**
+	 * return a readable description of the triplestore endpoint
+	 * 
+	 * @return
+	 */
+	public abstract String getFullEndpointDescription();
 
 	/**
 	 * get current time in milliseconds
@@ -34,7 +41,7 @@ public abstract class QanaryTripleStoreConnector {
 	 * @param duration
 	 */
 	protected void logTime(long duration, String description) {
-		logger.debug("runtime measurement: {} ms for {}", duration, description);
+		logger.info("runtime measurement: {} ms for {}", duration, description);
 	}
 
 	/**
@@ -43,10 +50,11 @@ public abstract class QanaryTripleStoreConnector {
 	 * @param description
 	 */
 	protected void logTime(long duration, String description, String endpoint) {
-		logger.debug("runtime measurement: {} ms on {} for {}", duration, endpoint, description);
+		logger.info("runtime measurement: {} ms on {} for {}", duration, endpoint, description);
 	}
 
 	protected Logger getLogger() {
 		return this.logger;
 	}
+
 }

@@ -144,7 +144,7 @@ public class QanaryGerbilController {
         //retrieve text representation, SPARQL and JSON result
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         @SuppressWarnings("rawtypes")
-		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
         //Generates the following output
     	/*{
  		   "questions":[

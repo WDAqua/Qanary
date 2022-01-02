@@ -9,9 +9,9 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 public class QanaryQuestionTextual extends QanaryQuestion<Object> {
 
-	public QanaryQuestionTextual(QanaryMessage qanaryMessage)
+	public QanaryQuestionTextual(QanaryMessage qanaryMessage, QanaryConfigurator myQanaryConfigurator)
 			throws QanaryExceptionNoOrMultipleQuestions, URISyntaxException, SparqlQueryFailed {
-		super(qanaryMessage);
+		super(qanaryMessage, myQanaryConfigurator);
 		// ensure that the question is marked as textual question
 		this.putAnnotationOfTextRepresentation();
 	}
