@@ -23,21 +23,14 @@ public class AdditionalInsertQuery {
 				logger.info("initializing AdditionalTriples with query \n{}", this.insertQuery);
 			} catch (Exception e) {
 				logger.warn("initializing no additonal query: \n{}", e.getMessage());
-				this.insertQuery = null;
 			}
 		} else {
 			logger.info("initializing no additonal query");
-			this.insertQuery = null;
 		}
 	}
 
 	public String getInsertQuery() {
 		return this.insertQuery;
-	}
-
-	@Deprecated
-	public String getInsertQueryForGraph(String graph) {
-		return this.insertQuery.replace("<GRAPH>", "<"+graph+">");
 	}
 
 	private String addBindsToInsertQuery(String insertQuery) {
