@@ -13,6 +13,7 @@ import org.apache.jena.query.ResultSet;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -102,11 +103,9 @@ public class QanaryQuestion<T> {
 		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 
 		// Load the Qanary Ontology using the permanent GitHub location
-		// be aware that
-		// https://raw.githubusercontent.com/WDAqua/QAOntology/master/qanary.owl does
-		// not work due to header issues on behalf of GitHub
+		// specified in application.properties
 		sparqlquery = "" //
-				+ "LOAD <https://rawcdn.githack.com/WDAqua/QAOntology/6d25ebc8970b93452b5bb970a8e2f526be9841a5/qanary.owl> " //
+				+ "LOAD <"+qanaryConfigurator.getQanaryOntology()+"> " //
 				+ "INTO GRAPH " + namedGraphMarker;
 		logger.warn("SPARQL query: {}", sparqlquery);
 		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
@@ -574,6 +573,7 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
+		//TODO: this can throw index out of bounds if no query was annotated
 		return this.getSparqlResults().get(0).query;
 	}
 
@@ -581,11 +581,16 @@ public class QanaryQuestion<T> {
 		String sparql = "" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " //
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
-				+ "  ?a oa:hasBody ?json " //
+				+ "	 ?a a qa:AnnotationOfAnswerJson . " //
+				+ "  ?a oa:hasBody ?answer . " //
+				+ "  ?answer rdf:value ?json . " //
+//				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
+//				+ "  ?a oa:hasBody ?json " //
+//				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);

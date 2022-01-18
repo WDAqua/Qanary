@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
+import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -144,12 +146,13 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
-			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
+			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, //
+			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final AdditionalTriples additionalTriples //
 			) throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
-				componentsToBeCalled, language, targetdata, priorConversation);
+				componentsToBeCalled, language, targetdata, priorConversation, additionalTriples);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -193,7 +196,7 @@ public class QanaryQuestionAnsweringController {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
-				componentsToBeCalled, language, targetdata, priorConversation);
+				componentsToBeCalled, language, targetdata, priorConversation, null); 
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -288,7 +291,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, priorConversation);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -324,7 +327,7 @@ public class QanaryQuestionAnsweringController {
 				textquestion, componentsToBeCalled, language, targetdata);
 
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
-				audioquestion, componentsToBeCalled, language, targetdata, priorConversation);
+				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
 		// retrieve text representation, SPARQL and JSON result
 		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(), qanaryConfigurator);
 
@@ -342,7 +345,7 @@ public class QanaryQuestionAnsweringController {
 			o.put("query", s.query);
 			o.put("confidence", s.confidence);
 			o.put("kb", s.kb);
-			sparql.add(o);
+			sparql.put(o);
 		}
 		obj.put("sparql", sparql);
 		obj.put("json", myQanaryQuestion.getJsonResult());
@@ -364,7 +367,7 @@ public class QanaryQuestionAnsweringController {
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
 			MultipartFile questionaudio, List<String> componentsToBeCalled, List<String> language,
-			List<String> targetdata, URI priorConversation) throws Exception {
+			List<String> targetdata, URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
@@ -424,11 +427,34 @@ public class QanaryQuestionAnsweringController {
 		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
 				myQanaryMessage.getInGraph(), myQanaryMessage.getEndpoint());
 
+		if (myQanaryPipelineConfiguration.getInsertQueriesAllowed() && additionalTriples != null) {
+			if (additionalTriples.getInsertQuery() != null) loadAdditionalTriples(additionalTriples, myQanaryMessage);
+		}
+
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
 				myQanaryMessage);
 		return myRun;
 	}
-	
+
+	/**
+	 * create and execute a SPARQL insert query to load additional triples into the triplestore
+	 * before processing the question.
+	 *
+	 * @param additionalPrefixes
+	 * @param additionalTriples
+	 * @param myQanaryMessage
+	 */
+	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed{
+
+
+		String sparqlInsert = additionalTriples.getInsertQuery();
+
+		logger.info("loading additional triples into graph \"{}\" with query: {}\n", myQanaryMessage.getEndpoint(), sparqlInsert);
+
+		QanaryUtils qanaryUtils = new QanaryUtils(myQanaryMessage, myQanaryTripleStoreConnector);
+		qanaryUtils.updateTripleStore(sparqlInsert, myQanaryMessage.getEndpoint());
+	}
+
 	/**
 	 * wrapper: create new Question Answering process for a given textual question 
 	 * 
@@ -444,7 +470,8 @@ public class QanaryQuestionAnsweringController {
 				myRequestQuestionAnsweringProcess.getcomponentlist(), // 
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
-				myRequestQuestionAnsweringProcess.getPriorConversation() //
+				myRequestQuestionAnsweringProcess.getPriorConversation(),
+				null // addtional triples
 			);			
 	}
 
@@ -485,7 +512,7 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> getNumberOfAnnotationsForComponent(
 			@RequestParam String component,
 			@RequestParam String graph
-	) throws URISyntaxException {
+	) throws URISyntaxException, JSONException {
 
 		JSONObject json = new JSONObject();
 		URI graphUri = URI.create(graph);

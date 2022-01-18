@@ -72,7 +72,7 @@ public class QanarySparqlProtocolController {
 	public ResponseEntity<String> getSparqlAsJSON( //
 			@RequestHeader(value = "accept", required = false) String acceptHeader, //
 			@RequestParam(required = true, value = "query") String sparqlQuery //
-	) throws SparqlQueryFailed {
+	) throws SparqlQueryFailed, JSONException {
 		logger.info("getSparqlAsJSON // accept-header: {}, SELECT query: {}", acceptHeader, sparqlQuery);
 
 		Query query = QueryFactory.create(sparqlQuery);

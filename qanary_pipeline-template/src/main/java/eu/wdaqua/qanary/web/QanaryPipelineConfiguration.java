@@ -19,6 +19,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import eu.wdaqua.qanary.exceptions.MissingRequiredConfiguration;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
@@ -34,17 +35,20 @@ public class QanaryPipelineConfiguration {
 	private Environment environment;
 	private final String[] commonPropertiesToBeShownOnStartup = { //
 			"spring.application.name", //
-			"server.host", //
+			//"server.host", // TODO: re-enable if getHost() works on application start
 			"server.port", //
+			"server.ssl.enabled", //
 			"qanary.triplestore", //
+			"qanary.process.allow-insert-queries", //
 			"qanary.questions.directory", //
-			"qanary.components" };
+			"qanary.components", //
+			"qanary.ontology"};
 	private final String[] debugPropertiesPrefixesToBeShowOnStartup = { //
 			"qanary", //
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = { "server.host", "server.port" };
+	private final String[] requiredParameterNames = {"server.port" , "qanary.ontology"};
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -61,6 +65,8 @@ public class QanaryPipelineConfiguration {
 			}
 		}
 		logger.info("Current Configuration: \n{}", this);
+
+		this.printConfigurationWarnings();
 
 		// log all properties that are important (see
 		// debugPropertiesPrefixesToBeShowOnStartup) to DEBUG log
@@ -146,13 +152,25 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
-	public String getHost() {
-		String name = "server.host";
-		if (this.hasProperty(name) && !this.environment.getProperty(name).isEmpty()) {
-			return this.environment.getProperty(name);
-		} else {
+	public String getBaseUrl() {
+		try {
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+				.toUriString();
+			return baseUrl;
+		} catch (Exception e) {
+			logger.warn("could not get base url: {}", e.getMessage());
 			return null;
 		}
+	}
+
+	// TODO: return the host on startup
+	// currently the context is only available after the application started
+	public String getHost() {
+		String baseUrl = this.getBaseUrl();
+		if (baseUrl != null) {
+			return baseUrl.substring(0, baseUrl.lastIndexOf(":"));
+		}
+		return this.environment.getProperty("server.host");
 	}
 
 	public Integer getPort() {
@@ -183,6 +201,11 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
+	/**
+	 * required attribute
+	 * 
+	 * @return
+	 */
 	public URI getTriplestoreAsURI() throws TripleStoreNotProvided {
 		try {
 			return new URI(getTriplestore());
@@ -191,6 +214,19 @@ public class QanaryPipelineConfiguration {
 					"triplestore value '" + getTriplestore() + "' was no URI.\n(error: " + e.getMessage() + ")");
 		}
 	}
+
+	public URI getQanaryOntologyAsURI() {
+		try {
+			return new URI(this.getProperty("qanary.ontology"));
+		} catch (Exception e) {
+			throw new MissingRequiredConfiguration("qanary.ontology");
+		}
+	}
+
+	public boolean getInsertQueriesAllowed() {
+		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
+	}
+
 
 	/**
 	 * default value is System.getProperty("user.dir") if configuration is not
@@ -231,5 +267,14 @@ public class QanaryPipelineConfiguration {
 					this.getProperty(commonPropertiesToBeShownOnStartup[i]));
 		}
 		return result;
+	}
+
+	/**
+	 * warn users of potentially unwanted configurations
+	 */
+	public void printConfigurationWarnings() {
+		if (this.getInsertQueriesAllowed()) {
+			logger.warn("enabling qanary.process.allow-insert-queries may pose a security risk");
+		}
 	}
 }

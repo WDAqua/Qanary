@@ -31,7 +31,7 @@ public class QanaryConfigurator {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryConfigurator.class);
 	private final RestTemplate restTemplate;
-	// default configuration defined in the currently used in application
+	// default configuration defined in the currently used application
 	// context (e.g., defined in application.properties)
 	private List<String> defaultComponentNames;
 
@@ -40,12 +40,15 @@ public class QanaryConfigurator {
 	private final URI endpoint;
 
 	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
+	private final URI qanaryOntology;
+
 
 	public QanaryConfigurator( //
 			RestTemplate restTemplate, //
 			List<String> defaultComponents, //
 			String serverhost, //
 			int serverport, //
+			URI qanaryOntology, //
 			URI triplestoreendpoint, // TODO: remove?
 			QanaryTripleStoreConnector myQanaryTripleStoreConnector // 
 	) {
@@ -55,6 +58,7 @@ public class QanaryConfigurator {
 		this.host = serverhost;
 		this.endpoint = triplestoreendpoint;
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		this.qanaryOntology = qanaryOntology;
 
 		logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
 	}
@@ -122,6 +126,10 @@ public class QanaryConfigurator {
 		result.endQuestionAnswering();
 		logger.info("callServices finished: {}", result);
 		return result;
+	}
+
+	public URI getQanaryOntology() {
+		return this.qanaryOntology;
 	}
 
 	public int getPort() {

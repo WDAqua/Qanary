@@ -8,11 +8,11 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.6.RELEASE</version>
+		<version>2.5.5</version>
 	</parent>
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
+		<spring-boot-admin.version>2.5.2</spring-boot-admin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<jena.version>4.3.2</jena.version>
@@ -65,6 +65,13 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>[24.1.1,)</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<!--version>4.13.2</version-->
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
