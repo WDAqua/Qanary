@@ -5,6 +5,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +53,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
+import eu.wdaqua.qanary.web.messages.AdditionalInsertQuery;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -147,6 +153,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final List<String> language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, //
+			//@RequestParam(value = QanaryStandardWebParameters.ADDITIONALQUERY, defaultValue = "", required = false) final AdditionalInsertQuery additionalQuery, // TODO: re-enable additional queries
 			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final AdditionalTriples additionalTriples //
 			) throws Exception {
 
@@ -217,6 +224,17 @@ public class QanaryQuestionAnsweringController {
 	@ResponseBody
 	public ClassPathResource getFile2() {
 		return new ClassPathResource("/qanaryOntology.ttl");
+	}
+
+	/**
+	 * exposing additional triples
+	 */
+	@RequestMapping(value = "/additional-triples/{id}", method = RequestMethod.GET, produces = "text/turtle")
+	@ResponseBody
+	public InputStreamResource getAdditionalTriples(@PathVariable final String id) throws FileNotFoundException {
+		String filename = Paths.get(myQanaryPipelineConfiguration.getAdditionalTriplesDirectory(), id+".ttl").toString();
+		InputStream in = new FileInputStream(filename);
+		return new InputStreamResource(in);
 	}
 
 	/**
@@ -427,13 +445,28 @@ public class QanaryQuestionAnsweringController {
 		logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
 				myQanaryMessage.getInGraph(), myQanaryMessage.getEndpoint());
 
-		if (myQanaryPipelineConfiguration.getInsertQueriesAllowed() && additionalTriples != null) {
-			if (additionalTriples.getInsertQuery() != null) loadAdditionalTriples(additionalTriples, myQanaryMessage);
+//		TODO: re-enable additional insert queries 
+//		if (myQanaryPipelineConfiguration.getInsertQueriesAllowed() && additionalQuery != null) {
+//			if (additionalQuery.getInsertQuery() != null) loadAdditionalQuery(additionalQuery, myQanaryMessage);
+//		}
+
+		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null) {
+			if(additionalTriples.getUriFilePath() != null) loadAdditionalTriples(additionalTriples, myQanaryMessage);
 		}
 
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
 				myQanaryMessage);
 		return myRun;
+	}
+
+	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
+		String resource = myQanaryPipelineConfiguration.getHost()+":"+myQanaryPipelineConfiguration.getPort()
+			+"/additional-triples/"+additionalTriples.getUUIDString();
+		String sparqlquery = "" //
+				+ "LOAD <"+resource+"> " //
+				+ "INTO GRAPH <"+myQanaryMessage.getInGraph().toString()+">";
+		logger.info("load additional triples with SPARQL query: {}", sparqlquery);
+		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 	}
 
 	/**
@@ -444,16 +477,15 @@ public class QanaryQuestionAnsweringController {
 	 * @param additionalTriples
 	 * @param myQanaryMessage
 	 */
-	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed{
-
-
-		String sparqlInsert = additionalTriples.getInsertQuery();
-
-		logger.info("loading additional triples into graph \"{}\" with query: {}\n", myQanaryMessage.getEndpoint(), sparqlInsert);
-
-		QanaryUtils qanaryUtils = new QanaryUtils(myQanaryMessage, myQanaryTripleStoreConnector);
-		qanaryUtils.updateTripleStore(sparqlInsert, myQanaryMessage.getEndpoint());
-	}
+//	TODO: re-enable additional insert queries 
+//	private void loadAdditionalQuery(AdditionalInsertQuery additionalQuery, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
+//		String sparqlInsert = additionalQuery.getInsertQuery();
+//
+//		logger.info("loading additional triples into graph \"{}\" with query: {}\n", myQanaryMessage.getEndpoint(), sparqlInsert);
+//
+//		QanaryUtils qanaryUtils = new QanaryUtils(myQanaryMessage);
+//		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
+//	}
 
 	/**
 	 * wrapper: create new Question Answering process for a given textual question 

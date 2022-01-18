@@ -105,8 +105,8 @@ public class QanaryPipeline {
 				qanaryPipelineConfiguration.getPredefinedComponents(), // from config
 				qanaryPipelineConfiguration.getHost(), // from config
 				qanaryPipelineConfiguration.getPort(), // from config
-				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
 				qanaryPipelineConfiguration.getQanaryOntologyAsURI(), // from config
+				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
 				myQanaryTripleStoreConnector //
 		);
 	}

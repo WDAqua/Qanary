@@ -40,6 +40,7 @@ public class QanaryPipelineConfiguration {
 			"server.ssl.enabled", //
 			"qanary.triplestore", //
 			"qanary.process.allow-insert-queries", //
+			"qanary.process.allow-additional-triples", //
 			"qanary.questions.directory", //
 			"qanary.components", //
 			"qanary.ontology"};
@@ -225,6 +226,14 @@ public class QanaryPipelineConfiguration {
 
 	public boolean getInsertQueriesAllowed() {
 		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
+	}
+
+	public boolean getAdditionalTriplesAllowed() {
+		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples"));
+	}
+
+	public String getAdditionalTriplesDirectory() {
+		return getProperty("qanary.process.additional-triples-directory");
 	}
 
 

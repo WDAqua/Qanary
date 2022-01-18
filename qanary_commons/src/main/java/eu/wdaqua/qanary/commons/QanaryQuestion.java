@@ -116,9 +116,11 @@ public class QanaryQuestion<T> {
 		sparqlquery = "" //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> \n" //
+				+ "PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" //
 				+ "INSERT DATA { \n" //
 				+ "	GRAPH " + namedGraphMarker + " { \n" //
 				+ "		<" + questionUrlString + "> a qa:Question .\n" //
+				+ "		<" + questionUrlString + "> owl:sameAs <urn:qanary:currentQuestion> .\n" //
 				+ "		<" + questionUrlString + "#Answer> a qa:Answer . \n" //
 				+ "		<" + questionUrlString + "#Dataset> a qa:Dataset . \n" //
 				+ "		<" + questionUrlString + "#Annotation:1> a  oa:AnnotationOfQuestion; \n" //
