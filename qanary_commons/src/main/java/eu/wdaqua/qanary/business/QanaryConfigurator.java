@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 
@@ -38,32 +39,34 @@ public class QanaryConfigurator {
 	private final String host;
 	private final URI endpoint;
 
+	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	private final URI qanaryOntology;
 
-	// parameter required to create the correct triplestore endpoint, particularly
-	// due to Stardog v5+
-	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
 
 	public QanaryConfigurator( //
 			RestTemplate restTemplate, //
 			List<String> defaultComponents, //
 			String serverhost, //
 			int serverport, //
-			URI triplestoreendpoint, //
 			URI qanaryOntology, //
-			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier 
+			URI triplestoreendpoint, // TODO: remove?
+			QanaryTripleStoreConnector myQanaryTripleStoreConnector // 
 	) {
 		this.restTemplate = restTemplate;
-		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 		this.setDefaultComponentNames(defaultComponents);
 		this.port = serverport;
 		this.host = serverhost;
 		this.endpoint = triplestoreendpoint;
+		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
 		this.qanaryOntology = qanaryOntology;
 
 		logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
 	}
 
+	public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
+		return this.myQanaryTripleStoreConnector;
+	}
+	
 	/**
 	 * call the provided components sequentially, as demanded by the provided
 	 * QanaryMessage
@@ -139,14 +142,6 @@ public class QanaryConfigurator {
 
 	public URI getEndpoint() {
 		return this.endpoint;
-	}
-
-	public URI getAskEndpoint() throws URISyntaxException {
-		return myTriplestoreEndpointIdentifier.getAskEndpoint(this.endpoint);
-	}
-
-	public URI getLoadEndpoint() throws URISyntaxException {
-		return myTriplestoreEndpointIdentifier.getLoadEndpoint(this.endpoint);
 	}
 
 	/**

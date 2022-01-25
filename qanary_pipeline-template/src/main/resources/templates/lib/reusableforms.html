@@ -4,21 +4,19 @@
                 </div>
 			</div>
 
-            <div th:fragment="additionaltripleinput">
-                INSERT query:
-                <div>
-                    <textarea rows=10 cols=60 type="text" name="additionaltriples" id="additionaltriples"></textarea>
+            <div th:fragment="additionalqueryinput" style="border:3px solid black"> 
+                <p>
+                The example on the right adds an AnnotationOfQuestionLanguage. 
+                &lt;urn:qanary:currentGraph&gt; and &lt;urn:qanary:currentQuestion&gt; will automatically
+                point to the correct URIs for this question answering process. 
+                Variables (?a) will be replaced by a random IRI. 
+                I you decide to not use any variables, opt for INSERT DATA instead of INSERT.
+                </p>
+                <div style="float:left; margin-right:10px">
+                    <textarea rows=10 cols=60 type="text" name="additionalquery" id="additionalquery"></textarea>
                 </div>
                 <div>
-                    Exmaple: 
-                    <p>
-                    This example adds an AnnotationOfQuestionLanguage. 
-                    <urn:qanary:currentGraph> and <urn:qanary:currentQuestion> will automatically
-                    point to the correct URIs for this question answering process. 
-                    Variables (?a) will be replaced by a random IRI. 
-                    I you decide to not use any variables, opt for INSERT DATA instead of INSERT.
-                    </p>
-                    <textarea readonly rows=10 cols=60 type="text" id="additionaltriplesexample">
+                    <textarea readonly rows=10 cols=60 type="text" id="additionalqueryexample">
 PREFIX qa: <http://www.wdaqua.eu/qa#> 
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 INSERT { 
@@ -26,9 +24,28 @@ INSERT {
         ?a a qa:AnnotationOfQuestionLanguage . 
         ?a oa:hasBody "en" .
         ?a oa:hasTarget <urn:qanary:currentQuestion> ;
-        oa:annotatedAt ?time  
  } 
 } 
+                    </textarea>
+                </div>
+            </div>
+
+            <div th:fragment="additionaltripleinput" style="border:3px solid black">
+                <p>
+                The example on the right adds an AnnotationOfQuestionLanguage to the currentGraph.
+                &lt;urn:qanary:currentQuestion&gt; will point to the correct URI of the current 
+                question in each question answering process. 
+                </p>
+                <div style="float:left; margin-right:10px">
+                    <textarea rows=10 cols=60 type="text" name="additionaltriples" id="additionaltriples"></textarea>
+                </div>
+                <div>
+                    <textarea readonly rows=10 cols=60 type="text" id="additionaltripleexample">
+@prefix qa: <http://www.wdaqua.eu/qa#> .
+@prefix oa: <http://www.w3.org/ns/openannotation/core/> .
+_:a a qa:AnnotationOfQuestionLanguage . 
+_:a oa:hasBody "en" .
+_:a oa:hasTarget <urn:qanary:currentQuestion> .
                     </textarea>
                 </div>
             </div>

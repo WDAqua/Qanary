@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +29,21 @@ import io.swagger.v3.oas.models.info.License;
 
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
+import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 
 @SpringBootApplication
 @de.codecentric.boot.admin.server.config.EnableAdminServer
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
-@ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web" })
+@ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web", "eu.wdaqua.qanary.commons" })
 public class QanaryPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
-
+	
 	@Autowired
 	public QanaryComponentRegistrationChangeNotifier myComponentRegistrationChangeNotifier;
 	
@@ -66,20 +69,49 @@ public class QanaryPipeline {
 			InstanceRepository repository) {
 		return new QanaryComponentRegistrationChangeNotifier(repository);
 	}
+	
+	/**
+	 * send a test query to the triplestore 
+	 * 
+	 * @param myQanaryTripleStoreConnector
+	 * @return
+	 * @throws TripleStoreNotWorking 
+	 */
+	private void checkTripleStoreConnection(QanaryTripleStoreConnector myQanaryTripleStoreConnector) throws TripleStoreNotWorking {
+		int numberOfTests = 1;
+		int maxNumberOfTests = 10;
+		while(numberOfTests <= maxNumberOfTests) {
+			try {
+				ResultSet myResultSet = myQanaryTripleStoreConnector.select("SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 1");
+				while(myResultSet.hasNext()) {
+					logger.debug("Test #{}/{}: Test query to {}: {}", numberOfTests, maxNumberOfTests, myQanaryTripleStoreConnector.getFullEndpointDescription(), myResultSet.next().toString()); 
+				}
+				logger.info("Test query to triplestore {} worked.", myQanaryTripleStoreConnector.getFullEndpointDescription());
+				return;
+			} catch (SparqlQueryFailed e) {
+				e.printStackTrace();
+			}
+			numberOfTests--;
+		}
+		throw new TripleStoreNotWorking("Minimal request does not work after " + maxNumberOfTests + " tries."); 
+	}
+	
 
 	@Bean
 	public QanaryConfigurator configurator( //
-			TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
-			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier //
-	) throws TripleStoreNotProvided {
+			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier, //
+			QanaryTripleStoreConnector myQanaryTripleStoreConnector
+	) throws TripleStoreNotWorking, TripleStoreNotProvided {
+		this.checkTripleStoreConnection(myQanaryTripleStoreConnector);
+		
 		return new QanaryConfigurator( //
 				restTemplate(), //
 				qanaryPipelineConfiguration.getPredefinedComponents(), // from config
 				qanaryPipelineConfiguration.getHost(), // from config
 				qanaryPipelineConfiguration.getPort(), // from config
-				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
 				qanaryPipelineConfiguration.getQanaryOntologyAsURI(), // from config
-				myTriplestoreEndpointIdentifier //
+				qanaryPipelineConfiguration.getTriplestoreAsURI(), // from config
+				myQanaryTripleStoreConnector //
 		);
 	}
 

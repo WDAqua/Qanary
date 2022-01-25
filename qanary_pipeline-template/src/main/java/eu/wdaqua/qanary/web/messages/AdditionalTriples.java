@@ -1,120 +1,75 @@
 package eu.wdaqua.qanary.web.messages;
 
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.query.QueryParseException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
+import java.io.File;
+import java.io.BufferedOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
 
+
+@Component
+@Scope(value = "singelton")
 public class AdditionalTriples {
-	private String insertQuery;
+	private Environment env; 
+	private String id;
+	private String filePath;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdditionalTriples.class);
 
-	public AdditionalTriples(String insertQuery) {
-		if (insertQuery != null) {
+	public AdditionalTriples(String triples, Environment environment) {
+		this.env = environment;
+		String ttlFileDirectory = env.getProperty("qanary.process.additional-triples-directory");
+		if (triples != null) {
 			try {
-				this.insertQuery = parseInsertQuery(addBindsToInsertQuery(insertQuery));
-				logger.info("initializing AdditionalTriples with query \n{}", this.insertQuery);
+				writeTriplesToFile(triples, ttlFileDirectory);
+				logger.info("stored additional triples as {}", this.getStringFilePath());
 			} catch (Exception e) {
-				logger.warn("initializing no additional triples: \n{}", e.getMessage());
-				this.insertQuery = null;
+				logger.warn("storing no additional triples: \n{}", e.getMessage());
 			}
 		} else {
 			logger.info("initializing no additional triples");
-			this.insertQuery = null;
 		}
 	}
 
-	public String getInsertQuery() {
-		return this.insertQuery;
-	}
+	private void writeTriplesToFile(String triples, String ttlFileDirectory) throws IOException {
+		id = UUID.randomUUID().toString();
+		String fileName = id+".ttl"; // TODO: add a prefix
+		filePath = Paths.get(ttlFileDirectory, fileName).toString();
 
-	@Deprecated
-	public String getInsertQueryForGraph(String graph) {
-		return this.insertQuery.replace("<GRAPH>", "<"+graph+">");
-	}
-
-	private String addBindsToInsertQuery(String insertQuery) {
-		String sparqlBinds = getSparqlBindsForVariables(insertQuery);
-		if (sparqlBinds.length()>0) {
-			return insertQuery+""// 
-				+ " WHERE { " //
-				+ sparqlBinds
-				+"} "; //
-		} else return insertQuery;
-	}
-
-	private String getSparqlBindsForVariables(String insertQuery) {
-		String sparqlBinds = "";
-
-		List<String> unnamed = findAdditionalVaraibles(insertQuery);
-
-		for (String i : unnamed) {
-			logger.info("adding URI bind for var {}", i);
-			sparqlBinds += "BIND (IRI(str(RAND())) AS "+i+") . ";
-		}
-		return sparqlBinds;
-	}
-
-
-	private String parseInsertQuery(String expectedQuery) {
-		logger.info("parsing query: \n{}", expectedQuery);
-		Pattern pattern = Pattern.compile(".*(delete|clear|load)+.*");
-		Matcher matcher = pattern.matcher(expectedQuery.toLowerCase());
-		if (expectedQuery.length() == 0) {
-			logger.info("no additional SPARQL INSERT query was supplied");
-			return null;
-		} else if (matcher.find()) {
-			throw new QueryParseException(
-					"additional SPARQL queries must not contain either of DELETE | CLEAR | LOAD",
-					0, matcher.start() // column is not computed
-					);
-		} else if (!expectedQuery.toLowerCase().contains("insert")) {
-			throw new QueryParseException(
-					"additional SPARQL queries are expected to contain an insert statement", 0, 0);
+		if(!Files.isDirectory(Paths.get(ttlFileDirectory))) {
+			File file = new File(ttlFileDirectory);
+			file.mkdirs();
+			logger.warn("created directory for storing additional triples: {}", ttlFileDirectory);
 		} else {
-			try {
-				UpdateFactory.create(expectedQuery);
-				logger.info("successfully parsed additional SPARQL INSERT query");
-				return expectedQuery;
-			} catch (Exception e) {
-				logger.info("parsing additional SPARQL query failed with exception: \n{}", e.getLocalizedMessage());
-				return null;
-			}
+			logger.warn("directory already exists: {}", ttlFileDirectory);
 		}
+
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
+		out.write(triples.getBytes(Charset.defaultCharset()));
+		out.close();
 	}
 
-	/**
-	 * return a list of all variables used in a group of SPARQL triples
-	 *
-	 * @param additionalTriples
-	 * @return variables
-	 */
-	private List<String> findAdditionalVaraibles(String additionalTriples) {
-		int lastIdx = 0;
-		String varString;
-		List<String> variables = new ArrayList<String>();
-
-		while (lastIdx != -1) {
-			lastIdx = additionalTriples.indexOf("?", lastIdx);
-			int end = additionalTriples.indexOf(" ", lastIdx);
-
-			if (lastIdx != -1) {
-				varString = additionalTriples.substring(lastIdx, end);
-				if (!variables.contains(varString)) {
-					logger.info("found new var {} at ({},{})", varString, lastIdx, end);
-					variables.add(varString);
-				}
-				lastIdx += varString.length();
-			}
-		}
-		return variables;
+	public String getUUIDString() {
+		return this.id;
 	}
 
+	public String getStringFilePath() {
+		return filePath;
+	}
+
+	public URI getUriFilePath() throws URISyntaxException {
+		return new URI(filePath);
+	}
 }

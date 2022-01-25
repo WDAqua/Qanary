@@ -15,6 +15,7 @@
 		<spring-boot-admin.version>2.5.2</spring-boot-admin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<jena.version>4.3.2</jena.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -93,16 +94,34 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
+			<version>${jena.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+			<version>${jena.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<type>pom</type>
+			<version>${jena.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>3.4.6</version>
+			<version>4.2.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>3.8.0</version>
+			<version>4.2.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Caching -->
@@ -114,6 +133,24 @@
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.complexible.stardog/client-http -->
+		<dependency>
+			<groupId>com.complexible.stardog</groupId>
+			<artifactId>client-http</artifactId>
+			<version>[7.8.2,8.0.0)</version>
+		</dependency>
+		<dependency>
+			<groupId>com.complexible.stardog.jena</groupId>
+			<artifactId>stardog-jena</artifactId>
+			<version>[7.8.2,8.0.0)</version>
+		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>Stardog</id>
+			<name>Stardog Maven Repository</name>
+			<url>https://maven.stardog.com/</url>
+		</repository>
+	</repositories>
 
 </project>
