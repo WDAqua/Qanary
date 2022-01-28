@@ -25,11 +25,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import eu.wdaqua.qanary.web.QanaryStandardWebParameters;
+import eu.wdaqua.qanary.web.QanaryWebConfiguration;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.matches;
 
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 
 
@@ -38,19 +41,11 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 @ContextConfiguration(name = "contextWithFakeBean")
 class QanaryQuestionAnsweringControllerTest {
 	
-	static {
-		// TODO: needs to be replaced by mocked version
-		System.setProperty("stardog.url", "https://webengineering.ins.hs-anhalt.de:40159"); 
-		System.setProperty("stardog.username", "admin");
-		System.setProperty("stardog.password", "admin");
-	}
-	
 	@Autowired
-	@Qualifier("QanaryTripleStoreConnectorQanaryInternal")
     private MockMvc mvc;
 
 	@MockBean
-	private QanaryTripleStoreConnectorQanaryInternal mockedQanaryTripleStoreConnector;
+	private QanaryTripleStoreConnector mockedQanaryTripleStoreConnector;
     
     @Test
 	void testRequestQuestionAnsweringProcessToString() throws URISyntaxException {
@@ -79,15 +74,12 @@ class QanaryQuestionAnsweringControllerTest {
 
     @Test
     void testQuestionAnsweringControllerPriorConversation() throws Exception {
-        String json = "{\"question\": \"foo?\"}";
-
-//		mockedQanaryTripleStoreConnector = 
-//			mock(QanaryTripleStoreConnectorQanaryInternal.class);
-		doNothing().when(mockedQanaryTripleStoreConnector).update(anyString());
-
 		URI priorConversation = new URI("urn:priorConversation");
-		URL questionUri = new URI("http://localhost/question").toURL();
+		URL questionUri = new URI("http://localhost/question").toURL(); // TODO: needs to be used as parameter for call to /startquestionansweringwithtextquestion
 
+		String json = "{\"question\": \"foo?\", \"priorConversation\": \""+ priorConversation.toASCIIString() + "\"}"; // TODO: needs to use the QanaryStandardWebParameters
+
+		doNothing().when(mockedQanaryTripleStoreConnector).update(anyString()); // remove the internal logic of the update method 
 
 		// when post is made to endpoint (and question is created)
 		mvc.perform(
@@ -97,15 +89,19 @@ class QanaryQuestionAnsweringControllerTest {
 					.accept(MediaType.APPLICATION_JSON)
 				).andExpect(status().is2xxSuccessful());
 
-
 		// update() 'does nothing' but we can still verify the passed string value
 		// ensure that a SPARQL UPDATE query is called and a graph URI is provided as
 		// prior conversation
 		String queryPart = ".*" //
-				+ "<" + questionUri.toString() + ">" //
+				// + "<" + questionUri.toString() + ">" //
 				+ " qa:priorConversation " //
 				+ "<" + priorConversation.toASCIIString() + ">" //
 				+ " \\..*";
+		
+		// is it called at least once?
+		verify(mockedQanaryTripleStoreConnector, atLeast(1)).update(anyString());
+		
+		// is is called at least once with the expected parameter value?
 		verify(mockedQanaryTripleStoreConnector, atLeast(1)).update(matches(queryPart));
     }
 }
