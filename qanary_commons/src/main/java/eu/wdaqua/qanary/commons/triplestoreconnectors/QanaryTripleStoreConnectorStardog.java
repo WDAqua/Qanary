@@ -12,6 +12,7 @@ import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.complexible.stardog.api.Connection;
@@ -49,6 +50,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * </code>
  *         </pre>
  */
+@ConditionalOnProperty(name = {"stardog.url", "stardog.username", "stardog.password", "stardog.database:qanary"}, matchIfMissing = false)
 @Component
 public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnector {
 
