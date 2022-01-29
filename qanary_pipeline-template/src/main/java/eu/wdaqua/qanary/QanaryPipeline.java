@@ -80,6 +80,7 @@ public class QanaryPipeline {
 	private void checkTripleStoreConnection(QanaryTripleStoreConnector myQanaryTripleStoreConnector) throws TripleStoreNotWorking {
 		int numberOfTests = 1;
 		int maxNumberOfTests = 10;
+		/*// TODO: needs to be extracted and moved to abstract class QanaryTripleStoreConnector
 		while(numberOfTests <= maxNumberOfTests) {
 			try {
 				ResultSet myResultSet = myQanaryTripleStoreConnector.select("SELECT ?g WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 1");
@@ -93,7 +94,8 @@ public class QanaryPipeline {
 			}
 			numberOfTests--;
 		}
-		throw new TripleStoreNotWorking("Minimal request does not work after " + maxNumberOfTests + " tries."); 
+		throw new TripleStoreNotWorking("Minimal request does not work after " + maxNumberOfTests + " tries.");
+		*/ 
 	}
 	
 
