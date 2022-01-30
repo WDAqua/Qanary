@@ -292,10 +292,10 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfTextRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
@@ -317,10 +317,10 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfAudioRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfAudioRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
@@ -587,11 +587,11 @@ public class QanaryQuestion<T> {
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "	 ?a a qa:AnnotationOfAnswerJson . " //
-				+ "  ?a oa:hasBody ?answer . " //
-				+ "  ?answer rdf:value ?json . " //
-//				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
-//				+ "  ?a oa:hasBody ?json " //
+				+ "	?a a qa:AnnotationOfAnswerJson . " //
+				+ "  	?a oa:hasBody ?answer . " //
+				+ " 	?answer rdf:value ?json . " //
+//				+ "  	?a a qa:AnnotationOfAnswerJSON . " //
+//				+ "  	?a oa:hasBody ?json " //
 //				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		
@@ -619,11 +619,12 @@ public class QanaryQuestion<T> {
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextualRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + uriTextRepresention + "> ;" //
-				+ "     oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
-				+ "	    oa:AnnotatedAt ?time  " + "}} " //
+				+ " 	?a a qa:AnnotationOfTextualRepresentation . " //
+				+ " 	?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ " 	?a oa:hasBody <" + uriTextRepresention + "> ;" //
+				+ "        oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
+				+ "	   oa:AnnotatedAt ?time  " //
+				+ "}} " //
 				+ "WHERE { " //
 				+ "	BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "	BIND (now() as ?time) " //
@@ -650,8 +651,8 @@ public class QanaryQuestion<T> {
 				+ "		?a a qa:AnnotationOfQuestionLanguage . " //
 				+ part //
 				+ "		?a 	oa:hasTarget <" + this.getUri() + "> ; " //
-				+ "   		oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
-				+ "   		oa:annotatedAt ?time  " //
+				+ "   			oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
+				+ "   			oa:annotatedAt ?time  " //
 				+ " } " //
 				+ "} " //
 				+ "WHERE { " //
