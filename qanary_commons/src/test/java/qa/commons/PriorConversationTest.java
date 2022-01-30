@@ -34,6 +34,7 @@ class PriorConversationTest {
 				null, //
 				0, //
 				null, //
+				null, //
 				mockedQanaryTripleStoreConnectorQanary //
 		);
 

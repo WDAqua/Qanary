@@ -8,7 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class QanaryPipelineConfigurationController {
      * writes changes in pipeline property values to application.local.properties
      */
     @RequestMapping(value = "/configuration", method = RequestMethod.POST, consumes = "application/json")
-    public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) {
+    public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) throws JSONException {
 
         String filePath = environment.getProperty("spring.config.location");
         Path localConfigPath = Paths.get(new ClassPathResource(filePath).getPath());
@@ -97,7 +98,7 @@ public class QanaryPipelineConfigurationController {
         try {
             FileWriter writer = new FileWriter(filePath);
 
-            for( Object key : configJson.keySet()) {
+            for( Object key : (Iterable)configJson.keys()) {
                 String value = configJson.get(key.toString()).toString();
                 writer.write(key+"="+value+"\n");
             }

@@ -3,14 +3,17 @@
 # A Reference Implementation for Creating Question Answering Systems following the Qanary Methodology
 ## Qanary in a Nutshell
 
+*TL;DR: The Qanary framework takes a best-of-breed approach to the integration of Question Answering (QA) components. It enables rapid development of QA systems that are flexible, extensible, reusable and provide built-in features to measure the quality of the QA quality.*
+
 Qanary is a methodology for creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.eu) where question answering systems are researched and developed. For all the publications related to Qanary please see the section [publications](#qanarypublications). W.r.t. questions, ideas or any feedback related to Qanary please do not hesitate to [contact the core developers](https://github.com/WDAqua/Qanary/wiki/Who-do-I-talk-to%3F). However, if you like to see a QA system built using the Qanary framework, one of our core developers has build a complete end-to-end QA system which allows to query several RDF data stores: http://wdaqua.eu/qa.
+
 
 Please go to the [GitHub Wiki page](https://github.com/WDAqua/Qanary/wiki) of this repository to get more insights on how to use this framework, how to add new component etc.
 
 Here, we provide our key contributions on-top of the [RDF vocabulary qa](https://github.com/WDAqua/QAOntology): the reference implementation of the Qanary methodology. This repository contributes several sub-resources for the Question Answering Community to build knowledge-driven QA systems incorporating a standard [RDF vocabulary named "qa"](https://github.com/WDAqua/QAOntology). 
 
-All the resources are reusable. For detailed description of individual resources, kindly refer to Wiki section of this repository. The [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components) maintained by the core developers are available [here](https://github.com/WDAqua/Qanary-question-answering-components) (in a separated Git repository). They require to first clone this repository (of the Qanary framework) and execute ``mvn install``.
-However, this is just the beginning, many more components will soon be published.
+All the resources are reusable. For detailed description of individual resources, we kindly refer to the Wiki section of this repository. The [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components) maintained by the core developers are available [here](https://github.com/WDAqua/Qanary-question-answering-components) (in a separated Git repository); it contains typical components that where provided from and for the community. They require to first clone the Qanary framework repository and execute ``mvn install``.
+Although many components are available already, this is still just the beginning, many more components will be published soon.
 
 The following sub-project are part of the Qanary core frameworks:
 

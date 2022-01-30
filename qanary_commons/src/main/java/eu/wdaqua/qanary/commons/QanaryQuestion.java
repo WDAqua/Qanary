@@ -13,6 +13,7 @@ import org.apache.jena.query.ResultSet;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -102,11 +103,9 @@ public class QanaryQuestion<T> {
 		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 
 		// Load the Qanary Ontology using the permanent GitHub location
-		// be aware that
-		// https://raw.githubusercontent.com/WDAqua/QAOntology/master/qanary.owl does
-		// not work due to header issues on behalf of GitHub
+		// specified in application.properties
 		sparqlquery = "" //
-				+ "LOAD <https://rawcdn.githack.com/WDAqua/QAOntology/6d25ebc8970b93452b5bb970a8e2f526be9841a5/qanary.owl> " //
+				+ "LOAD <"+qanaryConfigurator.getQanaryOntology()+"> " //
 				+ "INTO GRAPH " + namedGraphMarker;
 		logger.warn("SPARQL query: {}", sparqlquery);
 		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
@@ -117,9 +116,11 @@ public class QanaryQuestion<T> {
 		sparqlquery = "" //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> \n" //
+				+ "PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" //
 				+ "INSERT DATA { \n" //
 				+ "	GRAPH " + namedGraphMarker + " { \n" //
 				+ "		<" + questionUrlString + "> a qa:Question .\n" //
+				+ "		<" + questionUrlString + "> owl:sameAs <urn:qanary:currentQuestion> .\n" //
 				+ "		<" + questionUrlString + "#Answer> a qa:Answer . \n" //
 				+ "		<" + questionUrlString + "#Dataset> a qa:Dataset . \n" //
 				+ "		<" + questionUrlString + "#Annotation:1> a  oa:AnnotationOfQuestion; \n" //
@@ -291,10 +292,10 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfTextRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
@@ -316,10 +317,10 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfAudioRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfAudioRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
@@ -574,6 +575,7 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
+		//TODO: this can throw index out of bounds if no query was annotated
 		return this.getSparqlResults().get(0).query;
 	}
 
@@ -581,11 +583,16 @@ public class QanaryQuestion<T> {
 		String sparql = "" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
+				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " //
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
-				+ "  ?a oa:hasBody ?json " //
+				+ "	?a a qa:AnnotationOfAnswerJson . " //
+				+ "  	?a oa:hasBody ?answer . " //
+				+ " 	?answer rdf:value ?json . " //
+//				+ "  	?a a qa:AnnotationOfAnswerJSON . " //
+//				+ "  	?a oa:hasBody ?json " //
+//				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
@@ -612,11 +619,12 @@ public class QanaryQuestion<T> {
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextualRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + uriTextRepresention + "> ;" //
-				+ "     oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
-				+ "	    oa:AnnotatedAt ?time  " + "}} " //
+				+ " 	?a a qa:AnnotationOfTextualRepresentation . " //
+				+ " 	?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ " 	?a oa:hasBody <" + uriTextRepresention + "> ;" //
+				+ "        oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
+				+ "	   oa:AnnotatedAt ?time  " //
+				+ "}} " //
 				+ "WHERE { " //
 				+ "	BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "	BIND (now() as ?time) " //
@@ -643,8 +651,8 @@ public class QanaryQuestion<T> {
 				+ "		?a a qa:AnnotationOfQuestionLanguage . " //
 				+ part //
 				+ "		?a 	oa:hasTarget <" + this.getUri() + "> ; " //
-				+ "   		oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
-				+ "   		oa:annotatedAt ?time  " //
+				+ "   			oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
+				+ "   			oa:annotatedAt ?time  " //
 				+ " } " //
 				+ "} " //
 				+ "WHERE { " //
