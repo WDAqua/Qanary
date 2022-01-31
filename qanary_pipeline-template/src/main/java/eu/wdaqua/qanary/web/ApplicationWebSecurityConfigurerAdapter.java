@@ -4,6 +4,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+/**
+ * configure Spring Security: CSRF protection is disabled
+ */
 @EnableWebSecurity
 public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 

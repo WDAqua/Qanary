@@ -26,7 +26,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 /**
  * 
- * @author both
+ * @author AnBo-de
  * 
  *         the component is initialized if and only if the required information
  *         is available
@@ -50,7 +50,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * </code>
  *         </pre>
  */
-@ConditionalOnProperty(name = {"stardog.url", "stardog.username", "stardog.password", "stardog.database:qanary"}, matchIfMissing = false)
+@ConditionalOnProperty(name = {"stardog.url", "stardog.username", "stardog.password"}, matchIfMissing = false)
 @Component
 public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnector {
 
@@ -71,8 +71,8 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 			@Value("${stardog.password}") String password, //
 			@Value("${stardog.database:qanary}") String database, //
 			@Value("${stardog.reasoningType:false}") boolean reasoningType, //
-			@Value("${stardog.minPool:1}") int minPool, //
-			@Value("${stardog.maxPool:50}") int maxPool, //
+			@Value("${stardog.minPool:0}") int minPool, // default from docs
+			@Value("${stardog.maxPool:1000}") int maxPool, // default from docs
 			@Value("${stardog.expirationTime:60}") int expirationTime, //
 			@Value("${stardog.blockCapacityTime:5}") int blockCapacityTime //
 	) {
@@ -127,7 +127,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 		// c.f.,
 		// https://docs.stardog.com/archive/7.5.0/developing/programming-with-stardog/java#using-sesame
 		ConnectionPoolConfig poolConfig = ConnectionPoolConfig.using(connectionConfig) //
-				.minPool(minPool).maxPool(maxPool) //
+				.minPool(minPool).maxPool(maxPool) // for some reason it causes errors while using some specific values
 				.expiration(expirationTime, expirationTimeUnit) //
 				.blockAtCapacity(blockCapacityTime, blockCapacityTimeUnit); //
 		return poolConfig.create();
