@@ -70,8 +70,8 @@
 		</div>
  		<div th:replace="lib/footer"/>
 		<!-- load React -->
-		<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+		<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
 </body>
 	<script th:inline="javascript">
 		// TODO: move to a JS file
@@ -363,7 +363,7 @@
 
 		// AJAX request to triplestore endpoint with created query
 		function queryStardog(stardogQuery, callback) {
-			// TODO: configurations might be specific to the Stardog triplestore -> need to be tested on different triplestores  
+			// TODO: configurations need to be tested on different triplestores 
 			console.log("querying triplestore ...");
 			let triplestoreQueryUrl = /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf";
 			let url = triplestoreQueryUrl + "?reasoning=false&query=" + encodeURIComponent(stardogQuery);
@@ -390,6 +390,7 @@
 			this.message = message;
 			this.name = "Unable to get query"
 		}
+		
 		GetQueryException.prototype.toString = function () {
 			return this.name + ': ' + this.message;
 		}
