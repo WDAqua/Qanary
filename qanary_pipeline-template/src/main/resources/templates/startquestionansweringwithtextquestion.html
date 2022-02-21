@@ -169,7 +169,7 @@
 						return [
 							// list of endpoints to be suggested in the endpoint input field
 							{
-								endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf"
+								endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf"
 							},
 							{   // default DBpedia SPARQL endpoint
 								endpoint: "https://dbpedia.org/sparql"
@@ -207,10 +207,9 @@
 						"}\n",
 				used:false,
 				requestConfig: {
-					endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+					endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
 					headers: () => ({
 						Accept:'application/sparql-results+json',
-						Authorization: 'Basic YWRtaW46YWRtaW4=' // Stardog specific
 					}),
 					method: 'GET'
 				},
@@ -233,10 +232,9 @@
 						"}\n",
 				used:false,
 				requestConfig: {
-					endpoint: /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+					endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
 					headers: () => ({
 						Accept:'application/sparql-results+json',
-						Authorization: 'Basic YWRtaW46YWRtaW4=' // Stardog specific
 					}),
 					method: 'GET'
 				},
@@ -383,7 +381,6 @@
 				}],
 				headers:{
 					Accept:'application/sparql-results+json',
-					Authorization: 'Basic YWRtaW46YWRtaW4='
 				},
 			});
 		}
