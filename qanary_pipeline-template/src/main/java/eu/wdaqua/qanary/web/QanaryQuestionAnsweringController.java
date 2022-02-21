@@ -132,7 +132,7 @@ public class QanaryQuestionAnsweringController {
 	@ModelAttribute("sparqlEndpointOfCurrentQanaryPipeline")
 	public String sparqlEndpointOfCurrentQanaryPipeline() {
 		String baseUrlString = this.getQuestionAnsweringHostUrlString();
-		String sparqlEndpoint = baseUrlString+"sparql";
+		String sparqlEndpoint = baseUrlString + QanarySparqlProtocolController.SPARQL_ENDPOINT;
 		return sparqlEndpoint;
 	}
 
