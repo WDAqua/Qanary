@@ -127,6 +127,16 @@ public class QanaryQuestionAnsweringController {
 	}
 
 	/**
+	 * expose the model with the Qanary sparql query endpoint
+	 */
+	@ModelAttribute("sparqlEndpointOfCurrentQanaryPipeline")
+	public String sparqlEndpointOfCurrentQanaryPipeline() {
+		String baseUrlString = this.getQuestionAnsweringHostUrlString();
+		String sparqlEndpoint = baseUrlString + QanarySparqlProtocolController.SPARQL_ENDPOINT;
+		return sparqlEndpoint;
+	}
+
+	/**
 	 * a simple HTML input form for starting a question answering process with a
 	 * QuestionURI
 	 */
