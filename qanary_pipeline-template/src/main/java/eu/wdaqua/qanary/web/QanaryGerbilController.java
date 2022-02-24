@@ -14,6 +14,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -131,22 +132,33 @@ public class QanaryGerbilController {
 
     @SuppressWarnings("unchecked")
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
-	public ResponseEntity<?> gerbil(
-			@RequestParam(value = "query", required = true) final String query,
-            @RequestParam(value = "lang", required = true) final String queryLanguage,
-            @PathVariable("components") final String componentsToBeCalled
+	public ResponseEntity<JSONObject> gerbil(
+			@RequestParam(value = "query", required = true) final String query, // 
+            @RequestParam(value = "lang", required = true) final String queryLanguage, // 
+            @RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, // 
+            @PathVariable("components") final String componentsToBeCalled // 
     ) throws URISyntaxException, Exception, SparqlQueryFailed, ParseException {
     	logger.info("Asked question: {}", query);
     	logger.info("Language of question: {}", queryLanguage);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
-    	MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        logger.info("priorConversation: {}", priorConversation);
+    	
+        // prepare message to process executor
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
         map.add("question", query);
         map.add("language", queryLanguage);
         map.add("componentlist[]", componentsToBeCalled);
+        if( priorConversation != null && priorConversation.toASCIIString() != "") {
+        	map.add(QanaryStandardWebParameters.PRIORCONVERSATION, priorConversation.toASCIIString());
+        }
+
+        // call process executor  
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.postForObject(qanaryConfigurator.getHost()+":"+qanaryConfigurator.getPort()+"/startquestionansweringwithtextquestion", map, String.class);
         org.json.JSONObject json = new org.json.JSONObject(response);
-        //retrieve text representation, SPARQL and JSON result
+        URI currentGraph = new URI((String)json.get("outGraph"));
+        
+        // retrieve text representation, SPARQL and JSON result
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         @SuppressWarnings("rawtypes")
 		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
@@ -165,7 +177,7 @@ public class QanaryGerbilController {
         }*/
         // retrieve the content (question, SPARQL Query and answer)
         // getTextualRepresentation needs Exception to be thrown
-        // tries to retrieve the language from Triplestore, if not retrievable use "en" as default
+        // tries to retrieve the language from Qanary triplestore, if not retrievable use "en" as default
         String language = "en";
         try {
             String annotatedLang = myQanaryQuestion.getLanguage();
@@ -213,6 +225,11 @@ public class QanaryGerbilController {
         JSONObject obj = new JSONObject();
         obj.put("questions", questionsArray);
 
-        return new ResponseEntity<JSONObject>(obj,HttpStatus.OK);
+        // create a new header containing the 
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("X-qanary-graph", currentGraph.toASCIIString());
+        logger.info("X-qanary-graph: {}", currentGraph.toASCIIString());
+        
+        return ResponseEntity.ok().headers(responseHeaders).body(obj);
 	}
 }
