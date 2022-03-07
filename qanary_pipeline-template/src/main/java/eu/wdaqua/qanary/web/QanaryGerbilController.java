@@ -31,6 +31,7 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import io.swagger.v3.oas.annotations.Operation;
 
 
 /**
@@ -83,6 +84,11 @@ public class QanaryGerbilController {
      * a simple HTML input to generate a url-endpoint for gerbil for QA, http://gerbil-qa.aksw.org/gerbil/config
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.GET)
+    @Operation(
+        summary="expose an HTML frontend for generating a gerbil url endpoint",
+        operationId="startquestionansweringwithtextquestion",
+        description="Generate a url endpoint for gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input."
+    )
     public String startquestionansweringwithtextquestion(Model model) {
         model.addAttribute("url", "Select components!");
         return "generategerbilendpoint";
@@ -93,6 +99,11 @@ public class QanaryGerbilController {
      *
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.POST)
+    @Operation(
+        summary="expose an HTML frontend for a gerbil url endpoint", 
+        operationId="gerbilGenerator",
+        description="Generate a url endpoint for gerbil QA from a list of compoents."
+    )
     public String gerbilGenerator(
             @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
             Model model
@@ -129,6 +140,11 @@ public class QanaryGerbilController {
     }
 
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
+    @Operation(
+        summary="Start a gerbil QA process with a list of components",
+        operationId="gerbil",
+        description="curl -X POST http://localhost:8080/gerbil-execute/NED-DBpedia-Spotlight -d query='What is the capital of France?'"
+    )
 	public ResponseEntity<?> gerbil(
 			@RequestParam(value = "query", required = true) final String query,
             @PathVariable("components") final String componentsToBeCalled

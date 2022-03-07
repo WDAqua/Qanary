@@ -67,6 +67,13 @@ public class QanaryQuestionController {
 	 */
 	@PostMapping(value = "/question", produces = "application/json")
 	@ResponseBody
+	@Operation(
+		summary = "Synchronous call o sart a QA process", //
+		operationId = "createQuestion", //
+		description = "Start a question answering process via synchronous POST request "
+					+ "and return the URL of the created question. "
+					+ "Requires a question string."
+	)
 	public ResponseEntity<?> createQuestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true)
 			final String questionstring) {
@@ -118,9 +125,17 @@ public class QanaryQuestionController {
 	/**
 	 * synchronous call to start the QA process (POST) with an audio file, return
 	 * the URL of the created question
+	 * @param file // TODO: why is the file parameter not shown in swagger-ui?
 	 */
 	@PostMapping(value = "/question_audio", produces = "application/json")
 	@ResponseBody
+	@Operation(
+		summary = "Synchronous call o sart a QA process wih an audio file", //
+		operationId = "createAudioQuestion", //
+		description = "Start a question answering process with an audio file via synchronous POST "
+					+ "and return the URL of the created question. "
+					+ "Requires an audio file."
+	)
 	public ResponseEntity<?> createAudioQuestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
@@ -216,11 +231,15 @@ public class QanaryQuestionController {
 	}
 
 	/**
-	 * synchronous call to start the QA process (POST), return the URL of the
-	 * created question
+	 * delete a question
 	 */
 	@DeleteMapping(value = "/question/{questionid}", produces = "application/json")
 	@ResponseBody
+	@Operation(
+		summary = "Delete a given question", //
+		operationId = "deleteQuestion", //
+		description = "(Not yet implemented) Requires the question ID."
+	) 
 	public String deleteQuestion(@PathVariable final String questionid) throws HttpRequestMethodNotSupportedException {
 		// TODO: please implement deletion of file if and only if they are in
 		// this question directory (security!)
@@ -232,6 +251,11 @@ public class QanaryQuestionController {
 	 */
 	@GetMapping(value = "/question/")
 	@ResponseBody
+	@Operation(
+		summary = "Reurn links to all questions", //
+		operationId = "getQuestions",//
+		description = "" // TODO: add 
+	)
 	public QanaryAvailableQuestions getQuestions() throws IOException {
 
 		final QanaryAvailableQuestions questions = new QanaryAvailableQuestions(
@@ -263,6 +287,12 @@ public class QanaryQuestionController {
 	 */
 	@GetMapping(value = "/question/{questionid}/raw", produces = "text/plain;charset=UTF-8")
 	@ResponseBody
+	@Operation(
+		summary = "Return raw data for a given question", //
+		operationId = "getQuestionRawData", //
+		description = "Requires the ID of the question. "
+					+ "Example: \"/question/1/raw\""
+	)
 	public FileSystemResource getQuestionRawData(@PathVariable final String questionid) {
 
 		// TODO: move outside of this class
@@ -276,7 +306,13 @@ public class QanaryQuestionController {
 	@GetMapping(value = "/question/{question}/status", headers = "Accept=application/json", produces = {
 			"application/json;charset=UTF-8" })
 	@ResponseBody
+	@Operation(
+		summary = "Fetch the processing status of a given question", //
+		operationId = "getStatusOfQuestion", //
+		description = "(Not yet implemented) Requires the URL of the question."
+	)
 	public String getStatusOfQuestion(@PathVariable final URL questionuri) {
+		logger.warn("NOT IMPLEMENTED");
 		// TODO: fetch the processing status of the given question URL
 		// TODO: OR return the complete RDF object
 		return null;
