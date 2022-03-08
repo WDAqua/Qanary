@@ -254,7 +254,7 @@ public class QanaryQuestionController {
 	@Operation(
 		summary = "Reurn links to all questions", //
 		operationId = "getQuestions",//
-		description = "" // TODO: add 
+		description = "No parameters are required" // 
 	)
 	public QanaryAvailableQuestions getQuestions() throws IOException {
 

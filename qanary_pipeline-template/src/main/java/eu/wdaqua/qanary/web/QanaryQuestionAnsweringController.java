@@ -370,7 +370,7 @@ public class QanaryQuestionAnsweringController {
 	@Operation(
 		summary = "Create a new Question Answering Process", //
 		operationId = "createQuestionAnswering", //
-		description = "" // TODO: add
+		description = "No parameters are required." // TODO: extend
 	)
 	public ResponseEntity<?> createQuestionAnswering( //
 			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
@@ -410,7 +410,7 @@ public class QanaryQuestionAnsweringController {
 	@Operation(
 		summary = "Create a new Question Answering Process", //
 		operationId = "createQuestionAnsweringFull", //
-		description = "" // TODO: add
+		description = "No parameters are required." // TODO: how does this differ from /questionanswering
 	)
 	public ResponseEntity<?> createQuestionAnsweringFull( //
 			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
