@@ -43,8 +43,8 @@ class QanaryQuestionAnsweringControllerTest {
 	private QanaryTripleStoreConnector mockedQanaryTripleStoreConnector;
     
     @Test
-	void testRequestQuestionAnsweringProcessToString() throws URISyntaxException {
-		RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
+    void testRequestQuestionAnsweringProcessToStringWithoutLanguage() throws URISyntaxException {
+        RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
 
 		// given a text question, two components and an existing priorConversation
 		String question = "What is the real name of Batman";
@@ -57,14 +57,40 @@ class QanaryQuestionAnsweringControllerTest {
 		qaProcess.setcomponentlist(componentList);
 		qaProcess.setPriorConversation(priorConversation);
 
-		// when the request is represented as string
-		String actual = qaProcess.toString();
+        String expected = "RequestQuestionAnsweringProcess " + // 
+                " -- question: \"What is the real name of Batman\"" + // 
+                " -- componentList: [NED-DBpediaSpotlight, QueryBuilderSimpleRealNameOfSuperHero]" + // 
+                " -- priorConversation: urn:graph:806261d9-4601-4c8c-8603-926eee707c38" + // 
+                " -- language: null";
 
-		// then the string representation needs to contain the expected information
-		String expected = "RequestQuestionAnsweringProcess " //
-				+ " -- question: \"What is the real name of Batman\"" //
-				+ " -- componentList: [NED-DBpediaSpotlight, QueryBuilderSimpleRealNameOfSuperHero]" //
-				+ " -- priorConversation: urn:graph:806261d9-4601-4c8c-8603-926eee707c38";
+        String actual = qaProcess.toString();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testRequestQuestionAnsweringProcessToStringWithLanguage() throws URISyntaxException {
+        RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
+
+        String question = "What is the real name of Batman";
+        List<String> componentList = new ArrayList<>();
+        componentList.add("NED-DBpediaSpotlight");
+        componentList.add("QueryBuilderSimpleRealNameOfSuperHero");
+        URI priorConversation = new URI("urn:graph:806261d9-4601-4c8c-9999-926eee707c38");
+
+        qaProcess.setQuestion(question);
+        qaProcess.setcomponentlist(componentList);
+        qaProcess.setPriorConversation(priorConversation);
+        qaProcess.setLanguage("es"); // Spanish
+
+        String expected = "RequestQuestionAnsweringProcess " + // 
+                " -- question: \"What is the real name of Batman\"" + // 
+                " -- componentList: [NED-DBpediaSpotlight, QueryBuilderSimpleRealNameOfSuperHero]" + // 
+                " -- priorConversation: urn:graph:806261d9-4601-4c8c-9999-926eee707c38" + // 
+                " -- language: es";
+
+        String actual = qaProcess.toString();
+
 		assertEquals(expected, actual);
 	}
 
