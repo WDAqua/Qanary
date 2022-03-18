@@ -15,4 +15,5 @@ public interface QanaryStandardWebParameters {
 	final String TARGETDATA = "targetdata";
 	final String GRAPH = "graph";
 	final String PRIORCONVERSATION = "priorConversation";
+	final String QANARYGRAPHHEADERNAME = "X-qanary-graph";
 }
