@@ -78,7 +78,7 @@ public class QanaryQuestion<T> {
 		logger.info("Triplestore: {}, Current graph: {}", triplestore, namedGraph.toString());
 
 		String addPriorConversation = "";
-		if( priorConversation != null ) {
+		if( priorConversation != null && !priorConversation.toASCIIString().trim().isEmpty() ) {
 			addPriorConversation = "<" + questionUrlString + "> qa:priorConversation <" + priorConversation.toASCIIString() + "> . ";
 		} else {
 			logger.info("No previous graph (qa:priorConversation) provided: {}", priorConversation);
