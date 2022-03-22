@@ -149,9 +149,9 @@ public class QanaryPipeline {
 	}
 
 	@Bean
-	public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) { // TODO:should this be sprindoc or qanary pipeline version?
+	public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) { 
 		return new OpenAPI().info(new Info() //
-				.title("Qanary Question Answering System component") // TODO: use application properties?
+				.title("Qanary Question Answering System component") // TODO: replace by name from application.properties
 				.version(appVersion) //
 				.description("Provides central functionality for each Qanary component (registration) "
 						+ "and endpoints for users.")
