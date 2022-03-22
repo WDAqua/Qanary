@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 
 /**
- * controller for processing questions, i.e., related to the question answering process
+ * controller for validating questions using Gerbil, i.e., validating the question answering results
  *
  * @author Dennis Diefenbach
  */
@@ -44,10 +44,10 @@ public class QanaryGerbilController {
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryGerbilController.class);
     private final QanaryConfigurator qanaryConfigurator;
-	private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
+    private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
  
-     private String host;
-     private int port;
+    private String host;
+    private int port;
      
  
     //Set this to allow browser requests from other websites
@@ -85,9 +85,9 @@ public class QanaryGerbilController {
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.GET)
     @Operation(
-        summary="expose an HTML frontend for generating a gerbil url endpoint",
+        summary="expose an HTML frontend for generating a Gerbil URL endpoint",
         operationId="startquestionansweringwithtextquestion",
-        description="Generate a url endpoint for gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input."
+        description="Generate a URL endpoint for Gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input form."
     )
     public String startquestionansweringwithtextquestion(Model model) {
         model.addAttribute("url", "Select components!");
@@ -95,14 +95,14 @@ public class QanaryGerbilController {
     }
 
     /**
-     * given a list of components a url-endpoint for gerbil for QA is generated
+     * given a list of components a url-endpoint for Gerbil for QA is generated
      *
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.POST)
     @Operation(
-        summary="expose an HTML frontend for a gerbil url endpoint", 
+        summary="expose an HTML frontend for a Gerbil URL endpoint", 
         operationId="gerbilGenerator",
-        description="Generate a url endpoint for gerbil QA from a list of compoents."
+        description="Generate a URL endpoint for Gerbil QA from a list of compoents."
     )
     public String gerbilGenerator(
             @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
@@ -140,14 +140,14 @@ public class QanaryGerbilController {
     }
 
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
-    @Operation(
-        summary="Start a gerbil QA process with a list of components",
-        operationId="gerbil",
-        description="curl -X POST http://localhost:8080/gerbil-execute/NED-DBpedia-Spotlight -d query='What is the capital of France?'"
-    )
+	@Operation(
+		summary="Start a Gerbil QA process with a list of components",
+		operationId="gerbil",
+		description="curl -X POST http://localhost:8080/gerbil-execute/NED-DBpedia-Spotlight -d query='What is the capital of France?'"
+	)
 	public ResponseEntity<?> gerbil(
-			@RequestParam(value = "query", required = true) final String query,
-            @PathVariable("components") final String componentsToBeCalled
+		@RequestParam(value = "query", required = true) final String query,
+		@PathVariable("components") final String componentsToBeCalled
     ) throws URISyntaxException, SparqlQueryFailed, JSONException {
     	logger.info("Asked question: {}", query);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
@@ -161,7 +161,7 @@ public class QanaryGerbilController {
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         @SuppressWarnings("rawtypes")
 		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
-        //Generates the following output
+        // Generates the following output
     	/*{
  		   "questions":[
  		      "question":{
