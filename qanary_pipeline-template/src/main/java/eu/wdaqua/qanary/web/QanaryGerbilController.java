@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  *
  * @author Dennis Diefenbach
  */
+@CrossOrigin
 @Controller
 public class QanaryGerbilController {
 	
@@ -133,23 +135,26 @@ public class QanaryGerbilController {
     @SuppressWarnings("unchecked")
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<JSONObject> gerbil(
-			@RequestParam(value = "query", required = true) final String query, // 
-            @RequestParam(value = "lang", required = true) final String queryLanguage, // 
-            @RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, // 
+			@RequestParam(value = "query", required = true) final String question, // 
+            @RequestParam(value = "lang", required = false) String languageOfQuestion, // 
+            @RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) URI priorConversation, // 
             @PathVariable("components") final String componentsToBeCalled // 
     ) throws URISyntaxException, Exception, SparqlQueryFailed, ParseException {
-    	logger.info("Asked question: {}", query);
-    	logger.info("Language of question: {}", queryLanguage);
+    	logger.info("Asked question: {}", question);
+    	logger.info("Language of question: {}", languageOfQuestion);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
-        logger.info("priorConversation: {}", priorConversation);
+        logger.info("priorConversation: |{}|", priorConversation);
     	
         // prepare message to process executor
         MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-        map.add("question", query);
-        map.add("language", queryLanguage);
+        map.add("question", question);
+        map.add("language", languageOfQuestion);
         map.add("componentlist[]", componentsToBeCalled);
-        if( priorConversation != null && priorConversation.toASCIIString() != "") {
+        if( priorConversation != null && !priorConversation.toASCIIString().trim().isEmpty() ) {
         	map.add(QanaryStandardWebParameters.PRIORCONVERSATION, priorConversation.toASCIIString());
+        	logger.info("priorConversation was not null and was not an empty string: |{}|", priorConversation.toASCIIString());
+        } else {
+        	priorConversation = null; 
         }
 
         // call process executor  
@@ -227,7 +232,8 @@ public class QanaryGerbilController {
 
         // create a new header containing the 
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("X-qanary-graph", currentGraph.toASCIIString());
+        responseHeaders.set("Access-Control-Expose-Headers", QanaryStandardWebParameters.QANARYGRAPHHEADERNAME);
+        responseHeaders.set(QanaryStandardWebParameters.QANARYGRAPHHEADERNAME, currentGraph.toASCIIString());
         logger.info("X-qanary-graph: {}", currentGraph.toASCIIString());
         
         return ResponseEntity.ok().headers(responseHeaders).body(obj);
