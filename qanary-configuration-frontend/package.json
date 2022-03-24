@@ -1,16 +1,16 @@
 {
   "name": "qanary-configuration-frontend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
+    "@babel/core": "latest",
+    "@testing-library/jest-dom": "^5.16.2",
+    "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^7.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hook-form": "^6.3.0",
-    "react-scripts": "3.4.1",
-    "@babel/core": "latest"
+    "react-scripts": "^5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
