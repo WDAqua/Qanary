@@ -4,13 +4,11 @@ import java.net.URI;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,14 +33,6 @@ public class QanaryServiceController {
     public QanaryServiceController(QanaryComponent qanaryComponent) {
         this.qanaryComponent = qanaryComponent;
         logger.info("qanaryComponent: {}", this.qanaryComponent);
-    }
-
-    /**
-     * provides a description HTML page of the component, replace description.html to custom page
-     */
-    @GetMapping(value = QanaryConfiguration.description)
-    public String description(HttpServletResponse response){
-        return "description";
     }
 
     /**

@@ -1,17 +1,6 @@
 package eu.wdaqua.qanary.component;
 
-import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.QanaryMessage;
-import eu.wdaqua.qanary.commons.QanaryQuestion;
-import eu.wdaqua.qanary.commons.QanaryUtils;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorStardog;
-
 import java.io.IOException;
-import java.util.List;
-
-import javax.management.RuntimeErrorException;
 
 import org.apache.http.client.ClientProtocolException;
 //import org.apache.jena.query.Query;
@@ -22,6 +11,13 @@ import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import eu.wdaqua.qanary.business.QanaryConfigurator;
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
