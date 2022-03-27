@@ -43,10 +43,7 @@ import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 public class QanaryPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
-	
-	@Autowired
-	public QanaryComponentRegistrationChangeNotifier myComponentRegistrationChangeNotifier;
-	
+
 	@Autowired
 	public QanaryPipelineConfiguration qanaryPipelineConfiguration;  
 
