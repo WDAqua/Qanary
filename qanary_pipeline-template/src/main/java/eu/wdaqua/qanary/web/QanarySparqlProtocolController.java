@@ -54,19 +54,47 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 @Controller
 public class QanarySparqlProtocolController {
 	public final static String SPARQL_ENDPOINT = "sparql";
-
+	public final static String SPARQL_ENDPOINT_TESTER = "checktriplestoreconnection";
+	
 	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	private static final Logger logger = LoggerFactory.getLogger(QanarySparqlProtocolController.class);
 
 	@Autowired
 	public QanarySparqlProtocolController(QanaryTripleStoreConnector myQanaryTripleStoreConnector) {
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		checkTriplestoreConnection();
 	}
 
 	private QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
 		return this.myQanaryTripleStoreConnector;
 	}
 
+	@GetMapping(value = "/" + SPARQL_ENDPOINT_TESTER, consumes = { "*/*" })
+	@ResponseBody
+	public ResponseEntity<String> checkTriplestoreConnection() {
+		logger.info("checkTriplestoreConnection");
+		String sparqlQuery = "SELECT * { GRAPH ?g { ?s ?p ?o  } } LIMIT 1";
+		logger.info("checkTriplestoreConnection 2");
+		
+		ResultSet result = null;
+		try {
+			result = this.getQanaryTripleStoreConnector().select(sparqlQuery);
+		} catch (SparqlQueryFailed e) {
+			e.printStackTrace();
+			logger.error("SPARQL query for connection check failed: {}", e.toString());
+			return ResponseEntity.internalServerError().body("SPARQL query for connection check failed: {}" + e.toString());
+		}
+		logger.info("checkTriplestoreConnection 3");
+		if ( result != null && result.hasNext() ) {
+			logger.info("Triplestore accessible and returns triples.");
+			return ResponseEntity.ok().body("Triplestore accessible and returns triples.");
+		} else {
+			logger.warn("Triplestore accessible, but not triples returned (correctly initialized).");
+			return ResponseEntity.ok().body("Triplestore accessible, but not triples returned (correctly initialized).");
+		}
+	}
+	
+	
 	@GetMapping(value = "/" + SPARQL_ENDPOINT, produces = "application/sparql-results+json", consumes = { "*/*" })
 	@ResponseBody
 	public ResponseEntity<String> getSparqlAsJSON( //
