@@ -54,6 +54,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 @Controller
 public class QanarySparqlProtocolController {
 	public final static String SPARQL_ENDPOINT = "sparql";
+	public final static String SPARQL_ENDPOINT_TESTER = "checktriplestoreconnection";
 
 	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	private static final Logger logger = LoggerFactory.getLogger(QanarySparqlProtocolController.class);
@@ -61,10 +62,38 @@ public class QanarySparqlProtocolController {
 	@Autowired
 	public QanarySparqlProtocolController(QanaryTripleStoreConnector myQanaryTripleStoreConnector) {
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		checkTriplestoreConnection();
 	}
 
 	private QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
 		return this.myQanaryTripleStoreConnector;
+	}
+
+	@GetMapping(value = "/" + SPARQL_ENDPOINT_TESTER, consumes = { "*/*" })
+	@ResponseBody
+	public ResponseEntity<String> checkTriplestoreConnection() {
+		String sparqlQuery = "SELECT * { GRAPH ?g { ?s ?p ?o  } } LIMIT 1";
+		logger.info("checkTriplestoreConnection: test with {}", sparqlQuery);
+
+		ResultSet result = null;
+		try {
+			result = this.getQanaryTripleStoreConnector().select(sparqlQuery);
+		} catch (SparqlQueryFailed e) {
+			e.printStackTrace();
+			logger.error("SPARQL query for connection check failed: {}", e.toString());
+			return ResponseEntity.internalServerError()
+					.body("SPARQL query for connection check failed: {}" + e.toString());
+		}
+
+		if (result != null && result.hasNext()) {
+			String message = "Triplestore is accessible and returns triples.";
+			logger.info(message);
+			return ResponseEntity.ok().body(message);
+		} else {
+			String message = "Triplestore is accessible, but NO triples are returned (correctly initialized?).";
+			logger.warn(message);
+			return ResponseEntity.ok().body(message);
+		}
 	}
 
 	@GetMapping(value = "/" + SPARQL_ENDPOINT, produces = "application/sparql-results+json", consumes = { "*/*" })
@@ -76,7 +105,8 @@ public class QanarySparqlProtocolController {
 		logger.info("getSparqlAsJSON // accept-header: {}, SELECT query: {}", acceptHeader, sparqlQuery);
 
 		Query query = QueryFactory.create(sparqlQuery);
-		logger.info("ask:{}, select:{}, unknown:{}, query:{}", query.isAskType(), query.isSelectType(), query.isUnknownType(), sparqlQuery);
+		logger.info("ask:{}, select:{}, unknown:{}, query:{}", query.isAskType(), query.isSelectType(),
+				query.isUnknownType(), sparqlQuery);
 
 		// get result of SPARQL query from connected triplestore
 		if (query.isAskType()) {
