@@ -3,13 +3,11 @@ package eu.wdaqua.qanary.web;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -55,7 +53,6 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 public class QanarySparqlProtocolController {
 	public final static String SPARQL_ENDPOINT = "sparql";
 	public final static String SPARQL_ENDPOINT_TESTER = "checktriplestoreconnection";
-
 	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	private static final Logger logger = LoggerFactory.getLogger(QanarySparqlProtocolController.class);
 
@@ -74,15 +71,14 @@ public class QanarySparqlProtocolController {
 	public ResponseEntity<String> checkTriplestoreConnection() {
 		String sparqlQuery = "SELECT * { GRAPH ?g { ?s ?p ?o  } } LIMIT 1";
 		logger.info("checkTriplestoreConnection: test with {}", sparqlQuery);
-
 		ResultSet result = null;
 		try {
 			result = this.getQanaryTripleStoreConnector().select(sparqlQuery);
 		} catch (SparqlQueryFailed e) {
 			e.printStackTrace();
-			logger.error("SPARQL query for connection check failed: {}", e.toString());
-			return ResponseEntity.internalServerError()
-					.body("SPARQL query for connection check failed: {}" + e.toString());
+			String message = "SPARQL query for connection check failed";
+			logger.error("{}: {}", message, e.toString());
+			return ResponseEntity.internalServerError().body(message + ": " + e.toString());
 		}
 
 		if (result != null && result.hasNext()) {
