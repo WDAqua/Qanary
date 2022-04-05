@@ -92,6 +92,17 @@ public class QanarySparqlProtocolController {
 		}
 	}
 
+	/**
+	 * returns a HTML page
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/" + SPARQL_ENDPOINT, produces = {MediaType.TEXT_HTML_VALUE}, consumes = {MediaType.ALL_VALUE})
+	public String getSparqlAsHTML() {
+		return "sparql";
+	}
+
+	
 	@GetMapping(value = "/" + SPARQL_ENDPOINT, produces = "application/sparql-results+json", consumes = { "*/*" })
 	@ResponseBody
 	public ResponseEntity<String> getSparqlAsJSON( //
