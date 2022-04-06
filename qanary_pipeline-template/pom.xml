@@ -19,7 +19,7 @@
 		<qanary.version>[3.,4.0.0)</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
-		<docker.image.name>qapipeline</docker.image.name>
+		<docker.image.name>qanary-pipeline</docker.image.name>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
@@ -242,7 +242,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<repository>${docker.image.name}</repository>
+					<repository>${docker.image.prefix}/${docker.image.name}</repository>
 					<tag>${project.version}</tag>
 					<buildArgs>
 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
