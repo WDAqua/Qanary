@@ -21,6 +21,10 @@ import eu.wdaqua.qanary.commons.config.CacheConfig;
 public class CacheOfRestTemplateResponse {
 	private static Logger logger = LoggerFactory.getLogger(CacheOfRestTemplateResponse.class);
 	private static long numberOfExecutedRequests = 0;
+	
+	public CacheOfRestTemplateResponse() {
+		logger.warn("CacheResponse: initialized");		
+	}
 
 	@Cacheable(value = CacheConfig.CACHENAME, key = "#hashCode")
 	public ClientHttpResponse getResponse(int hashCode, HttpRequest request, byte[] body,
@@ -30,6 +34,11 @@ public class CacheOfRestTemplateResponse {
 		return execution.execute(request, body);
 	}
 
+	/**
+	 * returns number of actually executed web service requests, i.e., if the number is not increasing, then the request was cached
+	 * 
+	 * @return
+	 */
 	public long getNumberOfExecutedRequests() {
 		return CacheOfRestTemplateResponse.numberOfExecutedRequests;
 	}

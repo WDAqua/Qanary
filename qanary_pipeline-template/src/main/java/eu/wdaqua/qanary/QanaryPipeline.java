@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +22,21 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.Maps;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
-
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication
 @de.codecentric.boot.admin.server.config.EnableAdminServer
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
-@ComponentScan({ "eu.wdaqua.qanary.business", "eu.wdaqua.qanary.web", "eu.wdaqua.qanary.commons" })
+@ComponentScan({ "eu.wdaqua.qanary" })
 public class QanaryPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
