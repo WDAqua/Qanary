@@ -35,7 +35,7 @@ public class QanaryPipelineConfiguration {
 	private Environment environment;
 	private final String[] commonPropertiesToBeShownOnStartup = { //
 			"spring.application.name", //
-			//"server.host", // TODO: re-enable if getHost() works on application start
+			"server.host", // 
 			"server.port", //
 			"server.ssl.enabled", //
 			"qanary.triplestore", //
@@ -49,7 +49,7 @@ public class QanaryPipelineConfiguration {
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = {"server.port" , "qanary.ontology"};
+	private final String[] requiredParameterNames = {"server.host", "server.port" , "qanary.ontology"};
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -164,14 +164,14 @@ public class QanaryPipelineConfiguration {
 		}
 	}
 
-	// TODO: return the host on startup
-	// currently the context is only available after the application started
 	public String getHost() {
-		String baseUrl = this.getBaseUrl();
-		if (baseUrl != null) {
-			return baseUrl.substring(0, baseUrl.lastIndexOf(":"));
+		String host = this.environment.getProperty("server.host"); 
+		if (host.contains("localhost")) {
+				logger.warn("Use of 'localhost' detected! "
+						+ "Ensure that all services are started on the same network "
+						+ "or set `server.host` to the published IP address");
 		}
-		return this.environment.getProperty("server.host");
+		return host;
 	}
 
 	public Integer getPort() {
