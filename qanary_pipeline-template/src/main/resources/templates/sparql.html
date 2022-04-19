@@ -1,10 +1,42 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head> 
-    <title>Qanary Pipeline: SPARQL endpoint info</title> 
+  <head>
+    <title>Qanary Pipeline: SPARQL endpoint info</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head>
-<body>
-    <p th:text="'Qanary offers a SPARQL endpoint. Use approriate tools to fetch RDF via the GET or POST methods.'" />
-</body>
+    <link
+      href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+    <style>
+      .yasgui .autocompleteWrapper {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <p
+      th:text="'Qanary offers a SPARQL endpoint. Use approriate tools to fetch RDF via the GET or POST methods.'"
+    />
+    <div>
+      To visualize a graph, you can use
+      <a
+        th:href="@{${graphVisualizerUrl}}"
+        href="https://webengineering.ins.hs-anhalt.de:43712/"
+        rel="noreferrer"
+        >this free-to-use software</a
+      >.
+    </div>
+    <noscript>JavaScript is needed to use Yasgui.</noscript>
+    <div id="yasgui"></div>
+    <script th:inline="javascript">
+      const yasgui = new Yasgui(document.getElementById("yasgui"), {
+        requestConfig: {
+          endpoint: "http://localhost:3000/sparql" /*[[${endpoint}]]*/,
+        },
+        copyEndpointOnNewTab: false,
+      });
+    </script>
+  </body>
 </html>
