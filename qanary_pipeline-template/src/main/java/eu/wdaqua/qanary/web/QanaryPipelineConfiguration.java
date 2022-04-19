@@ -225,15 +225,21 @@ public class QanaryPipelineConfiguration {
 	}
 
 	public boolean getInsertQueriesAllowed() {
-		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
+		boolean result = Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-insert-queries"));
+		logger.info("getInsertQueriesAllowed: {}", result);
+		return result;
 	}
 
 	public boolean getAdditionalTriplesAllowed() {
-		return Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples"));
+		boolean result = Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples")); 
+		logger.info("getAdditionalTriplesAllowed: {}", result);
+		return result;
 	}
 
 	public String getAdditionalTriplesDirectory() {
-		return getProperty("qanary.process.additional-triples-directory");
+		String result = getProperty("qanary.process.additional-triples-directory"); 
+		logger.info("getAdditionalTriplesDirectory: {}", result);
+		return result;
 	}
 
 
