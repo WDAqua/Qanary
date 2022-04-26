@@ -57,6 +57,26 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 		return new ArrayList<>(availableComponents.keySet());
 	}
 
+	public Map<String, Instance> getAvailableComponents() {
+		return this.availableComponents;
+	}
+	
+	/**
+	 * returns a Qanary component for a given name or NULL
+	 * 
+	 * @param componentName
+	 * @return
+	 */
+	public QanaryComponent getAvailableComponentFromName(String componentName) {
+		Instance componentInstance = this.availableComponents.getOrDefault(componentName, null);
+		if (componentInstance != null && componentInstance.getStatusInfo().isUp()) {
+			boolean used = true;
+			return new QanaryComponent(componentName, componentInstance.getRegistration().getServiceUrl(), used);
+		} else {
+			return null;
+		}
+	}
+
 	public List<QanaryComponent> getAvailableComponentsFromNames(List<String> componentsToBeCalled) {
 
 		List<QanaryComponent> components = new LinkedList<>();

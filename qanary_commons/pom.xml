@@ -4,17 +4,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>2.2.2</version>
+	<version>3.1.0</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.6.RELEASE</version>
+		<version>2.5.5</version>
 	</parent>
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
+		<spring-boot-admin.version>2.5.2</spring-boot-admin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<jena.version>4.3.2</jena.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -83,6 +84,13 @@
 			<artifactId>guava</artifactId>
 			<version>[24.1.1,)</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<!--version>4.13.2</version-->
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -120,16 +128,34 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
+			<version>${jena.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+			<version>${jena.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<type>pom</type>
+			<version>${jena.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>3.4.6</version>
+			<version>4.2.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>3.8.0</version>
+			<version>4.2.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Caching -->
@@ -185,6 +211,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.complexible.stardog/client-http -->
+		<dependency>
+			<groupId>com.complexible.stardog</groupId>
+			<artifactId>client-http</artifactId>
+			<version>[7.9.0,8.0.0)</version>
+		</dependency>
+		<dependency>
+			<groupId>com.complexible.stardog.jena</groupId>
+			<artifactId>stardog-jena</artifactId>
+			<version>[7.9.0,8.0.0)</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
 		    <groupId>org.apache.logging.log4j</groupId>
@@ -198,6 +235,14 @@
 					</exclusions>
 		</dependency>		
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>Stardog</id>
+			<name>Stardog Maven Repository</name>
+			<url>https://maven.stardog.com/</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 		      <plugin>

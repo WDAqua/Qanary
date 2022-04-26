@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * controller providing an embedded front end for human users
@@ -82,6 +83,11 @@ public class QanaryEmbeddedQaWebFrontendController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/qa", method = RequestMethod.POST)
+	@Operation(
+		summary="start a pre-configured question answering process",
+		operationId="qa", 
+		description="Use the qanary.componentList defined in local properties file.\nExample: curl -d question='Capital of France?' http://localhost:8080/qa"
+	)
 	public String qa(@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final String question,
 			Model model) throws Exception {
 
@@ -97,7 +103,7 @@ public class QanaryEmbeddedQaWebFrontendController {
 
 		// Send the question to the startquestionansweringwithtextquestion
 		ResponseEntity<?> response = qanaryQuestionAnsweringController.startquestionansweringwithtextquestion(question,
-				qanaryConfigurator.getDefaultComponentNames(), null, null, null);
+				qanaryConfigurator.getDefaultComponentNames(), null, null, null, null);
 		QanaryQuestionAnsweringRun run = (QanaryQuestionAnsweringRun) response.getBody();
 		logger.warn("response from startquestionansweringwithtextquestion: {}", run);
 

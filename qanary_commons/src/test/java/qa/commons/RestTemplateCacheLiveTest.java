@@ -16,8 +16,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,7 +28,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import eu.wdaqua.qanary.commons.config.CacheConfig;
-import eu.wdaqua.qanary.commons.config.RestClientConfig;
 import eu.wdaqua.qanary.communications.CacheOfRestTemplateResponse;
 import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
 
@@ -36,21 +35,13 @@ import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
  * Test is validating the correct functionality of RestTemplateWithCaching
  * (i.e., repeated requests to a Web service are cached)
  */
-@SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-@EnableAutoConfiguration
-@ContextConfiguration(loader = AnnotationConfigWebContextLoader.class, classes = { RestClientConfig.class,
-		CacheConfig.class })
+@SpringBootTest(classes=RestTemplateCacheLiveTest.class)
+@ContextConfiguration(loader = AnnotationConfigWebContextLoader.class, classes = { CacheConfig.class })
+@Import(RestTemplateCacheLiveTestConfiguration.class)
 public class RestTemplateCacheLiveTest {
-
 	// time span for caching, tests wait this time span during the test runs
-	private final static int MAX_TIME_SPAN_SECONDS = 5;
-
-	// define here the current CaffeineCacheManager configuration
-	static {
-		System.setProperty("qanary.webservicecalls.cache.specs",
-				"maximumSize=1000,expireAfterAccess=" + MAX_TIME_SPAN_SECONDS + "s");
-	}
+	protected final static int MAX_TIME_SPAN_SECONDS = 5;
 
 	private Logger logger = LoggerFactory.getLogger(RestTemplateCacheLiveTest.class);
 
@@ -62,19 +53,21 @@ public class RestTemplateCacheLiveTest {
 	RestTemplateWithCaching restTemplate;
 
 	@Autowired
-	CacheOfRestTemplateResponse myCacheOfResponses;
+	CacheOfRestTemplateResponse myCacheOfResponse;
 
 	@Test
 	public void givenRestTemplate_whenRequested_thenLogAndModifyResponse()
 			throws InterruptedException, URISyntaxException {
 
+		// myCacheOfResponse = new CacheOfRestTemplateResponse();
+		// restTemplate =  new RestTemplateWithCaching(myCacheOfResponse);
 		assertNotNull(restTemplate);
-		assertNotNull(myCacheOfResponses);
+		assertNotNull(myCacheOfResponse);
 
 		LoginForm loginForm0 = new LoginForm("userName", "password");
 		LoginForm loginForm1 = new LoginForm("userName2", "password2");
 
-		assertEquals(0, myCacheOfResponses.getNumberOfExecutedRequests());
+		assertEquals(0, myCacheOfResponse.getNumberOfExecutedRequests());
 
 		callRestTemplateWithCaching(loginForm0, Cache.NOTCACHED); // cache miss
 		callRestTemplateWithCaching(loginForm0, Cache.CACHED); // cache hit
@@ -86,7 +79,7 @@ public class RestTemplateCacheLiveTest {
 		callRestTemplateWithCaching(loginForm0, Cache.CACHED); // cache hit
 		callRestTemplateWithCaching(loginForm1, Cache.CACHED); // cache hit
 
-		assertEquals(3, myCacheOfResponses.getNumberOfExecutedRequests());
+		assertEquals(3, myCacheOfResponse.getNumberOfExecutedRequests());
 
 	}
 
@@ -97,12 +90,12 @@ public class RestTemplateCacheLiveTest {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<LoginForm> requestEntity = new HttpEntity<LoginForm>(loginForm, headers);
 
-		long numberOfNewlyExecutedRequests = myCacheOfResponses.getNumberOfExecutedRequests();
+		long numberOfNewlyExecutedRequests = myCacheOfResponse.getNumberOfExecutedRequests();
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(TESTSERVICEURL, requestEntity, String.class);
-		numberOfNewlyExecutedRequests = myCacheOfResponses.getNumberOfExecutedRequests()
+		numberOfNewlyExecutedRequests = myCacheOfResponse.getNumberOfExecutedRequests()
 				- numberOfNewlyExecutedRequests;
 		logger.info("numberOfExecutedRequest since last request: new={}, count={}, teststatus={}", //
-				numberOfNewlyExecutedRequests, myCacheOfResponses.getNumberOfExecutedRequests(), cacheStatus);
+				numberOfNewlyExecutedRequests, myCacheOfResponse.getNumberOfExecutedRequests(), cacheStatus);
 
 		assertThat(responseEntity.getStatusCode(), is(equalTo(HttpStatus.OK)));
 

@@ -3,6 +3,7 @@ package eu.wdaqua.qanary.commons;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.commons.ontology.TextPositionSelector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 import org.apache.jena.atlas.json.JSON;
@@ -25,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-
-import static eu.wdaqua.qanary.commons.QanaryUtils.loadTripleStore;
 
 /**
  * represents the access to a question in a triplestore
@@ -51,6 +50,7 @@ public class QanaryQuestion<T> {
 	private final URI namedGraph; // where the question is stored
 	private String language;
 	private List<String> knowledgeBase;
+	private QanaryTripleStoreConnector myQanaryTripleStoreConnector; 
 
 	private QanaryConfigurator myQanaryConfigurator;
 
@@ -69,6 +69,13 @@ public class QanaryQuestion<T> {
 		// in this graph the data is stored
 		this.namedGraph = new URI("urn:graph:" + UUID.randomUUID().toString());
 		this.uri = questionUri.toURI();
+		
+		if (qanaryConfigurator == null) {
+			String message = "qanaryConfigurator was null";
+			logger.error(message);
+			throw new RuntimeException(message);
+		}
+		
 		this.myQanaryConfigurator = qanaryConfigurator;
 
 		final URI triplestore = qanaryConfigurator.getEndpoint();
@@ -93,23 +100,28 @@ public class QanaryQuestion<T> {
 				+ "LOAD <http://www.w3.org/ns/oa.rdf> " //
 				+ "INTO GRAPH " + namedGraphMarker;
 		logger.info("SPARQL query: {}", sparqlquery);
-		loadTripleStore(sparqlquery, qanaryConfigurator);
+		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove 
+		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 
 		// Load the Qanary Ontology using the permanent GitHub location
 		// specified in application.properties
 		sparqlquery = "" //
 				+ "LOAD <"+qanaryConfigurator.getQanaryOntology()+"> " //
 				+ "INTO GRAPH " + namedGraphMarker;
-		logger.info("SPARQL query: {}", sparqlquery);
-		loadTripleStore(sparqlquery, qanaryConfigurator);
+		logger.warn("SPARQL query: {}", sparqlquery);
+		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
+		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
+		
 
 		// Prepare the question, answer and dataset objects
 		sparqlquery = "" //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" //
 				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> \n" //
+				+ "PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" //
 				+ "INSERT DATA { \n" //
 				+ "	GRAPH " + namedGraphMarker + " { \n" //
 				+ "		<" + questionUrlString + "> a qa:Question .\n" //
+				+ "		<" + questionUrlString + "> owl:sameAs <urn:qanary:currentQuestion> .\n" //
 				+ "		<" + questionUrlString + "#Answer> a qa:Answer . \n" //
 				+ "		<" + questionUrlString + "#Dataset> a qa:Dataset . \n" //
 				+ "		<" + questionUrlString + "#Annotation:1> a  oa:AnnotationOfQuestion; \n" //
@@ -122,7 +134,9 @@ public class QanaryQuestion<T> {
 				+ "	} \n" // end: graph
 				+ "}";
 		logger.info("SPARQL query (initial annotations for question {}):\n{}", questionUrlString, sparqlquery);
-		loadTripleStore(sparqlquery, qanaryConfigurator);
+		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
+		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
+
 
 		initFromTriplestore(qanaryConfigurator);
 	}
@@ -138,6 +152,7 @@ public class QanaryQuestion<T> {
 	public QanaryQuestion(URI namedGraph, QanaryConfigurator qanaryConfigurator) throws URISyntaxException {
 		this.initFromTriplestore(qanaryConfigurator);
 		this.qanaryMessage = new QanaryMessage(qanaryConfigurator.getEndpoint(), namedGraph);
+		this.myQanaryConfigurator = qanaryConfigurator;
 		// save where the answer is stored
 		this.namedGraph = namedGraph;
 	}
@@ -147,13 +162,37 @@ public class QanaryQuestion<T> {
 	 * 
 	 * @param qanaryMessage
 	 */
-	public QanaryQuestion(QanaryMessage qanaryMessage) {
+	public QanaryQuestion(QanaryMessage qanaryMessage, final QanaryConfigurator myQanaryConfigurator) {
+		this(qanaryMessage, myQanaryConfigurator.getQanaryTripleStoreConnector());
+	}
+
+	public QanaryQuestion(QanaryMessage qanaryMessage, final QanaryTripleStoreConnector myQanaryTripleStoreConnector) {
 		this.qanaryMessage = qanaryMessage;
-		this.qanaryUtil = new QanaryUtils(qanaryMessage);
+		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		this.qanaryUtil = new QanaryUtils(qanaryMessage, myQanaryTripleStoreConnector);
 		// save where the answer is stored
 		this.namedGraph = qanaryMessage.getInGraph();
 	}
 
+	/**
+	 * safe retrieval of QanaryTripleStoreConnector instance 
+	 * 
+	 * remark: needed for transition between Qanary versions
+	 * 
+	 * @return
+	 */
+	public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
+		if( this.myQanaryConfigurator != null) {
+			return this.myQanaryConfigurator.getQanaryTripleStoreConnector();
+		} else if(this.myQanaryTripleStoreConnector != null) {
+			return this.myQanaryTripleStoreConnector;
+		} else {
+			String message = "in QanaryQuestion a QanaryTripleStoreConnector instance is required";
+			logger.error(message);
+			throw new RuntimeException(message);
+		}
+	}
+	
 	/**
 	 * init object properties from a given triplestore URI
 	 * 
@@ -162,7 +201,7 @@ public class QanaryQuestion<T> {
 	 */
 	private void initFromTriplestore(final QanaryConfigurator myQanaryConfigurator) throws URISyntaxException {
 		this.qanaryMessage = new QanaryMessage(myQanaryConfigurator.getEndpoint(), namedGraph);
-		this.qanaryUtil = new QanaryUtils(this.qanaryMessage);
+		this.qanaryUtil = new QanaryUtils(this.qanaryMessage, this.getQanaryTripleStoreConnector());
 	}
 
 	/**
@@ -206,15 +245,6 @@ public class QanaryQuestion<T> {
 	}
 
 	/**
-	 * retrieves current instance of configurator
-	 * 
-	 * @return
-	 */
-	private QanaryConfigurator getQanaryConfigurator() {
-		return this.myQanaryConfigurator;
-	}
-
-	/**
 	 * get original question URI from the pipeline endpoint
 	 * 
 	 * @throws SparqlQueryFailed
@@ -225,11 +255,11 @@ public class QanaryQuestion<T> {
 			if (this.getInGraph() == null) {
 				throw new QanaryExceptionNoOrMultipleQuestions("inGraph is null.");
 			} else {
-				ResultSet resultset = qanaryUtil.selectFromTripleStore("" //
+				ResultSet resultset = this.getQanaryTripleStoreConnector().select("" //
 						+ "SELECT ?question " //
 						+ "FROM <" + this.getInGraph() + "> {" //
 						+ "	?question <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.wdaqua.eu/qa#Question>" //
-						+ "}", this.getEndpoint().toString());
+						+ "}");
 
 				int i = 0;
 				String question = null;
@@ -263,16 +293,16 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfTextRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
-		this.qanaryUtil.updateTripleStore(sparqlquery, this.getQanaryConfigurator());
+		this.getQanaryTripleStoreConnector().update(sparqlquery);
 	}
 
 	/**
@@ -288,16 +318,16 @@ public class QanaryQuestion<T> {
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " //
 				+ "	GRAPH <" + this.getInGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfAudioRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + this.getUri() + "> . " //
-				+ "	 ?a oa:annotatedAt ?time  "//
+				+ "  		?a a qa:AnnotationOfAudioRepresentation . " //
+				+ "  		?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ "  		?a oa:hasBody <" + this.getUri() + "> . " //
+				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
 				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
-		this.qanaryUtil.updateTripleStore(sparqlquery, this.getQanaryConfigurator());
+		this.getQanaryTripleStoreConnector().update(sparqlquery);
 	}
 
 	/**
@@ -356,7 +386,7 @@ public class QanaryQuestion<T> {
 					+ "  ?a oa:hasBody ?uri " //
 					+ "}"; //
 
-			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+			ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 			int i = 0;
 			String uriTextRepresentation = null;
@@ -406,7 +436,7 @@ public class QanaryQuestion<T> {
 					+ "  ?a oa:hasBody ?uri . " //
 					+ "}";
 
-			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+			ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 			int i = 0;
 			String uriAudioRepresentation = null;
@@ -495,7 +525,7 @@ public class QanaryQuestion<T> {
 					+ "     BIND (now() as ?time) " //
 					+ "}";
 
-			qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
+			this.getQanaryTripleStoreConnector().update(sparql);
 		}
 	}
 
@@ -521,8 +551,8 @@ public class QanaryQuestion<T> {
 				+ "  } " //
 				+ "} " //
 				+ "ORDER BY DESC(?score)";
-		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
-
+		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
+		
 		List<SparqlAnnotation> annotationList = new ArrayList<SparqlAnnotation>();
 		while (resultset.hasNext()) {
 			QuerySolution next = resultset.next();
@@ -564,14 +594,15 @@ public class QanaryQuestion<T> {
 				+ "SELECT ?json " //
 				+ "FROM <" + this.getInGraph() + "> " //
 				+ "WHERE { " //
-				+ "	 ?a a qa:AnnotationOfAnswerJson . " //
-				+ "  ?a oa:hasBody ?answer . " //
-				+ "  ?answer rdf:value ?json . " //
-//				+ "  ?a a qa:AnnotationOfAnswerJSON . " //
-//				+ "  ?a oa:hasBody ?json " //
+				+ "	?a a qa:AnnotationOfAnswerJson . " //
+				+ "  	?a oa:hasBody ?answer . " //
+				+ " 	?answer rdf:value ?json . " //
+//				+ "  	?a a qa:AnnotationOfAnswerJSON . " //
+//				+ "  	?a oa:hasBody ?json " //
 //				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
-		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+		
+		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 		// the default value has to be null to distinguish missing values from empty values
 		String sparqlAnnotation = null; 
@@ -601,17 +632,18 @@ public class QanaryQuestion<T> {
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
 				+ "INSERT { " + "GRAPH <" + this.getOutGraph() + "> { " //
-				+ "  ?a a qa:AnnotationOfTextualRepresentation . " //
-				+ "  ?a oa:hasTarget <" + this.getUri() + "> . " //
-				+ "  ?a oa:hasBody <" + uriTextRepresention + "> ;" //
-				+ "     oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
-				+ "	    oa:AnnotatedAt ?time  " + "}} " //
+				+ " 	?a a qa:AnnotationOfTextualRepresentation . " //
+				+ " 	?a oa:hasTarget <" + this.getUri() + "> . " //
+				+ " 	?a oa:hasBody <" + uriTextRepresention + "> ;" //
+				+ "        oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
+				+ "	   oa:AnnotatedAt ?time  " //
+				+ "}} " //
 				+ "WHERE { " //
 				+ "	BIND (IRI(str(RAND())) AS ?a) ." //
 				+ "	BIND (now() as ?time) " //
 				+ "}";
-		logger.info("SPARQL query {}", sparql);
-		this.qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
+		logger.info("SPARQL query: {}", sparql);
+		this.getQanaryTripleStoreConnector().update(sparql);
 	}
 
 	/**
@@ -632,15 +664,15 @@ public class QanaryQuestion<T> {
 				+ "		?a a qa:AnnotationOfQuestionLanguage . " //
 				+ part //
 				+ "		?a 	oa:hasTarget <" + this.getUri() + "> ; " //
-				+ "   		oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
-				+ "   		oa:annotatedAt ?time  " //
+				+ "   			oa:annotatedBy <www.wdaqua.eu/qanary> ; " //
+				+ "   			oa:annotatedAt ?time  " //
 				+ " } " //
 				+ "} " //
 				+ "WHERE { " //
 				+ "	BIND (IRI(str(RAND())) AS ?a) . " //
 				+ "	BIND (now() as ?time) . " //
 				+ "}";
-		qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
+		this.getQanaryTripleStoreConnector().update(sparql);
 	}
 
 	/**
@@ -666,8 +698,8 @@ public class QanaryQuestion<T> {
 					+ "  } " //
 					+ "}";
 
-			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
-
+			ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
+					
 			int i = 0;
 			List<String> languageArray = new ArrayList<>();
 			String language = "";
@@ -719,7 +751,7 @@ public class QanaryQuestion<T> {
 				+ "	BIND (IRI(str(RAND())) AS ?a) . " //
 				+ "	BIND (now() as ?time) . " //
 				+ "}";
-		qanaryUtil.updateTripleStore(sparql, this.getQanaryConfigurator());
+		this.getQanaryTripleStoreConnector().update(sparql);
 	}
 
 	/**
@@ -744,7 +776,7 @@ public class QanaryQuestion<T> {
 					+ "    } ORDER BY ?time LIMIT 1 " //
 					+ "  } " //
 					+ "}";
-			ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+			ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 			int i = 0;
 			List<String> knowledgeBase = new ArrayList<String>();
@@ -773,7 +805,7 @@ public class QanaryQuestion<T> {
 				+ "WHERE { " //
 				+ "  <URIAnswer> qa:found ?found .  " //
 				+ "}";
-		ResultSet resultset = qanaryUtil.selectFromTripleStore(sparql, this.getEndpoint().toString());
+		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 		String found = "undefined";
 		while (resultset.hasNext()) {

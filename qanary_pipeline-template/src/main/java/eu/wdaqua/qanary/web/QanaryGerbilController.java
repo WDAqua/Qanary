@@ -7,15 +7,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,10 +32,11 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import io.swagger.v3.oas.annotations.Operation;
 
 
 /**
- * controller for processing questions, i.e., related to the question answering process
+ * controller for validating questions using Gerbil, i.e., validating the question answering results
  *
  * @author Dennis Diefenbach
  */
@@ -47,10 +46,10 @@ public class QanaryGerbilController {
 	
     private static final Logger logger = LoggerFactory.getLogger(QanaryGerbilController.class);
     private final QanaryConfigurator qanaryConfigurator;
-	private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
+    private final QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
  
-     private String host;
-     private int port;
+    private String host;
+    private int port;
      
  
     //Set this to allow browser requests from other websites
@@ -87,16 +86,26 @@ public class QanaryGerbilController {
      * a simple HTML input to generate a url-endpoint for gerbil for QA, http://gerbil-qa.aksw.org/gerbil/config
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.GET)
+    @Operation(
+        summary="expose an HTML frontend for generating a Gerbil URL endpoint",
+        operationId="startquestionansweringwithtextquestion",
+        description="Generate a URL endpoint for Gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input form."
+    )
     public String startquestionansweringwithtextquestion(Model model) {
         model.addAttribute("url", "Select components!");
         return "generategerbilendpoint";
     }
 
     /**
-     * given a list of components a url-endpoint for gerbil for QA is generated
+     * given a list of components a url-endpoint for Gerbil for QA is generated
      *
      */
     @RequestMapping(value = "/gerbil", method = RequestMethod.POST)
+    @Operation(
+        summary="expose an HTML frontend for a Gerbil URL endpoint", 
+        operationId="gerbilGenerator",
+        description="Generate a URL endpoint for Gerbil QA from a list of compoents."
+    )
     public String gerbilGenerator(
             @RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
             Model model
@@ -132,14 +141,18 @@ public class QanaryGerbilController {
         return "generategerbilendpoint";
     }
 
-    @SuppressWarnings("unchecked")
 	@RequestMapping(value="/gerbil-execute/{components:.*}",  method = RequestMethod.POST, produces = "application/json")
+	@Operation(
+		summary="Start a Gerbil QA process with a list of components",
+		operationId="gerbil",
+		description="curl -X POST http://localhost:8080/gerbil-execute/NED-DBpedia-Spotlight -d query='What is the capital of France?'"
+	)
 	public ResponseEntity<JSONObject> gerbil(
 			@RequestParam(value = "query", required = true) final String question, // 
             @RequestParam(value = "lang", required = false) String languageOfQuestion, // 
             @RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) URI priorConversation, // 
             @PathVariable("components") final String componentsToBeCalled // 
-    ) throws URISyntaxException, Exception, SparqlQueryFailed, ParseException {
+    ) throws URISyntaxException, Exception, SparqlQueryFailed {
     	logger.info("Asked question: {}", question);
     	logger.info("Language of question: {}", languageOfQuestion);
         logger.info("QA pipeline components: {}", componentsToBeCalled);
@@ -166,7 +179,8 @@ public class QanaryGerbilController {
         // retrieve text representation, SPARQL and JSON result
         QanaryMessage myQanaryMessage = new QanaryMessage(new URI((String)json.get("endpoint")), new URI((String)json.get("inGraph")), new URI((String)json.get("outGraph")));
         @SuppressWarnings("rawtypes")
-		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage);
+		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
+
         //Generates the following output
         /*{
             "questions": [{
@@ -201,7 +215,7 @@ public class QanaryGerbilController {
         JSONObject questionData = new JSONObject();
         questionData.put("language", language);
         questionData.put("string", questionText);
-        questionDataArray.add(questionData);
+        questionDataArray.put(questionData);
 
         // create the query object and add the content
         JSONObject queryObj = new JSONObject();
@@ -210,13 +224,13 @@ public class QanaryGerbilController {
         // transform the answer String to JSON, if an answer was found
         JSONObject answersObj = new JSONObject();
         if (jsonAnswerString != null && jsonAnswerString.length() > 0) {
-            JSONParser parser = new JSONParser();
-            answersObj = (JSONObject) parser.parse(jsonAnswerString);
+            JSONTokener tokener = new JSONTokener(jsonAnswerString);
+            answersObj = new JSONObject(tokener);
         }
 
         // create the answers array and add the content
         JSONArray answersArray = new JSONArray();
-        answersArray.add(answersObj);
+        answersArray.put(answersObj);
 
         // create the wrapper object and the array and add all JSON to it
         JSONArray questionsArray = new JSONArray();
@@ -224,7 +238,7 @@ public class QanaryGerbilController {
         questionObject.put("question", questionDataArray);
         questionObject.put("query", queryObj);
         questionObject.put("answers", answersArray);
-        questionsArray.add(questionObject);
+        questionsArray.put(questionObject);
 
         // add all to the wrapper object
         JSONObject obj = new JSONObject();

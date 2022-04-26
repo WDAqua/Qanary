@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
  * @author AnBo
  *
  */
+@Deprecated
 @Component
 public class TriplestoreEndpointIdentifier {
 	private static final Logger logger = LoggerFactory.getLogger(TriplestoreEndpointIdentifier.class);
 
-	@Value("${qanary.triplestore.stardog5}")
+	@Value("${qanary.triplestore.stardog5:true}")
 	private boolean stardog5;
 
 	/**
@@ -39,12 +40,14 @@ public class TriplestoreEndpointIdentifier {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
+	@Deprecated
 	public URI getSelectEndpoint(URI uri) throws URISyntaxException {
+		/*
 		if (this.isStardog5orHigher()) {
 			uri = new URI(uri.toString() + "/query");
 			logger.info("endpoint changed due to Stardog 5+: {}", uri);
 		}
-
+		*/
 		return uri;
 	}
 
@@ -55,6 +58,7 @@ public class TriplestoreEndpointIdentifier {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
+	@Deprecated
 	public URI getAskEndpoint(URI uri) throws URISyntaxException {
 		if (this.isStardog5orHigher()) {
 			uri = this.getSelectEndpoint(uri);
@@ -70,12 +74,14 @@ public class TriplestoreEndpointIdentifier {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
+	@Deprecated
 	public URI getUpdateEndpoint(URI uri) throws URISyntaxException {
+		/*
 		if (this.isStardog5orHigher()) {
 			uri = new URI(uri.toString() + "/update");
 			logger.info("endpoint changed due to Stardog 5+: {}", uri);
 		}
-
+		*/
 		return uri;
 	}
 
@@ -86,6 +92,7 @@ public class TriplestoreEndpointIdentifier {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
+	@Deprecated
 	public URI getCreateEndpoint(URI url) throws URISyntaxException {
 		if (this.isStardog5orHigher()) {
 			url = this.getUpdateEndpoint(url);
@@ -101,6 +108,7 @@ public class TriplestoreEndpointIdentifier {
 	 * @return
 	 * @throws URISyntaxException 
 	 */
+	@Deprecated
 	public URI getLoadEndpoint(URI uri) throws URISyntaxException {
 		if (this.isStardog5orHigher()) {
 			uri = this.getUpdateEndpoint(uri);

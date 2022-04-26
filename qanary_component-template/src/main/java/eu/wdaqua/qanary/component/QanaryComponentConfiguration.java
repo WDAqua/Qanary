@@ -7,15 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-
-import eu.wdaqua.qanary.commons.config.CacheConfig;
-import eu.wdaqua.qanary.commons.config.RestClientConfig;
-import eu.wdaqua.qanary.communications.CacheOfRestTemplateResponse;
-import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Component
 @Configuration
@@ -24,6 +19,7 @@ public class QanaryComponentConfiguration {
 	private final Logger logger = LoggerFactory.getLogger(QanaryComponentConfiguration.class);
 	private Environment environment;
 	private final String[] propertiesToDisplayOnStartup = { //
+			"server.host", //
 			"server.port", //
 			"spring.application.name", //
 			"spring.application.description", //
@@ -34,34 +30,6 @@ public class QanaryComponentConfiguration {
 
 	public QanaryComponentConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
-	}
-
-	/**
-	 * the following four beans are required to make these components in the package
-	 * eu.wdaqua.qanary.component visible
-	 * 
-	 * @return
-	 */
-	@Bean
-	public RestClientConfig myRestClientConfig() {
-		return new RestClientConfig();
-	}
-
-	@Bean
-	public RestTemplateWithCaching myComponentRestClient(RestClientConfig myRestClientConfig)
-			throws NoSuchMethodException, SecurityException {
-		return myRestClientConfig.restTemplateWithCaching(myRestClientConfig.cacheResponse());
-	}
-	
-	@Bean
-	public CacheOfRestTemplateResponse myCacheOfRestTemplateResponse(RestClientConfig myRestClientConfig)
-			throws NoSuchMethodException, SecurityException{
-		return myRestClientConfig.cacheResponse();
-	}
-	
-	@Bean
-	public CacheConfig myCacheConfig() {
-		return new CacheConfig();
 	}
 
 	@PostConstruct
@@ -91,7 +59,32 @@ public class QanaryComponentConfiguration {
 	}
 
 	public String getPropertyValue(String property) {
-		return this.environment.getProperty(property);
+		if (property.compareTo("server.host") == 0) {
+			return getHost();
+		} else {
+			return this.environment.getProperty(property);
+		}
+	}
+
+	public String getBaseUrl() {
+		try {
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+				.toUriString();
+			return baseUrl;
+		} catch (Exception e) {
+			logger.warn("could not get base url: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	// TODO: return the host on startup
+	// currently the context is only available after the application started
+	public String getHost() {
+		String baseUrl = this.getBaseUrl();
+		if (baseUrl != null) {
+			return baseUrl.substring(0, baseUrl.lastIndexOf(":"));
+		}
+		return null;
 	}
 
 	public String toString() {

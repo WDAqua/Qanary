@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * Controller for Qanary pipeline service w.r.t. components intended to offer configuration information, 
@@ -32,6 +33,11 @@ public class QanaryConfigurationController {
 	}
 
 	@RequestMapping(value="/components", method=RequestMethod.GET, produces="application/json")
+	@Operation(
+		summary="get a list of all registered components",
+		operationId="getAvailableComponents",
+		description="Returns a list of registered and available components, containing their name and url."
+	)
 	public ResponseEntity<JSONArray> getAvailableComponents() {
 		JSONArray json = new JSONArray();
 		List<String> componentNames = registrationChangeNotifier.getAvailableComponentNames();

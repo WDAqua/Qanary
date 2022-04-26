@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
  * 
  * see component CacheConfig for configuring the behavior of the cache
  */
+@Service
 public class RestTemplateWithCaching extends RestTemplate {
 
 	public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
