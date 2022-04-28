@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -113,7 +113,7 @@ public class QanaryQuestionController {
 
 		// Save the file locally
 		try (final BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filepath)))){
-			stream.write(questionstring.getBytes(Charset.defaultCharset()));
+			stream.write(questionstring.getBytes(StandardCharsets.UTF_8));
 		}
 
 		final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
