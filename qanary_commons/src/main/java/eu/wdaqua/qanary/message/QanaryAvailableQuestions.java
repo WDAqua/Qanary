@@ -26,6 +26,7 @@ public class QanaryAvailableQuestions {
     public QanaryAvailableQuestions(String directoryForStoringQuestionRawData, String host) throws IOException {
     	if( directoryForStoringQuestionRawData.isBlank() ) {
     		directoryForStoringQuestionRawData = "."; // fallback if no custom configuration was defined
+            logger.warn("No directory for storing question raw data was configured. Files will be stored on the current execution path which may not be a suitable location!");
     	}
     	
         File folder = new File(directoryForStoringQuestionRawData);
@@ -36,9 +37,7 @@ public class QanaryAvailableQuestions {
         }
 
         for (final File fileEntry : folder.listFiles()) {
-            if (fileEntry.isDirectory()) {
-                // skip
-            } else {
+            if (fileEntry.isFile() && fileEntry.getName().startsWith("stored-question")) { // only return stored-question files created by qanary
                 try {
                     availablequestions.add(new URL(host + "/question/" + fileEntry.getName() + "/"));
                 } catch (MalformedURLException e) {
@@ -48,7 +47,7 @@ public class QanaryAvailableQuestions {
             }
         }
 
-        logger.info("found: " + this.availablequestions.size() + " in " + directoryForStoringQuestionRawData);
+        logger.info("found " + this.availablequestions.size() + " questions in " + folder.getAbsolutePath());
 
     }
 
