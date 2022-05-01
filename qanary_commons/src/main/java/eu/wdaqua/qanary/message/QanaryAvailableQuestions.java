@@ -41,13 +41,13 @@ public class QanaryAvailableQuestions {
                 try {
                     availablequestions.add(new URL(host + "/question/" + fileEntry.getName() + "/"));
                 } catch (MalformedURLException e) {
-                    logger.warn("could not create URL from " + fileEntry + ": " + e.getMessage());
+                    logger.warn("could not create URL from {}: {}", fileEntry, e.getMessage());
                     throw e;
                 }
             }
         }
 
-        logger.info("found " + this.availablequestions.size() + " questions in " + folder.getAbsolutePath());
+        logger.info("found {} questions in {}", this.availablequestions.size(), folder.getAbsolutePath());
 
     }
 
