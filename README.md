@@ -83,23 +83,30 @@ How to build a complete *tiny Question Answering system* driven by Qanary is des
 
  5. Switch to Qanary directoy: `cd Qanary`
  
- 6. Build the components (creating Docker images is skipped):
+ 6. [Configure your pipeline appropriately](https://github.com/WDAqua/Qanary/wiki/Configuration-Parameters-of-a-Qanary-Pipeline). A common pitfall is the Stardog Triplestore. If you're using a regular Stardog Triplestore running locally on port `5280` with the database `qanary` and the credentials `admin`/`admin`, simply use the following configuration:
+ ```
+ stardog.url=http://127.0.0.1:5820/qanary
+ stardog.username=admin
+ stardog.password=admin
+ ```
+ 
+ 7. Build the components (creating Docker images is skipped):
 ```
    mvn clean install -Ddockerfile.skip=true
 ```
  
- 7. Run the pipeline component:
+ 8. Run the pipeline component:
 ```
    cd qanary_pipeline-template/target/
-   java -jar target/qa.pipeline-<version>.jar --qanary.triplestore=ENDPOINT-OF-YOUR-TRIPLESTORE
+   java -jar target/qa.pipeline-<version>.jar
 ```
 
-   * while using Stardog on your local system using the default configuration you might use as triplestore endpoint: `http://admin:admin@localhost:5820/YOUR-DATABASE-NAME` (of course, you have to create a database by yourself)
+   * **(It's generally better to use the approach described in step 6 than the following for configuring your Stardog Triplestore.)** While using Stardog on your local system using the default configuration you might use as triplestore endpoint: `http://admin:admin@localhost:5820/YOUR-DATABASE-NAME` (of course, you have to create a database by yourself). In that case, you need to append the parameter `--qanary.triplestore=ENDPOINT-OF-YOUR-TRIPLESTORE` to the command above.
   
- 8. After running corresponding component JAR files, you can see Spring Boot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
+ 9. After running corresponding component JAR files, you can see Spring Boot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
    * To run components you need to build and run Qanary components, see the components repository for details: [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components)
 
- 9. Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
+ 10. Now your pipeline is ready to use. Go to <http://localhost:8080/startquestionansweringwithtextquestion>. Here you can find a User Interface to interact for adding question via web interface, and then select the components you need to include in the pipeline via checking a checkbox for each component. Press the start button and you are ready to go!
 
 
 ### Including the creation of Docker instances
@@ -109,6 +116,8 @@ How to build a complete *tiny Question Answering system* driven by Qanary is des
  * Install the Docker environment (see <https://docs.docker.com/engine/installation/> for details)
  
  * Start the Docker service (see <https://docs.docker.com/engine/admin/> for details)
+ 
+ * [Configure your pipeline as needed](https://github.com/WDAqua/Qanary/wiki/How-do-I-configure-a-Qanary-pipeline-using-Docker%253F). Not doing so can cause the pipeline to fail.
 
  * Build your project using maven: `mvn clean install` (note: you might also add `-Ddockerfile.skip=false` to express that Docker images are created)
    * The _install_ goal will compile, test, and package your project’s code and then copy it into the local dependency repository. Additionally, it will generate docker images for each component that will be stored in your local repository.
