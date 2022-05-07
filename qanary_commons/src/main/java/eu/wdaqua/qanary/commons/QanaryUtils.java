@@ -80,15 +80,6 @@ public class QanaryUtils {
 	}
 
 	/**
-	 * wrapper for selectTripleStore
-	 * @throws SparqlQueryFailed 
-	 */
-	@Deprecated
-	public ResultSet selectFromTripleStore(String sparqlQuery) throws SparqlQueryFailed {
-		return this.selectFromTripleStore(sparqlQuery);
-	}
-
-	/**
 	 * query a SPARQL endpoint with a given SELECT query
 	 * 
 	 * @throws SparqlQueryFailed

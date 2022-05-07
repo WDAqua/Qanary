@@ -37,14 +37,15 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 	
 	@Override
 	public void connect() {
+		org.apache.jena.query.ARQ.init();  // maybe it helps to prevent problems?
 		this.connection = RDFConnection.connect(this.getEndpoint().toASCIIString());
 	}
 
 	@Override
 	public ResultSet select(String sparql) throws SparqlQueryFailed {
-		logger.debug("SELECT on {}: {}", this.getEndpoint().toASCIIString(), sparql);
 		QueryExecution queryExecution = this.connection.query(sparql);
-		ResultSetRewindable resultSet = ResultSetFactory.makeRewindable(queryExecution.execSelect());
+		ResultSet myResultSet = queryExecution.execSelect();
+		ResultSetRewindable resultSet = ResultSetFactory.makeRewindable(myResultSet);
 		return resultSet;
 	}
 

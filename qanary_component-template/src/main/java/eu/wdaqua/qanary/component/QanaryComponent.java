@@ -10,6 +10,8 @@ import org.apache.http.client.ClientProtocolException;
 //import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
@@ -31,6 +33,14 @@ public abstract class QanaryComponent {
 
     // TODO need to be changed
     final String questionUrl = "http://localhost:8080/question/28f56d32-b30a-428d-ac90-79372a6f7625/";
+    
+    @Autowired
+    private Environment env;
+    
+    public Environment getEnvironment() {
+    	return this.env;
+    }
+    
 
     /**
      * needs to be implemented for any new Qanary component

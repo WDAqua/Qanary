@@ -4,14 +4,15 @@ import java.net.URI;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
@@ -39,7 +40,7 @@ public class QanaryServiceController {
      * example: curl -X POST -d 'message={"http://qanary/#endpoint":"http://x.y"}'
      * http://localhost:8080/annotatequestion | python -m json.tool
      */
-    @RequestMapping(value = QanaryConfiguration.annotatequestion, consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
+    @PostMapping(value = { QanaryConfiguration.annotatequestion, "/" + QanaryConfiguration.annotatequestion }, consumes = "application/json", produces = "application/json")
     @ResponseBody
     public QanaryMessage annotatequestion(HttpServletRequest request, @RequestBody String message) throws Exception {
         logger.info("annotatequestion: {}", message);
@@ -58,4 +59,29 @@ public class QanaryServiceController {
         return myQanaryMessage;
     }
 
+    /**
+     * fallback: showing description
+     * 
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value =  { QanaryConfiguration.annotatequestion, "/" + QanaryConfiguration.annotatequestion } )
+    public String showDescriptionOnGetRequest(HttpServletResponse response) throws Exception {
+    	// TODO: show a specific HTML page describing that only POST requests are allowed
+    	return QanaryConfiguration.description_file;
+    }
+
+    /**
+     * fallback: showing description
+     * 
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/")
+    public String showDescriptionOnGetRequestOnRoot(HttpServletResponse response) throws Exception {
+    	// TODO: show a specific HTML page describing that only POST requests to /annotate are allowed
+    	return QanaryConfiguration.description_file;
+    }
 }

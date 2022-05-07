@@ -86,6 +86,11 @@ public class QanaryComponentConfiguration {
 		}
 		return null;
 	}
+	
+	public String getApplicationName() {
+		return this.getPropertyValue("spring.application.name");
+	}
+	
 
 	public String toString() {
 		String output = "";

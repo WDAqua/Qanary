@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
+
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
@@ -54,6 +56,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 import io.swagger.v3.oas.annotations.Operation;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
+import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
 import eu.wdaqua.qanary.web.messages.AdditionalInsertQuery;
 
 /**
@@ -91,9 +94,9 @@ public class QanaryQuestionAnsweringController {
 			final QanaryQuestionController qanaryQuestionController, //
 			final QanaryComponentRegistrationChangeNotifier myComponentNotifier, //
 			final QanaryPipelineConfiguration myQanaryPipelineConfiguration, //
-			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, // 
-			final QanaryTripleStoreConnector myQanaryTripleStoreConnector // 
-		) {
+			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
+			final QanaryTripleStoreConnector myQanaryTripleStoreConnector //
+	) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
 		this.myComponentNotifier = myComponentNotifier;
@@ -113,28 +116,30 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * expose the model with the Qanary triplestore endpoint
-	 * @throws URISyntaxException 
-	 * @throws TripleStoreNotProvided 
+	 * 
+	 * @throws URISyntaxException
+	 * @throws TripleStoreNotProvided
 	 */
 	@ModelAttribute("triplestoreEndpointOfCurrentQanaryPipeline")
-	public String triplestoreEndpointOfCurrentQanaryPipeline() throws TripleStoreNotProvided {		
+	public String triplestoreEndpointOfCurrentQanaryPipeline() throws TripleStoreNotProvided {
 		try {
-			String selectEndpoint = this.myTriplestoreEndpointIdentifier.getSelectEndpoint(this.myQanaryPipelineConfiguration.getTriplestoreAsURI()).toString();
+			String selectEndpoint = this.myTriplestoreEndpointIdentifier
+					.getSelectEndpoint(this.myQanaryPipelineConfiguration.getTriplestoreAsURI()).toString();
 			logger.info("set available endpoint in frontend to {}.", selectEndpoint);
 			return selectEndpoint;
 		} catch (Exception e) {
 			throw new TripleStoreNotProvided(this.myQanaryPipelineConfiguration.getTriplestore());
-		} 
+		}
 	}
 
-    /**
-     * expose the model with the Qanary sparql query endpoint
-     */
-    @ModelAttribute("sparqlEndpointOfCurrentQanaryPipeline")
-    public String sparqlEndpointOfCurrentQanaryPipeline() {
-            String baseUrlString = this.getQuestionAnsweringHostUrlString();
-            String sparqlEndpoint = baseUrlString + QanarySparqlProtocolController.SPARQL_ENDPOINT;
-            return sparqlEndpoint;
+	/**
+	 * expose the model with the Qanary sparql query endpoint
+	 */
+	@ModelAttribute("sparqlEndpointOfCurrentQanaryPipeline")
+	public String sparqlEndpointOfCurrentQanaryPipeline() {
+		String baseUrlString = this.getQuestionAnsweringHostUrlString();
+		String sparqlEndpoint = baseUrlString + QanarySparqlProtocolController.SPARQL_ENDPOINT;
+		return sparqlEndpoint;
 	}
 
 	/**
@@ -142,8 +147,7 @@ public class QanaryQuestionAnsweringController {
 	 * QuestionURI
 	 */
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
-	@Operation(
-		summary = "Return a simple HTML input form for starting a question answering process" //
+	@Operation(summary = "Return a simple HTML input form for starting a question answering process" //
 	)
 	public String startquestionansweringwithtextquestion() {
 		return "startquestionansweringwithtextquestion";
@@ -162,10 +166,9 @@ public class QanaryQuestionAnsweringController {
 	@Deprecated
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "(deprecated) Start a process directly with a textual question", //
-		operationId = "startquestionansweringwithtextquestion", //
-		description = "Parameters are supplied as form entries. Only the question parameter is required. " //
+	@Operation(summary = "(deprecated) Start a process directly with a textual question", //
+			operationId = "startquestionansweringwithtextquestion", //
+			description = "Parameters are supplied as form entries. Only the question parameter is required. " //
 					+ "Examples: \"What is the capital of Germany?\",  " //
 					+ "\"How many people live in Madrid?\", " //
 					+ "\"Person born in France\", " //
@@ -178,41 +181,42 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation, //
-			//@RequestParam(value = QanaryStandardWebParameters.ADDITIONALQUERY, defaultValue = "", required = false) final AdditionalInsertQuery additionalQuery, // TODO: re-enable additional queries
+			// @RequestParam(value = QanaryStandardWebParameters.ADDITIONALQUERY,
+			// defaultValue = "", required = false) final AdditionalInsertQuery
+			// additionalQuery, // TODO: re-enable additional queries
 			@RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final AdditionalTriples additionalTriples //
-			) throws Exception {
+	) throws Exception {
 
 		logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
-		logger.warn("mapping \"/startquestionansweringwithtextquestion\" for form-based requests is DEPRECATED in favour of requests using JSON");
+		logger.warn(
+				"mapping \"/startquestionansweringwithtextquestion\" for form-based requests is DEPRECATED in favour of requests using JSON");
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
 				componentsToBeCalled, language, targetdata, priorConversation, additionalTriples);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
-	
+
 	@PostMapping(value = "/startquestionansweringwithtextquestion", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(
-		summary = "Start a process directly with a textual question", //
-		operationId = "startquestionansweringwithtextquestion", //
-		description = "Parameters are supplied via JSON. Only the question parameter is required. " //
+	@Operation(summary = "Start a process directly with a textual question", //
+			operationId = "startquestionansweringwithtextquestion", //
+			description = "Parameters are supplied via JSON. Only the question parameter is required. " //
 					+ "Examples: {\"question\": \"What is the capital of Germany?\"}, " //
 					+ "{\"question\": \"Person born in France?\"}" //
 	)
-	public ResponseEntity<?> startquestionansweringwithtextquestion(@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception{
+	public ResponseEntity<?> startquestionansweringwithtextquestion(
+			@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
 		logger.info("startquestionansweringwithtextquestion: {}", myRequestQuestionAnsweringProcess);
-		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
+		QanaryQuestionAnsweringRun myRun = this
+				.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
-	
 
 	/**
 	 * a simple HTML input form for starting a question answering process with an
 	 * audio question
 	 */
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.GET)
-	@Operation(
-		summary = "Return a simple HTML form for starting a question answering process with an audio question"
-	)
+	@Operation(summary = "Return a simple HTML form for starting a question answering process with an audio question")
 	public String startquestionansweringwithaudioquestion() {
 		return "startquestionansweringwithaudioquestion";
 	}
@@ -229,10 +233,9 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Start a process directly with an audio question", //
-		operationId = "startquestionansweringwithaudioquestion", //
-		description = "Only the audio question is required. " //
+	@Operation(summary = "Start a process directly with an audio question", //
+			operationId = "startquestionansweringwithaudioquestion", //
+			description = "Only the audio question is required. " //
 					+ "Examples: t.b.a" //
 	)
 	// TODO: How would I give examples here? with path to audio file?
@@ -242,11 +245,11 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
-			) throws Exception {
+	) throws Exception {
 
 		logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
-				componentsToBeCalled, language, targetdata, priorConversation, null); 
+				componentsToBeCalled, language, targetdata, priorConversation, null);
 
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
@@ -256,10 +259,9 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/oa.owl", method = RequestMethod.GET, produces = "application/sparql-results+xml")
 	@ResponseBody
-	@Operation(
-		summary = "Expose the OA commons", //
-		operationId = "getFile1", // TODO: shouldn't this be a more telling ID?
-		description = "View or download the Open Annotation Data Model." //
+	@Operation(summary = "Expose the OA commons", //
+			operationId = "getFile1", // TODO: shouldn't this be a more telling ID?
+			description = "View or download the Open Annotation Data Model." //
 	)
 	public ClassPathResource getFile1() {
 		return new ClassPathResource("/oa.owl");
@@ -270,10 +272,9 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/qanaryOntology.ttl", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
-	@Operation(
-		summary = "Expose the Qanary ontology", //
-		operationId = "getFile2" , //
-		description = "View or download the Qanary ontology." //
+	@Operation(summary = "Expose the Qanary ontology", //
+			operationId = "getFile2", //
+			description = "View or download the Qanary ontology." //
 	)
 	public ClassPathResource getFile2() {
 		return new ClassPathResource("/qanaryOntology.ttl");
@@ -284,14 +285,13 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/additional-triples/{id}", method = RequestMethod.GET, produces = "text/turtle")
 	@ResponseBody
-	@Operation(
-		summary = "Expose additonal Triples", //
-		operationId = "getAdditionalTriples" , //
-		description = "View additional triples that were passed and stored when starting the " //
-					+ "question answering process. Requires a valid ID."
-	)
+	@Operation(summary = "Expose additonal Triples", //
+			operationId = "getAdditionalTriples", //
+			description = "View additional triples that were passed and stored when starting the " //
+					+ "question answering process. Requires a valid ID.")
 	public InputStreamResource getAdditionalTriples(@PathVariable final String id) throws FileNotFoundException {
-		String filename = Paths.get(myQanaryPipelineConfiguration.getAdditionalTriplesDirectory(), id+".ttl").toString();
+		String filename = Paths.get(myQanaryPipelineConfiguration.getAdditionalTriplesDirectory(), id + ".ttl")
+				.toString();
 		InputStream in = new FileInputStream(filename);
 		return new InputStreamResource(in);
 	}
@@ -305,10 +305,11 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Return information about a specific question answering run", //
-		operationId = "getQuestionAnsweringGraphInformation", //
-		description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate description once fully implemented
+	@Operation(summary = "Return information about a specific question answering run", //
+			operationId = "getQuestionAnsweringGraphInformation", //
+			description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate
+																								// description once
+																								// fully implemented
 	)
 	public ResponseEntity<?> getQuestionAnsweringGraphInformation(@PathVariable(value = "runId") final UUID runId)
 			throws Exception {
@@ -325,10 +326,11 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = QUESTIONANSWERING
 			+ "/{runId}", method = RequestMethod.DELETE, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Delete information about a specific question answering run", //
-		operationId = "deleteQuestionAnsweringGraph", //
-		description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate description once fully implemented
+	@Operation(summary = "Delete information about a specific question answering run", //
+			operationId = "deleteQuestionAnsweringGraph", //
+			description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate
+																								// description once
+																								// fully implemented
 	)
 	public ResponseEntity<?> deleteQuestionAnsweringGraph(@PathVariable(value = "runId") final UUID runId)
 			throws Exception {
@@ -344,10 +346,11 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.PUT, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Update information about a specific question answering run", //
-		operationId = "createOrUpdateQuestionAnsweringGraph", //
-		description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate description once fully implemented
+	@Operation(summary = "Update information about a specific question answering run", //
+			operationId = "createOrUpdateQuestionAnsweringGraph", //
+			description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate
+																								// description once
+																								// fully implemented
 	)
 	public ResponseEntity<?> createOrUpdateQuestionAnsweringGraph(@PathVariable(value = "runId") final UUID runId)
 			throws Exception {
@@ -367,10 +370,9 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Create a new Question Answering Process", //
-		operationId = "createQuestionAnswering", //
-		description = "No parameters are required." // TODO: extend
+	@Operation(summary = "Create a new Question Answering Process", //
+			operationId = "createQuestionAnswering", //
+			description = "No parameters are required." // TODO: extend
 	)
 	public ResponseEntity<?> createQuestionAnswering( //
 			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
@@ -380,7 +382,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
-			) throws Exception {
+	) throws Exception {
 
 		// create a new question answering system
 		logger.info(
@@ -407,10 +409,9 @@ public class QanaryQuestionAnsweringController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = QUESTIONANSWERINGFULL, method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
-	@Operation(
-		summary = "Create a new Question Answering Process", //
-		operationId = "createQuestionAnsweringFull", //
-		description = "No parameters are required." // TODO: how does this differ from /questionanswering
+	@Operation(summary = "Create a new Question Answering Process", //
+			operationId = "createQuestionAnsweringFull", //
+			description = "No parameters are required." // TODO: how does this differ from /questionanswering
 	)
 	public ResponseEntity<?> createQuestionAnsweringFull( //
 			@RequestParam(value = QanaryStandardWebParameters.TEXTQUESTION, defaultValue = "", required = false) final String textquestion, //
@@ -420,8 +421,7 @@ public class QanaryQuestionAnsweringController {
 			@RequestParam(value = QanaryStandardWebParameters.LANGUAGE, defaultValue = "", required = false) final String language, //
 			@RequestParam(value = QanaryStandardWebParameters.TARGETDATA, defaultValue = "", required = false) final List<String> targetdata, //
 			@RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
-			)
-			throws Exception {
+	) throws Exception {
 
 		// create a new question answering system
 		logger.info(
@@ -468,8 +468,8 @@ public class QanaryQuestionAnsweringController {
 	 * @throws Exception
 	 */
 	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
-			MultipartFile questionaudio, List<String> componentsToBeCalled, String language,
-			List<String> targetdata, URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
+			MultipartFile questionaudio, List<String> componentsToBeCalled, String language, List<String> targetdata,
+			URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
 
 		// create a QanaryQuestion from given question and graph
 		logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
@@ -486,8 +486,8 @@ public class QanaryQuestionAnsweringController {
 				logger.info("question was empty, data is retrieved from graph \"{}\"", graph);
 				qanaryQuestion = new QanaryQuestion<String>(graph, qanaryConfigurator);
 			}
-		} else { 
-			// TODO: check control flow of next ITE structure 
+		} else {
+			// TODO: check control flow of next ITE structure
 			if (questionaudio == null) {
 				// store the question on the current server
 				QanaryQuestionCreated qanaryQuestionCreated = qanaryQuestionController.storeQuestion(question);
@@ -501,7 +501,8 @@ public class QanaryQuestionAnsweringController {
 						.storeAudioQuestion(questionaudio);
 
 				// create question
-				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator, priorConversation);
+				qanaryQuestion = new QanaryQuestion(qanaryQuestionCreated.getQuestionURI().toURL(), qanaryConfigurator,
+						priorConversation);
 
 				// add annotation saying that it is an audio question
 				qanaryQuestion.putAnnotationOfAudioRepresentation();
@@ -535,7 +536,8 @@ public class QanaryQuestionAnsweringController {
 //		}
 
 		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null) {
-			if(additionalTriples.getUriFilePath() != null) loadAdditionalTriples(additionalTriples, myQanaryMessage);
+			if (additionalTriples.getUriFilePath() != null)
+				loadAdditionalTriples(additionalTriples, myQanaryMessage);
 		}
 
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
@@ -543,19 +545,20 @@ public class QanaryQuestionAnsweringController {
 		return myRun;
 	}
 
-	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage) throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
-		String resource = myQanaryPipelineConfiguration.getHost()+":"+myQanaryPipelineConfiguration.getPort()
-			+"/additional-triples/"+additionalTriples.getUUIDString();
+	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage)
+			throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
+		String resource = myQanaryPipelineConfiguration.getHost() + ":" + myQanaryPipelineConfiguration.getPort()
+				+ "/additional-triples/" + additionalTriples.getUUIDString();
 		String sparqlquery = "" //
-				+ "LOAD <"+resource+"> " //
-				+ "INTO GRAPH <"+myQanaryMessage.getInGraph().toString()+">";
+				+ "LOAD <" + resource + "> " //
+				+ "INTO GRAPH <" + myQanaryMessage.getInGraph().toString() + ">";
 		logger.info("load additional triples with SPARQL query: {}", sparqlquery);
 		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 	}
 
 	/**
-	 * create and execute a SPARQL insert query to load additional triples into the triplestore
-	 * before processing the question.
+	 * create and execute a SPARQL insert query to load additional triples into the
+	 * triplestore before processing the question.
 	 *
 	 * @param additionalPrefixes
 	 * @param additionalTriples
@@ -572,23 +575,23 @@ public class QanaryQuestionAnsweringController {
 //	}
 
 	/**
-	 * wrapper: create new Question Answering process for a given textual question 
+	 * wrapper: create new Question Answering process for a given textual question
 	 * 
 	 * @param myRequestQuestionAnsweringProcess
 	 * @return
 	 * @throws Exception
 	 */
-	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
-		URI newGraph = null; 
-		return this.createOrUpdateAndRunQuestionAnsweringSystemHelper( newGraph, // 
+	private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(
+			RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
+		URI newGraph = null;
+		return this.createOrUpdateAndRunQuestionAnsweringSystemHelper(newGraph, //
 				myRequestQuestionAnsweringProcess.getQuestion(), //
 				null, //
-				myRequestQuestionAnsweringProcess.getcomponentlist(), // 
+				myRequestQuestionAnsweringProcess.getcomponentlist(), //
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
-				myRequestQuestionAnsweringProcess.getPriorConversation(),
-				null // addtional triples
-			);			
+				myRequestQuestionAnsweringProcess.getPriorConversation(), null // addtional triples
+		);
 	}
 
 	/**
@@ -623,63 +626,49 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * get the number of annotations created by a component
+	 * 
+	 * @throws SparqlQueryFailed
 	 */
 	@RequestMapping(value = "/numberOfAnnotations/", method = RequestMethod.GET, produces = "application/json")
-	@Operation(
-		summary = "Get the number of annotations created by a component", //
-		operationId = "getNumberOfAnnotationsForComponent", //
-		description = "Filter all annotations created for the current question answering run "
+	@Operation(summary = "Get the number of annotations created by a component", //
+			operationId = "getNumberOfAnnotationsForComponent", //
+			description = "Filter all annotations created for the current question answering run "
 					+ "to find how many were created by a specific component. "
-					+ "Requires the correct component name (case sensitive) and the graph."
-	)
-	public ResponseEntity<?> getNumberOfAnnotationsForComponent(
-			@RequestParam String component,
-			@RequestParam String graph
-	) throws URISyntaxException, JSONException {
-
-		JSONObject json = new JSONObject();
-		URI graphUri = URI.create(graph);
-
-		String sparqlGet ="" //
+					+ "Requires the correct component name (case sensitive) and the graph.")
+	public ResponseEntity<NumberOfAnnotationsResponse> getNumberOfAnnotationsForComponent( //
+			@RequestParam String component, //
+			@RequestParam String graph //
+	) throws URISyntaxException, JSONException, SparqlQueryFailed {
+		// TODO: a test is needed
+		String sparqlGet = "" //
 				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>" //
-				+ "SELECT (COUNT(*) AS ?NumberOfAnnotations)" //
-				+ "(SAMPLE(STR(?componentname)) AS ?ComponentName)" //
-				+ "FROM <"+graph+">" //
-				+ "WHERE {    ?s oa:annotatedBy ?componentname .    " //
-				+ "FILTER REGEX (STR(?componentname), \".*:"+component+"$\") . " //
+				+ "SELECT " //
+				+ "		(COUNT(*) AS ?NumberOfAnnotations)" //
+				+ "		(SAMPLE(STR(?componentname)) AS ?ComponentName)" //
+				+ "FROM <" + graph + ">" //
+				+ "WHERE {    " //
+				+ "		?s oa:annotatedBy ?componentname .    " //
+				+ "		FILTER REGEX (STR(?componentname), \".*:" + component + "$\") . " //
 				+ "}";
 
-		QanaryMessage qanaryMessage= new QanaryMessage( qanaryConfigurator.getEndpoint(), graphUri);
-		QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, myQanaryTripleStoreConnector);
+		logger.info("fetching number of annotations with query: {}", sparqlGet);
+
+		ResultSet annotations = myQanaryTripleStoreConnector.select(sparqlGet);
+		QuerySolution annotation = annotations.next();
+
+		int annotationCount = 0;
+		String componentUrl = null;
 
 		try {
-			logger.info("fetching number of annotations with query: {}",sparqlGet);
-
-			ResultSet annotations = qanaryUtils.selectFromTripleStore(sparqlGet, this.qanaryConfigurator.getEndpoint().toString());
-			QuerySolution annotation = annotations.next();
-
-			int annotationCount = 0;
-			String componentUrl = null;
-
-			try {
-				annotationCount = annotation.get("NumberOfAnnotations").asLiteral().getInt();
-				componentUrl = annotation.get("ComponentName").asLiteral().getString();
-				logger.info("found {} annotations for component {} on graph {}",annotationCount,component,graph);
-			} catch (NullPointerException nullPointer) {
-				logger.info("No annotations were found for component {} on graph {}",component,graph);
-			}
-
-			json.put("annotationCount", annotationCount);
-			json.put("componentUrl", componentUrl);
-			json.put("usedGraph", graph);
-			json.put("usedQuery", sparqlGet);
-
-
-		} catch (SparqlQueryFailed queryFailed) {
-			logger.error(queryFailed.getMessage());
+			annotationCount = annotation.get("NumberOfAnnotations").asLiteral().getInt();
+			componentUrl = annotation.get("ComponentName").asLiteral().getString();
+			logger.info("found {} annotations for component {} on graph {}", annotationCount, component, graph);
+		} catch (NullPointerException nullPointer) {
+			logger.info("No annotations were found for component {} on graph {}", component, graph);
 		}
 
-		return new ResponseEntity<>(json, HttpStatus.OK);
+		return new ResponseEntity<>(new NumberOfAnnotationsResponse(componentUrl, annotationCount, graph, sparqlGet),
+				HttpStatus.OK);
 	}
 
 	/**

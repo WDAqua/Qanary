@@ -86,7 +86,7 @@ public class QanaryComponentDescriptionController {
 	@GetMapping(value = QanaryConfiguration.description)
 	// TODO: OpenAPI definitions
 	public String description(HttpServletResponse response) {
-		return "description";
+		return QanaryConfiguration.description_file;
 	}
 
 	private void logHeader(HttpServletRequest request) {

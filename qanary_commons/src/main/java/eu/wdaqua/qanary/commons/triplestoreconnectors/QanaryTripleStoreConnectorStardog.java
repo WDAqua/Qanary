@@ -89,7 +89,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 				"Stardog Connection initialized: url:{}, username:{}, password:{}, database:{}, reasoningType:{}, minPool:{}, maxPool:{}, expirationTime:{}s, blockCapacityTime:{}s",
 				url, username, password, database, reasoningType, minPool, maxPool, expirationTime, blockCapacityTime);
 		this.connect();
-		this.getLogger().info("Stardog Connection created.");
+		this.getLogger().info("Stardog Connection created on endpoint {}", url);
 	}
 
 	public URI getUrl() {

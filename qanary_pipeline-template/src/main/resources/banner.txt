@@ -23,5 +23,7 @@ ${AnsiColor.BLUE}k@@@@QKe9QQEK@@@@L   `@@@@@Q`  'K@@@@@w   S@@@@@;   ;@@@@@r  ,@
 ${AnsiBackground.WHITE}Application Title:   Qanary Question Answering System component                                                       ${AnsiBackground.DEFAULT}
 ${AnsiBackground.WHITE}Description:         Provides central functionality for each Qanary component (registration) and endpoints for users. ${AnsiBackground.DEFAULT}
 ${AnsiBackground.WHITE}Framework@GitHub:    https://github.com/WDAqua/Qanary                                                                 ${AnsiBackground.DEFAULT}
+${AnsiBackground.DEFAULT}${AnsiColor.DEFAULT}Pipeline Version:    ${application.version}                                                     ${AnsiBackground.DEFAULT}
 ${AnsiBackground.DEFAULT}${AnsiColor.DEFAULT}Spring Boot Version: ${spring-boot.version}                                                     ${AnsiBackground.DEFAULT}
+${AnsiBackground.DEFAULT}${AnsiColor.DEFAULT}Java Version:        ${java.version}                                                            ${AnsiBackground.DEFAULT}
                                                                                                 
