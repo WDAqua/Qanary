@@ -117,7 +117,7 @@ How to build a complete *tiny Question Answering system* driven by Qanary is des
  
  * Start the Docker service (see <https://docs.docker.com/engine/admin/> for details)
  
- * [Configure your pipeline as needed](https://github.com/WDAqua/Qanary/wiki/How-do-I-configure-a-Qanary-pipeline-using-Docker%253F). Not doing so can cause the pipeline to fail.
+ * [Configure your pipeline as needed](https://github.com/WDAqua/Qanary/wiki/How-do-I-configure-a-Qanary-pipeline-using-Docker%3F). Not doing so can cause the pipeline to fail.
 
  * Build your project using maven: `mvn clean install` (note: you might also add `-Ddockerfile.skip=false` to express that Docker images are created)
    * The _install_ goal will compile, test, and package your project’s code and then copy it into the local dependency repository. Additionally, it will generate docker images for each component that will be stored in your local repository.
