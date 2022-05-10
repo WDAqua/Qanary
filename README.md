@@ -100,8 +100,6 @@ How to build a complete *tiny Question Answering system* driven by Qanary is des
    cd qanary_pipeline-template/target/
    java -jar target/qa.pipeline-<version>.jar
 ```
-
-   * **(It's generally better to use the approach described in step 6 than the following for configuring your Stardog Triplestore.)** While using Stardog on your local system using the default configuration you might use as triplestore endpoint: `http://admin:admin@localhost:5820/YOUR-DATABASE-NAME` (of course, you have to create a database by yourself). In that case, you need to append the parameter `--qanary.triplestore=ENDPOINT-OF-YOUR-TRIPLESTORE` to the command above.
   
  9. After running corresponding component JAR files, you can see Spring Boot application running on <http://localhost:8080/#/overview> that will tell the status of currently running components.
    * To run components you need to build and run Qanary components, see the components repository for details: [Qanary Question Answering components](https://github.com/WDAqua/Qanary-question-answering-components)
