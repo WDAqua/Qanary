@@ -531,26 +531,32 @@ public class QanaryQuestion<T> {
 
 	public List<SparqlAnnotation> getSparqlResults() throws SparqlQueryFailed {
 		String sparql = "" //
-				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-				+ "SELECT ?sparql ?confidence ?kb " //
-				+ "FROM <" + this.getInGraph() + "> " //
-				+ "WHERE { " //
-				+ "  ?a a qa:AnnotationOfAnswerSPARQL . " //
-				+ "  OPTIONAL { ?a oa:hasBody ?sparql . } " //
-				+ "  OPTIONAL { ?a qa:hasScore ?score . } " //
-				+ "  OPTIONAL { ?a qa:hasConfidence ?confidence . } " //
-				+ "  OPTIONAL { ?a qa:overKb ?kb . } " //
-				+ "  ?a oa:annotatedAt ?time1 . " //
-				+ "  { " //
-				+ "   SELECT ?time1 { " //
-				+ "    ?a a qa:AnnotationOfAnswerSPARQL . " //
-				+ "    ?a oa:annotatedAt ?time1 . " //
-				+ "   } " //
-				+ "	  ORDER BY DESC(?time1) LIMIT 1 " //
-				+ "  } " //
-				+ "} " //
-				+ "ORDER BY DESC(?score)";
+				+ "PREFIX qa: <http://www.wdaqua.eu/qa#> \n" //
+				+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" // 
+				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" // 
+				+ "SELECT (?sparqlquery AS ?sparql) ?confidence ?knowledgegraphEndpoint (?time1 AS ?time) \n" //
+				+ "FROM <" + this.getInGraph() + "> \n" //
+				+ "WHERE { \n" //
+				+ "  ?a a qa:AnnotationOfAnswerSPARQL . \n" //
+				+ "  OPTIONAL { \n" //
+				+ "			?a oa:hasBody ?s . \n" //
+				+ "			?s rdf:type qa:SparqlQuery . \n" // 
+				+ "			?s rdf:value ?sparqlquery . \n" //
+				+ "  } \n" //
+				+ "  OPTIONAL { ?a qa:score ?confidence . } \n" //
+				+ "  OPTIONAL { ?a qa:overKnowledgeGraph ?kb . } \n" //
+				+ "  ?a oa:annotatedAt ?time1 . \n" //
+				+ "  { \n" //
+				+ "   SELECT ?time1 { \n" //
+				+ "    ?a a qa:AnnotationOfAnswerSPARQL . \n" //
+				+ "    ?a oa:annotatedAt ?time1 . \n" //
+				+ "   } \n" //
+				+ "	  ORDER BY DESC(?time1) \n" //
+				+ "	  LIMIT 1 \n" //
+				+ "  } \n" //
+				+ "} \n" //
+				+ "ORDER BY DESC(?score) \n";
+		logger.debug("getSparqlResults: SELECT using\n{}", sparql);
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 		
 		List<SparqlAnnotation> annotationList = new ArrayList<SparqlAnnotation>();
@@ -561,8 +567,8 @@ public class QanaryQuestion<T> {
 			if (next.get("confidence") != null) {
 				sparqlAnnotation.confidence = next.get("confidence").asLiteral().toString();
 			}
-			if (next.get("kb") != null) {
-				sparqlAnnotation.kb = next.get("kb").asLiteral().toString();
+			if (next.get("knowledgegraphEndpoint") != null) {
+				sparqlAnnotation.knowledgegraphEndpoint = next.get("knowledgegraphEndpoint").asLiteral().toString();
 			}
 			annotationList.add(sparqlAnnotation);
 		}
@@ -572,7 +578,7 @@ public class QanaryQuestion<T> {
 	public class SparqlAnnotation {
 		public String query;
 		public String confidence;
-		public String kb;
+		public String knowledgegraphEndpoint;
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
@@ -601,7 +607,7 @@ public class QanaryQuestion<T> {
 //				+ "  	?a oa:hasBody ?json " //
 //				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
-		
+		logger.debug("getJsonResult: SELECT using:\n{}", sparql);
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
 		// the default value has to be null to distinguish missing values from empty values

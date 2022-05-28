@@ -194,10 +194,13 @@ public class QanaryPipelineConfiguration {
 		String triplestore = this.environment.getProperty("qanary.triplestore");
 		logger.debug("qanary.triplestore from env: {}", triplestore);
 		if (triplestore == null) { // not defined, so use the automatically created internal endpoint
-			return  this.getHost().concat(":").concat(this.getPort().toString()).concat("/").concat(QanarySparqlProtocolController.SPARQL_ENDPOINT);
+			triplestore = this.getHost().concat(":").concat(this.getPort().toString()).concat("/").concat(QanarySparqlProtocolController.SPARQL_ENDPOINT);
+			logger.debug("local triplestore endpoint constructed: {}", triplestore);
+			return triplestore;
 		} else if (triplestore.isEmpty()) {
 			throw new MissingRequiredConfiguration("qanary.triplestore");
 		} else {
+			logger.debug("default triplestore endpoint: {}", triplestore);
 			return triplestore;
 		}
 	}

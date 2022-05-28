@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.matches;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = QanaryPipeline.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ContextConfiguration(name = "contextWithFakeBean")
 class QanaryQuestionAnsweringControllerTest {

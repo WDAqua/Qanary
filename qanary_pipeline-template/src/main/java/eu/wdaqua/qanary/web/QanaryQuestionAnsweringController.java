@@ -431,7 +431,7 @@ public class QanaryQuestionAnsweringController {
 		QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
 				audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
 		// retrieve text representation, SPARQL and JSON result
-		QanaryQuestion myQanaryQuestion = new QanaryQuestion(myRun.getInGraph(), qanaryConfigurator);
+		QanaryQuestion<String> myQanaryQuestion = new QanaryQuestion<String>(myRun.getInGraph(), qanaryConfigurator);
 
 		JSONObject obj = new JSONObject();
 		obj.put("endpoint", myRun.getEndpoint());
@@ -439,14 +439,14 @@ public class QanaryQuestionAnsweringController {
 		obj.put("textrepresentation", myQanaryQuestion.getTextualRepresentation());
 		obj.put("answer_found", myQanaryQuestion.getAnswerFound());
 		JSONArray sparql = new JSONArray();
-		@SuppressWarnings("rawtypes")
-		List<QanaryQuestion.SparqlAnnotation> ss = myQanaryQuestion.getSparqlResults();
+		List<QanaryQuestion<String>.SparqlAnnotation> ss = myQanaryQuestion.getSparqlResults();
 		for (@SuppressWarnings("rawtypes")
 		QanaryQuestion.SparqlAnnotation s : ss) {
+			logger.debug("createQuestionAnsweringFull: raw result: {}", s);
 			JSONObject o = new JSONObject();
 			o.put("query", s.query);
 			o.put("confidence", s.confidence);
-			o.put("kb", s.kb);
+			o.put("kb", s.knowledgegraphEndpoint);
 			sparql.put(o);
 		}
 		obj.put("sparql", sparql);
@@ -608,6 +608,7 @@ public class QanaryQuestionAnsweringController {
 	private QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
 			QanaryMessage myQanaryMessage)
 			throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
+		logger.info("executeComponentList on \"{}\": {}", question, componentsToBeCalled);
 		// execute synchronous calls to all components with the same message
 		// if no component is passed nothing is happening
 		if (componentsToBeCalled.isEmpty() == false) {
@@ -684,6 +685,7 @@ public class QanaryQuestionAnsweringController {
 	public ResponseEntity<?> questionansweringLegacy(final List<String> componentsToBeCalled, //
 			// expected is a JSON message contains ingraph, outgraph, endpoint
 			String jsonMessage) throws Exception {
+		logger.warn("used deprecated method: questionansweringLegacy");
 		QanaryMessage myQanaryMessage = new QanaryMessage(jsonMessage);
 		QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
 		URI question = myQanaryQuestion.getUri();

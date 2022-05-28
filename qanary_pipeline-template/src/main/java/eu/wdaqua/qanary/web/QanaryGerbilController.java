@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
@@ -135,7 +136,7 @@ public class QanaryGerbilController {
 	}
 
 	@RequestMapping(value = GERBILEXECUTE + "{components:.*}", method = RequestMethod.POST, produces = "application/json")
-	@Operation(summary = "Start a Gerbil QA process with a list of components", operationId = "gerbil", description = "curl -X POST http://localhost:8080/gerbil-execute/NED-DBpedia-Spotlight -d query='What is the capital of France?'")
+	@Operation(summary = "Start a Gerbil QA process with a list of components", operationId = "gerbil", description = "examples: curl -X POST http://localhost:8080/gerbil-execute/QAnswerQueryBuilderAndExecutor -d query='What is the capital of France?'  or curl -X POST http://localhost:8080/gerbil-execute/NED-DBpediaSpotlight -d query='What is the capital of France?'")
 	public ResponseEntity<GerbilExecuteResponse> gerbil(
 			@RequestParam(value = "query", required = true) final String question, //
 			@RequestParam(value = "lang", required = false) String languageOfQuestion, //
@@ -144,8 +145,9 @@ public class QanaryGerbilController {
 	) throws URISyntaxException, Exception, SparqlQueryFailed {
 		logger.info("Asked question: {}", question);
 		logger.info("Language of question: {}", languageOfQuestion);
-		logger.info("QA pipeline components: {}", componentsToBeCalled);
 		logger.info("priorConversation: |{}|", priorConversation);
+		logger.info("QA pipeline components: {}", componentsToBeCalled);
+		logger.debug("available components: {}", this.componentList());
 
 		// prepare message to process executor
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -164,6 +166,7 @@ public class QanaryGerbilController {
 		RestTemplate restTemplate = new RestTemplate();
 		String response = restTemplate.postForObject(qanaryConfigurator.getHost() + ":" + qanaryConfigurator.getPort()
 				+ "/startquestionansweringwithtextquestion", map, String.class);
+		
 		org.json.JSONObject json = new org.json.JSONObject(response);
 		URI currentGraph = new URI((String) json.get("outGraph"));
 
@@ -205,7 +208,7 @@ public class QanaryGerbilController {
 		}
 		String questionText = myQanaryQuestion.getTextualRepresentation();
 		String sparqlQueryString = myQanaryQuestion.getSparqlResult(); // returns empty String if no Query was found
-		String jsonAnswerString = myQanaryQuestion.getJsonResult(); // returns empty String if no answer was found
+		String jsonAnswerString = "{}"; // TODO: myQanaryQuestion.getJsonResult(); // returns empty String if no answer was found
 
 		GerbilExecuteResponse obj = new GerbilExecuteResponse(Jackson2ObjectMapperBuilder.json().build(), //
 				questionText, language, sparqlQueryString, jsonAnswerString);

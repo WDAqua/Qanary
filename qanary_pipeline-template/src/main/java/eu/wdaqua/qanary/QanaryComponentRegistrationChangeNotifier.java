@@ -39,7 +39,7 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 					if (instance.getRegistration().getServiceUrl() != null) {
 						logger.debug("registering component \"{}\" has URL ({})", instanceName,
 								instance.getRegistration().getServiceUrl());
-						availableComponents.put(instanceName, instance);
+						this.addAvailableComponent(instanceName, instance);
 					} else {
 						logger.warn("registering component \"{}\" has no callable URL ({})", instanceName,
 								instance.getRegistration().getServiceUrl());
@@ -51,6 +51,10 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 				logger.debug("Instance {} ({}) {}", instanceName, event.getInstance(), event.getType());
 			}
 		});
+	}
+	
+	protected void addAvailableComponent(String instanceName, Instance instance) {
+		this.getAvailableComponents().put(instanceName, instance);
 	}
 
 	public List<String> getAvailableComponentNames() {
@@ -68,7 +72,7 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 	 * @return
 	 */
 	public QanaryComponent getAvailableComponentFromName(String componentName) {
-		Instance componentInstance = this.availableComponents.getOrDefault(componentName, null);
+		Instance componentInstance = this.getAvailableComponents().getOrDefault(componentName, null);
 		if (componentInstance != null && componentInstance.getStatusInfo().isUp()) {
 			boolean used = true;
 			return new QanaryComponent(componentName, componentInstance.getRegistration().getServiceUrl(), used);
@@ -77,15 +81,29 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 		}
 	}
 
+	/**
+	 * for given list of component names find the ones that are registered and up (i.e., they can be called during the process)  
+	 * 
+	 * @param componentsToBeCalled
+	 * @return
+	 */
 	public List<QanaryComponent> getAvailableComponentsFromNames(List<String> componentsToBeCalled) {
-
+		logger.debug("getAvailableComponentsFromNames: componentsToBeCalled={} availableComponents={}", componentsToBeCalled, this.getAvailableComponents());
 		List<QanaryComponent> components = new LinkedList<>();
 		for (String componentName : componentsToBeCalled) {
-			Instance componentInstance = this.availableComponents.getOrDefault(componentName, null);
-			if (componentInstance != null && componentInstance.getStatusInfo().isUp()) {
+			Instance componentInstance = this.getAvailableComponents().getOrDefault(componentName, null);
+			logger.debug("searched for component with name \"{}\" and found: {}", componentName, componentInstance);
+			if (this.isComponentUsable(componentInstance)) {
 				boolean used = true;
 				components.add(
 						new QanaryComponent(componentName, componentInstance.getRegistration().getServiceUrl(), used));
+			} else {
+				if( componentInstance != null && !componentInstance.getStatusInfo().isUp() ) {
+					logger.warn("component \"{}\" is registered, but offline", componentName);
+				} else if( componentInstance == null ) {
+					logger.warn("component \"{}\" is not registered", componentName);
+				}
+
 			}
 		}
 
@@ -94,10 +112,14 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 		} else {
 			logger.info("getAvailableComponentsFromNames: found {} components", components.size());
 			for (QanaryComponent myQanaryComponent : components) {
-				logger.debug("{}: url={}", myQanaryComponent.getName(), myQanaryComponent.getUrl());
+				logger.debug("getAvailableComponentsFromNames: found component \"{}\": url={}", myQanaryComponent.getName(), myQanaryComponent.getUrl());
 			}
 		}
 
 		return components;
+	}
+
+	protected boolean isComponentUsable(Instance componentInstance) {
+		return componentInstance != null && componentInstance.getStatusInfo().isUp();
 	}
 }

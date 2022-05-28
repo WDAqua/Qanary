@@ -79,6 +79,10 @@ public class QanaryConfigurator {
 		result.startQuestionAnswering();
 
 		logger.info("QanaryMessage for current process: {} (components={})", message.asJsonString(), myComponents);
+		
+		if( myComponents.size() == 0) {
+			logger.warn("callServices with empty component list is recognized: {}", myComponents);
+		}
 
 		// run the process for all demanded components
 		for (QanaryComponent component : myComponents) {
