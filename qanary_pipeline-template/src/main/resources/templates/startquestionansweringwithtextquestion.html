@@ -1,107 +1,174 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head> 
-    <title>Qanary Helper: Start question answering with a new textual question</title> 
- 	<meta th:replace="lib/header"/>
-	<link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-	<script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
-</head>
-<body>
-        <h1>Start a QA process with a new textual question</h1>
-        <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
-			<div th:replace="lib/reusableforms::textquestioninput"/>
+  <head>
+    <title>
+      Qanary Helper: Start question answering with a new textual question
+    </title>
+    <meta th:replace="lib/header" />
+    <link href="./static/css/main.a67614dd.css" rel="stylesheet" />
+    <script defer="defer" src="./static/js/main.0c27842e.js"></script>
+    <script>
+      window.__CONFIG__ = {
+        springBootAppUrl: "http://localhost:8080", // Currently requires manual configuration.
+        checkInterval: 10000, // Currently requires manual configuration.
+      };
+    </script>
+    <link
+      href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+  </head>
+  <body>
+    <h1>Start a QA process with a new textual question</h1>
+    <form
+      id="startForm"
+      action="/startquestionansweringwithtextquestion"
+      method="POST"
+    >
+      <div th:replace="lib/reusableforms::textquestioninput" />
 
-			<div th:if="${@environment.getProperty('qanary.process.allow-additional-triples') == 'true'}">
-				<button type="button" id="showadditionaltripleinput" onclick="showAdditionalTripleInput()">
-					Insert additional Triples into the triplestore
-				</button>
-				<div id="additionaltripleinput" style="display:none;">
-					<div th:include="lib/reusableforms::additionaltripleinput"/>
-				</div>
-			</div>
-
-			<div th:if="${@environment.getProperty('qanary.process.allow-insert-queries') == 'true'}">
-				<button type="button" id="showadditionalqueryinput" onclick="showAdditionalQueryInput()">
-					Execute an additional Query on the triplestore
-				</button>
-				<div id="additionalqueryinput" style="display:none;">
-					<div th:include="lib/reusableforms::additionalqueryinput"/>
-				</div>
-			</div>
-			<br/>
-			<div th:include="lib/reusableforms::componentlistcheckboxes" />
-			<button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
-        </form>
-        <div id="results">
-        	<h2>Results (provided from backend as JSON)</h2>
-        	<table>
-        		<tr class="header">
-        			<th>key</th><th>value</th>
-        		</tr>
-        		<tr title="connect to this endpoint to retrieve question analysis data">
-        			<td>Qanary triplestore endpoint</td><td id="endpoint" class="resultdata"></td>
-        		</tr>
-        		<tr title="might be the same as the outgraph, it represents earlier processing steps">
-        			<td>Qanary question analysis ingraph</td><td id="inGraph" class="resultdata"></td>
-        		</tr>
-        		<tr title="contains the analysis data, query this graph to retrieve question analysis data">
-        			<td>Qanary question analysis outgraph</td><td id="outGraph" class="resultdata"></td>
-        		</tr>
-        		<tr title="the created ID of the question you just have provided">
-        			<td>Question URI</td><td id="questionuri" class="resultdata"></td>
-        		</tr>
-        	</table>
-        	<div class="helpers">
-	        	<h3>Helpers: get typical SPARQL queries for your recent Question Answering process</h3>
-	        	<ul>
-					<li>
-						<button class="helpers" id="fetchOutgraph" onclick="autofillStardogTab()" title="copy the outgraph URI of the current Qanary pipeline process to the query in tab 'find computed query'">Paste the &quot;Qanary question analysis outgraph&quot; URI to the tab &quot;find computed query&quot;</button>
-					</li>
-					<li>
-						<button class="helpers" id="displayQuery" onclick="autofillDBpediaTab()" title="Open a new tab containing the query used to fetch the answer for the recent pipeline process from DBpedia">Add the computed SPARQL query of your Question Answering process as a new SPARQL query tab</button>
-					</li>
-				</ul>
-			</div>
+      <div
+        th:if="${@environment.getProperty('qanary.process.allow-additional-triples') == 'true'}"
+      >
+        <button
+          type="button"
+          id="showadditionaltripleinput"
+          onclick="showAdditionalTripleInput()"
+        >
+          Insert additional Triples into the triplestore
+        </button>
+        <div id="additionaltripleinput" style="display: none">
+          <div th:include="lib/reusableforms::additionaltripleinput" />
         </div>
-		<!--front end YASGYUI implementation - BETA-->
-        <div id="SPARQLqueryeditorblock">
-        	<h2>SPARQL query editor</h2>
-			<div id="yasgui"></div>
-		</div>
- 		<div th:replace="lib/footer"/>
-		<!-- load React -->
-		<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
-		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
-</body>
-	<script th:inline="javascript">
-		// TODO: move to a JS file
+      </div>
 
-		// function for toggling additional input fields
-		function showAdditionalTripleInput() {
-			var add_triples = document.getElementById("additionaltripleinput");
-			if (add_triples.style.display === "none") {
-				add_triples.style.display = "block";
-			} else {
-				add_triples.style.display = "none";
-			}
-		}
-		function showAdditionalQueryInput() {
-			var add_query = document.getElementById("additionalqueryinput");
-			if (add_query.style.display === "none") {
-				add_query.style.display = "block";
-			} else {
-				add_query.style.display = "none";
-			}
-		}
+      <div
+        th:if="${@environment.getProperty('qanary.process.allow-insert-queries') == 'true'}"
+      >
+        <button
+          type="button"
+          id="showadditionalqueryinput"
+          onclick="showAdditionalQueryInput()"
+        >
+          Execute an additional Query on the triplestore
+        </button>
+        <div id="additionalqueryinput" style="display: none">
+          <div th:include="lib/reusableforms::additionalqueryinput" />
+        </div>
+      </div>
+      <br />
+      <div th:include="lib/reusableforms::componentlistcheckboxes" />
+      <button id="submit">
+        start Question Answering process provided by your configured Qanary
+        pipeline <i class="fa fa-rocket"></i>
+      </button>
+    </form>
+    <div id="results">
+      <h2>Results (provided from backend as JSON)</h2>
+      <table>
+        <tr class="header">
+          <th>key</th>
+          <th>value</th>
+        </tr>
+        <tr title="connect to this endpoint to retrieve question analysis data">
+          <td>Qanary triplestore endpoint</td>
+          <td id="endpoint" class="resultdata"></td>
+        </tr>
+        <tr
+          title="might be the same as the outgraph, it represents earlier processing steps"
+        >
+          <td>Qanary question analysis ingraph</td>
+          <td id="inGraph" class="resultdata"></td>
+        </tr>
+        <tr
+          title="contains the analysis data, query this graph to retrieve question analysis data"
+        >
+          <td>Qanary question analysis outgraph</td>
+          <td id="outGraph" class="resultdata"></td>
+        </tr>
+        <tr title="the created ID of the question you just have provided">
+          <td>Question URI</td>
+          <td id="questionuri" class="resultdata"></td>
+        </tr>
+      </table>
+      <div class="helpers">
+        <h3>
+          Helpers: get typical SPARQL queries for your recent Question Answering
+          process
+        </h3>
+        <ul>
+          <li>
+            <button
+              class="helpers"
+              id="fetchOutgraph"
+              onclick="autofillStardogTab()"
+              title="copy the outgraph URI of the current Qanary pipeline process to the query in tab 'find computed query'"
+            >
+              Paste the &quot;Qanary question analysis outgraph&quot; URI to the
+              tab &quot;find computed query&quot;
+            </button>
+          </li>
+          <li>
+            <button
+              class="helpers"
+              id="displayQuery"
+              onclick="autofillDBpediaTab()"
+              title="Open a new tab containing the query used to fetch the answer for the recent pipeline process from DBpedia"
+            >
+              Add the computed SPARQL query of your Question Answering process
+              as a new SPARQL query tab
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!--front end YASGYUI implementation - BETA-->
+    <div id="SPARQLqueryeditorblock">
+      <h2>SPARQL query editor</h2>
+      <div id="yasgui"></div>
+    </div>
+    <div th:replace="lib/footer" />
+    <!-- load React -->
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+  <script th:inline="javascript">
+    // TODO: move to a JS file
 
-		// sets autofocus to question input field
-		window.onload = function() {
-			document.getElementById("question").focus();
-		}
+    // function for toggling additional input fields
+    function showAdditionalTripleInput() {
+      var add_triples = document.getElementById("additionaltripleinput");
+      if (add_triples.style.display === "none") {
+        add_triples.style.display = "block";
+      } else {
+        add_triples.style.display = "none";
+      }
+    }
+    function showAdditionalQueryInput() {
+      var add_query = document.getElementById("additionalqueryinput");
+      if (add_query.style.display === "none") {
+        add_query.style.display = "block";
+      } else {
+        add_query.style.display = "none";
+      }
+    }
 
-		const e = React.createElement;
+    // sets autofocus to question input field
+    window.onload = function () {
+      document.getElementById("question").focus();
+    };
 
-		/*
+    const e = React.createElement;
+
+    /*
 		fetches an object containing the number of annotations created by a component on a specified graph
 		only annotationCount is rendered, but attributes
   		  - usedGraph
@@ -109,291 +176,346 @@
   		  - used query
   		 may also be accessed
 		 */
-		class AnnotationCount extends React.Component {
-			constructor(props) {
-				super(props);
-				this.state = {
-					response: [],
-					count: 0,
-					fetched: this.props.fetched
-				}
-				console.log(this.props)
-			}
+    class AnnotationCount extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          response: [],
+          count: 0,
+          fetched: this.props.fetched,
+        };
+        console.log(this.props);
+      }
 
-			callBackend() {
-				let graph = this.props.graph
-				let component = this.props.component
+      callBackend() {
+        let graph = this.props.graph;
+        let component = this.props.component;
 
-				// TODO: replace with POST request
-				let requestString = window.location.origin + "/numberOfAnnotations/?component=" + component + "&graph=" + graph;
+        // TODO: replace with POST request
+        let requestString =
+          window.location.origin +
+          "/numberOfAnnotations/?component=" +
+          component +
+          "&graph=" +
+          graph;
 
-				fetch(requestString).then(response => {
-					if (response.status == 500) {
-						this.setState({count: 0, response: response, fetched: true})
-						return Promise.reject();
-					}
-					return response.json();
-				}).then(
-						data => {
-							this.setState({count: data.annotationCount, response: data, fetched: true})
-							console.log(this.state.response);
-						}
-				).catch(function (error) {
-					console.log(error)
-				})
-			}
+        fetch(requestString)
+          .then((response) => {
+            if (response.status == 500) {
+              this.setState({ count: 0, response: response, fetched: true });
+              return Promise.reject();
+            }
+            return response.json();
+          })
+          .then((data) => {
+            this.setState({
+              count: data.annotationCount,
+              response: data,
+              fetched: true,
+            });
+            console.log(this.state.response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
 
-			render() {
-				if (this.state.fetched) {
-					// don't perform another backend call
-					console.log("data already fetched");
-				} else {
-					this.callBackend();
-					console.log("fetching data");
+      render() {
+        if (this.state.fetched) {
+          // don't perform another backend call
+          console.log("data already fetched");
+        } else {
+          this.callBackend();
+          console.log("fetching data");
+        }
+        // display the number of annotations
+        return React.createElement(
+          "span",
+          {
+            "data-count": this.state.count,
+            class: "annotationCount",
+            title:
+              "This component has created  " +
+              this.state.count +
+              " annotations in the graph " +
+              this.props.graph +
+              " during the recent QA process execution.",
+          },
+          "(created " + this.state.count + " annotations)"
+        );
+      }
+    }
 
-				}
-				// display the number of annotations
-				return React.createElement("span", {
-  					"data-count": this.state.count,
-  					"class": "annotationCount",
-  					"title": "This component has created  " + this.state.count + " annotations in the graph " + this.props.graph + " during the recent QA process execution."
-					}, "(created " + this.state.count + " annotations)");
-				}
-		}
+    const yasgui = new Yasgui(document.getElementById("yasgui"), {
+      copyEndpointOnNewTab: false,
+      autofocus: false,
+      endpointCatalogueOptions: {
+        getData: () => {
+          return [
+            // list of endpoints to be suggested in the endpoint input field
+            {
+              endpoint:
+                /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+            },
+            {
+              // default DBpedia SPARQL endpoint
+              endpoint: "https://dbpedia.org/sparql",
+            },
+            {
+              // default Wikidata SPARQL endpoint
+              endpoint:
+                " https://query.wikidata.org/bigdata/namespace/wdq/sparql",
+            },
+          ];
+        },
+        keys: [],
+        renderItem: (data, source) => {
+          const contentDiv = document.createElement("div");
+          contentDiv.innerText = data.value.endpoint;
+          source.appendChild(contentDiv);
+        },
+      },
+    });
 
-		const yasgui = new Yasgui(document.getElementById("yasgui"), {
-				copyEndpointOnNewTab: false,
-				autofocus: false,
-				endpointCatalogueOptions: {
-					getData: () => {
-						return [
-							// list of endpoints to be suggested in the endpoint input field
-							{
-								endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf"
-							},
-							{   // default DBpedia SPARQL endpoint
-								endpoint: "https://dbpedia.org/sparql"
-							},
-							{   // default Wikidata SPARQL endpoint
-								endpoint: " https://query.wikidata.org/bigdata/namespace/wdq/sparql"
-							}
-						];
-					},
-					keys: [],
-					renderItem: (data, source) => {
-						const contentDiv = document.createElement("div");
-						contentDiv.innerText = data.value.endpoint;
-						source.appendChild(contentDiv);
-					}
-				}
-			}
-		);
+    // define the custom tabs and their values
+    let customTabNames = {
+      customtab0: {
+        name: "find computed query",
+        query:
+          "" +
+          "# find the SPARQL query that is the result of the current process\n" +
+          "# use Qanary question analysis outgraph from the result table\n" +
+          "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+          "SELECT *\n" +
+          "#FROM <" +
+          "$questionAnalysisOutgraph$" +
+          ">\n" +
+          "WHERE {\n" +
+          "    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
+          "    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
+          "}\n",
+        used: false,
+        requestConfig: {
+          endpoint:
+            /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+          headers: () => ({
+            Accept: "application/sparql-results+json",
+          }),
+          method: "GET",
+        },
+      },
+      customtab2: {
+        name: "find all created annotations",
+        query:
+          "" +
+          "# retrieve all annotations contained in the Qanary triplestore\n" +
+          "# to show the created information artefacts for the current process \n" +
+          "# use Qanary question analysis outgraph from the result table\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+          "PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+          "SELECT *\n" +
+          "#FROM <" +
+          "$questionAnalysisOutgraph$" +
+          ">\n" +
+          "WHERE {\n" +
+          "    ?annotationId rdf:type ?type.\n" +
+          "    ?annotationId oa:hasBody ?body.\n" +
+          "    ?annotationId oa:hasTarget ?target.\n" +
+          "}\n",
+        used: false,
+        requestConfig: {
+          endpoint:
+            /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
+          headers: () => ({
+            Accept: "application/sparql-results+json",
+          }),
+          method: "GET",
+        },
+      },
+      customtab1: {
+        name: "DBpedia SELECT",
+        query:
+          "" +
+          "#generic resource SELECT for DBpedia\n" +
+          "PREFIX dbp: <http://dbpedia.org/property/>\n" +
+          "#define more prefixes for specific properties\n" +
+          "SELECT ?sub ?name WHERE {\n" +
+          "  VALUES ?sub {\n" +
+          "     <$resourceURL$>\n" +
+          "  }.\n" +
+          "  ?sub" +
+          " prefix:property " +
+          "?name.\n" +
+          "} ",
+        used: false,
+        requestConfig: {
+          endpoint: "https://dbpedia.org/sparql",
+          headers: () => ({
+            Accept: "application/sparql-results+json",
+          }),
+          method: "POST",
+        },
+      },
+    };
 
-		// define the custom tabs and their values
-		let customTabNames = {
-			"customtab0":{
-				name:"find computed query",
-				query:"" +
-						"# find the SPARQL query that is the result of the current process\n" +
-						"# use Qanary question analysis outgraph from the result table\n" +
-						"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
-						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-						"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
-						"SELECT *\n" +
-						"#FROM <"+"$questionAnalysisOutgraph$"+">\n" +
-						"WHERE {\n" +
-						"    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
-						"    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
-						"}\n",
-				used:false,
-				requestConfig: {
-					endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
-					headers: () => ({
-						Accept:'application/sparql-results+json',
-					}),
-					method: 'GET'
-				},
-			},
-			"customtab2":{
-				name:"find all created annotations",
-				query:"" +
-						"# retrieve all annotations contained in the Qanary triplestore\n" +
-						"# to show the created information artefacts for the current process \n" +
-						"# use Qanary question analysis outgraph from the result table\n" +
-						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-						"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
-						"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
-						"SELECT *\n" +
-						"#FROM <"+"$questionAnalysisOutgraph$"+">\n" +
-						"WHERE {\n" +
-						"    ?annotationId rdf:type ?type.\n" +
-						"    ?annotationId oa:hasBody ?body.\n" +
-						"    ?annotationId oa:hasTarget ?target.\n" +
-						"}\n",
-				used:false,
-				requestConfig: {
-					endpoint: /*[[${sparqlEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf",
-					headers: () => ({
-						Accept:'application/sparql-results+json',
-					}),
-					method: 'GET'
-				},
-			},
-			"customtab1":{
-				name:"DBpedia SELECT",
-				query:"" +
-						"#generic resource SELECT for DBpedia\n" +
-						"PREFIX dbp: <http://dbpedia.org/property/>\n" +
-						"#define more prefixes for specific properties\n" +
-						"SELECT ?sub ?name WHERE {\n" +
-						"  VALUES ?sub {\n" +
-						"     <$resourceURL$>\n" +
-						"  }.\n" +
-						"  ?sub"+" prefix:property "+"?name.\n" +
-						"} ",
-				used:false,
-				requestConfig: {
-					endpoint: 'https://dbpedia.org/sparql',
-					headers: () => ({
-						Accept:'application/sparql-results+json'
-					}),
-					method: 'POST'
-				},
-			}
-		};
+    for (var id in customTabNames) {
+      name = customTabNames[id].name;
+      requestConfig = customTabNames[id].requestConfig;
+      endpoint = customTabNames[id].endpoint;
+      if (yasgui.getTab(id) == null) {
+        console.debug("create: id=" + id + ", name=" + name);
+        yasgui.addTab(false, {
+          ...Yasgui.Tab.getDefaults(),
+          name: name,
+          id: id,
+          requestConfig: requestConfig,
+        });
+      }
+    }
 
-		for(var id in customTabNames){
-			name = customTabNames[id].name;
-			requestConfig = customTabNames[id].requestConfig;
-			endpoint = customTabNames[id].endpoint;
-			if(yasgui.getTab(id)==null){
-				console.debug("create: id="+id+", name="+name);
-				yasgui.addTab(
-						false,
-						{...Yasgui.Tab.getDefaults(), name:name, id:id, requestConfig:requestConfig}
-				);
-			}
-		};
+    // set the initial values of a tab when it is selected by the user
+    yasgui.on("tabSelect", function (instance, tab) {
+      Object.keys(customTabNames).forEach(function (key) {
+        // only reset values if it was not used already -> do not overwrite values defined by the user
+        if (tab in customTabNames && customTabNames[tab].used != true) {
+          console.debug(
+            'Set custom query for "' + customTabNames[tab].name + '".'
+          );
+          instance.getTab(tab).yasqe.setValue(customTabNames[tab].query);
+          customTabNames[tab].used = true;
+        } else {
+          console.debug("Selected tab not changed.");
+        }
+      });
+    });
 
-		// set the initial values of a tab when it is selected by the user
-		yasgui.on("tabSelect", function(instance,tab){
-			Object.keys(customTabNames).forEach(function(key) {
-				// only reset values if it was not used already -> do not overwrite values defined by the user
-				if (tab in customTabNames && customTabNames[tab].used != true) {
-					console.debug("Set custom query for \""+customTabNames[tab].name+"\".");
-					instance.getTab(tab).yasqe.setValue(customTabNames[tab].query);
-					customTabNames[tab].used = true;
-				} else {
-					console.debug("Selected tab not changed.");
-				}
-			});
-		});
+    function autofillStardogTab() {
+      try {
+        let stardogQuery = createStardogQuery();
+        yasgui.getTab("customtab0").yasqe.setValue(stardogQuery);
+      } catch (getQueryException) {
+        alert(getQueryException.toString());
+      }
+    }
 
-		function autofillStardogTab(){
+    // using the outgraph of the recent pipeline process, fetch the computed query (the answer of your process) from the triplestore
+    function autofillDBpediaTab() {
+      // fill only pre-defined DBpedia tab
+      // let id = customTabNames[1];
+      getDBpediaQueryFromStardog(function (getQueryException, dbpediaQuery) {
+        if (getQueryException == null) {
+          // add a new tab containing the computed query
 
-			try {
-				let stardogQuery = createStardogQuery();
-				yasgui.getTab("customtab0").yasqe.setValue(stardogQuery);
-			} catch (getQueryException) {
-				alert(getQueryException.toString());
-			}
-		}
+          yasgui
+            .addTab(
+              true, // set as active tab
+              {
+                ...Yasgui.Tab.getDefaults(),
+                name: "answer query",
+                value: dbpediaQuery,
+              }
+            )
+            .yasqe.setValue(dbpediaQuery);
+        } else {
+          alert(getQueryException.toString());
+        }
+      });
+    }
 
-		// using the outgraph of the recent pipeline process, fetch the computed query (the answer of your process) from the triplestore
-		function autofillDBpediaTab(){
-			// fill only pre-defined DBpedia tab
-			// let id = customTabNames[1];
-			getDBpediaQueryFromStardog(function (getQueryException, dbpediaQuery) {
-				if(getQueryException==null){
-					// add a new tab containing the computed query
+    // wrap functions for creating and sending Stardog query
+    function getDBpediaQueryFromStardog(callback) {
+      console.log(
+        "fetching the computed SPARQL query (the answer of your current Question Answering process) from the given triplestore ..."
+      );
 
-					yasgui.addTab(
-							true, // set as active tab
-							{ ...Yasgui.Tab.getDefaults(), name:"answer query", value:dbpediaQuery}
-					).yasqe.setValue(dbpediaQuery);
+      try {
+        let stardogQuery = createStardogQuery();
+        console.log("sending query \n" + stardogQuery);
 
-				} else {
-					alert(getQueryException.toString());
-				}
-			});
-		}
+        queryStardog(stardogQuery, function (getQueryException, computedQuery) {
+          callback(getQueryException, computedQuery);
+        });
+      } catch (getQueryException) {
+        callback(getQueryException);
+      }
+    }
 
-		// wrap functions for creating and sending Stardog query
-		function getDBpediaQueryFromStardog(callback){
-			console.log("fetching the computed SPARQL query (the answer of your current Question Answering process) from the given triplestore ...");
+    // create a valid query with the computed outgraph of the recent Question Answering process
+    function createStardogQuery() {
+      outgraph = getOutgraph();
+      console.log("recent outgraph: \n" + outgraph);
+      let stardogQuery =
+        "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+        "PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
+        "SELECT *\n" +
+        "FROM <" +
+        outgraph +
+        ">\n" +
+        "WHERE {\n" +
+        "    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
+        "    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
+        "}\n";
+      return stardogQuery;
+    }
 
-			try {
-				let stardogQuery = createStardogQuery();
-				console.log("sending query \n" + stardogQuery);
+    // get the computed Qanary outgraph of the current process
+    // if no outgraph available permeate exception
+    function getOutgraph() {
+      let outgraph = document.getElementById("outGraph").innerHTML;
+      if (outgraph == "") {
+        throw new GetQueryException("no outgraph found");
+      }
+      return outgraph;
+    }
 
-				queryStardog(stardogQuery, function (getQueryException, computedQuery) {
-					callback(getQueryException, computedQuery);
-				});
-			} catch (getQueryException) {
-				callback(getQueryException);
-			}
-		}
+    // AJAX request to triplestore endpoint with created query
+    function queryStardog(stardogQuery, callback) {
+      // TODO: configurations need to be tested on different triplestores
+      console.log("querying triplestore ...");
+      let triplestoreQueryUrl =
+        /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf";
+      let url =
+        triplestoreQueryUrl +
+        "?reasoning=false&query=" +
+        encodeURIComponent(stardogQuery);
+      $.ajax({
+        type: "GET",
+        url: url,
+        success: [
+          function (response) {
+            console.log(response);
+            try {
+              let dbpediaQuery =
+                response.results.bindings[0].resultAsSparqlQuery.value.toString();
+              callback(null, dbpediaQuery);
+            } catch (e) {
+              callback(
+                new GetQueryException(
+                  "no computed SPARQL query (the answer of the recent process) found in the given triplestore " +
+                    url
+                )
+              );
+            }
+          },
+        ],
+        headers: {
+          Accept: "application/sparql-results+json",
+        },
+      });
+    }
 
-		// create a valid query with the computed outgraph of the recent Question Answering process
-		function createStardogQuery() {
-			outgraph = getOutgraph();
-			console.log("recent outgraph: \n" + outgraph);
-			let stardogQuery =
-					"PREFIX oa: <http://www.w3.org/ns/openannotation/core/>\n" +
-					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-					"PREFIX qa: <http://www.wdaqua.eu/qa#>\n" +
-					"SELECT *\n" +
-					"FROM <" + outgraph + ">\n" +
-					"WHERE {\n" +
-					"    ?s rdf:type qa:AnnotationOfAnswerSPARQL.\n" +
-					"    ?s oa:hasBody ?resultAsSparqlQuery.\n" +
-					"}\n";
-			return stardogQuery;
-		}
+    // custom exception for fetching the computed query
+    function GetQueryException(message) {
+      this.message = message;
+      this.name = "Unable to get query";
+    }
 
-		// get the computed Qanary outgraph of the current process
-		// if no outgraph available permeate exception
-		function getOutgraph() {
-			let outgraph = document.getElementById("outGraph").innerHTML;
-			if(outgraph==""){
-				throw new GetQueryException("no outgraph found");
-			}
-			return outgraph;
-		}
-
-		// AJAX request to triplestore endpoint with created query
-		function queryStardog(stardogQuery, callback) {
-			// TODO: configurations need to be tested on different triplestores 
-			console.log("querying triplestore ...");
-			let triplestoreQueryUrl = /*[[${triplestoreEndpointOfCurrentQanaryPipeline}]]*/ "QanaryPipelineSparqlEndpointToBeReplacedByThyMeLeaf";
-			let url = triplestoreQueryUrl + "?reasoning=false&query=" + encodeURIComponent(stardogQuery);
-			$.ajax({
-				type: 'GET',
-				url:url,
-				success: [function (response) {
-					console.log(response);
-					try {
-						let dbpediaQuery = response.results.bindings[0].resultAsSparqlQuery.value.toString();
-						callback(null, dbpediaQuery);
-					} catch (e) {
-						callback(new GetQueryException("no computed SPARQL query (the answer of the recent process) found in the given triplestore " + url));
-					}
-				}],
-				headers:{
-					Accept:'application/sparql-results+json',
-				},
-			});
-		}
-
-		// custom exception for fetching the computed query
-		function GetQueryException(message){
-			this.message = message;
-			this.name = "Unable to get query"
-		}
-		
-		GetQueryException.prototype.toString = function () {
-			return this.name + ': ' + this.message;
-		}
-			
-	</script>
+    GetQueryException.prototype.toString = function () {
+      return this.name + ": " + this.message;
+    };
+  </script>
 </html>
