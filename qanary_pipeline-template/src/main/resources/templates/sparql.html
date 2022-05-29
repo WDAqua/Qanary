@@ -3,14 +3,6 @@
   <head>
     <title>Qanary Pipeline: SPARQL endpoint info</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link href="./static/css/main.a67614dd.css" rel="stylesheet" />
-    <script defer="defer" src="./static/js/main.0c27842e.js"></script>
-    <script>
-      window.__CONFIG__ = {
-        springBootAppUrl: "http://localhost:8080", // Currently requires manual configuration.
-        checkInterval: 10000, // Currently requires manual configuration.
-      };
-    </script>
     <link
       href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css"
       rel="stylesheet"
@@ -38,7 +30,6 @@
     </div>
     <noscript>JavaScript is needed to use Yasgui.</noscript>
     <div id="yasgui"></div>
-    <div id="springBootHealthCheckContainer"></div>
     <script th:inline="javascript">
       const yasgui = new Yasgui(document.getElementById("yasgui"), {
         requestConfig: {
