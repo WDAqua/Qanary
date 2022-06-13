@@ -103,12 +103,23 @@ public class QanaryQuestionAnsweringController {
 	}
 
 	/**
-	 * expose the model with the component names
+	 * expose the health check polling interval
 	 */
-	@ModelAttribute("componentList")
-	public List<String> componentList() {
-		logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
-		return myComponentNotifier.getAvailableComponentNames();
+	@ModelAttribute("checkInterval")
+	public int checkInterval() {
+		int springBootHealthCheckInterval = 10000;
+		logger.info("Spring boot health check polling interval: {}", springBootHealthCheckInterval);
+		return springBootHealthCheckInterval;
+	}
+
+	/**
+	 * expose the URL of the spring boot app
+	 */
+	@ModelAttribute("springBootAppUrl")
+	public String springBootAppUrl() {
+		String baseUrlString = this.getQuestionAnsweringHostUrlString();
+		logger.info("Spring boot app URL: {}", baseUrlString);
+		return baseUrlString;
 	}
 
 	/**
@@ -125,6 +136,15 @@ public class QanaryQuestionAnsweringController {
 		} catch (Exception e) {
 			throw new TripleStoreNotProvided(this.myQanaryPipelineConfiguration.getTriplestore());
 		} 
+	}
+
+	/**
+	 * expose the model with the component names
+	 */
+	@ModelAttribute("componentList")
+	public List<String> componentList() {
+		logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
+		return myComponentNotifier.getAvailableComponentNames();
 	}
 
     /**
