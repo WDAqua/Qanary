@@ -1,0 +1,6 @@
+SELECT (count(*) AS ?count) 
+WHERE { 
+	GRAPH ?graph { 
+		?s ?p ?o . 
+	} 
+}
