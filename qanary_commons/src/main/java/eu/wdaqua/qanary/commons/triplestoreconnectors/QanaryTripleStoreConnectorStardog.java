@@ -28,6 +28,9 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * 
  * @author AnBo-de
  * 
+ *         the component connects to a Stardog triplestore and provided a thread
+ *         pool for connecting and executing queries
+ * 
  *         the component is initialized if and only if the required information
  *         is available
  * 
@@ -50,7 +53,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * </code>
  *         </pre>
  */
-@ConditionalOnProperty(name = {"stardog.url", "stardog.username", "stardog.password"}, matchIfMissing = false)
+@ConditionalOnProperty(name = { "stardog.url", "stardog.username", "stardog.password" }, matchIfMissing = false)
 @Component
 public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnector {
 
@@ -73,8 +76,8 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 			@Value("${stardog.reasoningType:false}") boolean reasoningType, //
 			@Value("${stardog.minPool:0}") int minPool, // default from docs
 			@Value("${stardog.maxPool:1000}") int maxPool, // default from docs
-			@Value("${stardog.expirationTime:60}") int expirationTime, //
-			@Value("${stardog.blockCapacityTime:5}") int blockCapacityTime //
+			@Value("${stardog.expirationTime:60}") int expirationTime, // expiration time in seconds
+			@Value("${stardog.blockCapacityTime:5}") int blockCapacityTime // block wait time in seconds
 	) {
 		this.url = url;
 		this.username = username;
@@ -85,11 +88,11 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 		this.maxPool = maxPool;
 		this.expirationTime = expirationTime;
 		this.blockCapacityTime = blockCapacityTime;
-		this.getLogger().debug(
+		getLogger().debug(
 				"Stardog Connection initialized: url:{}, username:{}, password:{}, database:{}, reasoningType:{}, minPool:{}, maxPool:{}, expirationTime:{}s, blockCapacityTime:{}s",
 				url, username, password, database, reasoningType, minPool, maxPool, expirationTime, blockCapacityTime);
 		this.connect();
-		this.getLogger().info("Stardog Connection created on endpoint {}", url);
+		getLogger().info("Stardog Connection created on endpoint {}", url);
 	}
 
 	public URI getUrl() {
@@ -150,6 +153,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 		try (QueryExecution aExec = QueryExecutionFactory.create(aQuery, aModel)) {
 			ResultSetRewindable resultsRewindable = ResultSetFactory.makeRewindable(aExec.execSelect());
 			this.logTime(getTime() - start, "SELECT on " + this.getUrl().toASCIIString() + ": " + sparql);
+			this.getConnectionPool().release(connection);
 			return resultsRewindable;
 		} catch (Exception e) {
 			throw new SparqlQueryFailed(sparql, this.getUrl().toASCIIString(), e);
@@ -165,6 +169,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 		try (QueryExecution aExec = QueryExecutionFactory.create(aQuery, aModel)) {
 			boolean result = aExec.execAsk();
 			this.logTime(getTime() - start, "ASK on " + this.getUrl().toASCIIString() + ": " + sparql);
+			this.getConnectionPool().release(connection);
 			return result;
 		} catch (Exception e) {
 			throw new SparqlQueryFailed(sparql, this.getUrl().toASCIIString(), e);
@@ -173,7 +178,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 
 	@Override
 	public void update(String sparql, URI graph) {
-		this.getLogger().debug("execute update on {}: {}", graph, sparql);
+		getLogger().debug("execute update on {}: {}", graph, sparql);
 		long start = getTime();
 		Connection connection = this.getConnectionPool().obtain();
 		UpdateQuery query;
@@ -188,6 +193,7 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
 		query.execute();
 		this.logTime(getTime() - start,
 				"UPDATE on " + this.getUrl().toASCIIString() + " with Graph " + graphReadable + ": " + sparql);
+		this.getConnectionPool().release(connection);
 	}
 
 	/**
