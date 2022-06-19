@@ -13,6 +13,9 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.update.UpdateExecutionFactory;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +81,7 @@ public abstract class QanaryTripleStoreConnector {
 		InputStream in = QanaryTripleStoreConnector.class.getResourceAsStream(filenameWithRelativePath);
 		getLogger().info("filenameWithRelativePath: {}, {}", filenameWithRelativePath, in);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.lines().collect(Collectors.joining());
+		return reader.lines().collect(Collectors.joining("\n"));
 	}
 
 	/**
@@ -120,5 +123,55 @@ public abstract class QanaryTripleStoreConnector {
 
 		return query.toString();
 	}
+
+	/**
+	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
+	 * components
+	 * 
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerSPARQL.rq", bindings);
+	}
+
+	public static String getAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/select_all_AnnotationOfAnswerSPARQL.rq", bindings);
+	}
+
+	
+	/**
+	 * read query from file and apply bindings
+	 * 
+	 * @param filenameWithRelativePath
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String readFileFromResourcesWithMap(String filenameWithRelativePath, QuerySolutionMap bindings)
+			throws IOException {
+		String sparqlQueryString = readFileFromResources(filenameWithRelativePath);
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		
+		logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
+
+		if ((sparqlQueryString).contains("\nSELECT ") || sparqlQueryString.startsWith("SELECT")) {
+			Query query = QueryFactory.create(pq.toString());
+			logger.info("generated SELECT query:\n{}", query.toString());
+			return query.toString();
+		} else if (sparqlQueryString.contains("\nASK ") || sparqlQueryString.startsWith("ASK")) {
+			Query query = QueryFactory.create(pq.toString());
+			logger.info("generated ASK query:\n{}", query.toString());
+			return query.toString();
+		} else {
+			UpdateRequest query = UpdateFactory.create(pq.toString());
+			logger.info("generated UPDATE query:\n{}", query.toString());
+			query.toString();
+			return query.toString();
+		}
+
+	}
+
 
 }
