@@ -11,18 +11,35 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
+/**
+ * an in-memory triplestore using Jena TDB, to activate the triplestore set the
+ * environment parameter "enable.in-memory-triplestore" to "true"
+ * 
+ * beta as of qanary.commons v3.3.0: to be used as in-memory triplestore for
+ * regular use in Qanary systems
+ * 
+ * @author AnBo-de
+ *
+ */
+@ConditionalOnProperty(name = "enable.in-memory-triplestore", havingValue = "true")
+@Component
 public class QanaryTripleStoreConnectorInMemory extends QanaryTripleStoreConnector {
 
 	private Dataset dataset;
 
 	public QanaryTripleStoreConnectorInMemory() {
 		this.connect();
-		getLogger().info("QanaryTripleStoreConnectorInMemory initialized.");
+		getLogger().warn("QanaryTripleStoreConnectorInMemory initialized. Still beta for using in production.");
 	}
 
+	/**
+	 * init dataset or reset dataset 
+	 */
 	@Override
 	public void connect() {
 		if (dataset != null) {
@@ -39,7 +56,8 @@ public class QanaryTripleStoreConnectorInMemory extends QanaryTripleStoreConnect
 
 	@Override
 	public boolean ask(String sparql) throws SparqlQueryFailed {
-		throw new NotImplementedException();
+		QueryExecution qexec = QueryExecutionFactory.create(sparql, dataset);
+		return qexec.execAsk();		
 	}
 
 	@Override
@@ -55,7 +73,7 @@ public class QanaryTripleStoreConnectorInMemory extends QanaryTripleStoreConnect
 
 	@Override
 	public String getFullEndpointDescription() {
-		return "This is an in-memory triplestore. It is intended to be used in unit tests.";
+		return "This is an in-memory triplestore. For now, it is intended to be used only in unit tests.";
 	}
 
 }
