@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.4.0</version>
+	<version>3.4.1</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.12</version>
+		<version>2.5.5</version>
 	</parent>
 	<properties>
 		<java.version>11</java.version>
@@ -16,6 +16,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<jena.version>4.5.0</jena.version>
+		<stardog.version>[8.0.0,9.0.0)</stardog.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -42,7 +43,7 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
-			</exclusions>			
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,7 +89,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<!--version>4.13.2</version-->
+			<!--version>4.13.2</version -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -101,24 +102,15 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-rdfconnection</artifactId>
-			<version>${jena.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<type>pom</type>
-			<version>${jena.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
-			<version>${jena.version}</version>
+			<version>3.0.1</version>
 			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>org.apache.logging.log4j</groupId>
 					<artifactId>log4j-to-slf4j</artifactId>
@@ -136,19 +128,25 @@
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>	
-<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-base -->
-<dependency>
-    <groupId>org.apache.jena</groupId>
-    <artifactId>jena-base</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
 			<version>${jena.version}</version>
-</dependency>
-<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
-<dependency>
-    <groupId>org.apache.jena</groupId>
-    <artifactId>jena-core</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
 			<version>${jena.version}</version>
-</dependency>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<type>pom</type>
+			<version>${jena.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
@@ -218,25 +216,25 @@
 		<dependency>
 			<groupId>com.complexible.stardog</groupId>
 			<artifactId>client-http</artifactId>
-			<version>[7.9.0,8.0.0)</version>
+			<version>${stardog.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.complexible.stardog.jena</groupId>
 			<artifactId>stardog-jena</artifactId>
-			<version>[7.9.0,8.0.0)</version>
+			<version>${stardog.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-to-slf4j</artifactId>
-		    <version>[2.15.0,3.)</version>
-					<exclusions>
-						<exclusion>
-							<groupId>org.apache.logging.log4j</groupId>
-							<artifactId>log4j-api</artifactId>
-						</exclusion>
-					</exclusions>
-		</dependency>		
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-to-slf4j</artifactId>
+			<version>[2.15.0,3.)</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -248,31 +246,31 @@
 
 	<build>
 		<plugins>
-		      <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-enforcer-plugin</artifactId>
-		        <executions>
-		          <execution>
-		            <id>enforce-banned-dependencies</id>
-		            <goals>
-		              <goal>enforce</goal>
-		            </goals>
-		            <configuration>
-		              <rules>
-		                <bannedDependencies>
-		                  <excludes>
-		                    <exclude>org.apache.logging.log4j:log4j-to-slf4j</exclude>
-		                  </excludes>
-		                  <includes>
-		                    <include>org.apache.logging.log4j:log4j-to-slf4j:2.15.0</include>
-		                  </includes>
-		                </bannedDependencies>
-		              </rules>
-		              <fail>true</fail>
-		            </configuration>
-		          </execution>
-		        </executions>
-		      </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-banned-dependencies</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<bannedDependencies>
+									<excludes>
+										<exclude>org.apache.logging.log4j:log4j-to-slf4j</exclude>
+									</excludes>
+									<includes>
+										<include>org.apache.logging.log4j:log4j-to-slf4j:2.15.0</include>
+									</includes>
+								</bannedDependencies>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

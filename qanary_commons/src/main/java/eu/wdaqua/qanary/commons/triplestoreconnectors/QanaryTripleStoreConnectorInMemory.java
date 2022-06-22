@@ -26,8 +26,9 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * @author AnBo-de
  *
  */
-@ConditionalOnProperty(name = "enable.in-memory-triplestore", havingValue = "true")
-@Component
+// TODO: find a Maven dependency configuration making it possible to integrate this class as a component
+// @ConditionalOnProperty(name = "enable.in-memory-triplestore", havingValue = "true")
+// @Component
 public class QanaryTripleStoreConnectorInMemory extends QanaryTripleStoreConnector {
 
 	private Dataset dataset;

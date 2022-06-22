@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
@@ -12,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-
-import java.net.URISyntaxException;
 
 /**
  * simple connection to open endpoint without authorization using the Apache Jena library
