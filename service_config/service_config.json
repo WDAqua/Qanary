@@ -1,0 +1,16 @@
+{
+  "services": [
+    {
+      "mode": "dockerfile",
+      "port": "40180:40180",
+      "image": "qanary/qanary-pipeline",
+      "tag": "latest",
+      "files": {
+        ".env": "pipeline"
+      }
+    }
+  ],
+  "ids": {
+    "0": "qanary-qanary-pipeline"
+  }
+}

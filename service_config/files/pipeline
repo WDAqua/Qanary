@@ -1,0 +1,6 @@
+QANARY_PROCESS_ALLOW-ADDITIONAL-TRIPLES=false
+SERVER_HOST=http://demos.swe.htwk-leipzig.de
+SERVER_PORT=40180
+STARDOG_PASSWORD=admin
+STARDOG_URL=http://demos.swe.htwk-leipzig.de:40100/
+STARDOG_USERNAME=admin
