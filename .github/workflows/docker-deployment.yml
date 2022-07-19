@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build the Docker images and Push to Dockerhub
+        uses: actions/checkout@v3
+        run: bash -c ./service_config/build_images.sh
+      - name: Init update
+        uses: MindMaster98/docker-service-updater@v0.1.4
+        with:
+          api_key: ${{ secrets.API_KEY }}
+          updater_host: ${{ secrets.UPDATER_HOST }}
