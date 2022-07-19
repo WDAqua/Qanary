@@ -2,7 +2,7 @@
   "services": [
     {
       "mode": "dockerfile",
-      "port": "40180:40180",
+      "port": "40111:40111",
       "image": "qanary/qanary-pipeline",
       "tag": "latest",
       "files": {
