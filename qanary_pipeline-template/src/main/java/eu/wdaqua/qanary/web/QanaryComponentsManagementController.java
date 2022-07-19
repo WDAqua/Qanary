@@ -20,13 +20,12 @@ import de.codecentric.boot.admin.server.domain.entities.Instance;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
+import io.swagger.v3.oas.annotations.Operation;
 import net.sf.json.JSONObject;
 
 /**
- * a controller for accessing component information regarding their pre and post
- * conditions
- * 
- *
+ * a controller for accessing Qanary component information regarding their pre
+ * and post conditions as RDF
  */
 @CrossOrigin
 @RestController
@@ -43,7 +42,6 @@ public class QanaryComponentsManagementController {
 		this.myRestTemplateWithCaching = myRestTemplateWithCaching;
 	}
 
-	// TODO: add OpenAPI definition
 	/**
 	 * proxy method for providing access to component's descriptions without the
 	 * client requiring access to the component's location
@@ -62,6 +60,9 @@ public class QanaryComponentsManagementController {
 	@GetMapping(value = "/components/{componentName}", produces = { "application/x-javascript", "application/json",
 			"application/ld+json", "application/xml", "application/rdf+xml", "application/n-triples", "text/n3",
 			"text/turtle" })
+	@Operation(summary = "get the description of a registered Qanary component as RDF data (use header to define the format, default: JSON-LD)", //
+			operationId = "getServiceDescriptionOfComponent", //
+			description = "Returns set of RDF triples (presented in defined format), these triples describe the required inputs (data types) and expectedly produced outputs of the requested component. If the component is not available, then the request will result in an HTTP code 404 (not found).")
 	public ResponseEntity<String> getServiceDescriptionOfComponentAsJsonLD(HttpServletRequest request,
 			@PathVariable String componentName) {
 		String acceptHeader = request.getHeader("Accept");
