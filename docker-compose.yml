@@ -5,6 +5,10 @@ services:
       context: ./qanary_pipeline-template
       args:
         JAR_FILE: ${PIPELINE_NAME}-${PIPELINE_VERSION}.jar
+    environment:
+      - "QANARY_QUESTIONS_DIRECTORY=/qanary-questions"
+    volumes:
+      - "qanary_questions:/qanary-questions"
     image: ${PIPELINE_IMAGE}:${PIPELINE_VERSION}
     ports:
       - "${PIPELINE_PORT}:8080"
@@ -18,3 +22,5 @@ services:
     environment:
             - "REACT_APP_HOST=${PIPELINE_HOST}"
             - "REACT_APP_PORT=${PIPELINE_PORT}"
+volumes:
+  qanary_questions:
