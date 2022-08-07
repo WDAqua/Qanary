@@ -7,16 +7,12 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -29,11 +25,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
-import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.*;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
@@ -57,9 +50,6 @@ public class QanaryGerbilController {
 
 	private String host;
 	private int port;
-
-	@Autowired
-	private MappingJackson2HttpMessageConverter springMvcJacksonConverter;
 
 	// Set this to allow browser requests from other websites
 	@ModelAttribute
@@ -92,11 +82,11 @@ public class QanaryGerbilController {
 	}
 
 	/**
-	 * a simple HTML input to generate a url-endpoint for gerbil for QA,
+	 * a simple HTML input to generate a url-endpoint for Gerbil for QA,
 	 * http://gerbil-qa.aksw.org/gerbil/config
 	 */
 	@RequestMapping(value = "/gerbil", method = RequestMethod.GET)
-	@Operation(summary = "expose an HTML frontend for generating a Gerbil URL endpoint", operationId = "startquestionansweringwithtextquestion", description = "Generate a URL endpoint for Gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input form.")
+	@Operation(summary = "expose an HTML frontend for generating a Gerbil URL endpoint", operationId = "gerbil-html", description = "Generate a URL endpoint for Gerbil for QA (http://gerbil-qa.aksw.org/gerbil/config) through a simple HTML input form.")
 	public String startquestionansweringwithtextquestion(Model model) {
 		model.addAttribute("url", "Select components!");
 		return "generategerbilendpoint";
@@ -107,7 +97,7 @@ public class QanaryGerbilController {
 	 *
 	 */
 	@RequestMapping(value = "/gerbil", method = RequestMethod.POST)
-	@Operation(summary = "expose an HTML frontend for a Gerbil URL endpoint", operationId = "gerbilGenerator", description = "Generate a URL endpoint for Gerbil QA from a list of compoents.")
+	@Operation(summary = "expose a Gerbil URL endpoint for POST requests", operationId = "gerbilGenerator", description = "Generate a URL endpoint for Gerbil QA from a list of components.")
 	public String gerbilGenerator(
 			@RequestParam(value = QanaryStandardWebParameters.COMPONENTLIST, defaultValue = "") final List<String> componentsToBeCalled,
 			Model model) throws Exception {
