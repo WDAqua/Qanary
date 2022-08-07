@@ -1,6 +1,11 @@
 #!/bin/bash
 # build Docker Images and store name and tag
-mvn clean install -DskipTests
+if ! mvn clean install -DskipTests;
+then
+  # build failed
+  exit 1
+fi
+
 docker image ls | grep -oP "qanary.*\.[0-9] " > images.temp
 
 # read image list
