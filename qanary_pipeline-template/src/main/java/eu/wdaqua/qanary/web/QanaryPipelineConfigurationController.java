@@ -54,6 +54,7 @@ public class QanaryPipelineConfigurationController {
 
     /**
      * returns configurable properties and their values based on the Environment
+     * @throws Exception
      */
     @RequestMapping(value = "/configuration", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<JSONObject> getConfigurablePipelineProperties() {
