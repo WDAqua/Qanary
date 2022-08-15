@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -48,7 +52,6 @@ public class QanaryPipelineConfigurationController {
         for (String property : excludedProperties) {
             propertyMap.remove(property);
         }
-
         return propertyMap;
     }
 
@@ -57,24 +60,28 @@ public class QanaryPipelineConfigurationController {
      * @throws Exception
      */
     @RequestMapping(value = "/configuration", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<JSONObject> getConfigurablePipelineProperties() {
+    public ResponseEntity<String> getConfigurablePipelineProperties() {
 
         Map<String, Object> configurationMap = qanaryPipelineConfiguration.getAllKnownProperties(this.environment);
-
         this.excludeProperties(this.notConfigurable, configurationMap);
 
-        JSONObject json = new JSONObject(configurationMap);
-        ResponseEntity<JSONObject> response = new ResponseEntity<>(json, HttpStatus.OK);
-
-        return response;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(configurationMap);
+            return new ResponseEntity<>(jsonString, HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * writes changes in pipeline property values to application.local.properties
      */
     @RequestMapping(value = "/configuration", method = RequestMethod.POST, consumes = "application/json")
-    public void updateLocalPipelineProperties(@RequestBody JSONObject configJson) throws JSONException {
+    public void updateLocalPipelineProperties(@RequestBody String jsonString) throws JSONException {
 
+        JSONObject configJson = new JSONObject(jsonString);
         String filePath = environment.getProperty("spring.config.location");
         Path localConfigPath = Paths.get(new ClassPathResource(filePath).getPath());
 
@@ -98,11 +105,15 @@ public class QanaryPipelineConfigurationController {
 
         try {
             FileWriter writer = new FileWriter(filePath);
+            Iterator<String> keys = configJson.keys();
+            logger.info("writing keys ...");
+            while(keys.hasNext()) {
+                String key = keys.next();
+                String value = configJson.get(key).toString();
 
-            for( Object key : (Iterable)configJson.keys()) {
-                String value = configJson.get(key.toString()).toString();
                 writer.write(key+"="+value+"\n");
             }
+
             logger.info("saved configuration to application.local.properties");
             writer.close();
 
