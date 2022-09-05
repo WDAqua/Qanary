@@ -1,15 +1,13 @@
 package eu.wdaqua.qanary.web;
 
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * configure Spring Security: CSRF protection is disabled
@@ -26,12 +24,12 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	}
 
 	private void setAccessConfiguration(Environment env) {
-		String access = env.getProperty("configuration.access", "disallow");
-		String username = env.getProperty("configuration.username", "admin");
-		String password = env.getProperty("configuration.password", "admin");
-		this.access = (access.length()==0)?"disallow":access;
-		this.username = (username.length()==0)?"admin":username;
-		this.password = (password.length()==0)?"admin":password;
+		String access = env.getProperty(QanaryConfigurationAccessParameters.ACCESSKEY);
+		String username = env.getProperty(QanaryConfigurationAccessParameters.USERNAMEKEY);
+		String password = env.getProperty(QanaryConfigurationAccessParameters.PASSWORDKEY);
+		this.access = (access.length()==0)?QanaryConfigurationAccessParameters.DEFAULTACCESSTYPE:access;
+		this.username = (username.length()==0)?QanaryConfigurationAccessParameters.DEFAULTUSERNAME:username;
+		this.password = (password.length()==0)?QanaryConfigurationAccessParameters.DEFAULTPASSWORD:password;
 	}
 
 	@Override
@@ -39,22 +37,22 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 		http.csrf().disable();
 
         switch(access) {
-            case "disallow":
+            case QanaryConfigurationAccessParameters.DISALLOWACCESS:
 	    		http
 	    			.authorizeRequests()
 	    				.antMatchers("/").denyAll()
-						.antMatchers("/configuration").denyAll()
+						.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).denyAll()
 	    				.anyRequest().permitAll();
 				break;
-            case "web":
+            case QanaryConfigurationAccessParameters.WEBACCESS:
 	    		http
 	    			.authorizeRequests()
 	    				.antMatchers("/").authenticated() 
-						.antMatchers("/configuration").authenticated()
+						.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).authenticated()
 	    				.anyRequest().permitAll()
 	    				.and() 
 	    			.formLogin()
-	    				.loginPage("/login")
+	    				.loginPage(QanaryConfigurationAccessParameters.LOGINENDPOINT)
 	    				.permitAll()
 	    				.and()
 	    			.logout()
@@ -65,17 +63,12 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
         }
 	}
 
-	@Bean
 	@Override
-	public UserDetailsService userDetailsService() {
-		UserDetails user =
-			// TODO: use correct encoder for production
-			 User.withDefaultPasswordEncoder()
-				.username(username)
-				.password(password)
-				.roles("USER")
-				.build();
-
-		return new InMemoryUserDetailsManager(user);
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		auth.inMemoryAuthentication()
+			.withUser(username)
+			.password(encoder.encode(password))
+			.roles("USER");
 	}
 }

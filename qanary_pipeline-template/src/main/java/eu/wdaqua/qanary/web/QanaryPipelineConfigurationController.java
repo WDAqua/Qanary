@@ -38,7 +38,9 @@ public class QanaryPipelineConfigurationController {
     private final Environment environment;
     private final QanaryPipelineConfiguration qanaryPipelineConfiguration;
     // define properties that should not be configurable using this controller
-    private final String[] notConfigurable = {"server.host", "server.port", "qanary.components", "spring.config.name"};
+    private final String[] notConfigurable = {
+        "server.host", "server.port", "qanary.components", "spring.config.name",
+        "configuration.username", "configuration.password"};
 
     @Autowired
     public QanaryPipelineConfigurationController(
@@ -59,8 +61,10 @@ public class QanaryPipelineConfigurationController {
      * returns configurable properties and their values based on the Environment
      * @throws Exception
      */
-    @RequestMapping(value = "/configuration", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getConfigurablePipelineProperties() {
+    @RequestMapping(
+        value = QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT, 
+        method = RequestMethod.GET, produces = "application/json")
+        public ResponseEntity<String> getConfigurablePipelineProperties() {
 
         Map<String, Object> configurationMap = qanaryPipelineConfiguration.getAllKnownProperties(this.environment);
         this.excludeProperties(this.notConfigurable, configurationMap);
@@ -78,7 +82,9 @@ public class QanaryPipelineConfigurationController {
     /**
      * writes changes in pipeline property values to application.local.properties
      */
-    @RequestMapping(value = "/configuration", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(
+        value = QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT, 
+        method = RequestMethod.POST, consumes = "application/json")
     public void updateLocalPipelineProperties(@RequestBody String jsonString) throws JSONException {
 
         JSONObject configJson = new JSONObject(jsonString);
