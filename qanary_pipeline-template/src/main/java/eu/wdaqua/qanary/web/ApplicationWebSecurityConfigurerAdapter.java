@@ -18,6 +18,14 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	private String access;
 	private String username;
 	private String password;
+	private String[] publicUrls = new String[] {
+		"/*question*",
+		"/qa",
+		"/gerbil",
+		"/login",
+		"/instances",
+		"/sparql"
+	};
 
 	public ApplicationWebSecurityConfigurerAdapter(@Autowired Environment env) {
 		this.setAccessConfiguration(env);
@@ -34,7 +42,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable();
+		http.csrf().ignoringAntMatchers(publicUrls);
 
         switch(access) {
             case QanaryConfigurationAccessParameters.DISALLOWACCESS:
