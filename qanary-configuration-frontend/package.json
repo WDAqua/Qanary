@@ -1,6 +1,6 @@
 {
   "name": "qanary-configuration-frontend",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "dependencies": {
     "@babel/core": "7.18.10",
