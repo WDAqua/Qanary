@@ -1,10 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.4.1</version>
+	<version>3.5.0</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -223,6 +221,18 @@
 			<artifactId>stardog-jena</artifactId>
 			<version>${stardog.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.openlinksw/virt_jena_v3_10 -->
+		<dependency>
+		    <groupId>com.openlinksw</groupId>
+		    <artifactId>virt_jena_v3_10</artifactId>
+		    <version>1.42</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.openlinksw/virtjdbc4 -->
+		<dependency>
+		    <groupId>com.openlinksw</groupId>
+		    <artifactId>virtjdbc4_3</artifactId>
+		    <version>3.122</version>
+		</dependency>		
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
