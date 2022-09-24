@@ -1,0 +1,93 @@
+:toc:
+:toclevels: 5
+:toc-placement!:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= How to Configure the Qanary Triplestore
+
+toc::[]
+
+== Context
+
+The Qanary methodology is stored all process memory into a global data store. In this Qanary Framework implementation a triplestore is used to store the input and output of each Qanary component.
+
+== Supported Triplestores
+
+We tested some triplestores which are listed below. Additional triplestores might be supported, specific connectors can be implemented by implementing a concrete class as a subclass of the abstract class `QanaryTripleStoreConnector`.
+
+=== Stardog
+
+==== Preparations
+
+1. Install https://www.stardog.com/get-started/[Stardog]. You might use https://docs.stardog.com/get-started/install-stardog/docker[a Docker image].
+2. Connect to your Stardog instance using http://stardog.studio/[Stardog Studio]. There, select the menu item "Databases" and "Create Database". By default, the name "qanary" should by used. However, you are free to choose any other name.
+
+==== Required Parameters
+
+To configure Stardog you are *required* to define the following configuration parameters:
+
+```ini
+stardog.url=
+stardog.username=
+stardog.password=
+```
+
+By running your Stardog instance locally, the following configuration would be typical:
+
+```ini
+stardog.url=http://127.0.0.1:5820/
+stardog.username=admin
+stardog.password=admin
+```
+
+==== Optional Parameters
+
+You might change the following additional parameters:
+
+```ini
+stardog.database=
+stardog.reasoningType=
+```
+
+By default the following values are used:
+
+```ini
+stardog.database=qanary
+stardog.reasoningType=false
+```
+
+=== Openlink Virtuoso
+
+==== Preparations
+
+1. Install https://virtuoso.openlinksw.com/[Virtuoso]. You might use https://hub.docker.com/r/openlink/virtuoso-opensource-7[a Docker image].
+2. Connect to your Virutoso Management UI (locally and by default it would be at available http://localhost:8890/).
+    * Log in as admin user (in the Docker image by default: `dba` and `mysecret`)
+    * Go to "System Admin" → "User Accounts" → tab "Users"
+    * Open "Edit" for the user your would like to use within your Qanary system
+    * From the list of available "Account Roles", select "SPARQL_UPDATE" and click the ">>" button to add it to roles of your user.
+    * Click the "Save" button.
+
+==== Required Parameters
+
+To configure Virtuoso you are *required* to define the following configuration parameters:
+
+```ini
+virtuoso.url=
+virtuoso.username=
+virtuoso.password=
+```
+
+By running your Virtuoso instance locally, the following configuration would be typical:
+
+```ini
+virtuoso.url=jdbc:virtuoso://localhost:1111
+virtuoso.username=dba
+virtuoso.password=mysecret
+```
