@@ -68,7 +68,7 @@ stardog.reasoningType=false
 
 1. Install https://virtuoso.openlinksw.com/[Virtuoso]. You might use https://hub.docker.com/r/openlink/virtuoso-opensource-7[a Docker image].
 2. Connect to your Virutoso Management UI (locally and by default it would be at available http://localhost:8890/).
-    * Log in as admin user (in the Docker image by default: `dba` and `mysecret`)
+    * Log in as admin user (in the previously mentioned Docker image documentation is would be by default: `dba` and `mysecret`)
     * Go to "System Admin" → "User Accounts" → tab "Users"
     * Open "Edit" for the user your would like to use within your Qanary system
     * From the list of available "Account Roles", select "SPARQL_UPDATE" and click the ">>" button to add it to roles of your user.
