@@ -126,7 +126,7 @@ public abstract class QanaryTripleStoreConnector {
 	/**
 	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
 	 * components
-	 * 
+	 *
 	 * @param bindings
 	 * @return
 	 * @throws IOException
@@ -135,14 +135,26 @@ public abstract class QanaryTripleStoreConnector {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerSPARQL.rq", bindings);
 	}
 
+	/**
+	 * add AnnotationOfAnswerJson as it is done typically in Qanary QueryExecutor
+	 * components
+	 *
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfAnswerJson(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerJson.rq", bindings);
+	}
+
 	public static String getAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
 		return readFileFromResourcesWithMap("/queries/select_all_AnnotationOfAnswerSPARQL.rq", bindings);
 	}
 
-	
+
 	/**
 	 * read query from file and apply bindings
-	 * 
+	 *
 	 * @param filenameWithRelativePath
 	 * @param bindings
 	 * @return
