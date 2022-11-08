@@ -11,4 +11,5 @@ public interface QanaryConfigurationAccessParameters {
 	final String DISALLOWACCESS = "disallow";
 	final String LOGINENDPOINT = "/login";
 	final String CONFIGURATIONENDPOINT = "/configuration";
+	final String APPLICATIONSENDPOINT = "/applications";
 }

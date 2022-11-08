@@ -10,7 +10,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * configure Spring Security: CSRF protection is disabled
+ * Configure access to specific URLs of the application, using application.properties.
  */
 @EnableWebSecurity
 public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -19,7 +19,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	private String username;
 	private String password;
 	private boolean passwordProtected;
-	private String[] publicUrls = new String[] {
+	private String[] publicUrls = new String[] { // CSRF protection is disabled for these URLs
 		"/*question*",
 		"/qa",
 		"/gerbil",
@@ -54,6 +54,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	    			.authorizeRequests()
 	    				.antMatchers("/").denyAll()
 						.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).denyAll()
+						.antMatchers(QanaryConfigurationAccessParameters.APPLICATIONSENDPOINT).denyAll()
 	    				.anyRequest().permitAll();
 				break;
             case QanaryConfigurationAccessParameters.WEBACCESS:
@@ -62,6 +63,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 						.authorizeRequests()
 							.antMatchers("/").authenticated() 
 							.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).authenticated()
+							.antMatchers(QanaryConfigurationAccessParameters.APPLICATIONSENDPOINT).authenticated()
 							.anyRequest().permitAll()
 							.and() 
 						.formLogin()
