@@ -10,7 +10,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * configure Spring Security: CSRF protection is disabled
+ * Configure access to specific URLs of the application, using application.properties.
  */
 @EnableWebSecurity
 public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -18,7 +18,8 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	private String access;
 	private String username;
 	private String password;
-	private String[] publicUrls = new String[] {
+	private boolean passwordProtected;
+	private String[] publicUrls = new String[] { // CSRF protection is disabled for these URLs
 		"/*question*",
 		"/qa",
 		"/gerbil",
@@ -32,12 +33,15 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	}
 
 	private void setAccessConfiguration(Environment env) {
-		String access = env.getProperty(QanaryConfigurationAccessParameters.ACCESSKEY);
-		String username = env.getProperty(QanaryConfigurationAccessParameters.USERNAMEKEY);
-		String password = env.getProperty(QanaryConfigurationAccessParameters.PASSWORDKEY);
-		this.access = (access.length()==0)?QanaryConfigurationAccessParameters.DEFAULTACCESSTYPE:access;
-		this.username = (username.length()==0)?QanaryConfigurationAccessParameters.DEFAULTUSERNAME:username;
-		this.password = (password.length()==0)?QanaryConfigurationAccessParameters.DEFAULTPASSWORD:password;
+		String access = env.getProperty(QanaryConfigurationAccessParameters.ACCESSKEY, "");
+		String username = env.getProperty(QanaryConfigurationAccessParameters.USERNAMEKEY, "");
+		String password = env.getProperty(QanaryConfigurationAccessParameters.PASSWORDKEY, "");
+		this.access = access;
+		this.username = username;
+		this.password = password;
+		if (username.length() == 0 || username.length() == 0) {
+			this.passwordProtected = false;
+		} else {this.passwordProtected = true;}
 	}
 
 	@Override
@@ -50,22 +54,29 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	    			.authorizeRequests()
 	    				.antMatchers("/").denyAll()
 						.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).denyAll()
+						.antMatchers(QanaryConfigurationAccessParameters.APPLICATIONSENDPOINT).denyAll()
 	    				.anyRequest().permitAll();
 				break;
             case QanaryConfigurationAccessParameters.WEBACCESS:
-	    		http
-	    			.authorizeRequests()
-	    				.antMatchers("/").authenticated() 
-						.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).authenticated()
-	    				.anyRequest().permitAll()
-	    				.and() 
-	    			.formLogin()
-	    				.loginPage(QanaryConfigurationAccessParameters.LOGINENDPOINT)
-	    				.permitAll()
-	    				.and()
-	    			.logout()
-	    				.permitAll();
-				break;
+				if (this.passwordProtected) {
+					http
+						.authorizeRequests()
+							.antMatchers("/").authenticated() 
+							.antMatchers(QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT).authenticated()
+							.antMatchers(QanaryConfigurationAccessParameters.APPLICATIONSENDPOINT).authenticated()
+							.anyRequest().permitAll()
+							.and() 
+						.formLogin()
+							.loginPage(QanaryConfigurationAccessParameters.LOGINENDPOINT)
+							.permitAll()
+							.and()
+						.logout()
+							.permitAll();
+					break;
+				} else {
+					http.authorizeRequests().anyRequest().permitAll();
+					break;
+				}
             default:
                 throw new Exception("undefined access type");
         }
@@ -73,6 +84,9 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		if (!this.passwordProtected) {
+			return;
+		}
 		PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		auth.inMemoryAuthentication()
 			.withUser(username)

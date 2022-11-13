@@ -11,6 +11,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,6 +38,8 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 @AutoConfigureMockMvc
 @ContextConfiguration(name = "contextWithFakeBean")
 class QanaryQuestionAnsweringControllerTest {
+
+    private final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringControllerTest.class);
 	
 	@Autowired
     private MockMvc mvc;
@@ -128,4 +133,5 @@ class QanaryQuestionAnsweringControllerTest {
  		// is is called at least once with the expected parameter value?
 		verify(mockedQanaryTripleStoreConnector, atLeast(1)).update(matches(queryPart));
     }
+
 }
