@@ -1,24 +1,19 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.stream.Collectors;
-
-import org.apache.jena.query.ParameterizedSparqlString;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolutionMap;
-import org.apache.jena.query.ResultSet;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.stream.Collectors;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
@@ -112,6 +107,26 @@ public abstract class QanaryTripleStoreConnector {
 	 */
 	public static String getAllAnnotationOfAnswerInGraph(URI graph) throws IOException {
 		String sparqlQueryString = readFileFromResources("/queries/select_all_AnnotationOfAnswerJson.rq");
+
+		QuerySolutionMap bindings = new QuerySolutionMap();
+		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		Query query = QueryFactory.create(pq.toString());
+		logger.info("generated query:\n{}", query.toString());
+
+		return query.toString();
+	}
+
+	/**
+	 * get SELECT query to get the answer with the highest score in a graph
+	 *
+	 * @param graph
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getHighestScoreAnnotationOfAnswerInGraph(URI graph) throws IOException {
+		String sparqlQueryString = readFileFromResources("/queries/select_highestScore_AnnotationOfAnswerSPARQL.rq");
 
 		QuerySolutionMap bindings = new QuerySolutionMap();
 		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
