@@ -22,7 +22,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 	private String[] publicUrls = new String[] { // CSRF protection is disabled for these URLs
 		"/*question*",
 		"/qa",
-		"/gerbil",
+		"/gerbil*/**",
 		"/login",
 		"/instances",
 		"/sparql"
