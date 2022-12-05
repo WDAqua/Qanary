@@ -86,6 +86,8 @@ public class QanaryUtils {
 	 */
 	@Deprecated
 	public ResultSet selectFromTripleStore(String sparqlQuery, String endpoint) throws SparqlQueryFailed {
+		logger.warn("This method is deprecated and will be removed in future versions. Please use the method QanaryTripleStoreConnector.select(String sparqlQuery) instead.");
+		logger.warn("The parameter 'endpoint' is not longer used in this method !!!");
 		return this.qanaryTripleStoreConnector.select(sparqlQuery);
 	}
 
@@ -95,7 +97,8 @@ public class QanaryUtils {
 	 */
 	@Deprecated
 	public boolean askTripleStore(String sparqlQuery, String endpoint) throws SparqlQueryFailed {
-		logger.debug("askTripleStore on {} execute {}", endpoint, sparqlQuery);
+		logger.warn("This method is deprecated and will be removed in future versions. Please use the method QanaryTripleStoreConnector.ask(String sparqlQuery) instead.");
+		logger.warn("The parameter 'endpoint' is not longer used in this method !!!");
 		return this.qanaryTripleStoreConnector.ask(sparqlQuery);
 	}
 
@@ -120,6 +123,7 @@ public class QanaryUtils {
 	 */
 	@Deprecated
 	public void updateTripleStore(String sparqlQuery, URL endpoint) throws SparqlQueryFailed {
+		logger.warn("This method is deprecated and will be removed in future versions. Please use the method QanaryTripleStoreConnector.update(String sparqlQuery) instead.");
 		this.updateTripleStore(sparqlQuery, endpoint.toString());
 	}
 
@@ -132,6 +136,7 @@ public class QanaryUtils {
 	 */
 	@Deprecated
 	public void updateTripleStore(String sparqlQuery, URI endpoint) throws SparqlQueryFailed {
+		logger.warn("This method is deprecated and will be removed in future versions. Please use the method QanaryTripleStoreConnector.update(String sparqlQuery) instead.");
 		this.updateTripleStore(sparqlQuery, endpoint.toString());
 	}
 
@@ -142,6 +147,7 @@ public class QanaryUtils {
 	 */
 	@Deprecated
 	public void updateTripleStore(String sparqlQuery, String endpoint) throws SparqlQueryFailed {
+		logger.warn("This method is deprecated and will be removed in future versions. Please use the method QanaryTripleStoreConnector.update(String sparqlQuery) instead.");
 		logger.debug("updateTripleStore on {}: {}", endpoint, sparqlQuery);
 		this.getQanaryTripleStoreConnector().update(sparqlQuery);
 	}

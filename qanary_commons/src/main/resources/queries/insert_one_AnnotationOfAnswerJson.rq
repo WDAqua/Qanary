@@ -1,0 +1,24 @@
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT { 
+GRAPH ?graph  {
+        ?newAnnotation rdf:type qa:AnnotationOfAnswerJson .
+        ?newAnnotation oa:hasTarget ?targetQuestion .
+        ?newAnnotation oa:hasBody ?answer .
+        ?newAnnotation oa:annotatedAt ?time .
+        ?newAnnotation oa:annotatedBy ?application .
+
+        ?answer rdf:type qa:AnswerJson .
+        ?answer rdf:value ?jsonAnswer .
+        qa:AnswerJson rdfs:subClassOf qa:Answer .
+    }
+}
+WHERE {
+    BIND (IRI(str(RAND())) AS ?newAnnotation) .
+    BIND (IRI(str(RAND())) AS ?answer) .
+    BIND (now() as ?time) .
+}
