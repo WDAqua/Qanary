@@ -111,7 +111,15 @@ public class QanarySparqlProtocolController {
 	) throws SparqlQueryFailed, JSONException {
 		logger.info("getSparqlAsJSON // accept-header: {}, SELECT query: {}", acceptHeader, sparqlQuery);
 
-		Query query = QueryFactory.create(sparqlQuery);
+		Query query = null;
+		try {			
+			query = QueryFactory.create(sparqlQuery);
+		} catch (Exception e) {
+			logger.error("SPARQL query could not be processed because of the error: {}\nfailed query:\n{}", e, sparqlQuery);
+			e.printStackTrace();
+			throw new SparqlQueryFailed(sparqlQuery, this.getQanaryTripleStoreConnector().getFullEndpointDescription(), e);
+		}
+
 		logger.info("ask:{}, select:{}, unknown:{}, query:{}", query.isAskType(), query.isSelectType(),
 				query.isUnknownType(), sparqlQuery);
 

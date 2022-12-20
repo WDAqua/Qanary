@@ -5,14 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>3.5.1</version>
-
+	<version>3.5.2</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.5.12</version>
 	</parent>
-
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.5.2</spring-boot-admin.version>
@@ -23,7 +21,6 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
@@ -224,6 +221,11 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.0</version>
 		</dependency>
 	</dependencies>
 	<build>
