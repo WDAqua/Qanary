@@ -1,19 +1,24 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.stream.Collectors;
+
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolutionMap;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
@@ -74,8 +79,13 @@ public abstract class QanaryTripleStoreConnector {
 	public static String readFileFromResources(String filenameWithRelativePath) throws IOException {
 		InputStream in = QanaryTripleStoreConnector.class.getResourceAsStream(filenameWithRelativePath);
 		getLogger().info("filenameWithRelativePath: {}, {}", filenameWithRelativePath, in);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.lines().collect(Collectors.joining("\n"));
+
+		if (in == null) {
+			return null;
+		} else {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			return reader.lines().collect(Collectors.joining("\n"));
+		}
 	}
 
 	/**
@@ -166,7 +176,6 @@ public abstract class QanaryTripleStoreConnector {
 		return readFileFromResourcesWithMap("/queries/select_all_AnnotationOfAnswerSPARQL.rq", bindings);
 	}
 
-
 	/**
 	 * read query from file and apply bindings
 	 *
@@ -179,7 +188,7 @@ public abstract class QanaryTripleStoreConnector {
 			throws IOException {
 		String sparqlQueryString = readFileFromResources(filenameWithRelativePath);
 		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
-		
+
 		logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
 
 		if ((sparqlQueryString).contains("\nSELECT ") || sparqlQueryString.startsWith("SELECT")) {
@@ -199,5 +208,35 @@ public abstract class QanaryTripleStoreConnector {
 
 	}
 
+	/**
+	 * ensures that files exists in the resources and are non-empty
+	 * 
+	 * e.g., useful for component constructors to ensure that SPRARQL query template
+	 * files (*.rq) are valid
+	 * 
+	 * @param filenameInResources
+	 */
+	public static void guardNonEmptyFileFromResources(String filenameInResources) {
+		String message = null;
+		try {
+			String readFileContent = readFileFromResources(filenameInResources);
+
+			if (readFileContent == null) {
+				message = "file content was null (does the file exist?): " + filenameInResources;
+			} else if (readFileContent.isBlank()) {
+				message = "no content: " + filenameInResources;
+			} else {
+				return; // ok
+			}
+			logger.error(message);
+			throw new RuntimeException(message);
+
+		} catch (IOException e) {
+			// should not happen as readFileContent should always be readable (as null)
+			message = "not available: " + filenameInResources;
+			logger.error(message);
+			throw new RuntimeException(message);
+		}
+	}
 
 }
