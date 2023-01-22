@@ -1,8 +1,5 @@
 package eu.wdaqua.qanary.component;
 
-import java.io.IOException;
-
-import org.apache.http.client.ClientProtocolException;
 //import org.apache.jena.query.Query;
 //import org.apache.jena.query.QueryExecution;
 //import org.apache.jena.query.QueryExecutionFactory;
@@ -31,11 +28,12 @@ public abstract class QanaryComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryComponent.class);
 
-    // TODO need to be changed
-    final String questionUrl = "http://localhost:8080/question/28f56d32-b30a-428d-ac90-79372a6f7625/";
-    
     @Autowired
     private Environment env;
+
+	private QanaryUtils utils;
+
+	private QanaryMessage qanaryMessage;
     
     public Environment getEnvironment() {
     	return this.env;
@@ -49,38 +47,24 @@ public abstract class QanaryComponent {
 
     /**
      * fetch raw data for a question
+     * @throws Exception 
      */
-    public String getQuestionRawData() throws ClientProtocolException, IOException {
-        /*
-		 * @SuppressWarnings("deprecation") HttpClient client = new
-		 * DefaultHttpClient(); HttpGet request = new HttpGet(questionUrl +
-		 * QanaryConfiguration.questionRawDataUrlSuffix); HttpResponse response
-		 * = client.execute(request);
-		 * 
-		 * // Get the response BufferedReader rd = new BufferedReader(new
-		 * InputStreamReader(response.getEntity().getContent()));
-		 * 
-		 * String rawText = ""; String line = ""; while ((line = rd.readLine())
-		 * != null) { rawText.concat(line); }
-		 */
-        return "";
+    public String getQuestionRawData() throws Exception {
+    	return this.getQanaryQuestion().getTextualRepresentation();
     }
 
-    /**
-     * get Qanary question
-     */
-    public QanaryQuestion getQuestion() {
 
-        // TODO: fetch from endpoint+ingraph via SPARQL the resource of rdf:type
-        // qa:Question
-
-        // TODO: create QanaryQuestion object with question URL and raw data
-        // this.getQuestionRawData()
-
-        return null;
-    }
-
-    
+	public void setUtils(QanaryMessage myQanaryMessage) {
+		this.utils = this.getUtils(myQanaryMessage);
+	}
+	
+	public QanaryUtils getUtils() {
+		if (this.utils == null) {
+			logger.error("QanaryUtils should never be null.");
+			throw new java.lang.IllegalStateException("QanaryUtils should never be null.");
+		}
+		return(this.utils);
+	}
     
     /**
      * get access to common utilities useful for the Qanary framework --> internal communication
@@ -110,6 +94,24 @@ public abstract class QanaryComponent {
 			throw new RuntimeException(e); // TODO: not needed --> replace
 		}
     }
+    
+    /**
+     * get current Qanary question
+     */
+    public QanaryQuestion<String> getQanaryQuestion(){
+		if (this.getQanaryMessage() == null) {
+			logger.error("QanaryMessage should never be null.");
+			throw new java.lang.IllegalStateException("QanaryMessage should never be null.");
+		}
+    	return this.getQanaryQuestion(this.getQanaryMessage());
+    }
+
+    /**
+     * get current Qanary question
+     */
+    public QanaryQuestion<String> getQuestion() {
+        return this.getQanaryQuestion();
+    }
 
     /**
      * get access to a java representation of the question for the Qanary framework
@@ -118,4 +120,11 @@ public abstract class QanaryComponent {
         return new QanaryQuestion<String>(qanaryMessage, myQanaryConfigurator);
     }
 
+	public void setQanaryMessage(QanaryMessage myQanaryMessage) {
+		this.qanaryMessage = myQanaryMessage; 
+	}
+
+	public QanaryMessage getQanaryMessage() {
+		return this.qanaryMessage; 
+	}
 }
