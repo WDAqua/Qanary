@@ -10,12 +10,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.6.RELEASE</version>
+		<version>2.6.7</version>
 	</parent>
 	<properties>
-		<java.version>11</java.version>
-		<qanary.version>[2.0.0,3.0.0)</qanary.version>
-		<spring-boot-admin.version>2.1.6</spring-boot-admin.version>
+		<java.version>17</java.version>
+		<qanary.version>[3.6.0,4.0.0)</qanary.version>
+		<spring-boot-admin.version>2.6.7</spring-boot-admin.version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 
