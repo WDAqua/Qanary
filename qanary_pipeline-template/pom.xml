@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>3.5.3</version>
+	<version>3.5.4</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -20,7 +20,7 @@
 		<docker.image.name>qanary-pipeline</docker.image.name>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<springdoc.version>1.6.14</springdoc.version>
+		<springdoc.version>1.6.12</springdoc.version><!-- last working version: 1.6.12 -->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -215,6 +215,18 @@
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 			<version>4.0.0</version>
+		</dependency>
+		<!-- required for springdoc-openapi -->
+		<dependency>
+		    <groupId>jakarta.xml.bind</groupId>
+		    <artifactId>jakarta.xml.bind-api</artifactId>
+		    <version>2.3.2</version>
+		</dependency>
+		<!-- required for springdoc-openapi -->
+		<dependency>
+		    <groupId>org.glassfish.jaxb</groupId>
+		    <artifactId>jaxb-runtime</artifactId>
+		    <version>2.3.2</version>
 		</dependency>
 	</dependencies>
 	<build>
