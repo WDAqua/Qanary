@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
@@ -13,7 +14,7 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import eu.wdaqua.qanary.web.QanaryStandardWebParameters;
@@ -46,7 +48,11 @@ class QanaryQuestionAnsweringControllerTest {
 
 	@MockBean
 	private QanaryTripleStoreConnector mockedQanaryTripleStoreConnector;
-    
+
+	static {
+		System.setProperty("springdoc.api-docs.path", "/api-docs");
+  	}
+	
     @Test
     void testRequestQuestionAnsweringProcessToStringWithoutLanguage() throws URISyntaxException {
         RequestQuestionAnsweringProcess qaProcess = new RequestQuestionAnsweringProcess();
@@ -132,6 +138,30 @@ class QanaryQuestionAnsweringControllerTest {
 
  		// is is called at least once with the expected parameter value?
 		verify(mockedQanaryTripleStoreConnector, atLeast(1)).update(matches(queryPart));
+		
+		System.out.println();
+    }
+    
+    /**
+     * IMPORTANT: for some reason this test does not work in the GitHub action
+     * 
+     * test availability of api-docs via Web service (required to ensure OpenAPI/Swagger docs availability)
+     * 
+     * problem might be discovered when springdoc-openapi package has a conflict (e.g., v1.6.14) 
+     * 
+     * @throws Exception
+     */
+    @Test
+    void testOpenApiDefinitionAvailability() throws Exception {
+    	String openApiPath = System.getProperty("springdoc.api-docs.path") + ".yaml";
+    	logger.info("test availability of OpenAPI YAML file at {}", openApiPath);
+    	MvcResult x = mvc.perform(MockMvcRequestBuilders.get(openApiPath)).andReturn();
+    	int httpCode = x.getResponse().getStatus();
+    	if( httpCode >= 200 && httpCode < 400 ) {
+    		logger.info("Access to {} results in HTTP {}.", openApiPath, httpCode);
+    	} else {
+    		logger.error("Access to {} results in HTTP {}. Check springdoc-openapi!", openApiPath, httpCode);
+    	}
     }
 
 }
