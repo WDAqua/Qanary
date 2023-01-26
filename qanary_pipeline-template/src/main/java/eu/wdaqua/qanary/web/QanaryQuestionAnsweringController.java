@@ -163,7 +163,7 @@ public class QanaryQuestionAnsweringController {
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
 	 */
-	@Deprecated
+	// @Deprecated // removed as it shows /startquestionansweringwithtextquestion as deprecated 
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	@Operation(summary = "(deprecated) Start a process directly with a textual question", //

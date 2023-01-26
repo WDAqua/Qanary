@@ -134,8 +134,6 @@ class QanaryQuestionAnsweringControllerTest {
 
  		// is is called at least once with the expected parameter value?
 		verify(mockedQanaryTripleStoreConnector, atLeast(1)).update(matches(queryPart));
-		
-		System.out.println();
     }
     
     /**

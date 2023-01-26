@@ -68,7 +68,7 @@ public class QanaryQuestionController {
 	@PostMapping(value = "/question", produces = "application/json")
 	@ResponseBody
 	@Operation(
-		summary = "Synchronous call o sart a QA process", //
+		summary = "Synchronous call to start a QA process", //
 		operationId = "createQuestion", //
 		description = "Start a question answering process via synchronous POST request "
 					+ "and return the URL of the created question. "
@@ -187,7 +187,7 @@ public class QanaryQuestionController {
 	}
 
 	/**
-	 * return directory where the i questions are stored or saved if not existing,
+	 * return directory where the questions are stored or saved if not existing,
 	 * then create the directory
 	 */
 	private String getDirectoryForStoringQuestionRawData() {
@@ -252,7 +252,7 @@ public class QanaryQuestionController {
 	@GetMapping(value = "/question/")
 	@ResponseBody
 	@Operation(
-		summary = "Reurn links to all questions", //
+		summary = "Return links to all questions", //
 		operationId = "getQuestions",//
 		description = "No parameters are required" // 
 	)
@@ -283,7 +283,7 @@ public class QanaryQuestionController {
 	}
 
 	/**
-	 * question for a given id, raw return of the data
+	 * question for a given ID, raw return of the data
 	 */
 	@GetMapping(value = "/question/{questionid}/raw", produces = "text/plain;charset=UTF-8")
 	@ResponseBody
