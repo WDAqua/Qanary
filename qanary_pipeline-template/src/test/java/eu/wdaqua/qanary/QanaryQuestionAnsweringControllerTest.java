@@ -50,7 +50,11 @@ class QanaryQuestionAnsweringControllerTest {
 	private QanaryTripleStoreConnector mockedQanaryTripleStoreConnector;
 
 	static {
+<<<<<<< HEAD
 		System.setProperty("springdoc.api-docs.path", "/api-docs");
+=======
+		System.setProperty("springdoc.api-docs.path", "/test-api-docs");
+>>>>>>> 6c020f6e139c86c3dda3786ec621e96fa66f1923
   	}
 	
     @Test
