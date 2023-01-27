@@ -1,0 +1,1 @@
+rename to banner.txt or otherwise the default Qanary banner.txt is used, c.f.,  https://github.com/WDAqua/Qanary/blob/master/qanary_component-template/src/main/resources/banner.txt

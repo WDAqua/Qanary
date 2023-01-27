@@ -23,6 +23,5 @@ public class QanaryService {
     public static void main(String[] args) {
         Properties p = new Properties();
         new SpringApplicationBuilder(QanaryService.class).properties(p).run(args);
-        //SpringApplication.run(QanaryService.class, args);
     }
 }

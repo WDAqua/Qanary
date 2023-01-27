@@ -18,6 +18,8 @@
       <directory>src/main/resources</directory>
       <includes>
         <include>**/*.html</include>
+        <include>**/*.rq</include>
+        <include>**/*.ttl</include>
         <include>**/*.properties</include>
         <include>**/*.txt</include>
       </includes>
@@ -33,6 +35,7 @@
         <includes>
             <include>.gitignore</include>
             <include>Dockerfile</include>
+            <include>**/*.md</include>
         </includes>
     </fileSet>
   </fileSets>

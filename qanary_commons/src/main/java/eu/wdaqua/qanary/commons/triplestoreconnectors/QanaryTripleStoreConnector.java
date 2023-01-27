@@ -79,8 +79,13 @@ public abstract class QanaryTripleStoreConnector {
 	public static String readFileFromResources(String filenameWithRelativePath) throws IOException {
 		InputStream in = QanaryTripleStoreConnector.class.getResourceAsStream(filenameWithRelativePath);
 		getLogger().info("filenameWithRelativePath: {}, {}", filenameWithRelativePath, in);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.lines().collect(Collectors.joining("\n"));
+
+		if (in == null) {
+			return null;
+		} else {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			return reader.lines().collect(Collectors.joining("\n"));
+		}
 	}
 
 	/**
@@ -124,9 +129,29 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
+	 * get SELECT query to get the answer with the highest score in a graph
+	 *
+	 * @param graph
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getHighestScoreAnnotationOfAnswerInGraph(URI graph) throws IOException {
+		String sparqlQueryString = readFileFromResources("/queries/select_highestScore_AnnotationOfAnswerSPARQL.rq");
+
+		QuerySolutionMap bindings = new QuerySolutionMap();
+		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		Query query = QueryFactory.create(pq.toString());
+		logger.info("generated query:\n{}", query.toString());
+
+		return query.toString();
+	}
+
+	/**
 	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
 	 * components
-	 * 
+	 *
 	 * @param bindings
 	 * @return
 	 * @throws IOException
@@ -135,14 +160,25 @@ public abstract class QanaryTripleStoreConnector {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerSPARQL.rq", bindings);
 	}
 
+	/**
+	 * add AnnotationOfAnswerJson as it is done typically in Qanary QueryExecutor
+	 * components
+	 *
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfAnswerJson(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerJson.rq", bindings);
+	}
+
 	public static String getAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
 		return readFileFromResourcesWithMap("/queries/select_all_AnnotationOfAnswerSPARQL.rq", bindings);
 	}
 
-	
 	/**
 	 * read query from file and apply bindings
-	 * 
+	 *
 	 * @param filenameWithRelativePath
 	 * @param bindings
 	 * @return
@@ -152,7 +188,7 @@ public abstract class QanaryTripleStoreConnector {
 			throws IOException {
 		String sparqlQueryString = readFileFromResources(filenameWithRelativePath);
 		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
-		
+
 		logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
 
 		if ((sparqlQueryString).contains("\nSELECT ") || sparqlQueryString.startsWith("SELECT")) {
@@ -172,5 +208,35 @@ public abstract class QanaryTripleStoreConnector {
 
 	}
 
+	/**
+	 * ensures that files exists in the resources and are non-empty
+	 * 
+	 * e.g., useful for component constructors to ensure that SPRARQL query template
+	 * files (*.rq) are valid
+	 * 
+	 * @param filenameInResources
+	 */
+	public static void guardNonEmptyFileFromResources(String filenameInResources) {
+		String message = null;
+		try {
+			String readFileContent = readFileFromResources(filenameInResources);
+
+			if (readFileContent == null) {
+				message = "file content was null (does the file exist?): " + filenameInResources;
+			} else if (readFileContent.isBlank()) {
+				message = "no content: " + filenameInResources;
+			} else {
+				return; // ok
+			}
+			logger.error(message);
+			throw new RuntimeException(message);
+
+		} catch (IOException e) {
+			// should not happen as readFileContent should always be readable (as null)
+			message = "not available: " + filenameInResources;
+			logger.error(message);
+			throw new RuntimeException(message);
+		}
+	}
 
 }

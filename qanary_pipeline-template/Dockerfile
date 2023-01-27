@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM openjdk:17
 
 ENTRYPOINT ["java", "-jar", "/usr/share/qanary-question-answering-system/my-qanary-qa-system.jar"]
 

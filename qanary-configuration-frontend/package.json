@@ -1,6 +1,6 @@
 {
   "name": "qanary-configuration-frontend",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "dependencies": {
     "@babel/core": "latest",
@@ -10,7 +10,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hook-form": "^6.3.0",
-    "react-scripts": "^5.0.0"
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -34,7 +34,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "latest",
+    "@babel/core": "7.18.10",
     "axios": "^0.21.2"
   }
 }

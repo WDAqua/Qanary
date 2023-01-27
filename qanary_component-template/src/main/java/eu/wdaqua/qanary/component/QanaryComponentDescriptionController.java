@@ -14,7 +14,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * provides access to the components definition in different RDF formats
@@ -32,50 +32,47 @@ import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 public class QanaryComponentDescriptionController {
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryComponentDescriptionController.class);
-	private static final String componentTurtleDescriptionFileLocation = "component-description.ttl";
+	private static final String COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION = "component-description.ttl";
 
 	private ApplicationContext context;
 
 	public Model model;
 
-	@Autowired
 	public QanaryComponentDescriptionController(ApplicationContext context) throws FileNotFoundException {
 		this.context = context;
 		initQanaryServiceDecription();
 	}
 
-	private void initQanaryServiceDecription() throws FileNotFoundException {
+	private void initQanaryServiceDecription(){
 		String filename;
 
 		try {
 			try {
 				// standard location
-				Resource file = context.getResource("classpath:" + componentTurtleDescriptionFileLocation);
+				Resource file = context.getResource("classpath:" + COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION);
 				filename = file.getURI().toASCIIString();
 			} catch (Exception e) {
 				// fallback for some development scenarios
-				File x = new File("src/main/resources/" + componentTurtleDescriptionFileLocation);
+				File x = new File("src/main/resources/" + COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION);
 				filename = x.getAbsolutePath();
 			}
 
 			if (filename != null) {
-				logger.info("location of {}: {}", componentTurtleDescriptionFileLocation, filename);
+				logger.info("location of {}: {}", COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION, filename);
 				try {
 					if (model == null) {
 						model = RDFDataMgr.loadModel(filename);
-						logger.info("size of loaded model: {} triples as TURTLE\n", model.size(),
+						logger.info("size of loaded model: {} triples as TURTLE\n{}", model.size(),
 								getModelAsString("TURTLE"));
-						// logger.info("size of loaded model: {} triples as RDF/JSON\n",
-						// model.size(),getModelAsString("RDF/JSON"));
-						// logger.info("size of loaded model: {} triples as RDF/XML\n", model.size(),
-						// getModelAsString("RDF/XML"));
 					}
 				} catch (Exception e) {
-					logger.warn("could not find a Turtle service description at '{}'", filename);
+					logger.warn("could not find a Turtle service description at '{}': {}", filename, e);
 				}
+			} else {
+				logger.warn("could not find a Turtle service description as null is provided.");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn("problem with component description at '{}': {}", COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION, e);
 		}
 	}
 
@@ -84,7 +81,6 @@ public class QanaryComponentDescriptionController {
 	 * to custom page
 	 */
 	@GetMapping(value = QanaryConfiguration.description)
-	// TODO: OpenAPI definitions
 	public String description(HttpServletResponse response) {
 		return QanaryConfiguration.description_file;
 	}
@@ -103,7 +99,6 @@ public class QanaryComponentDescriptionController {
 	@ExceptionHandler(NotImplementedException.class)
 	@GetMapping(value = QanaryConfiguration.rdfcomponentdescription, produces = { "application/x-javascript",
 			"application/json", "application/ld+json" })
-	// TODO: OpenAPI definitions
 	public @ResponseBody String getModelAsJson(HttpServletRequest request) {
 		this.logHeader(request);
 		return getModelAsString("RDF/JSON");
@@ -111,21 +106,18 @@ public class QanaryComponentDescriptionController {
 
 	@GetMapping(value = QanaryConfiguration.rdfcomponentdescription, produces = { "application/xml",
 			"application/rdf+xml" })
-	// TODO: OpenAPI definitions
 	public @ResponseBody String getModelAsXml(HttpServletRequest request) {
 		this.logHeader(request);
 		return getModelAsString("RDF/XML");
 	}
 
 	@GetMapping(value = QanaryConfiguration.rdfcomponentdescription, produces = { "application/n-triples" })
-	// TODO: OpenAPI definitions
 	public @ResponseBody String getModelAsNTriples(HttpServletRequest request) throws IOException {
 		this.logHeader(request);
 		return getModelAsString("N-TRIPLE");
 	}
 
 	@GetMapping(value = QanaryConfiguration.rdfcomponentdescription, produces = { "text/n3" })
-	// TODO: OpenAPI definitions
 	public @ResponseBody String getModelAsN3(HttpServletRequest request) throws IOException {
 		this.logHeader(request);
 		return getModelAsString("N3");
@@ -143,8 +135,12 @@ public class QanaryComponentDescriptionController {
 	 * @return
 	 * @throws IOException
 	 */
-	// TODO: OpenAPI definitions
 	@GetMapping(value = QanaryConfiguration.rdfcomponentdescription, produces = { "text/turtle" })
+	@Operation(
+			summary = "Returns the component description as RDF (required data types, producable data types).", //
+			operationId = "getModel", //
+			description = "note: change the data format using RDF-compatible headers" //  
+	)
 	public @ResponseBody String getModelAsTurtle(HttpServletRequest request) throws IOException {
 		this.logHeader(request);
 		return getModelAsString("TURTLE");
