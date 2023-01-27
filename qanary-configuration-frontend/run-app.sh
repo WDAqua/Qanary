@@ -14,12 +14,6 @@ if [ $# -ne 0 ]; then
     done
 fi
 
-echo "-> ENV vars:"
-env | sort
-
-echo "-> User:"
-id
-
 echo "-> building app ..."
 npm run build --production
 
