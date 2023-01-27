@@ -3,9 +3,9 @@
   "version": "1.0.3",
   "private": true,
   "dependencies": {
-    "@babel/core": "7.18.10",
-    "@testing-library/jest-dom": "^5.16.2",
-    "@testing-library/react": "^12.1.5",
+    "@babel/core": "latest",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^7.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
