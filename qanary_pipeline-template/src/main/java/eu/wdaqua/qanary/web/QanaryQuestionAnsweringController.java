@@ -361,23 +361,6 @@ public class QanaryQuestionAnsweringController {
 	public ClassPathResource getFile2() {
 		return new ClassPathResource("/qanaryOntology.ttl");
 	}
-
-	/**
-	 * exposing additional triples
-	 */
-	@RequestMapping(value = "/additional-triples/{id}", method = RequestMethod.GET, produces = "text/turtle")
-	@ResponseBody
-	@Operation(summary = "Expose additonal Triples", //
-			operationId = "getAdditionalTriples", //
-			description = "View additional triples that were passed and stored when starting the " //
-					+ "question answering process. Requires a valid ID.")
-	public InputStreamResource getAdditionalTriples(@PathVariable final String id) throws FileNotFoundException {
-		String filename = Paths.get(myQanaryPipelineConfiguration.getAdditionalTriplesDirectory(), id + ".ttl")
-				.toString();
-		InputStream in = new FileInputStream(filename);
-		return new InputStreamResource(in);
-	}
-
 	
 	@GetMapping(value = QUESTIONANSWERING, produces = "application/json")
 	@ResponseBody
