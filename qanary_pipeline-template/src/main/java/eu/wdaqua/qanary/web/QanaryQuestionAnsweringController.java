@@ -8,6 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.query.QueryExecution;
@@ -30,6 +33,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
@@ -54,6 +58,7 @@ import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
@@ -89,7 +94,7 @@ public class QanaryQuestionAnsweringController {
 	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	// LinkedHashMap keeps the order of the elements, s.t., the oldest elements can be removed
 	private static Map<URI,QanaryQuestionAnsweringFinished> lastQanaryQuestionAnsweringProcesses = new LinkedHashMap<>(); 
-	
+    private final Environment environment;		
 	private final int maxQanaryQuestionAnsweringProcesses = 1000;
 
 	// Set this to allow browser requests from other websites
@@ -108,7 +113,8 @@ public class QanaryQuestionAnsweringController {
 			final QanaryComponentRegistrationChangeNotifier myComponentNotifier, //
 			final QanaryPipelineConfiguration myQanaryPipelineConfiguration, //
 			final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
-			final QanaryTripleStoreConnector myQanaryTripleStoreConnector //
+			final QanaryTripleStoreConnector myQanaryTripleStoreConnector, //
+			final Environment environment //
 	) {
 		this.qanaryConfigurator = qanaryConfigurator;
 		this.qanaryQuestionController = qanaryQuestionController;
@@ -116,7 +122,7 @@ public class QanaryQuestionAnsweringController {
 		this.myQanaryPipelineConfiguration = myQanaryPipelineConfiguration;
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
-		
+		this.environment = environment;
 	}
 
 	/**
@@ -163,7 +169,8 @@ public class QanaryQuestionAnsweringController {
 	@RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.GET)
 	@Operation(summary = "Return a simple HTML input form for starting a question answering process" //
 	)
-	public String startquestionansweringwithtextquestion() {
+	public String startquestionansweringwithtextquestion(HttpServletResponse response, Model model, HttpSession session) {
+		this.setSessionAttributes(response, model, session);
 		return "startquestionansweringwithtextquestion";
 	}
 
@@ -299,10 +306,45 @@ public class QanaryQuestionAnsweringController {
 	 */
 	@RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.GET)
 	@Operation(summary = "Return a simple HTML form for starting a question answering process with an audio question")
-	public String startquestionansweringwithaudioquestion() {
+	public String startquestionansweringwithaudioquestion(HttpServletResponse response, Model model, HttpSession session) {
+		this.setSessionAttributes(response, model, session);
 		return "startquestionansweringwithaudioquestion";
 	}
-
+	
+	private void setSessionAttributes(HttpServletResponse response, Model model, HttpSession session) {
+		List<String> envImportantPropertyNames = Arrays.asList("spring.application.name", "spring.application.description", "springdoc.swagger-ui.path", "spring.boot.admin.url");
+		
+		// collect all important properties and add them to the session attributes
+		for (String name : envImportantPropertyNames) {
+			// replace characters that will not be accepted by Thymeleaf
+			String sessionDataName = name.replace(".", "_").replace("-", "_");
+			// add all values to the session including a default text if the parameter is not available
+			String sessionDataValue = this.environment.getProperty(name, "This text is shown as the property " + name + " is not defined (e.g., in application.properties).");
+	    	session.setAttribute(sessionDataName, sessionDataValue);
+			logger.info("session | {} -> {}={}", name, sessionDataName, session.getAttribute(sessionDataName));
+		}
+		
+		Map<String,String> envImportantPropertyNameValue = new HashMap<>();
+		envImportantPropertyNameValue.put("component_description_url", QanaryConfiguration.description);
+		envImportantPropertyNameValue.put("component_description_file", QanaryConfiguration.description_file);
+		envImportantPropertyNameValue.put("rdfcomponentdescription", QanaryConfiguration.rdfcomponentdescription);
+		envImportantPropertyNameValue.put("ImplementationVersion", getClass().getPackage().getImplementationVersion());
+		envImportantPropertyNameValue.put("ImplementationTitle", getClass().getPackage().getImplementationTitle());
+		envImportantPropertyNameValue.put("ImplementationVendor", getClass().getPackage().getImplementationVendor());
+		envImportantPropertyNameValue.put("Name", getClass().getPackage().getName());
+		envImportantPropertyNameValue.put("SpecificationTitle", getClass().getPackage().getSpecificationTitle());
+		envImportantPropertyNameValue.put("SpecificationVendor", getClass().getPackage().getSpecificationVendor());
+		envImportantPropertyNameValue.put("SpecificationVersion", getClass().getPackage().getSpecificationVersion());
+	
+		for (Map.Entry<String, String> entry : envImportantPropertyNameValue.entrySet()) {
+			String key = entry.getKey();
+			String val = entry.getValue();
+	    	session.setAttribute(key, val);
+			logger.info("session | {}={}", key, session.getAttribute(key));
+		}
+	}
+	
+	
 	/**
 	 * start a process directly with an audio question
 	 * 

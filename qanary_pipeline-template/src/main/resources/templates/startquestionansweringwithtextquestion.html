@@ -7,7 +7,7 @@
 	<script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 </head>
 <body>
-        <h1>Start a QA process with a new textual question</h1>
+        <h1>Start a QA process with a new textual question (Qanary Pipeline v<span th:text=${session.ImplementationVersion} th:unless="${session.ImplementationVersion == null}" ></span>)</h1>
         <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
 			<div th:replace="lib/reusableforms::textquestioninput"/>
 
