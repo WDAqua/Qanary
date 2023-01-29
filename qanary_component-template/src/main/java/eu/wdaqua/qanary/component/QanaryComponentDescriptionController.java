@@ -155,8 +155,12 @@ public class QanaryComponentDescriptionController {
 	 */
 	private String getModelAsString(String returnType) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		model.write(os, returnType);
-		logger.info("result for '{}':\n{}", returnType, os.toString());
+		if(this.model != null) {
+			model.write(os, returnType);
+			logger.info("result for '{}':\n{}", returnType, os.toString());
+		} else {
+			logger.warn("No component description model available. (model == null).");
+		}
 		return os.toString();
 	}
 
