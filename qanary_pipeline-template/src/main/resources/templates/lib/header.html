@@ -258,14 +258,22 @@
                 		$("#endpoint").html(response.endpoint);
                 		$("#questionuri").html(response.question);
                 		$("#inGraph").html(response.inGraph);
+                		$("#protocol_link").html($("<a></a>").text("process details").prop("href","/questionanswering/" + response.inGraph).prop("target","_blank"));
+                		$("#all_annotation_link").html($("<a></a>").text("all annotations").prop("href","/components/" + response.inGraph + "/*").prop("target","_blank"));
                 		$("#outGraph").html(response.outGraph);
                     	$("#results").slideDown("fast"); // show results with animation
                     	$("#results").show();
                         getNumberOfAnnotations(response.outGraph); // get new number of annotations
-                	}).error(function (jqXHR) {
+                	}).error(function (jqXHR, textStatus) {
                         $("#submit").attr("disabled", false); // reactivate button
                         $("#submit").removeClass("inprogress");
-                        alert("The process failed.\nPlease check your implementation!");
+                        completeErrorMessage = jqXHR.responseJSON["message"];
+                        coreMessage = completeErrorMessage.substr(0, completeErrorMessage.indexOf(".", completeErrorMessage.indexOf(":")) + 1)
+                        message = "The process failed.\nPlease check your implementation!\n"; 
+                        alert(message + coreMessage + "\nSee browser console for details.");
+                        console.error(message + completeErrorMessage);
+                        console.error(jqXHR.responseJSON);
+                        console.error(jqXHR.responseJSON["trace"]);
                 	});
                 });
         });

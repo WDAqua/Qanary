@@ -1,18 +1,24 @@
 package eu.wdaqua.qanary;
 
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.util.NestedServletException;
 
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.web.QanaryStandardWebParameters;
@@ -47,6 +54,7 @@ class QanaryQuestionAnsweringControllerTest {
 
 	static {
 		System.setProperty("springdoc.api-docs.path", "/api-docs");
+		System.setProperty("qanary.process.allow-additional-triples", "true");
   	}
 	
     @Test
@@ -97,8 +105,8 @@ class QanaryQuestionAnsweringControllerTest {
                 " -- language: es";
 
         String actual = qaProcess.toString();
-
-		assertEquals(expected, actual);
+        
+		assertEquals(expected, actual, "\nexpected:\n" + expected + " \n != \nactual:\n" + actual );
 	}
 
 
@@ -156,6 +164,132 @@ class QanaryQuestionAnsweringControllerTest {
     	} else {
     		logger.error("Access to {} results in HTTP {}. Check springdoc-openapi!", openApiPath, httpCode);
     	}
+    }
+
+    @Test
+    void testWithoutAdditionalTriples() throws Exception {
+    	String url = "/startquestionansweringwithtextquestion";
+
+    	JSONArray componentList = new org.json.JSONArray();
+    	componentList.put("OpenTapiocaNED");
+    	componentList.put("BirthDataQueryBuilderWikidata");
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("question", "When was Albert Einstein born?");
+    	json.put("componentlist", componentList);
+    	json.put("language", "en");
+    	
+    	mvc.perform(MockMvcRequestBuilders.post(url) // 
+				.contentType("application/json")
+				.content(json.toString())
+				.with(csrf())
+				.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().is2xxSuccessful());;
+    	
+    }
+
+    @Test
+    void testWithEmptyAdditionalTriples() throws Exception {
+    	String url = "/startquestionansweringwithtextquestion";
+
+    	JSONArray componentList = new org.json.JSONArray();
+    	componentList.put("OpenTapiocaNED");
+    	componentList.put("BirthDataQueryBuilderWikidata");
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("question", "When was Albert Einstein born?");
+    	json.put("componentlist", componentList);
+    	json.put("language", "en");
+    	json.put("additionalTriples", "");
+    	
+    	mvc.perform(MockMvcRequestBuilders.post(url) // 
+				.contentType("application/json")
+				.content(json.toString())
+				.with(csrf())
+				.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().is2xxSuccessful());;
+    	
+    }
+  
+    @Test
+    void testWithAdditionalTriple() throws Exception {
+    	String url = "/startquestionansweringwithtextquestion";
+
+    	JSONArray componentList = new org.json.JSONArray();
+    	componentList.put("OpenTapiocaNED");
+    	componentList.put("BirthDataQueryBuilderWikidata");
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("question", "When was Albert Einstein born?");
+    	json.put("componentlist", componentList);
+    	json.put("language", "en");
+    	json.put("additionalTriples", "<urn:s> <urn:p> <urn:o>  .");
+    	
+    	mvc.perform(MockMvcRequestBuilders.post(url) // 
+				.contentType("application/json")
+				.content(json.toString())
+				.with(csrf())
+				.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().is2xxSuccessful());;
+    	
+    }
+
+    @Test
+    void testWithAdditionalTriples() throws Exception {
+    	String url = "/startquestionansweringwithtextquestion";
+
+    	JSONArray componentList = new org.json.JSONArray();
+    	componentList.put("OpenTapiocaNED");
+    	componentList.put("BirthDataQueryBuilderWikidata");
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("question", "When was Albert Einstein born?");
+    	json.put("componentlist", componentList);
+    	json.put("language", "en");
+		json.put("additionalTriples", "" //
+				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " // 
+				+ "PREFIX xyz: <urn:xyz:> " //
+				+ "<urn:s0> xyz:p0 <urn:o0> ." //
+				+ "<urn:s1>   <urn:p1> <urn:o1> .     " //
+				+ "<urn:s2> <urn:p2> \"1\"^^xsd:integer    . " //
+				+ "<urn:s3> <urn:p3>    \"string\" . " //
+				+ "<urn:s4> <urn:p4> \"explicit string\"^^xsd:string . " //
+				+ "<urn:s5>   <urn:p5> <urn:o5>,\"string\" . " //
+				+ "");    	
+    	
+    	mvc.perform(MockMvcRequestBuilders.post(url) // 
+				.contentType("application/json")
+				.content(json.toString())
+				.with(csrf())
+				.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().is2xxSuccessful());;
+    	
+    }
+
+    @Test
+    void testWithBrokenAdditionalTriplesShouldFail() throws Exception {
+    	String url = "/startquestionansweringwithtextquestion";
+
+    	JSONArray componentList = new org.json.JSONArray();
+    	componentList.put("OpenTapiocaNED");
+    	componentList.put("BirthDataQueryBuilderWikidata");
+    	
+    	JSONObject json = new JSONObject();
+    	json.put("question", "When was Albert Einstein born?");
+    	json.put("componentlist", componentList);
+    	json.put("language", "en");
+    	json.put("additionalTriples", "<urn:s <urn:p> <urn:o>  .");
+    	
+    	Assertions.assertThrows(NestedServletException.class, () -> {
+	    	mvc.perform(MockMvcRequestBuilders.post(url) // 
+					.contentType("application/json")
+					.content(json.toString())
+					.with(csrf())
+					.accept(MediaType.APPLICATION_JSON)
+			).andReturn();
+	    	fail("Request should have failed");
+   	   });
+    	
     }
 
 }

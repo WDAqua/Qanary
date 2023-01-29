@@ -1,22 +1,32 @@
 package eu.wdaqua.qanary.web;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.UUID;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,8 +47,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
-
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
@@ -45,19 +54,19 @@ import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
-import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
-import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
-import io.swagger.v3.oas.annotations.Operation;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
-import eu.wdaqua.qanary.web.messages.AdditionalInsertQuery;
+import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * controller for processing questions, i.e., related to the question answering
@@ -78,6 +87,10 @@ public class QanaryQuestionAnsweringController {
 	private final QanaryPipelineConfiguration myQanaryPipelineConfiguration;
 	private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
 	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
+	// LinkedHashMap keeps the order of the elements, s.t., the oldest elements can be removed
+	private static Map<URI,QanaryQuestionAnsweringFinished> lastQanaryQuestionAnsweringProcesses = new LinkedHashMap<>(); 
+	
+	private final int maxQanaryQuestionAnsweringProcesses = 1000;
 
 	// Set this to allow browser requests from other websites
 	@ModelAttribute
@@ -103,6 +116,7 @@ public class QanaryQuestionAnsweringController {
 		this.myQanaryPipelineConfiguration = myQanaryPipelineConfiguration;
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		
 	}
 
 	/**
@@ -196,20 +210,88 @@ public class QanaryQuestionAnsweringController {
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
+	/**
+	 * start question answering process with textual question
+	 * 
+	 * <pre>
+		curl --location --request POST 'http://localhost:8080/startquestionansweringwithtextquestion' \
+		--header 'Content-Type: application/json' \
+		--data-raw '{
+		    "question": "Where was Albert Einstein born?",
+		    "componentlist": [
+		        "OpenTapiocaNED",
+		        "BirthDataQueryBuilderWikidata",
+		        "SparqlExecuter"
+		    ],
+		    "additionalTriples": "<urn:s1> <urn:p1> <urn:o1> . <urn:s2> <urn:p2> <urn:o2> ."
+		}'
+	 * </pre>
+	 * 
+	 * 
+	 * @param myRequestQuestionAnsweringProcess
+	 * @return
+	 * @throws Exception
+	 */
 	@PostMapping(value = "/startquestionansweringwithtextquestion", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "Start a process directly with a textual question", //
-			operationId = "startquestionansweringwithtextquestion", //
-			description = "Parameters are supplied via JSON. Only the question parameter is required. " //
-					+ "Examples: {\"question\": \"What is the capital of Germany?\"}, " //
-					+ "{\"question\": \"Person born in France?\"}" //
-	)
-	public ResponseEntity<?> startquestionansweringwithtextquestion(
+	public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestion(
 			@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
-		logger.info("startquestionansweringwithtextquestion: {}", myRequestQuestionAnsweringProcess);
+		logger.info("\n\n\n\n\nstartquestionansweringwithtextquestion (JSON request): {}", myRequestQuestionAnsweringProcess);
+		logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
+		logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+		logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+		
 		QanaryQuestionAnsweringRun myRun = this
 				.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
-		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
+		return new ResponseEntity<>(myRun, HttpStatus.CREATED);
 	}
+
+	/**
+	 * duplicate implementation as Swagger is not capable of showing two endpoints
+	 * with different headers correctly
+	 * 
+	 * <pre>
+	 curl --location --request POST 'http://localhost:8080/startquestionansweringwithtextquestion' \
+	      --header 'Content-Type: application/json' \
+	      --data-raw '{
+	          "question": "Where was Albert Einstein born?",
+	          "componentlist": [
+	              "OpenTapiocaNED",
+	              "BirthDataQueryBuilderWikidata",
+	              "SparqlExecuter"
+		      ],
+		      "additionalTriples": "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>    <urn:s> oa:hasTarget <urn:o>  ."
+	      }'
+	 * </pre>
+	 * 
+	 * @param myRequestQuestionAnsweringProcess
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping(value = "/startquestionansweringwithtextquestionThroughJson", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Start a process directly with a textual question", //
+			operationId = "startquestionansweringwithtextquestionJson", //
+			description = "Parameters are supplied via JSON (also possible via startquestionansweringwithtextquestion). Only the question parameter is required. You might add additional triples (prefixes are allowed) for initializing the current graph of your Qanary process." //
+					+ "Examples: <pre>{\"question\": \"What is the capital of Germany?\"}<pre>, " //
+					+ "<pre>{\n\"question\": \"Where was Albert Einstein born?\",\n\"componentlist\": [\n"
+					+ "		        &nbsp;&nbsp;\"OpenTapiocaNED\",\n"
+					+ "		        &nbsp;&nbsp;\"BirthDataQueryBuilderWikidata\",\n"
+					+ "		        &nbsp;&nbsp;\"SparqlExecuter\"\n"
+					+ "		    ], \n\"additionalTriples\": \"&lt;urn:s1&gt; &lt;urn:p1&gt; &lt;urn:o1&gt; . &lt;urn:s2&gt; &lt;urn:p2&gt; &lt;urn:o2&gt; .\"\n}</pre>" //
+	)
+	public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestionThroughJson(
+			@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
+		logger.info("\n\n\n\n\nstartquestionansweringwithtextquestionThroughJson (JSON request): {}", myRequestQuestionAnsweringProcess);
+		logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
+		logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+		logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+		
+		QanaryQuestionAnsweringRun myRun = this
+				.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
+		return new ResponseEntity<>(myRun, HttpStatus.CREATED);
+	}
+	
+	
+	
 
 	/**
 	 * a simple HTML input form for starting a question answering process with an
@@ -279,41 +361,36 @@ public class QanaryQuestionAnsweringController {
 	public ClassPathResource getFile2() {
 		return new ClassPathResource("/qanaryOntology.ttl");
 	}
-
-	/**
-	 * exposing additional triples
-	 */
-	@RequestMapping(value = "/additional-triples/{id}", method = RequestMethod.GET, produces = "text/turtle")
+	
+	@GetMapping(value = QUESTIONANSWERING, produces = "application/json")
 	@ResponseBody
-	@Operation(summary = "Expose additonal Triples", //
-			operationId = "getAdditionalTriples", //
-			description = "View additional triples that were passed and stored when starting the " //
-					+ "question answering process. Requires a valid ID.")
-	public InputStreamResource getAdditionalTriples(@PathVariable final String id) throws FileNotFoundException {
-		String filename = Paths.get(myQanaryPipelineConfiguration.getAdditionalTriplesDirectory(), id + ".ttl")
-				.toString();
-		InputStream in = new FileInputStream(filename);
-		return new InputStreamResource(in);
+	@Operation(summary = "Return information about all Qanary question answering runs", //
+			operationId = "getQuestionAnsweringInformationForAllGraphs", //
+			description = "returns details for the last 1000 Qanary processes: inGraph, outGraph, endpoint, start time, end time" // TODO
+	)
+	public ResponseEntity<Map<URI,QanaryQuestionAnsweringFinished>> getLastQanaryQuestionAnsweringProcesses(){
+		return (new ResponseEntity<Map<URI, QanaryQuestionAnsweringFinished>>(QanaryQuestionAnsweringController.lastQanaryQuestionAnsweringProcesses,HttpStatus.OK));
 	}
-
+	
+	
 	/**
 	 * returns information about the run identified by the provided runId
 	 * 
 	 * @param runId
 	 * @return
+	 * @throws URISyntaxException 
 	 * @throws Exception
 	 */
-	@RequestMapping(value = QUESTIONANSWERING + "/{runId}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = QUESTIONANSWERING + "/{graph}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	@Operation(summary = "Return information about a specific question answering run", //
-			operationId = "getQuestionAnsweringGraphInformation", //
-			description = "(not yet implemented) The run is identified by the provided runId" // TODO: udpate
-																								// description once
-																								// fully implemented
+	@Operation(summary = "Return information about a specific Qanary graph", //
+			operationId = "getQuestionAnsweringInformationForSpecificGraph", //
+			description = "(not yet implemented) The run is identified by the provided runId" // 
 	)
-	public ResponseEntity<?> getQuestionAnsweringGraphInformation(@PathVariable(value = "runId") final UUID runId)
-			throws Exception {
-		throw new Exception("not yet implemented");
+	public ResponseEntity<QanaryQuestionAnsweringFinished> getQuestionAnsweringGraphInformation(@PathVariable(value = "graph") final URI graph) throws URISyntaxException{
+		logger.info("{}/{}", QUESTIONANSWERING, graph);
+		// URI graph = new URI(graphId.toString());
+		return (new ResponseEntity<QanaryQuestionAnsweringFinished>(QanaryQuestionAnsweringController.lastQanaryQuestionAnsweringProcesses.get(graph), HttpStatus.OK));
 	}
 
 	/**
@@ -535,9 +612,10 @@ public class QanaryQuestionAnsweringController {
 //			if (additionalQuery.getInsertQuery() != null) loadAdditionalQuery(additionalQuery, myQanaryMessage);
 //		}
 
-		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null) {
-			if (additionalTriples.getUriFilePath() != null)
-				loadAdditionalTriples(additionalTriples, myQanaryMessage);
+		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null
+				&& additionalTriples.getTriples() != null) {
+			logger.info("loadAdditionalTriples: {}", additionalTriples.getTriples());
+			loadAdditionalTriples(additionalTriples, myQanaryMessage);
 		}
 
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
@@ -545,15 +623,62 @@ public class QanaryQuestionAnsweringController {
 		return myRun;
 	}
 
+	/**
+	 * create a SPARQL INSERT DATA query to add the provided additional triples to
+	 * the triplestore before the Question Answering process starts
+	 * 
+	 * @param additionalTriples
+	 * @param myQanaryMessage
+	 * @throws AdditionalTriplesCouldNotBeAdded 
+	 * @throws SparqlQueryFailed
+	 */
 	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage)
-			throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
-		String resource = myQanaryPipelineConfiguration.getHost() + ":" + myQanaryPipelineConfiguration.getPort()
-				+ "/additional-triples/" + additionalTriples.getUUIDString();
-		String sparqlquery = "" //
-				+ "LOAD <" + resource + "> " //
-				+ "INTO GRAPH <" + myQanaryMessage.getInGraph().toString() + ">";
-		logger.info("load additional triples with SPARQL query: {}", sparqlquery);
-		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
+			throws AdditionalTriplesCouldNotBeAdded, SparqlQueryFailed {
+		String sparqlquery = null;
+		try {
+			Model model = ModelFactory.createDefaultModel()
+					.read(IOUtils.toInputStream(additionalTriples.getTriples(), "UTF-8"), null, "Turtle");
+
+			String formattedTriples = this.modelToFormattedStringWithReplacedPrefixes(model);
+			logger.debug("formatted triples: {}", formattedTriples);
+			
+			sparqlquery = "INSERT DATA { GRAPH <" + myQanaryMessage.getInGraph().toString() + "> {\n"
+					+ formattedTriples + "\n}}";
+			logger.info("add additional triples through SPARQL query: {}", sparqlquery);
+
+			this.myQanaryTripleStoreConnector.update(sparqlquery);
+		} catch (IOException e) {
+			throw new AdditionalTriplesCouldNotBeAdded(e, sparqlquery);
+		} catch (SparqlQueryFailed e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AdditionalTriplesCouldNotBeAdded(e, sparqlquery);
+		}
+
+	}
+
+	/**
+	 * transforming a model into a SPARQL query-compatible string where all prefixes are replaced
+	 * 
+	 * @param model
+	 * @return
+	 */
+	private String modelToFormattedStringWithReplacedPrefixes(Model model) {
+		String formattedTriples = "";
+		final QueryExecution exec = QueryExecutionFactory.create("SELECT * { ?s ?p ?o . }", model);
+		final ResultSet rs = exec.execSelect();
+		while (rs.hasNext()) {
+			final QuerySolution qs = rs.next();
+			if (qs.get("o").isResource()) {
+				formattedTriples += String.format("<%s> <%s> <%s> .\n", // 
+						qs.get("s"), qs.get("p"), qs.get("o"));
+			} else {
+				formattedTriples += String.format("<%s> <%s> \"%s\"^^<%s> .\n", // 
+						qs.get("s"), qs.get("p"), qs.get("o").asLiteral().getValue(), qs.get("o").asLiteral().getDatatypeURI());
+			}
+		}
+		logger.info("formatted triples:\n{}", formattedTriples);
+		return formattedTriples;
 	}
 
 	/**
@@ -590,7 +715,8 @@ public class QanaryQuestionAnsweringController {
 				myRequestQuestionAnsweringProcess.getcomponentlist(), //
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
-				myRequestQuestionAnsweringProcess.getPriorConversation(), null // addtional triples
+				myRequestQuestionAnsweringProcess.getPriorConversation(), // 
+				new AdditionalTriples(myRequestQuestionAnsweringProcess.getAdditionalTriples(), this.myQanaryPipelineConfiguration.getEnv()) //
 		);
 	}
 
@@ -614,7 +740,8 @@ public class QanaryQuestionAnsweringController {
 		if (componentsToBeCalled.isEmpty() == false) {
 			List<QanaryComponent> components = this.myComponentNotifier
 					.getAvailableComponentsFromNames(componentsToBeCalled);
-			qanaryConfigurator.callServices(components, myQanaryMessage);
+			QanaryQuestionAnsweringFinished process = qanaryConfigurator.callServices(components, myQanaryMessage);
+			this.removeElementsFromProcessLogIfTooManyExist(process);
 		} else {
 			logger.warn("Executing components is not done, as the componentlist parameter was empty.");
 		}
@@ -623,6 +750,27 @@ public class QanaryQuestionAnsweringController {
 				myQanaryMessage.getInGraph(), myQanaryMessage.getOutGraph(), qanaryConfigurator);
 
 		return myRun;
+	}
+	
+	private void removeElementsFromProcessLogIfTooManyExist(QanaryQuestionAnsweringFinished process) {
+		// remember the details for the last process executions
+		lastQanaryQuestionAnsweringProcesses.put(process.getQanaryMessage().getOutGraph(), process);
+		// remove items if more then LIMIT are stored in the map
+		logger.info("lastQanaryQuestionAnsweringProcesses.size() = {}", lastQanaryQuestionAnsweringProcesses.size());
+		if(lastQanaryQuestionAnsweringProcesses.size() > maxQanaryQuestionAnsweringProcesses) {
+			int numberOfRemovableElements = lastQanaryQuestionAnsweringProcesses.size() - maxQanaryQuestionAnsweringProcesses;
+			logger.warn("lastQanaryQuestionAnsweringProcesses contains more {} elements --> remove {}", lastQanaryQuestionAnsweringProcesses.size(), numberOfRemovableElements);
+			List<URI> removableElements = new LinkedList<>();
+			for (Entry<URI, QanaryQuestionAnsweringFinished> entry : lastQanaryQuestionAnsweringProcesses.entrySet()) {
+				if(numberOfRemovableElements > 0) {
+					removableElements.add(entry.getKey());
+					numberOfRemovableElements--;
+				}
+			}
+			for (URI graph: removableElements) {
+				lastQanaryQuestionAnsweringProcesses.remove(graph);
+			}
+		}
 	}
 
 	/**

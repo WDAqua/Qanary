@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>3.5.5</version>
+	<version>3.6.0</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -14,7 +14,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.7.9</spring-boot-admin.version>
-		<qanary.version>[3.6.2,4.0.0)</qanary.version>
+		<qanary.version>[3.7.0,4.0.0)</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<docker.image.name>qanary-pipeline</docker.image.name>
@@ -210,21 +210,23 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
+			<version>4.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 			<version>4.0.0</version>
 		</dependency>
-		<!-- required for springdoc-openapi -->
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 		<dependency>
-		    <groupId>jakarta.xml.bind</groupId>
-		    <artifactId>jakarta.xml.bind-api</artifactId>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.3.1</version>
 		</dependency>
-		<!-- required for springdoc-openapi -->
 		<dependency>
-		    <groupId>org.glassfish.jaxb</groupId>
-		    <artifactId>jaxb-runtime</artifactId>
+			<groupId>eu.wdaqua.qanary</groupId>
+			<artifactId>qald.evaluator</artifactId>
+			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 	<build>
