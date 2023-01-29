@@ -127,6 +127,13 @@
         background-color: #00bc7c; 
         cursor: pointer;
     } 
+    
+    #showadditionaltripleinput {
+        padding: 0.5ex;
+        margin: 0;
+        background-color: #999;
+    }
+    
     button:hover { 
         border: 1px solid #333; 
         filter: opacity(0.9);
@@ -204,6 +211,17 @@
     .yasqe .yasqe_buttons .yasqe_queryButton .queryIcon svg {
     	fill: #00bc7c
     }
+    #errormessage {
+        margin-top: 1ex;
+    	display:none;
+        background-color: #FF0;
+    	border: 2px solid #F00;
+    	padding: 1ex;
+    	padding-top:
+    }
+    .coreMessage {
+    	font-family: monospace;
+    }
     </style>
     <script th:inline="javascript">
        	// TODO: move minimumNumberOfSelectedComponents to config
@@ -246,7 +264,10 @@
                 	$("#submit").attr("disabled", true); // disable button
                 	$("#submit").addClass("inprogress"); // change cursor
                 	$("#results").slideUp(500); // hide last results with animation
+                	$("#errormessage").slideUp(500); // hide last ERROR message with animation
+                	$("#errormessage").html();
                     removeAnnotationCount(); // clear old annotation count values
+                    message = "";
                     $.ajax({
                 		url : $(this).attr("action"), // get action url
                 		type: $(this).attr("method"), //get method
@@ -265,25 +286,59 @@
                     	$("#results").show();
                         getNumberOfAnnotations(response.outGraph); // get new number of annotations
                 	}).error(function (jqXHR, textStatus) {
+                		console.error("textStatus: ", textStatus);
+                		console.error("jqXHR: ", jqXHR);
                         $("#submit").attr("disabled", false); // reactivate button
                         $("#submit").removeClass("inprogress");
-                        completeErrorMessage = jqXHR.responseJSON["message"];
-                        coreMessage = completeErrorMessage.substr(0, completeErrorMessage.indexOf(".", completeErrorMessage.indexOf(":")) + 1)
-                        message = "The process failed.\nPlease check your implementation!\n"; 
-                        alert(message + coreMessage + "\nSee browser console for details.");
-                        console.error(message + completeErrorMessage);
-                        console.error(jqXHR.responseJSON);
-                        console.error(jqXHR.responseJSON["trace"]);
+                        jsonMessage = jqXHR.responseJSON["message"];
+                        textMessage = jqXHR.responseText;
+                        if (jsonMessage) {
+                        	console.log("jsonMessage:", jsonMessage);                        	
+                        	coreMessage = jsonMessage.substr(0, jsonMessage.indexOf(".", jsonMessage.indexOf(":")) + 1)
+                        } else if (textMessage){
+                        	console.log("textMessage:",textMessage);
+                       		coreMessage = textMessage;
+                        } else if (textStatus){
+                        	console.log("textStatus:",textStatus);
+                       		coreMessage = textStatus;
+                        } else {
+                        	console.log("error message: none found");
+                        	coreMessage = "";
+                        }
+                        message = "ERROR: The process failed.\nPlease check your implementation!\n<p class=\"coreMessage\">" + coreMessage + "</p>See browser console for details."; 
+	                	$("#errormessage").html(message);
+                    	$("#errormessage").slideDown("fast"); // show results with animation
+                    	$("#errormessage").show();
+                        // alert(message);
+                        console.error(message);
                 	}).fail(function (jqXHR, textStatus) {
-                        $("#submit").attr("disabled", false); // reactivate button
-                        $("#submit").removeClass("inprogress");
-                        completeErrorMessage = jqXHR.responseJSON["message"];
-                        coreMessage = completeErrorMessage.substr(0, completeErrorMessage.indexOf(".", completeErrorMessage.indexOf(":")) + 1)
-                        message = "The process failed.\nPlease check your implementation!\n"; 
-                        alert(message + coreMessage + "\nSee browser console for details.");
-                        console.error(message + completeErrorMessage);
-                        console.error(jqXHR.responseJSON);
-                        console.error(jqXHR.responseJSON["trace"]);
+                		if(message == ""){ // only do this if it was not done in the error() block
+	                		console.error("textStatus: ", textStatus);
+	                		console.error("jqXHR: ", jqXHR);
+	                        $("#submit").attr("disabled", false); // reactivate button
+	                        $("#submit").removeClass("inprogress");
+	                        jsonMessage = jqXHR.responseJSON["message"];
+	                        textMessage = jqXHR.responseText;
+	                        if (jsonMessage) {
+	                        	console.log("jsonMessage:", jsonMessage);                        	
+	                        	coreMessage = jsonMessage.substr(0, jsonMessage.indexOf(".", jsonMessage.indexOf(":")) + 1)
+	                        } else if (textMessage){
+	                        	console.log("textMessage:",textMessage);
+	                       		coreMessage = textMessage;
+	                        } else if (textStatus){
+	                        	console.log("textStatus:",textStatus);
+	                       		coreMessage = textStatus;
+	                        } else {
+	                        	console.log("error message: none found");
+	                        	coreMessage = "";
+	                        }
+	                        message = "ERROR: The process failed.\nPlease check your implementation!\n<p class=\"coreMessage\">" + coreMessage + "</p>See browser console for details."; 
+		                	$("#errormessage").html(message);
+	                    	$("#errormessage").slideDown("fast"); // show results with animation
+	                    	$("#errormessage").show();
+	                        // alert(message);
+	                        console.error(message);
+						}
                 	});
                 });
         });
