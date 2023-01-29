@@ -13,7 +13,7 @@
 
 			<div th:if="${@environment.getProperty('qanary.process.allow-additional-triples') == 'true'}">
 				<button type="button" id="showadditionaltripleinput" onclick="showAdditionalTripleInput()">
-					Insert additional Triples into the triplestore
+					Insert additional triples into the Qanary triplestore before execution (use the RDF Turtle format, prefixes are allowed)
 				</button>
 				<div id="additionaltripleinput" style="display:none;">
 					<div th:include="lib/reusableforms::additionaltripleinput"/>
@@ -30,6 +30,7 @@
 			</div>
 			<br/>
 			<div th:include="lib/reusableforms::componentlistcheckboxes" />
+			<div id="errormessage"></div>
 			<button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
         </form>
         <div id="results">

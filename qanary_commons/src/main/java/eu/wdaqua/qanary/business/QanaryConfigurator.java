@@ -97,7 +97,7 @@ public class QanaryConfigurator {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
+			HttpEntity<String> request = new HttpEntity<>(message.asJsonString(), headers);
 
 			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
 
@@ -118,10 +118,10 @@ public class QanaryConfigurator {
 							responseEntity.getStatusCode());
 				}
 			} catch (QanaryExceptionServiceCallNotOk e) {
-				logger.error("called \"{}\" catched {}", component.getName(), e.getMessage());
+				logger.error("QanaryExceptionServiceCallNotOk: called \"{}\" catched {}", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("called {} catched {} (using URI {}) -> throws {}", //
+				logger.error("Exception: called {} catched {} (using URI {}) -> throws {}", //
 						component.getName(), e.getMessage(), myURI, ExceptionUtils.getStackTrace(e));
 				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
 						e.getMessage(), ExceptionUtils.getStackTrace(e));
