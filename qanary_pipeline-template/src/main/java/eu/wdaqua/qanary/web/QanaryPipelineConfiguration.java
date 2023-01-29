@@ -295,4 +295,8 @@ public class QanaryPipelineConfiguration {
 			logger.warn("enabling qanary.process.allow-insert-queries may pose a security risk");
 		}
 	}
+
+	public Environment getEnv() {
+		return this.environment;
+	}
 }

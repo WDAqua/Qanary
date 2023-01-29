@@ -2,6 +2,7 @@ package eu.wdaqua.qanary.web;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -16,8 +17,13 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +55,7 @@ import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
@@ -109,6 +116,7 @@ public class QanaryQuestionAnsweringController {
 		this.myQanaryPipelineConfiguration = myQanaryPipelineConfiguration;
 		this.myTriplestoreEndpointIdentifier = myTriplestoreEndpointIdentifier;
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		
 	}
 
 	/**
@@ -202,20 +210,88 @@ public class QanaryQuestionAnsweringController {
 		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
 	}
 
+	/**
+	 * start question answering process with textual question
+	 * 
+	 * <pre>
+		curl --location --request POST 'http://localhost:8080/startquestionansweringwithtextquestion' \
+		--header 'Content-Type: application/json' \
+		--data-raw '{
+		    "question": "Where was Albert Einstein born?",
+		    "componentlist": [
+		        "OpenTapiocaNED",
+		        "BirthDataQueryBuilderWikidata",
+		        "SparqlExecuter"
+		    ],
+		    "additionalTriples": "<urn:s1> <urn:p1> <urn:o1> . <urn:s2> <urn:p2> <urn:o2> ."
+		}'
+	 * </pre>
+	 * 
+	 * 
+	 * @param myRequestQuestionAnsweringProcess
+	 * @return
+	 * @throws Exception
+	 */
 	@PostMapping(value = "/startquestionansweringwithtextquestion", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "Start a process directly with a textual question", //
-			operationId = "startquestionansweringwithtextquestion", //
-			description = "Parameters are supplied via JSON. Only the question parameter is required. " //
-					+ "Examples: {\"question\": \"What is the capital of Germany?\"}, " //
-					+ "{\"question\": \"Person born in France?\"}" //
-	)
-	public ResponseEntity<?> startquestionansweringwithtextquestion(
+	public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestion(
 			@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
-		logger.info("startquestionansweringwithtextquestion: {}", myRequestQuestionAnsweringProcess);
+		logger.info("\n\n\n\n\nstartquestionansweringwithtextquestion (JSON request): {}", myRequestQuestionAnsweringProcess);
+		logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
+		logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+		logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+		
 		QanaryQuestionAnsweringRun myRun = this
 				.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
-		return new ResponseEntity<QanaryQuestionAnsweringRun>(myRun, HttpStatus.CREATED);
+		return new ResponseEntity<>(myRun, HttpStatus.CREATED);
 	}
+
+	/**
+	 * duplicate implementation as Swagger is not capable of showing two endpoints
+	 * with different headers correctly
+	 * 
+	 * <pre>
+	 curl --location --request POST 'http://localhost:8080/startquestionansweringwithtextquestion' \
+	      --header 'Content-Type: application/json' \
+	      --data-raw '{
+	          "question": "Where was Albert Einstein born?",
+	          "componentlist": [
+	              "OpenTapiocaNED",
+	              "BirthDataQueryBuilderWikidata",
+	              "SparqlExecuter"
+		      ],
+		      "additionalTriples": "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>    <urn:s> oa:hasTarget <urn:o>  ."
+	      }'
+	 * </pre>
+	 * 
+	 * @param myRequestQuestionAnsweringProcess
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping(value = "/startquestionansweringwithtextquestionThroughJson", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Start a process directly with a textual question", //
+			operationId = "startquestionansweringwithtextquestionJson", //
+			description = "Parameters are supplied via JSON (also possible via startquestionansweringwithtextquestion). Only the question parameter is required. You might add additional triples (prefixes are allowed) for initializing the current graph of your Qanary process." //
+					+ "Examples: <pre>{\"question\": \"What is the capital of Germany?\"}<pre>, " //
+					+ "<pre>{\n\"question\": \"Where was Albert Einstein born?\",\n\"componentlist\": [\n"
+					+ "		        &nbsp;&nbsp;\"OpenTapiocaNED\",\n"
+					+ "		        &nbsp;&nbsp;\"BirthDataQueryBuilderWikidata\",\n"
+					+ "		        &nbsp;&nbsp;\"SparqlExecuter\"\n"
+					+ "		    ], \n\"additionalTriples\": \"&lt;urn:s1&gt; &lt;urn:p1&gt; &lt;urn:o1&gt; . &lt;urn:s2&gt; &lt;urn:p2&gt; &lt;urn:o2&gt; .\"\n}</pre>" //
+	)
+	public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestionThroughJson(
+			@RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
+		logger.info("\n\n\n\n\nstartquestionansweringwithtextquestionThroughJson (JSON request): {}", myRequestQuestionAnsweringProcess);
+		logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
+		logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+		logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+		
+		QanaryQuestionAnsweringRun myRun = this
+				.createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
+		return new ResponseEntity<>(myRun, HttpStatus.CREATED);
+	}
+	
+	
+	
 
 	/**
 	 * a simple HTML input form for starting a question answering process with an
@@ -553,9 +629,10 @@ public class QanaryQuestionAnsweringController {
 //			if (additionalQuery.getInsertQuery() != null) loadAdditionalQuery(additionalQuery, myQanaryMessage);
 //		}
 
-		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null) {
-			if (additionalTriples.getUriFilePath() != null)
-				loadAdditionalTriples(additionalTriples, myQanaryMessage);
+		if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null
+				&& additionalTriples.getTriples() != null) {
+			logger.info("loadAdditionalTriples: {}", additionalTriples.getTriples());
+			loadAdditionalTriples(additionalTriples, myQanaryMessage);
 		}
 
 		QanaryQuestionAnsweringRun myRun = this.executeComponentList(qanaryQuestion.getUri(), componentsToBeCalled,
@@ -563,15 +640,62 @@ public class QanaryQuestionAnsweringController {
 		return myRun;
 	}
 
+	/**
+	 * create a SPARQL INSERT DATA query to add the provided additional triples to
+	 * the triplestore before the Question Answering process starts
+	 * 
+	 * @param additionalTriples
+	 * @param myQanaryMessage
+	 * @throws AdditionalTriplesCouldNotBeAdded 
+	 * @throws SparqlQueryFailed
+	 */
 	private void loadAdditionalTriples(AdditionalTriples additionalTriples, QanaryMessage myQanaryMessage)
-			throws TripleStoreNotProvided, URISyntaxException, SparqlQueryFailed {
-		String resource = myQanaryPipelineConfiguration.getHost() + ":" + myQanaryPipelineConfiguration.getPort()
-				+ "/additional-triples/" + additionalTriples.getUUIDString();
-		String sparqlquery = "" //
-				+ "LOAD <" + resource + "> " //
-				+ "INTO GRAPH <" + myQanaryMessage.getInGraph().toString() + ">";
-		logger.info("load additional triples with SPARQL query: {}", sparqlquery);
-		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
+			throws AdditionalTriplesCouldNotBeAdded, SparqlQueryFailed {
+		String sparqlquery = null;
+		try {
+			Model model = ModelFactory.createDefaultModel()
+					.read(IOUtils.toInputStream(additionalTriples.getTriples(), "UTF-8"), null, "Turtle");
+
+			String formattedTriples = this.modelToFormattedStringWithReplacedPrefixes(model);
+			logger.debug("formatted triples: {}", formattedTriples);
+			
+			sparqlquery = "INSERT DATA { GRAPH <" + myQanaryMessage.getInGraph().toString() + "> {\n"
+					+ formattedTriples + "\n}}";
+			logger.info("add additional triples through SPARQL query: {}", sparqlquery);
+
+			this.myQanaryTripleStoreConnector.update(sparqlquery);
+		} catch (IOException e) {
+			throw new AdditionalTriplesCouldNotBeAdded(e, sparqlquery);
+		} catch (SparqlQueryFailed e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AdditionalTriplesCouldNotBeAdded(e, sparqlquery);
+		}
+
+	}
+
+	/**
+	 * transforming a model into a SPARQL query-compatible string where all prefixes are replaced
+	 * 
+	 * @param model
+	 * @return
+	 */
+	private String modelToFormattedStringWithReplacedPrefixes(Model model) {
+		String formattedTriples = "";
+		final QueryExecution exec = QueryExecutionFactory.create("SELECT * { ?s ?p ?o . }", model);
+		final ResultSet rs = exec.execSelect();
+		while (rs.hasNext()) {
+			final QuerySolution qs = rs.next();
+			if (qs.get("o").isResource()) {
+				formattedTriples += String.format("<%s> <%s> <%s> .\n", // 
+						qs.get("s"), qs.get("p"), qs.get("o"));
+			} else {
+				formattedTriples += String.format("<%s> <%s> \"%s\"^^<%s> .\n", // 
+						qs.get("s"), qs.get("p"), qs.get("o").asLiteral().getValue(), qs.get("o").asLiteral().getDatatypeURI());
+			}
+		}
+		logger.info("formatted triples:\n{}", formattedTriples);
+		return formattedTriples;
 	}
 
 	/**
@@ -608,7 +732,8 @@ public class QanaryQuestionAnsweringController {
 				myRequestQuestionAnsweringProcess.getcomponentlist(), //
 				myRequestQuestionAnsweringProcess.getLanguage(), //
 				myRequestQuestionAnsweringProcess.getTargetdata(), //
-				myRequestQuestionAnsweringProcess.getPriorConversation(), null // addtional triples
+				myRequestQuestionAnsweringProcess.getPriorConversation(), // 
+				new AdditionalTriples(myRequestQuestionAnsweringProcess.getAdditionalTriples(), this.myQanaryPipelineConfiguration.getEnv()) //
 		);
 	}
 
