@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-    <p th:text="'Hello World, this is my first QA PIPELINE driven by Qanary!'" />
+    <p th:text="'Hello World, this is my Question Answering system driven by the Qanary framework!'" />
+    The system is running on Version <span th:text=${session.ImplementationVersion} th:unless="${session.ImplementationVersion == null}" ></span>.
 </body>
 </html>

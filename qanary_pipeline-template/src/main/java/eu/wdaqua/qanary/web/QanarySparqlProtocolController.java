@@ -19,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,7 +55,6 @@ public class QanarySparqlProtocolController {
 	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 	private static final Logger logger = LoggerFactory.getLogger(QanarySparqlProtocolController.class);
 
-	@Autowired
 	public QanarySparqlProtocolController(QanaryTripleStoreConnector myQanaryTripleStoreConnector) {
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
 		checkTriplestoreConnection();
@@ -159,6 +157,12 @@ public class QanarySparqlProtocolController {
 			headers.set("Content-Type", "application/sparql-results+json");
 			ResponseEntity<String> responseEntity = ResponseEntity.ok().headers(headers).body(resultAsJSON);
 			logger.debug("responseEntity: {}", responseEntity.toString());
+			
+			if(jsonObject.has("results") && jsonObject.getJSONObject("results").has("bindings") ) {
+				logger.info("number of found results: {}", jsonObject.getJSONObject("results").getJSONArray("bindings").length());
+			} else {
+				logger.warn("number of found results: could not be identified: {}", jsonObject); 
+			}
 			return responseEntity;
 		} else {
 			throw new SparqlQueryFailed(sparqlQuery, "internal Qanary triplestore proxy",

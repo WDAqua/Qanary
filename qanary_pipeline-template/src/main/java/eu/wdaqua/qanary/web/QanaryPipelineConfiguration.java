@@ -35,7 +35,7 @@ public class QanaryPipelineConfiguration {
 	private Environment environment;
 	private final String[] commonPropertiesToBeShownOnStartup = { //
 			"spring.application.name", //
-			"server.host", // 
+			"server.host", //
 			"server.port", //
 			"server.ssl.enabled", //
 			"qanary.triplestore", //
@@ -43,13 +43,20 @@ public class QanaryPipelineConfiguration {
 			"qanary.process.allow-additional-triples", //
 			"qanary.questions.directory", //
 			"qanary.components", //
-			"qanary.ontology"};
+			"qanary.ontology", //
+			CorsConfigurationOnCondition.DISABLE_ALL_RESTRICTIONS, //
+			CorsConfigurationOnCondition.ADD_ALLOWED_ORIGIN, //
+			CorsConfigurationOnCondition.ADD_ALLOWED_ORIGIN_PATTERN, //
+			CorsConfigurationOnCondition.ADD_ALLOWED_HEADER, //
+			CorsConfigurationOnCondition.ADD_ALLOWED_METHOD, //
+			CorsConfigurationOnCondition.ENDPOINT_PATTERN //
+	};
 	private final String[] debugPropertiesPrefixesToBeShowOnStartup = { //
 			"qanary", //
 			"server", //
 			"spring" //
 	};
-	private final String[] requiredParameterNames = {"server.host", "server.port" , "qanary.ontology"};
+	private final String[] requiredParameterNames = { "server.host", "server.port", "qanary.ontology" };
 
 	public QanaryPipelineConfiguration(@Autowired Environment environment) {
 		this.environment = environment;
@@ -72,7 +79,7 @@ public class QanaryPipelineConfiguration {
 		// log all properties that are important (see
 		// debugPropertiesPrefixesToBeShowOnStartup) to DEBUG log
 		Map<String, Object> knowProperties = this.getAllKnownProperties(environment);
-		Map<String, Object> sortedMap = new TreeMap<String, Object>(knowProperties);
+		Map<String, Object> sortedMap = new TreeMap<>(knowProperties);
 		logSourceOfRelevantConfigurationProperties(sortedMap);
 	}
 
@@ -155,9 +162,7 @@ public class QanaryPipelineConfiguration {
 
 	public String getBaseUrl() {
 		try {
-			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-				.toUriString();
-			return baseUrl;
+			return ServletUriComponentsBuilder.fromCurrentContextPath().toUriString();
 		} catch (Exception e) {
 			logger.warn("could not get base url: {}", e.getMessage());
 			return null;
@@ -165,11 +170,10 @@ public class QanaryPipelineConfiguration {
 	}
 
 	public String getHost() {
-		String host = this.environment.getProperty("server.host"); 
+		String host = this.environment.getProperty("server.host");
 		if (host.contains("localhost")) {
-				logger.warn("Use of 'localhost' detected! "
-						+ "Ensure that all services are started on the same network "
-						+ "or set `server.host` to the published IP address");
+			logger.warn("Use of 'localhost' detected! " + "Ensure that all services are started on the same network "
+					+ "or set `server.host` to the published IP address");
 		}
 		return host;
 	}
@@ -186,7 +190,9 @@ public class QanaryPipelineConfiguration {
 	/**
 	 * required attribute: triplestore
 	 * 
-	 * there are two options: if defined in environment, it needs to be not empty, else (not defined) it will be created automatically from the host and the internal endpoint  
+	 * there are two options: if defined in environment, it needs to be not empty,
+	 * else (not defined) it will be created automatically from the host and the
+	 * internal endpoint
 	 * 
 	 * @return
 	 */
@@ -194,7 +200,8 @@ public class QanaryPipelineConfiguration {
 		String triplestore = this.environment.getProperty("qanary.triplestore");
 		logger.debug("qanary.triplestore from env: {}", triplestore);
 		if (triplestore == null) { // not defined, so use the automatically created internal endpoint
-			triplestore = this.getHost().concat(":").concat(this.getPort().toString()).concat("/").concat(QanarySparqlProtocolController.SPARQL_ENDPOINT);
+			triplestore = this.getHost().concat(":").concat(this.getPort().toString()).concat("/")
+					.concat(QanarySparqlProtocolController.SPARQL_ENDPOINT);
 			logger.debug("local triplestore endpoint constructed: {}", triplestore);
 			return triplestore;
 		} else if (triplestore.isEmpty()) {
@@ -234,17 +241,16 @@ public class QanaryPipelineConfiguration {
 	}
 
 	public boolean getAdditionalTriplesAllowed() {
-		boolean result = Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples")); 
+		boolean result = Boolean.parseBoolean(this.environment.getProperty("qanary.process.allow-additional-triples"));
 		logger.info("getAdditionalTriplesAllowed: {}", result);
 		return result;
 	}
 
 	public String getAdditionalTriplesDirectory() {
-		String result = getProperty("qanary.process.additional-triples-directory"); 
+		String result = getProperty("qanary.process.additional-triples-directory");
 		logger.info("getAdditionalTriplesDirectory: {}", result);
 		return result;
 	}
-
 
 	/**
 	 * default value is System.getProperty("user.dir") if configuration is not
@@ -280,7 +286,7 @@ public class QanaryPipelineConfiguration {
 	public String toString() {
 		String result = "";
 		for (int i = 0; i < commonPropertiesToBeShownOnStartup.length; i++) {
-			result += String.format("%-40s = %s\n", //
+			result += String.format("%-40s = %s%n", //
 					commonPropertiesToBeShownOnStartup[i], //
 					this.getProperty(commonPropertiesToBeShownOnStartup[i]));
 		}
@@ -294,5 +300,9 @@ public class QanaryPipelineConfiguration {
 		if (this.getInsertQueriesAllowed()) {
 			logger.warn("enabling qanary.process.allow-insert-queries may pose a security risk");
 		}
+	}
+
+	public Environment getEnv() {
+		return this.environment;
 	}
 }

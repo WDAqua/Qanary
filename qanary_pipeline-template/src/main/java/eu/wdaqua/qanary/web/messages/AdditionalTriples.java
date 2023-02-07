@@ -25,13 +25,15 @@ public class AdditionalTriples {
 	private Environment env; 
 	private String id;
 	private String filePath;
+	private String triples;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdditionalTriples.class);
 
 	public AdditionalTriples(String triples, Environment environment) {
 		this.env = environment;
 		String ttlFileDirectory = env.getProperty("qanary.process.additional-triples-directory");
-		if (triples != null) {
+		if (triples != null && !triples.isBlank()) {
+			this.triples = triples;
 			try {
 				writeTriplesToFile(triples, ttlFileDirectory);
 				logger.info("stored additional triples as {}", this.getStringFilePath());
@@ -71,5 +73,9 @@ public class AdditionalTriples {
 
 	public URI getUriFilePath() throws URISyntaxException {
 		return new URI(filePath);
+	}
+
+	public String getTriples() {
+		return this.triples;
 	}
 }
