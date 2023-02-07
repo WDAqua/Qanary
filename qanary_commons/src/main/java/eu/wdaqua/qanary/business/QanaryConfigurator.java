@@ -75,12 +75,12 @@ public class QanaryConfigurator {
 			List<QanaryComponent> myComponents, //
 			QanaryMessage message //
 	) throws QanaryExceptionServiceCallNotOk {
-		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished();
+		QanaryQuestionAnsweringFinished result = new QanaryQuestionAnsweringFinished(message);
 		result.startQuestionAnswering();
 
 		logger.info("QanaryMessage for current process: {} (components={})", message.asJsonString(), myComponents);
 		
-		if( myComponents.size() == 0) {
+		if( myComponents.isEmpty() ) {
 			logger.warn("callServices with empty component list is recognized: {}", myComponents);
 		}
 
@@ -97,17 +97,18 @@ public class QanaryConfigurator {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
-			HttpEntity<String> request = new HttpEntity<String>(message.asJsonString(), headers);
+			HttpEntity<String> request = new HttpEntity<>(message.asJsonString(), headers);
 
 			logger.debug("POST request will be performed to {} with {}", myURI, message.asJsonString());
 
 			long start = QanaryUtils.getTime();
 			try {
-
+				long startTimeOfComponent = QanaryUtils.getTime();
 				ResponseEntity<QanaryMessage> responseEntity = restTemplate.exchange( //
 						myURI, HttpMethod.POST, request, QanaryMessage.class);
+				long duration = QanaryUtils.getTime() - startTimeOfComponent;
 
-				result.appendProtocol(component);
+				result.appendProtocol(component, responseEntity.getStatusCode(), duration);
 				if (responseEntity.getStatusCode() == HttpStatus.OK) {
 					message = responseEntity.getBody();
 					logger.debug("received: {}", message);
@@ -117,10 +118,10 @@ public class QanaryConfigurator {
 							responseEntity.getStatusCode());
 				}
 			} catch (QanaryExceptionServiceCallNotOk e) {
-				logger.error("called \"{}\" catched {}", component.getName(), e.getMessage());
+				logger.error("QanaryExceptionServiceCallNotOk: called \"{}\" catched {}", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("called {} catched {} (using URI {}) -> throws {}", //
+				logger.error("Exception: called {} catched {} (using URI {}) -> throws {}", //
 						component.getName(), e.getMessage(), myURI, ExceptionUtils.getStackTrace(e));
 				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
 						e.getMessage(), ExceptionUtils.getStackTrace(e));

@@ -21,6 +21,7 @@ public class RequestQuestionAnsweringProcess {
 	private String language = null;
 	private List<String> targetdata = new ArrayList<>();
 	private URI priorConversation;
+	private String additionalTriples;
 
 	public RequestQuestionAnsweringProcess() {
 		// pass
@@ -73,6 +74,14 @@ public class RequestQuestionAnsweringProcess {
 				+ " -- componentList: " + Arrays.toString(getcomponentlist().toArray()) //
 				+ " -- priorConversation: " + getPriorConversation() // 
 				+ " -- language: " + getLanguage();
+	}
+
+	public String getAdditionalTriples() {
+		return this.additionalTriples;
+	}
+
+	public void setAdditionalTriples(String additionalTriples) {
+		this.additionalTriples = additionalTriples;
 	}
 
 }

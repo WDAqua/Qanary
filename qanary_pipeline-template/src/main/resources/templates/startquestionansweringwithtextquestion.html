@@ -7,13 +7,13 @@
 	<script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 </head>
 <body>
-        <h1>Start a QA process with a new textual question</h1>
+        <h1>Start a QA process with a new textual question (Qanary Pipeline v<span th:text=${session.ImplementationVersion} th:unless="${session.ImplementationVersion == null}" ></span>)</h1>
         <form id="startForm" action="/startquestionansweringwithtextquestion" method="POST">
 			<div th:replace="lib/reusableforms::textquestioninput"/>
 
 			<div th:if="${@environment.getProperty('qanary.process.allow-additional-triples') == 'true'}">
 				<button type="button" id="showadditionaltripleinput" onclick="showAdditionalTripleInput()">
-					Insert additional Triples into the triplestore
+					Insert additional triples into the Qanary triplestore before execution (use the RDF Turtle format, prefixes are allowed)
 				</button>
 				<div id="additionaltripleinput" style="display:none;">
 					<div th:include="lib/reusableforms::additionaltripleinput"/>
@@ -30,10 +30,11 @@
 			</div>
 			<br/>
 			<div th:include="lib/reusableforms::componentlistcheckboxes" />
+			<div id="errormessage"></div>
 			<button id="submit">start Question Answering process provided by your configured Qanary pipeline <i class="fa fa-rocket"></i></button>               
         </form>
         <div id="results">
-        	<h2>Results (provided from backend as JSON)</h2>
+        	<h2>Results provided from the Qanary backend as JSON (see <span id="protocol_link"></span> and <span id="all_annotation_link"></span>)</h2>
         	<table>
         		<tr class="header">
         			<th>key</th><th>value</th>
@@ -153,9 +154,11 @@
 
 				}
 				// display the number of annotations
-				return React.createElement("span", {
+				return React.createElement("a", {
   					"data-count": this.state.count,
   					"class": "annotationCount",
+  					"href": "/components/" + this.props.graph + "/" + this.props.component,
+  					"target": "_blank",
   					"title": "This component has created  " + this.state.count + " annotations in the graph " + this.props.graph + " during the recent QA process execution."
 					}, "(created " + this.state.count + " annotations)");
 				}

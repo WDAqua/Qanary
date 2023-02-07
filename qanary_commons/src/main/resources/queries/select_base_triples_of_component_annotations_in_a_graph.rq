@@ -1,0 +1,26 @@
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?annotationId ?annotationType ?hasTarget ?hasBody ?qaScore  ?annotatedBy ?annotatedAt ?subproperty ?subvalue ?subsubproperty ?subsubvalue {
+  GRAPH ?graph  {
+    ?annotationId oa:annotatedBy ?annotatedBy .
+    ?annotationId rdf:type ?annotationType .
+      FILTER REGEX (STR(?annotatedBy), ?componentName )
+    ?annotationId oa:annotatedAt ?annotatedAt .
+    ?annotationId oa:hasTarget ?hasTarget .
+    OPTIONAL {
+      ?annotationId qa:score ?qaScore .
+    }
+    ?annotationId oa:hasBody ?hasBody .
+    OPTIONAL {
+      ?hasBody ?subproperty ?subvalue .
+      OPTIONAL {
+        ?subvalue ?subsubproperty ?subsubvalue .
+      }
+    }
+  }
+}
+ORDER BY ?annotationId ?annotationType ?annotatedAt
