@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.values.Registration;
@@ -23,7 +23,7 @@ import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan("eu.wdaqua.qanary")
 @AutoConfigureWebClient
