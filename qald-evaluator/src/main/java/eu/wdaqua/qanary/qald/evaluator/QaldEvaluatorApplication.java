@@ -28,19 +28,19 @@ import java.util.List;
 public class QaldEvaluatorApplication {
     private static final Logger logger = LoggerFactory.getLogger(QaldEvaluatorApplication.class);
 
-//    @Value(value = "${server.uri}")
+    @Value(value = "${server.uri}")
     private String uriServer;
 
-//    @Value(value = "${qanary.triplestore.stardog5}")
+    @Value(value = "${qanary.triplestore.stardog5}")
     private boolean stadog5;
 
-//    @Value(value = "${qanary.component.ner}")
+    @Value(value = "${qanary.component.ner}")
     private List<String> nerComponents;
 
-//    @Value(value = "${qanary.component.ned}")
+    @Value(value = "${qanary.component.ned}")
     private List<String> nedComponents;
 
-//    @Value(value = "${qanary.component.configuration}")
+    @Value(value = "${qanary.component.configuration}")
     private List<String> componentConfigurations;
 
 
