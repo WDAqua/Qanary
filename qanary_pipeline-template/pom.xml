@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>qa.pipeline</artifactId>
 	<groupId>eu.wdaqua.qanary</groupId>
-	<version>3.7.1</version>
+	<version>3.7.2</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -226,7 +226,7 @@
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qald.evaluator</artifactId>
-			<version>1.0.1</version>
+			<version>[1.0.2,2.0.0)</version>
 		</dependency>
 	</dependencies>
 	<build>
