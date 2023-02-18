@@ -2,6 +2,7 @@ package eu.wdaqua.qanary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,6 @@ import de.codecentric.boot.admin.server.domain.values.Registration;
 import de.codecentric.boot.admin.server.domain.values.StatusInfo;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,7 +33,7 @@ class QanaryComponentRegistrationChangeNotifierTest {
 	QanaryComponentRegistrationChangeNotifier myNotifier;
 
 	@MockBean
-	QanaryTripleStoreConnector myQanaryTripleStoreConnector = Mockito.mock(QanaryTripleStoreConnectorQanaryInternal.class);
+	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 
 	final static String COMPONENTNAME = "myMockedInstance";
 
@@ -50,9 +50,9 @@ class QanaryComponentRegistrationChangeNotifierTest {
 		Instance myMockedInstance = Mockito.mock(Instance.class);
 		String myMockedInstanceName = COMPONENTNAME;
 
-		Registration myMockedRegistration = Mockito.mock(Registration.class);
+		Registration myMockedRegistration = mock(Registration.class);
 		Mockito.when(myMockedInstance.getRegistration()).thenReturn(myMockedRegistration);
-		StatusInfo myMockedStatusInfo = Mockito.mock(StatusInfo.class);
+		StatusInfo myMockedStatusInfo = mock(StatusInfo.class);
 		Mockito.when(myMockedInstance.getStatusInfo()).thenReturn(myMockedStatusInfo);
 
 		myNotifier.addAvailableComponent(myMockedInstanceName, myMockedInstance);
