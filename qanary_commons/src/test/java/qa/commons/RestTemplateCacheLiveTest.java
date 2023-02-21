@@ -2,17 +2,17 @@ package qa.commons;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import eu.wdaqua.qanary.commons.config.CacheConfig;
@@ -35,11 +35,11 @@ import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
  * Test is validating the correct functionality of RestTemplateWithCaching
  * (i.e., repeated requests to a Web service are cached)
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes=RestTemplateCacheLiveTest.class)
 @ContextConfiguration(loader = AnnotationConfigWebContextLoader.class, classes = { CacheConfig.class })
 @Import(RestTemplateCacheLiveTestConfiguration.class)
-public class RestTemplateCacheLiveTest {
+class RestTemplateCacheLiveTest {
 	// time span for caching, tests wait this time span during the test runs
 	protected final static int MAX_TIME_SPAN_SECONDS = 5;
 
@@ -56,7 +56,7 @@ public class RestTemplateCacheLiveTest {
 	CacheOfRestTemplateResponse myCacheOfResponse;
 
 	@Test
-	public void givenRestTemplate_whenRequested_thenLogAndModifyResponse()
+	void givenRestTemplate_whenRequested_thenLogAndModifyResponse()
 			throws InterruptedException, URISyntaxException {
 
 		// myCacheOfResponse = new CacheOfRestTemplateResponse();
@@ -97,7 +97,7 @@ public class RestTemplateCacheLiveTest {
 		logger.info("numberOfExecutedRequest since last request: new={}, count={}, teststatus={}", //
 				numberOfNewlyExecutedRequests, myCacheOfResponse.getNumberOfExecutedRequests(), cacheStatus);
 
-		assertThat(responseEntity.getStatusCode(), is(equalTo(HttpStatus.OK)));
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
 		switch (cacheStatus) {
 		case NOTCACHED:

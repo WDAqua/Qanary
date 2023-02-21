@@ -1,20 +1,20 @@
 package qald.evaluator;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 
-public class FileReaderTest {
+class FileReaderTest {
 
-	@Ignore
+	@Disabled
 	@Test
-	public void test() throws UnsupportedEncodingException, IOException {
+	void test() throws UnsupportedEncodingException, IOException {
 
 		FileReader filereader = new FileReader();
 

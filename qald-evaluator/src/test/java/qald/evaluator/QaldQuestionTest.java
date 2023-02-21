@@ -1,19 +1,19 @@
 package qald.evaluator;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
 
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
 
-public class QaldQuestionTest {
+class QaldQuestionTest {
 
-	@Ignore
+	@Disabled
 	@Test
-	public void test() {
+	void test() {
 
 		JsonObject rawQuestion = new JsonObject();
 		rawQuestion.addProperty("id", 42);
