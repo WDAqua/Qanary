@@ -1,4 +1,12 @@
 #!/bin/bash
+# replace secrets
+if [ -z "$STARDOG_PASSWORD" ]
+then
+  echo "STARDOG_PASSWORD is not set. Check your secrets."
+else
+  sed -i "s/SECRETS_STARDOG_PASSWORD/$STARDOG_PASSWORD/g" ./service_config/files/pipeline
+fi
+
 # build Docker Images and store name and tag
 if ! mvn clean install -DskipTests;
 then
