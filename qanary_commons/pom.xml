@@ -13,7 +13,7 @@
 		<spring-boot-admin.version>2.6.7</spring-boot-admin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<jena.version>4.4.0</jena.version>
+		<jena.version>4.7.0</jena.version>
 		<stardog.version>[8.0.0,9.0.0)</stardog.version>
 		<mockito.version>4.4.0</mockito.version><!-- last working version -->
 	</properties>
