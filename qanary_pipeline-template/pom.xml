@@ -13,7 +13,7 @@
 	</parent>
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot-admin.version>2.7.9</spring-boot-admin.version>
+		<spring-boot-admin.version>2.7.10</spring-boot-admin.version>
 		<qanary.version>[3.7.0,4.0.0)</qanary.version>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 		<docker.image.prefix>qanary</docker.image.prefix>
@@ -56,6 +56,11 @@
 					<artifactId>log4j-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+    			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
