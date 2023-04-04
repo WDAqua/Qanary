@@ -603,21 +603,23 @@ public class QanaryQuestion<T> {
 				+ "	?a a qa:AnnotationOfAnswerJson . " //
 				+ "  	?a oa:hasBody ?answer . " //
 				+ " 	?answer rdf:value ?json . " //
-//				+ "  	?a a qa:AnnotationOfAnswerJSON . " //
-//				+ "  	?a oa:hasBody ?json " //
-//				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		logger.debug("getJsonResult: SELECT using:\n{}", sparql);
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
-		// the default value has to be null to distinguish missing values from empty values
+		// OLD: the default value has to be null to distinguish missing values from empty values
+		// NEW: returning null would result in "null" being part of the response JSON, 
+		//		return an empty string instead.
+		//		This way, a distinction is still possible:
+		//		missing values: ""
+		//		empty values: []
 		String sparqlAnnotation = null; 
 		while (resultset.hasNext()) {
 			sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
 		}
 		
 		if (sparqlAnnotation == null) {
-			return sparqlAnnotation;
+			return "";
 		} else {
 			return sparqlAnnotation.replace("\\\"", "\"");
 		}
