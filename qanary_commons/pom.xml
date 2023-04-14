@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20230227</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.vaadin.external.google</groupId>
