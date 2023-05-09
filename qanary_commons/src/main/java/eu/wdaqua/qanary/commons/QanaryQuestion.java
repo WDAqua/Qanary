@@ -582,11 +582,11 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
-		// added try and catch to prevent indexOutOfBoundsException, returns empty String if no Query was found
+		// added try and catch to prevent indexOutOfBoundsException and NullPointerException, returns empty String if no Query was found
 		String sparqlResult = "";
 		try {
 			sparqlResult = this.getSparqlResults().get(0).query;
-		} catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException | NullPointerException e) {
 			logger.warn("No SPARQL Query found, index out of bounds");
 		}
 		return sparqlResult;
