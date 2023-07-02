@@ -40,11 +40,15 @@ public class QanaryComponentDescriptionController {
 
 	public QanaryComponentDescriptionController(ApplicationContext context) throws FileNotFoundException {
 		this.context = context;
-		initQanaryServiceDecription();
+		initQanaryServiceDescription();
 	}
 
-	private void initQanaryServiceDecription(){
+	/**
+	 * initializes the Qanary Service description from the Turtle file defined by COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION   
+	 */
+	private void initQanaryServiceDescription(){
 		String filename;
+		final String message = "Please consider to store a component description file to enable automatic pipeline compositions."; 
 
 		try {
 			try {
@@ -53,8 +57,8 @@ public class QanaryComponentDescriptionController {
 				filename = file.getURI().toASCIIString();
 			} catch (Exception e) {
 				// fallback for some development scenarios
-				File x = new File("src/main/resources/" + COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION);
-				filename = x.getAbsolutePath();
+				File file = new File("src/main/resources/" + COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION);
+				filename = file.getAbsolutePath();
 			}
 
 			if (filename != null) {
@@ -66,13 +70,13 @@ public class QanaryComponentDescriptionController {
 								getModelAsString("TURTLE"));
 					}
 				} catch (Exception e) {
-					logger.warn("could not find a Turtle service description at '{}': {}", filename, e);
+					logger.warn("could not find a Turtle service description at '{}': {}. {}", filename, e.toString(), message);
 				}
 			} else {
 				logger.warn("could not find a Turtle service description as null is provided.");
 			}
 		} catch (Exception e) {
-			logger.warn("problem with component description at '{}': {}", COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION, e);
+			logger.warn("problem with component description at '{}': {}. {}", COMPONENT_TURTLE_DESCRIPTION_FILE_LOCATION, e.toString(), message);
 		}
 	}
 
@@ -155,8 +159,12 @@ public class QanaryComponentDescriptionController {
 	 */
 	private String getModelAsString(String returnType) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		model.write(os, returnType);
-		logger.info("result for '{}':\n{}", returnType, os.toString());
+		if(this.model != null) {
+			model.write(os, returnType);
+			logger.info("result for '{}':\n{}", returnType, os.toString());
+		} else {
+			logger.warn("No component description model available. (model == null).");
+		}
 		return os.toString();
 	}
 

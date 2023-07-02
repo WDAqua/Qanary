@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.component</artifactId>
-	<version>3.6.1</version>
+	<version>3.7.1</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -72,6 +72,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -87,7 +93,7 @@
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qa.commons</artifactId>
-			<version>[3.6.1,4.0.0)</version>
+			<version>[3.7.0,4.0.0)</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>

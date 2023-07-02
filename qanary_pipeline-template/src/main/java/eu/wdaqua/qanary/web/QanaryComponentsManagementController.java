@@ -1,9 +1,16 @@
 package eu.wdaqua.qanary.web;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.jena.query.QuerySolutionMap;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -19,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import io.swagger.v3.oas.annotations.Operation;
 import net.sf.json.JSONObject;
 
@@ -34,12 +43,19 @@ public class QanaryComponentsManagementController {
 	private final QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier;
 	private final String rdfservicedescription = "component-description"; // TODO: remove duplicate to service name
 	private final RestTemplateWithCaching myRestTemplateWithCaching;
+	private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
+	private final static String QUERYGETBASETRIPLESOFCOMPONENTINGRAPH = "/queries/select_base_triples_of_component_annotations_in_a_graph.rq"; 
 
 	public QanaryComponentsManagementController(
 			QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier,
-			RestTemplateWithCaching myRestTemplateWithCaching) {
+			RestTemplateWithCaching myRestTemplateWithCaching,
+			QanaryTripleStoreConnector myQanaryTripleStoreConnector
+			) {
 		this.myQanaryComponentRegistrationChangeNotifier = myQanaryComponentRegistrationChangeNotifier;
 		this.myRestTemplateWithCaching = myRestTemplateWithCaching;
+		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
+		
+		QanaryTripleStoreConnector.guardNonEmptyFileFromResources(QUERYGETBASETRIPLESOFCOMPONENTINGRAPH);
 	}
 
 	/**
@@ -103,7 +119,33 @@ public class QanaryComponentsManagementController {
 			logger.warn("componentName: {}, isAvailable={} ", componentName, false);
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-
 	}
+	
+	@GetMapping(value = "/components/{graph}/{componentName}", produces = { "application/x-javascript", "application/json",
+			"application/ld+json" })
+	@Operation(summary = "Provides all annotations in a graph filter by a component name (name might be *)", //
+	operationId = "getBaseTriplesOfComponentInGraphAsJsonLD", //
+	description = "example: http://localhost:8080/components/urn:graph:9898e7e8-5fb6-4744-a69f-9997341ee89d/BirthDataQueryBuilderWikidata or http://localhost:8080/components/urn:graph:9898e7e8-5fb6-4744-a69f-9997341ee89d/*")
+	public String getBaseTriplesOfComponentInGraphAsJsonLD(HttpServletRequest request, @PathVariable URI graph,
+	@PathVariable String componentName) throws IOException, SparqlQueryFailed {
+		
+		logger.info("request for annotations of {} in graph {}.", componentName, graph);
+		
+		QuerySolutionMap bindings = new QuerySolutionMap();
+        bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+        bindings.add("componentName", ResourceFactory.createPlainLiteral(".*:" + componentName + "$"));
+ 
+		String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(QUERYGETBASETRIPLESOFCOMPONENTINGRAPH, bindings);
+        ResultSet results = myQanaryTripleStoreConnector.select(sparql);
 
+        // write to a ByteArrayOutputStream
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        ResultSetFormatter.outputAsJSON(outputStream, results);
+
+        // and turn that into a String
+        String json = new String(outputStream.toByteArray());        
+
+		return json;
+	}
 }
