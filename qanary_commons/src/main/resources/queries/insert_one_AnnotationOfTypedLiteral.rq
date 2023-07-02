@@ -1,0 +1,36 @@
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT { 
+GRAPH ?graph  {
+        ?newAnnotation rdf:type qa:AnnotationAnswer .
+        ?newAnnotation oa:hasTarget ?targetQuestion .
+        ?newAnnotation oa:hasBody ?answer .
+        ?newAnnotation qa:score ?confidence .
+        ?newAnnotation oa:annotatedAt ?time .
+        ?newAnnotation oa:annotatedBy ?application . 
+
+        ?answer rdf:type qa:Answer .
+        ?answer rdf:value ?answerValue .
+
+        ?newTypeAnnotation rdf:type qa:AnnotationOfAnswerType .
+        ?newTypeAnnotation oa:hasTarget ?targetQuestion .
+        ?newTypeAnnotation oa:hasBody ?annotationOfAnswerType .
+        ?newTypeAnnotation qa:score ?confidence .
+        ?newTypeAnnotation oa:annotatedAt ?time .
+        ?newTypeAnnotation oa:annotatedBy ?application . 
+
+        ?answerType rdf:type qa:AnswerType .
+        ?answerType rdf:value ?answerDataType .
+    }
+}
+WHERE {
+    BIND (IRI(str(RAND())) AS ?newAnnotation) .
+    BIND (IRI(str(RAND())) AS ?answer) .
+    BIND (IRI(str(RAND())) AS ?newTypeAnnotation) .
+    BIND (IRI(str(RAND())) AS ?answerType) .
+    BIND (now() as ?time) . 
+}
