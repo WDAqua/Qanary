@@ -9,11 +9,11 @@ import java.net.URISyntaxException;
 
 import org.apache.jena.query.ResultSet;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
@@ -24,7 +24,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * @author AnBo-de
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryTripleStoreConnectorInMemoryTest.class)
 @ContextConfiguration(loader = AnnotationConfigWebContextLoader.class, classes = {
 		QanaryTripleStoreConnectorInMemory.class })

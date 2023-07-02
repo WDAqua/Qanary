@@ -2,28 +2,28 @@ package eu.wdaqua.qanary;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.values.Registration;
 import de.codecentric.boot.admin.server.domain.values.StatusInfo;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan("eu.wdaqua.qanary")
 @AutoConfigureWebClient
@@ -33,7 +33,7 @@ class QanaryComponentRegistrationChangeNotifierTest {
 	QanaryComponentRegistrationChangeNotifier myNotifier;
 
 	@MockBean
-	QanaryTripleStoreConnector myQanaryTripleStoreConnector = Mockito.mock(QanaryTripleStoreConnectorQanaryInternal.class);
+	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 
 	final static String COMPONENTNAME = "myMockedInstance";
 
@@ -50,9 +50,9 @@ class QanaryComponentRegistrationChangeNotifierTest {
 		Instance myMockedInstance = Mockito.mock(Instance.class);
 		String myMockedInstanceName = COMPONENTNAME;
 
-		Registration myMockedRegistration = Mockito.mock(Registration.class);
+		Registration myMockedRegistration = mock(Registration.class);
 		Mockito.when(myMockedInstance.getRegistration()).thenReturn(myMockedRegistration);
-		StatusInfo myMockedStatusInfo = Mockito.mock(StatusInfo.class);
+		StatusInfo myMockedStatusInfo = mock(StatusInfo.class);
 		Mockito.when(myMockedInstance.getStatusInfo()).thenReturn(myMockedStatusInfo);
 
 		myNotifier.addAvailableComponent(myMockedInstanceName, myMockedInstance);
