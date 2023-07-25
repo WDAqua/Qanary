@@ -149,6 +149,18 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
+	 * add AnnotationAnswer and AnnotationOfAnswerType to allow annotating typed literals
+	 * as it may be required by Qanary QueryBuilder components
+	 *
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfTypedLiteral(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfTypedLiteral.rq", bindings);
+	}
+
+	/**
 	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
 	 * components
 	 *

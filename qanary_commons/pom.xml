@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.7.1</version>
+	<version>3.7.5</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -10,10 +10,10 @@
 	</parent>
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot-admin.version>2.6.7</spring-boot-admin.version>
+		<spring-boot-admin.version>2.7.10</spring-boot-admin.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<jena.version>4.4.0</jena.version>
+		<jena.version>4.7.0</jena.version>
 		<stardog.version>[8.0.0,9.0.0)</stardog.version>
 		<mockito.version>4.4.0</mockito.version><!-- last working version -->
 	</properties>
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20230227</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.vaadin.external.google</groupId>
