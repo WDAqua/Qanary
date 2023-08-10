@@ -9,11 +9,12 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.atlas.json.JSON;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,7 +41,7 @@ public class QanaryQuestion<T> {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestion.class);
 
 	private QanaryMessage qanaryMessage;
-	private QanaryUtils qanaryUtil;
+	private QanaryUtils qanaryUtils;
 	private T raw;
 	// note: uri not final due to different sources for the value (some from
 	// triplestore, some pre-set)
@@ -53,6 +54,9 @@ public class QanaryQuestion<T> {
 	private QanaryTripleStoreConnector myQanaryTripleStoreConnector; 
 
 	private QanaryConfigurator myQanaryConfigurator;
+
+  private String FILENAME_SELECT_TRANSLATION_ANNOTATION = "/queries/select_all_AnnotationOfQuestionTranslation.rq";
+	private String FILENAME_SELECT_URI_TEXTUAL_REPRESENTATION = "/queries/select_uri_textual_representation.rq";
 
 	/**
 	 * init the graph in the triplestore (c.f., application.properties), a new graph
@@ -169,7 +173,7 @@ public class QanaryQuestion<T> {
 	public QanaryQuestion(QanaryMessage qanaryMessage, final QanaryTripleStoreConnector myQanaryTripleStoreConnector) {
 		this.qanaryMessage = qanaryMessage;
 		this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
-		this.qanaryUtil = new QanaryUtils(qanaryMessage, myQanaryTripleStoreConnector);
+		this.qanaryUtils = new QanaryUtils(qanaryMessage, myQanaryTripleStoreConnector);
 		// save where the answer is stored
 		this.namedGraph = qanaryMessage.getInGraph();
 	}
@@ -201,7 +205,7 @@ public class QanaryQuestion<T> {
 	 */
 	private void initFromTriplestore(final QanaryConfigurator myQanaryConfigurator) throws URISyntaxException {
 		this.qanaryMessage = new QanaryMessage(myQanaryConfigurator.getEndpoint(), namedGraph);
-		this.qanaryUtil = new QanaryUtils(this.qanaryMessage, this.getQanaryTripleStoreConnector());
+		this.qanaryUtils = new QanaryUtils(this.qanaryMessage, this.getQanaryTripleStoreConnector());
 	}
 
 	/**
@@ -376,22 +380,17 @@ public class QanaryQuestion<T> {
 	 */
 	public URI getUriTextualRepresentation() throws Exception {
 		if (this.uriTextualRepresentation == null) {
-			String sparql = "" //
-					+ "PREFIX qa: <http://www.wdaqua.eu/qa#> " //
-					+ "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> " //
-					+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " //
-					+ "SELECT ?uri " //
-					+ "FROM <" + this.getInGraph() + "> { " //
-					+ "  ?a a qa:AnnotationOfTextRepresentation . " //
-					+ "  ?a oa:hasBody ?uri " //
-					+ "}"; //
+			QuerySolutionMap bindingsForSelect = new QuerySolutionMap();
+			bindingsForSelect.add("graph", ResourceFactory.createResource(this.getOutGraph().toASCIIString()));
 
-			ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
-
+			String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_SELECT_URI_TEXTUAL_REPRESENTATION, bindingsForSelect);
+			logger.info("SPARQL query: {}", sparql);
+			ResultSet resultSet = this.qanaryUtils.getQanaryTripleStoreConnector().select(sparql);
+			
 			int i = 0;
 			String uriTextRepresentation = null;
-			while (resultset.hasNext()) {
-				uriTextRepresentation = resultset.next().get("uri").asResource().getURI();
+			while (resultSet.hasNext()) {
+				uriTextRepresentation = resultSet.next().get("uri").asResource().getURI();
 				logger.debug("{}: qa#Question = {}", i++, uriTextRepresentation);
 			}
 			if (i > 1) {
@@ -418,6 +417,47 @@ public class QanaryQuestion<T> {
 				this.getUriTextualRepresentation() + QanaryConfiguration.questionRawDataUrlSuffix, String.class);
 		logger.debug("textRepresentation {} ", responseRaw.getBody());
 		return responseRaw.getBody();
+	}
+
+	public String getTextualRepresentation(String language) throws Exception {
+		// attempt to get original question language, if annotated by LD component
+		String questionLanguage = "";
+		try {
+			questionLanguage = this.getLanguage();
+			logger.info("Language of original text representation: {}", questionLanguage);
+			if (questionLanguage.equals(language)) {
+				// if language alrady matches, return getTextualRepresentation
+				return this.getTextualRepresentation(); 
+			}
+		} catch (Exception e) {
+			logger.warn("Language of original text representation is not known!\n{}", e.getMessage());
+		} if (language.trim().length() == 2) { 
+			// look for annotation of translation with matching language
+			return this.getTranslatedTextualRepresentation(language); 
+		} else {
+			throw new Exception("parameter `language` is invalid: " + language);
+		}
+	}
+
+	public String getTranslatedTextualRepresentation(String language) throws Exception {
+		QuerySolutionMap bindingsForSelect = new QuerySolutionMap();
+		bindingsForSelect.add("graph", ResourceFactory.createResource(this.getOutGraph().toASCIIString()));
+		bindingsForSelect.add("targetQuestion", ResourceFactory.createResource(this.getUri().toASCIIString()));
+		bindingsForSelect.add("language", ResourceFactory.createStringLiteral(language));
+
+		String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_SELECT_TRANSLATION_ANNOTATION, bindingsForSelect);
+		logger.info("SPARQL query: {}", sparql);
+		ResultSet resultSet = this.qanaryUtils.getQanaryTripleStoreConnector().select(sparql);
+
+		while (resultSet.hasNext()) {
+			QuerySolution result = resultSet.next();
+			String translatedQuestionString = result.get("translation").asLiteral().getString();
+			// take the first best result
+			return translatedQuestionString;
+		}
+		// if nothing was found
+		throw new Exception("No uriTextRepresentation available in graph " + this.getInGraph() 
+				+ " for language " + language + " at " + this.getEndpoint());
 	}
 
 	/**
@@ -518,7 +558,7 @@ public class QanaryQuestion<T> {
 					+ "  ] ; " //
 					+ resourceSparql //
 					+ scoreSparql //
-					+ "     oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
+					+ "     oa:annotatedBy <" + qanaryUtils.getComponentUri() + "> ; " //
 					+ "	    oa:annotatedAt ?time . " //
 					+ "}} WHERE { " //
 					+ "     BIND (IRI(str(RAND())) AS ?a) ." //
@@ -627,7 +667,7 @@ public class QanaryQuestion<T> {
 		RestTemplate restTemplate = new RestTemplate();
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("question", text);
-		String r = restTemplate.postForObject(qanaryUtil.getHostUri() + "/question", map, String.class);
+		String r = restTemplate.postForObject(qanaryUtils.getHostUri() + "/question", map, String.class);
 		logger.info("DEBUG {}", r);
 		JSONObject obj = new JSONObject(r);
 		String uriTextRepresention = obj.get("questionURI").toString();
@@ -641,7 +681,7 @@ public class QanaryQuestion<T> {
 				+ " 	?a a qa:AnnotationOfTextualRepresentation . " //
 				+ " 	?a oa:hasTarget <" + this.getUri() + "> . " //
 				+ " 	?a oa:hasBody <" + uriTextRepresention + "> ;" //
-				+ "        oa:annotatedBy <" + qanaryUtil.getComponentUri() + "> ; " //
+				+ "        oa:annotatedBy <" + qanaryUtils.getComponentUri() + "> ; " //
 				+ "	   oa:AnnotatedAt ?time  " //
 				+ "}} " //
 				+ "WHERE { " //

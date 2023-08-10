@@ -1,0 +1,11 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+
+SELECT ?a ?translation ?time
+FROM ?graph
+WHERE {
+    ?a a qa:AnnotationOfQuestionTranslation .
+    ?a oa:hasTarget ?targetQuestion .
+    ?a oa:hasBody ?translation .
+    FILTER (lang(?translation) = ?language).
+}
