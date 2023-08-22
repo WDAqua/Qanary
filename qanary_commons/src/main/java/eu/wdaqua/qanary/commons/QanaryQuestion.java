@@ -546,15 +546,15 @@ public class QanaryQuestion<T> {
 				+ "  OPTIONAL { ?a qa:score ?confidence . } \n" //
 				+ "  OPTIONAL { ?a qa:overKnowledgeGraph ?kb . } \n" //
 				+ "  OPTIONAL { \n" //
-				+ "			?a oa:annotatedAt ?time1 . \n" //
-				+ "  		{ \n" //
-				+ "  		 SELECT ?time1 { \n" //
-				+ "  		  ?a a qa:AnnotationOfAnswerSPARQL . \n" //
-				+ "  		  ?a oa:annotatedAt ?time1 . \n" //
-				+ "  		 } \n" //
-				+ "	 		 ORDER BY DESC(?time1) \n" //
-				+ "	 		 LIMIT 1 \n" //
-				+ "  		} \n" //
+				+ "	?a oa:annotatedAt ?time1 . \n" //
+				+ "  	{ \n" //
+				+ "  	SELECT ?time1 { \n" //
+				+ "  		?a a qa:AnnotationOfAnswerSPARQL . \n" //
+				+ "  		?a oa:annotatedAt ?time1 . \n" //
+				+ "  	} \n" //
+				+ "	ORDER BY DESC(?time1) \n" //
+				+ "	LIMIT 1 \n" //
+				+ "  	} \n" //
 				+ "  } \n" //
 				+ "} \n" //
 				+ "ORDER BY DESC(?score) \n";
