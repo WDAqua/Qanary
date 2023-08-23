@@ -2,12 +2,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.7.6</version>
-	<parent>
+	<version>3.8.1</version>
+
+  <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.6.7</version>
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
+
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.7.10</spring-boot-admin.version>
@@ -294,6 +297,19 @@
 							</rules>
 							<fail>true</fail>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!--	For Component Cache Tests	-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

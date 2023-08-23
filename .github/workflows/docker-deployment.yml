@@ -19,7 +19,7 @@ jobs:
       - name: Build the Docker images and Push to Dockerhub
         run: bash -c ./service_config/build_images.sh
       - name: Init update
-        uses: MindMaster98/docker-service-updater@v0.1.5
+        uses: WSE-research/docker-service-updater@v0.2.1
         with:
           api_key: ${{ secrets.API_KEY }}
           updater_host: ${{ secrets.UPDATER_HOST }}
