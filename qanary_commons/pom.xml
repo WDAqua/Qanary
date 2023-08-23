@@ -2,9 +2,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.8.1</version>
-
-  <parent>
+	<version>3.8.2</version>
+	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.6.7</version>
@@ -251,7 +250,7 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>4.0.0</version>
+			<version>4.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
