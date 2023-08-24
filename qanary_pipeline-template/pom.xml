@@ -20,7 +20,7 @@
 		<docker.image.name>qanary-pipeline</docker.image.name>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<springdoc.version>1.6.12</springdoc.version><!-- last working version: 1.6.12 -->
+		<springdoc.version>1.7.0</springdoc.version><!-- last working version: 1.6.12 -->
 	</properties>
 	<dependencies>
 		<dependency>
