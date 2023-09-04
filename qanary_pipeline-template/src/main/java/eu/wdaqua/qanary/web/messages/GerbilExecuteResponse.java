@@ -89,7 +89,6 @@ public class GerbilExecuteResponse {
 		QueryObj queryObj = new QueryObj(sparqlQueryString);
 
 		List<JsonNode> answersArray = new LinkedList<>();
-		//JsonNode answersObj2 = null;
 		if (jsonAnswerString != null && jsonAnswerString.length() > 0) {
 			JsonNode answersObj2 = objectMapper.readTree(jsonAnswerString);
 			answersArray.add(answersObj2);
