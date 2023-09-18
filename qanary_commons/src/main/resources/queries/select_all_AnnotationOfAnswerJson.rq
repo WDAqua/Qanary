@@ -8,14 +8,14 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT * 
 FROM ?graphURI
 WHERE { 
-		?annotationAnswer 
-				a				qa:AnnotationOfAnswerJson ;
-				oa:hasTarget	?question ; 
-				oa:hasBody		?answer ; 
-				oa:annotatedBy	?service ; 
-				oa:annotatedAt	?time ; 
-				qa:score		?score . 
+	?annotationAnswer 
+		a	qa:AnnotationOfAnswerJson ;
+				oa:hasTarget ?question ; 
+				oa:hasBody ?answer ; 
+				oa:annotatedBy ?service ; 
+				oa:annotatedAt ?time ; 
+				qa:score ?score . 
 	  	?answer	
-				a				qa:AnswerJson ;
-		   		rdf:value		?answerJson . 
+			a qa:AnswerJson ;
+		   	rdf:value ?answerJson . 
 }
