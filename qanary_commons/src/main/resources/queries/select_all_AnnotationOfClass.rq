@@ -1,0 +1,16 @@
+@prefix qa: <http://www.wdaqua.eu/qa#> .
+@prefix oa: <http://www.w3.org/ns/openannotation/core/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+SELECT *
+FROM ?graph
+WHERE {
+?annotationId a qa:AnnotationOfClass .
+?annotationId oa:hasTarget [
+	a oa:SpecificClass ;
+ 	oa:hasSource ?hasSource ;
+] .
+?annotationId oa:hasBody ?hasBody ;
+    oa:annotatedBy ?annotatedBy ;
+    oa:annotatedAt ?annotatedAt  .
+  }
