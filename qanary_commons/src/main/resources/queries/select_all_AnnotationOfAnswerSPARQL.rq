@@ -8,9 +8,9 @@ SELECT *
 FROM ?graph
 WHERE { 
         ?annotationId rdf:type qa:AnnotationOfAnswerSPARQL .
-        ?newAnnotation oa:hasTarget ?hasTarget .
-        ?newAnnotation oa:hasBody ?hasBody .
-        ?newAnnotation qa:score ?score .
-        ?newAnnotation oa:annotatedAt ?annotatedAt .
-        ?newAnnotation oa:annotatedBy ?annotatedBy . 
+        ?annotationId oa:hasTarget ?hasTarget ;
+        oa:hasBody ?hasBody ;
+        qa:score ?score ;
+        oa:annotatedAt ?annotatedAt ;
+        oa:annotatedBy ?annotatedBy . 
 }
