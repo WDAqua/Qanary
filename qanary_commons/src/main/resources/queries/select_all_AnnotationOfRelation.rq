@@ -1,0 +1,16 @@
+@prefix qa: <http://www.wdaqua.eu/qa#> .
+@prefix oa: <http://www.w3.org/ns/openannotation/core/> .
+
+<urn:qanary:output> a qa:AnnotationOfRelation .
+<urn:qanary:output> oa:hasTarget [
+    a   oa:SpecificResource;
+        oa:hasSource    ?hasSource ;
+        oa:hasSelector  [
+            a oa:TextPositionSelector ;
+            oa:start ?start ;
+            oa:end  ?end
+        ]
+    ] .
+<urn:qanary:output> oa:hasBody ?hasBody ;
+    oa:annotatedBy ?annotatedBy ;
+    oa:annotatedAt ?annotatedAt .
