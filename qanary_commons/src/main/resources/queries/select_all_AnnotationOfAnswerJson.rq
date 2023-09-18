@@ -15,7 +15,7 @@ WHERE {
 				oa:annotatedBy ?annotatedBy ; 
 				oa:annotatedAt ?annotatedAt ; 
 				qa:score ?score . 
-	  	?answer	
+	  	?hasBody	
 			a qa:AnswerJson ;
 		   	rdf:value ?value . 
 }
