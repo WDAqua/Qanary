@@ -10,12 +10,12 @@ FROM ?graphURI
 WHERE { 
 	?annotationAnswer 
 		a	qa:AnnotationOfAnswerJson ;
-				oa:hasTarget ?question ; 
-				oa:hasBody ?answer ; 
-				oa:annotatedBy ?service ; 
-				oa:annotatedAt ?time ; 
+				oa:hasTarget ?hasTarget ; 
+				oa:hasBody ?hasBody ; 
+				oa:annotatedBy ?annotatedBy ; 
+				oa:annotatedAt ?annotatedAt ; 
 				qa:score ?score . 
 	  	?answer	
 			a qa:AnswerJson ;
-		   	rdf:value ?answerJson . 
+		   	rdf:value ?value . 
 }
