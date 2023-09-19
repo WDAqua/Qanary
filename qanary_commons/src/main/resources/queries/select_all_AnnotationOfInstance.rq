@@ -17,6 +17,8 @@ WHERE {
         ].
     ?annotationId oa:hasBody ?hasBody ;
                   oa:annotatedBy ?annotatedBy ;
-                  oa:annotatedAt ?annotatedAt ;
-                  qa:score ?score .
-}
+                  oa:annotatedAt ?annotatedAt .
+                  OPTIONAL {
+    ?annotationId qa:score ?score .
+                  }
+    }
