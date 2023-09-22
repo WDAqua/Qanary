@@ -12,7 +12,7 @@ WHERE {
     ?annotationId oa:hasTarget ?hasTarget
     ?annotationId oa:hasBody ?hasBody .
     ?annotationId oa:annotatedAt ?annotatedAt .
-    ?annotationId oa:annotatedBy <urn:qanary:ChatGPTWrapper> .
+    ?annotationId oa:annotatedBy ?annotatedBy .
     ?hasBody rdf:type qa:AnswerJson .
     ?hasBody rdf:value ?value .
     qa:AnswerJson rdfs:subClassOf qa:Answer .
