@@ -1,6 +1,6 @@
-@prefix qa: <http://www.wdaqua.eu/qa#> .
-@prefix oa: <http://www.w3.org/ns/openannotation/core/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+Prefix qa: <http://www.wdaqua.eu/qa#>
+Prefix oa: <http://www.w3.org/ns/openannotation/core/>
+Prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
 
 SELECT *
 FROM ?graph
