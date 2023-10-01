@@ -198,7 +198,7 @@ public class QanaryGerbilController {
 		}
 		String questionText = myQanaryQuestion.getTextualRepresentation();
 		String sparqlQueryString = myQanaryQuestion.getSparqlResult(); // returns empty String if no Query was found
-		String jsonAnswerString = "{}"; // TODO: myQanaryQuestion.getJsonResult(); // returns empty String if no answer was found
+		String jsonAnswerString = myQanaryQuestion.getJsonResult();  
 
 		GerbilExecuteResponse obj = new GerbilExecuteResponse(Jackson2ObjectMapperBuilder.json().build(), //
 				questionText, language, sparqlQueryString, jsonAnswerString);
