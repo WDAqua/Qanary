@@ -15,7 +15,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build the Docker images and Push to Dockerhub
         run: bash -c ./service_config/build_images.sh
       - name: Init update
