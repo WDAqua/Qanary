@@ -585,14 +585,16 @@ public class QanaryQuestion<T> {
 				+ "  } \n" //
 				+ "  OPTIONAL { ?a qa:score ?confidence . } \n" //
 				+ "  OPTIONAL { ?a qa:overKnowledgeGraph ?kb . } \n" //
-				+ "  ?a oa:annotatedAt ?time1 . \n" //
-				+ "  { \n" //
-				+ "   SELECT ?time1 { \n" //
-				+ "    ?a a qa:AnnotationOfAnswerSPARQL . \n" //
-				+ "    ?a oa:annotatedAt ?time1 . \n" //
-				+ "   } \n" //
-				+ "	  ORDER BY DESC(?time1) \n" //
-				+ "	  LIMIT 1 \n" //
+				+ "  OPTIONAL { \n" //
+				+ "	?a oa:annotatedAt ?time1 . \n" //
+				+ "  	{ \n" //
+				+ "  	SELECT ?time1 { \n" //
+				+ "  		?a a qa:AnnotationOfAnswerSPARQL . \n" //
+				+ "  		?a oa:annotatedAt ?time1 . \n" //
+				+ "  	} \n" //
+				+ "	ORDER BY DESC(?time1) \n" //
+				+ "	LIMIT 1 \n" //
+				+ "  	} \n" //
 				+ "  } \n" //
 				+ "} \n" //
 				+ "ORDER BY DESC(?score) \n";
@@ -622,11 +624,11 @@ public class QanaryQuestion<T> {
 	}
 
 	public String getSparqlResult() throws SparqlQueryFailed {
-		// added try and catch to prevent indexOutOfBoundsException, returns empty String if no Query was found
+		// added try and catch to prevent indexOutOfBoundsException and NullPointerException, returns empty String if no Query was found
 		String sparqlResult = "";
 		try {
 			sparqlResult = this.getSparqlResults().get(0).query;
-		} catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException | NullPointerException e) {
 			logger.warn("No SPARQL Query found, index out of bounds");
 		}
 		return sparqlResult;
@@ -643,21 +645,23 @@ public class QanaryQuestion<T> {
 				+ "	?a a qa:AnnotationOfAnswerJson . " //
 				+ "  	?a oa:hasBody ?answer . " //
 				+ " 	?answer rdf:value ?json . " //
-//				+ "  	?a a qa:AnnotationOfAnswerJSON . " //
-//				+ "  	?a oa:hasBody ?json " //
-//				TODO: this should be body of AnswerJson with rdf:value answer
 				+ "}";
 		logger.debug("getJsonResult: SELECT using:\n{}", sparql);
 		ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
-		// the default value has to be null to distinguish missing values from empty values
+		// OLD: the default value has to be null to distinguish missing values from empty values
+		// NEW: returning null would result in "null" being part of the response JSON, 
+		//		return an empty string instead.
+		//		This way, a distinction is still possible:
+		//		missing values: ""
+		//		empty values: []
 		String sparqlAnnotation = null; 
 		while (resultset.hasNext()) {
 			sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
 		}
 		
 		if (sparqlAnnotation == null) {
-			return sparqlAnnotation;
+			return "";
 		} else {
 			return sparqlAnnotation.replace("\\\"", "\"");
 		}
