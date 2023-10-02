@@ -9,11 +9,6 @@ import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
 
 @TestConfiguration
 public class RestTemplateCacheLiveTestConfiguration {
-	// define here the current CaffeineCacheManager configuration
-	static {
-		System.setProperty("qanary.webservicecalls.cache.specs",
-				"maximumSize=1000,expireAfterAccess=" + RestTemplateCacheLiveTest.MAX_TIME_SPAN_SECONDS + "s");
-	}
 
 	@Bean
 	@Primary
