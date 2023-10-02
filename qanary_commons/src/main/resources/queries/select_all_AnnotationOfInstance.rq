@@ -7,18 +7,18 @@ FROM ?graph
 WHERE {
     ?annotationId rdf:type qa:AnnotationOfInstance .
     ?annotationId oa:hasTarget [
-        a oa:SpecificResource;
+                    a oa:SpecificResource;
                       oa:hasSource ?hasSource;
                       oa:hasSelector [
-        	a oa:TextPositionSelector;
-                      oa:start ?start;
-                      oa:end ?end;
-            ]
-        ].
+        	                a oa:TextPositionSelector;
+                            oa:start ?start;
+                            oa:end ?end
+                      ]
+    ].
     ?annotationId oa:hasBody ?hasBody ;
                   oa:annotatedBy ?annotatedBy ;
                   oa:annotatedAt ?annotatedAt .
                   OPTIONAL {
-    ?annotationId qa:score ?score .
+                      ?annotationId qa:score ?score .
                   }
-    }
+}
