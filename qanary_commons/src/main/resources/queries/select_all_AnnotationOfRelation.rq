@@ -1,0 +1,29 @@
+
+
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+
+SELECT *
+FROM ?graph
+WHERE {
+?annotationId a qa:AnnotationOfRelation .
+?annotationId oa:hasTarget [
+    a   oa:SpecificResource;
+        oa:hasSource    ?hasSource 
+    ] .
+  OPTIONAL {
+    ?annotationId oa:hasTarget [
+        oa:hasSelector  [
+            a oa:TextPositionSelector ;
+            oa:start ?start ;
+            oa:end  ?end
+        ] 
+    ] .
+}
+OPTIONAL {
+?annotationId qa:score ?score .
+}
+?annotationId oa:hasBody ?hasBody ;
+    oa:annotatedBy ?annotatedBy ;
+    oa:annotatedAt ?annotatedAt .
+}
