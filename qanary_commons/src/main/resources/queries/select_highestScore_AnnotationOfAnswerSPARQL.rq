@@ -5,8 +5,8 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT * 
+FROM ?graph
 WHERE { 
-	GRAPH ?graph  {
 		?newAnnotation rdf:type qa:AnnotationOfAnswerSPARQL .
 		?newAnnotation oa:hasTarget ?targetQuestion .
 		?newAnnotation oa:hasBody ?selectQueryThatShouldComputeTheAnswer .
@@ -25,6 +25,5 @@ WHERE {
 
 		?newAnnotation oa:annotatedBy ?application . 
 	}
-}
 ORDER BY DESC(?confidence) 
 LIMIT 1
