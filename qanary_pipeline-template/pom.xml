@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
-    <version>3.7.6</version>
+    <version>3.7.8</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -20,7 +20,7 @@
         <docker.image.name>qanary-pipeline</docker.image.name>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <springdoc.version>1.7.0</springdoc.version><!-- last working version: 1.6.12 -->
+        <springdoc.version>1.7.0</springdoc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -242,7 +242,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
