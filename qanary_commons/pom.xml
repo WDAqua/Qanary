@@ -227,7 +227,7 @@
 		<dependency>
 		    <groupId>com.openlinksw</groupId>
 		    <artifactId>virtjdbc4_3</artifactId>
-		    <version>3.122</version>
+		    <version>3.123</version>
 		</dependency>		
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
