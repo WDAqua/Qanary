@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
-	<version>3.8.6</version>
+	<version>3.8.7</version>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -227,7 +227,7 @@
 		<dependency>
 		    <groupId>com.openlinksw</groupId>
 		    <artifactId>virtjdbc4_3</artifactId>
-		    <version>3.122</version>
+		    <version>3.123</version>
 		</dependency>		
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
