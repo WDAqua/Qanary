@@ -8,14 +8,13 @@
 	<version>${version}</version>
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.7</version>
+		<!-- TODO: permalink? / repo? -->
+    <groupId>eu.wdaqua.qanary</groupId>
+    <artifactId>qa.qanarycomponent-parent</artifactId>
+    <version>0.1.0</version>
 	</parent>
 	<properties>
 		<java.version>17</java.version>
-		<qanary.version>[3.7.1,4.0.0)</qanary.version>
-		<spring-boot-admin.version>2.7.10</spring-boot-admin.version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 
@@ -25,42 +24,8 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>eu.wdaqua.qanary</groupId>
-			<artifactId>qa.component</artifactId>
-			<version>${qanary.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-client</artifactId>
-			<version>${spring-boot-admin.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.3</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>hamcrest-core</artifactId>
-					<groupId>org.hamcrest</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- common minimum dependencies are inherited from parent -->
+		<!-- specify optional commmon dependencies (see <dependencyManagement> in parent) -->
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
@@ -71,7 +36,15 @@
 			<artifactId>json-path-assert</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+		</dependency>
+
+		<!-- TODO: specify dependencies for this component -->
+
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -105,6 +78,16 @@
 							<goal>build</goal>
 							<goal>push</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>default-2</id>
+						<goals>
+							<goal>tag</goal>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<tag>latest</tag>
+						</configuration>
 					</execution>
 				</executions>
 				<configuration>

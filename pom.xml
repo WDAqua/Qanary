@@ -10,6 +10,7 @@
     <module>qanary_commons</module>
     <module>qanary_pipeline-template</module>
     <module>qanary_component-template</module>
+    <module>qanary_component-parent</module>
     <module>qald-evaluator</module>
   </modules>
 </project>
