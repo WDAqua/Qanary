@@ -1,0 +1,13 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+
+SELECT *
+FROM ?graph
+WHERE {
+?annotationId a qa:AnnotationOfQuestionLanguage .
+?annotationId oa:hasTarget ?hasTarget ; 
+  oa:hasBody ?hasBody ;
+  oa:annotatedBy ?annotatedBy ;
+  oa:annotatedAt ?annotatedAt .
+  }

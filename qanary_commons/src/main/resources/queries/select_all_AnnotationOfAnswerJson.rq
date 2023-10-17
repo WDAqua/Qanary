@@ -5,17 +5,17 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
 
-SELECT * WHERE { 
-	GRAPH ?graph {
-		?annotationAnswer 
-				a				qa:AnnotationOfAnswerJson ;
-				oa:hasTarget	?question ; 
-				oa:hasBody		?answer ; 
-				oa:annotatedBy	?service ; 
-				oa:annotatedAt	?time ; 
-				qa:score		?score . 
-	  	?answer	
-				a				qa:AnswerJson ;
-		   		rdf:value		?answerJson . 
-	}
+SELECT * 
+FROM ?graphURI
+WHERE { 
+	?annotationAnswer 
+		a	qa:AnnotationOfAnswerJson ;
+				oa:hasTarget ?hasTarget ; 
+				oa:hasBody ?hasBody ; 
+				oa:annotatedBy ?annotatedBy ; 
+				oa:annotatedAt ?annotatedAt ; 
+				qa:score ?score . 
+	  	?hasBody	
+			a qa:AnswerJson ;
+		   	rdf:value ?value . 
 }
