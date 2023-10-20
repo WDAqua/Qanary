@@ -6,8 +6,8 @@ INSERT {
 	GRAPH ?graph {
 		?annotationId a qa:AnnotationOfQuestionTranslation ;
 			oa:hasTarget ?hasTarget ;
-			oa:hasBody ?hasBody ; # @en
-			oa:annotatedBy ?annotatedBy ; # <urn:qanary:APP_NAME>
+			oa:hasBody ?hasBody ;
+			oa:annotatedBy ?annotatedBy ;
 			oa:annotatedAt ?annotatedAt .
 	}
 } WHERE {
