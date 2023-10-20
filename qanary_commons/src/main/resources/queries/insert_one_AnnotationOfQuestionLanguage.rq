@@ -1,0 +1,16 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+	GRAPH ?graph {
+		?annotationId a qa:AnnotationOfQuestionLanguage ;
+			oa:hasTarget ?hasTarget ;
+			oa:hasBody ?hasBody ; # @en
+			oa:annotatedBy ?annotatedBy ; # <urn:qanary:APP_NAME>
+			oa:annotatedAt ?annotatedAt .
+	}
+} WHERE {
+	BIND (IRI(str(RAND())) AS ?annotationId) .
+	BIND(now() as ?annotatedAt) .
+}
