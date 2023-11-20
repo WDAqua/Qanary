@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.component</artifactId>
-	<version>3.7.2</version>
+	<version>3.7.3</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -113,10 +113,22 @@
 				<artifactId>reflections</artifactId>
 				<version>0.10.2</version>
 		</dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+    <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-arq</artifactId>
+        <version>4.9.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
+    <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-core</artifactId>
+        <version>4.9.0</version>
+    </dependency>
 	</dependencies>
 	<build>
 		<plugins>
-		<!-- 
+		<!--
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -151,14 +163,14 @@
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-jar-plugin</artifactId>
 			    <configuration>
-			        <archive>                   
+			        <archive>
 			            <manifest>
 			                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 			                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 			            </manifest>
 			        </archive>
 			    </configuration>
-			</plugin>		      
+			</plugin>
 		</plugins>
 	</build>
 
