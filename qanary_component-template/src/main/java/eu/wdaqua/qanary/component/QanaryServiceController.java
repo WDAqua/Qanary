@@ -125,7 +125,7 @@ public class QanaryServiceController {
     		String sessionDataValue = env.getProperty(name, "This text is shown as the property " + name + " is not defined (e.g., in application.properties).");
 	    	session.setAttribute(sessionDataName, sessionDataValue);
     		logger.info("session | {} -> {}={}", name, sessionDataName, session.getAttribute(sessionDataName));
-		}
+	}
 
     	Map<String,String> envImportantPropertyNameValue = new HashMap<>();
     	envImportantPropertyNameValue.put("component_description_url", QanaryConfiguration.description);
@@ -146,26 +146,26 @@ public class QanaryServiceController {
         envImportantPropertyNameValue.put("componentImplementationVendor", extendingComponent.getPackage().getSpecificationVendor());
 
     } catch (Exception e) {
-        logger.debug("No class implementing QanaryComponent could be found during runtime!");
-        logger.debug(e.getMessage());
+        logger.warn("No class implementing QanaryComponent could be found during runtime!");
+        logger.warn(e.getMessage());
     }
 
     	for (Map.Entry<String, String> entry : envImportantPropertyNameValue.entrySet()) {
-			String key = entry.getKey();
-			String val = entry.getValue();
+		String key = entry.getKey();
+		String val = entry.getValue();
 	    	session.setAttribute(key, val);
     		logger.info("session | {}={}", key, session.getAttribute(key));
-		}
+	}
     	
     	return QanaryConfiguration.description_file;
     }
 
     // TODO: add documentation
     private Class<? extends QanaryComponent> getExtendingComponent() throws Exception {
-        Reflections reflections = new Reflections(
-                new ConfigurationBuilder()
-                    .addScanners(Scanners.SubTypes.filterResultsBy(s->true))
-                    .forPackages("eu.wdaqua.qanary.component")); 
+        Reflections reflections = new Reflections( // 
+                new ConfigurationBuilder() // 
+                    .addScanners(Scanners.SubTypes.filterResultsBy(s->true)) // 
+                    .forPackages("eu.wdaqua.qanary.component"));  
         // TODO: caution: what about custom components outside of this classpath?
         Set<Class<? extends QanaryComponent>> classes = reflections.getSubTypesOf(QanaryComponent.class);
         // exactly one class is expected
@@ -174,10 +174,11 @@ public class QanaryServiceController {
             logger.debug("version: {}", classes.iterator().next().getPackage().getImplementationVersion());
             return classes.iterator().next();
         } else if (classes.size() == 0) {
+            logger.warn("no extending component (classes.size() == 0)");
             //throw new NoExtendingComponentClassException();
             throw new Exception("no extending component");
         } else {
-            logger.warn("ambiguous");
+            logger.warn("ambiguous extending component");
             //throw new AmbiguousExtendingComponentClassException();
             throw new Exception("ambiguous extending component");
         }
