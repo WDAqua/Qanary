@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.component</artifactId>
-	<version>3.7.3</version>
+	<version>3.7.4</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
