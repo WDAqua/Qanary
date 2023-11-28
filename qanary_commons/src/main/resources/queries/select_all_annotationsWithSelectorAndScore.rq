@@ -1,0 +1,18 @@
+PREFIX dbr: <http://dbpedia.org/resource/> 
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/> 
+PREFIX qa: <http://www.wdaqua.eu/qa#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+SELECT ?entityResource ?annotationScore ?start ?end 
+FROM ?GRAPH 
+WHERE { 
+    ?annotation    	oa:hasBody   	?entityResource .
+    ?annotation 	oa:hasTarget 	?target .
+    ?target 		oa:hasSource    ?QUESTION_URI .
+    ?target     	oa:hasSelector  ?textSelector .
+    ?textSelector 	rdf:type    	oa:TextPositionSelector .
+    ?textSelector  	oa:start    	?start .
+    ?textSelector  	oa:end      	?end .
+    OPTIONAL { 
+		?annotation qa:score	?annotationScore .  # we cannot be sure that a score is provided
+	}
+}
