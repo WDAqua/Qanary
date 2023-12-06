@@ -1,11 +1,11 @@
 #!/bin/bash
 # replace secrets
-if [ -z "$STARDOG_PASSWORD" ]
+if [ -z "$VIRTUOSO_RW_PASSWORD" ]
 then
-  echo "STARDOG_PASSWORD is not set. Check your secrets."
+  echo "VIRTUOSO RW PASSWORD is not set. Check your secrets."
   exit
 else
-  sed -i "s/SECRETS_STARDOG_PASSWORD/$STARDOG_PASSWORD/g" ./service_config/files/pipeline
+  sed -i "s/SECRETS_VIRTUOSO_RW_PASSWORD/$VIRTUOSO_RW_PASSWORD/g" ./service_config/files/pipeline
 fi
 
 # build Docker Images and store name and tag
