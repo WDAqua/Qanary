@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 # replace secrets
 if [ -z "$VIRTUOSO_PASSWORD" ]
 then
