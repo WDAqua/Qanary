@@ -16,6 +16,8 @@ then
   exit 1
 fi
 
+echo "Docker images"
+docker image ls
 docker image ls | grep -oP "qanary.*\.[0-9] " > images.temp
 
 echo "Locally available Docker images:"
