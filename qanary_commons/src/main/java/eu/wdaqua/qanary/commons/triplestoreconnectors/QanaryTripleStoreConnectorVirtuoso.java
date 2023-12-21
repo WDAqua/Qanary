@@ -52,7 +52,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 			@Value("${virtuoso.username}") String username, //
 			@Value("${virtuoso.password}") String password //
 	) {
-		getLogger().debug("initialize Virtuoso triplestore connector: {}", virtuosoUrl);
+		getLogger().info("initialize Virtuoso triplestore connector as {} to {}", username, virtuosoUrl);
 		this.virtuosoUrl = virtuosoUrl;
 		this.username = username;
 		this.password = password;
@@ -90,7 +90,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 		Query query = QueryFactory.create(sparql);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, this.connection);
 		ResultSetRewindable resultsRewindable = ResultSetFactory.makeRewindable(vqe.execSelect());
-		this.logTime(getTime() - start, "SELECT on " + this.getVirtuosoUrl() + ": " + sparql);
+		this.logTime(getTime() - start, "SELECT on " + this.getVirtuosoUrl() + " resulted in " + resultsRewindable.size() + " rows: " + sparql);
 		return resultsRewindable;
 	}
 
