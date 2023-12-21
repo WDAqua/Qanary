@@ -18,6 +18,9 @@ fi
 
 docker image ls | grep -oP "qanary.*\.[0-9] " > images.temp
 
+echo "Locally available Docker images:"
+cat images.temp
+
 # read image list
 images=$(cat images.temp)
 
