@@ -11,6 +11,6 @@ INSERT {
 			oa:annotatedAt ?annotatedAt .
 	}
 } WHERE {
-	BIND (IRI(str(RAND())) AS ?annotationId) .
+    BIND (IRI(CONCAT("urn:qanary:annotation:question:translation:", STR(RAND()))) AS ?annotationId) .	
 	BIND(now() as ?annotatedAt) .
 }

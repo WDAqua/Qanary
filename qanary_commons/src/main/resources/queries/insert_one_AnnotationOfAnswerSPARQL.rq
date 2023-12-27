@@ -15,6 +15,6 @@ GRAPH ?graph  {
     }
 }
 WHERE {
-    BIND (IRI(str(RAND())) AS ?newAnnotation) .
+    BIND (IRI(CONCAT("urn:qanary:annotation:answer:sparql:", STR(RAND()))) AS ?newAnnotation) .
     BIND (now() as ?time) . 
 }
