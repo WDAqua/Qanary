@@ -1,0 +1,25 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+GRAPH ?graph {
+    ?a a qa:AnnotationOfInstance .
+    ?a oa:hasTarget [
+        a    oa:SpecificResource;
+        oa:hasSource    ?targetQuestion;
+        oa:hasSelector  [
+            a oa:TextPositionSelector ;
+            oa:start ?start ;
+            oa:end  ?end
+        ]
+    ] .
+    ?a oa:hasBody ?resource ;
+    oa:annotatedBy ?application ;
+    oa:annotatedAt ?time ;
+    qa:score ?score .
+}}
+WHERE {
+    BIND (IRI(CONCAT("urn:qanary:annotation:instance:", STR(RAND()))) AS ?a) .
+    BIND (now() as ?time)
+}

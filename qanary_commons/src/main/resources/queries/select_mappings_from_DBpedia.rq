@@ -1,0 +1,9 @@
+# for the given Wikipedia URI find the DBpedia resource
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT * 
+WHERE {
+	?dbpedia_resource foaf:isPrimaryTopicOf ?wikipedia_url. 
+}
