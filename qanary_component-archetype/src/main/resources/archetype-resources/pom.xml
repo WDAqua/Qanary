@@ -14,7 +14,7 @@
 	</parent>
 	<properties>
 		<java.version>17</java.version>
-		<qanary.version>[3.7.6,4.0.0)</qanary.version>
+		<qanary.version>[3.9.0,4.0.0)</qanary.version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 
