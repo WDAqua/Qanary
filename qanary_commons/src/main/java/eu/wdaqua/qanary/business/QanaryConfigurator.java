@@ -118,13 +118,21 @@ public class QanaryConfigurator {
 							responseEntity.getStatusCode());
 				}
 			} catch (QanaryExceptionServiceCallNotOk e) {
-				logger.error("QanaryExceptionServiceCallNotOk: called \"{}\" catched {}", component.getName(), e.getMessage());
+				logger.error("QanaryExceptionServiceCallNotOk: called \"{}\" catched '{}'", component.getName(), e.getMessage());
 				throw e;
 			} catch (Exception e) {
-				logger.error("Exception: called {} catched {} (using URI {}) -> throws {}", //
-						component.getName(), e.getMessage(), myURI, ExceptionUtils.getStackTrace(e));
-				throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
-						e.getMessage(), ExceptionUtils.getStackTrace(e));
+				logger.error("Exception during call to component {}: catched '{}' (using URI {}) -> throws '{}'", //
+						component.getName(), //
+						e.getMessage(), //
+						myURI, //
+						ExceptionUtils.getStackTrace(e) //
+				);
+				throw new QanaryExceptionServiceCallNotOk(
+						component.getName(), //
+						QanaryUtils.getTime() - start, //
+						e.getMessage(),  //
+						ExceptionUtils.getStackTrace(e) //
+				);
 			}
 
 		}
