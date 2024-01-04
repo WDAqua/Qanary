@@ -1,10 +1,5 @@
 package eu.wdaqua.qanary.component;
 
-//import org.apache.jena.query.Query;
-//import org.apache.jena.query.QueryExecution;
-//import org.apache.jena.query.QueryExecutionFactory;
-//import org.apache.jena.query.QueryFactory;
-//import org.apache.jena.query.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +80,7 @@ public abstract class QanaryComponent {
     }
 
     /**
-     * get access to a java representation of the question for the Qanary framework --> internal communication
+     * get access to a Java representation of the question for the Qanary framework --> internal communication
      */
     public QanaryQuestion<String> getQanaryQuestion(QanaryMessage qanaryMessage) {
     	try {
@@ -107,14 +102,14 @@ public abstract class QanaryComponent {
     }
 
     /**
-     * get current Qanary question
+     * get the current Qanary question
      */
     public QanaryQuestion<String> getQuestion() {
         return this.getQanaryQuestion();
     }
 
     /**
-     * get access to a java representation of the question for the Qanary framework
+     * get access to a Java representation of the question for the Qanary framework
      */
     public QanaryQuestion<String> getQanaryQuestion(QanaryMessage qanaryMessage, QanaryConfigurator myQanaryConfigurator) {
         return new QanaryQuestion<String>(qanaryMessage, myQanaryConfigurator);
