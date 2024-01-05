@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.component</artifactId>
-	<version>3.9.1</version>
+	<version>3.9.2</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qa.commons</artifactId>
-			<version>[3.11.0,4.0.0)</version>
+			<version>[3.11.2,4.0.0)</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
