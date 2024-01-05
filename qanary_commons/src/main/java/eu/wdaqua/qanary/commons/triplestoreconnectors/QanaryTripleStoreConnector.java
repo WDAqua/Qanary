@@ -199,9 +199,19 @@ public abstract class QanaryTripleStoreConnector {
 	public static String readFileFromResourcesWithMap(String filenameWithRelativePath, QuerySolutionMap bindings)
 			throws IOException {
 		String sparqlQueryString = readFileFromResources(filenameWithRelativePath);
+		
+		if(logger.isDebugEnabled()) {
+			logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
+			String debugMessage = "Try to apply the variables to the SPARQL query template:";
+			for( String varName : bindings.asMap().keySet() ) {
+				debugMessage += String.format("\n\t%s -> %s", varName, bindings.asMap().get(varName));
+			}
+			logger.debug(debugMessage);
+		}
+		
 		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
-
-		logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
+		
+		logger.debug("create SPARQL query text before QueryFactory: {}", pq.toString());
 
 		if ((sparqlQueryString).contains("\nSELECT ") || sparqlQueryString.startsWith("SELECT")) {
 			Query query = QueryFactory.create(pq.toString());
