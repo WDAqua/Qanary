@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -42,20 +43,25 @@ import virtuoso.jena.driver.VirtuosoUpdateRequest;
 @Component
 public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnector {
 
+	private static final CharSequence VIRTUOSO_PROBLEM_STRING = "Read timed out";
 	private final String virtuosoUrl;
 	private final String username;
 	private final String password;
+	private final int queryTimeout;
+	private final short maxTriesConnectionTimeout = 3;
 	private VirtGraph connection;
 
 	public QanaryTripleStoreConnectorVirtuoso( //
 			@Value("${virtuoso.url}") String virtuosoUrl, //
 			@Value("${virtuoso.username}") String username, //
-			@Value("${virtuoso.password}") String password //
+			@Value("${virtuoso.password}") String password, //
+			@Value("${virtuoso.query.timeout:10}") int queryTimeout //
 	) {
-		getLogger().info("initialize Virtuoso triplestore connector as {} to {}", username, virtuosoUrl);
+		getLogger().info("initialize Virtuoso triplestore connector as {} to {} with timeout {} secs", username, virtuosoUrl, queryTimeout);
 		this.virtuosoUrl = virtuosoUrl;
 		this.username = username;
 		this.password = password;
+		this.queryTimeout = queryTimeout;
 		this.connect();
 	}
 
@@ -70,6 +76,10 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 	private String getPassword() {
 		return this.password;
 	}
+	
+	private int getTimeout() {
+		return this.queryTimeout;
+	}
 
 	@Override
 	public void connect() {
@@ -77,16 +87,72 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 		assert this.virtuosoUrl != null && !"".equals(this.virtuosoUrl);
 		assert this.username != null && !"".equals(this.username);
 		assert this.password != null && !"".equals(this.password);
-
-		connection = new VirtGraph(this.getVirtuosoUrl(), this.getUsername(), this.getPassword());
-		getLogger().info("Virtuoso server connected at {}", this.getVirtuosoUrl());
+		assert this.getTimeout() > 0;
+		this.initConnection();
 		assert connection != null;
+	}
+	
+	private void initConnection() {
+		if( this.connection != null) {
+			getLogger().warn("Virtuoso server trying to re-connected at {}", this.getVirtuosoUrl());
+		} else {
+			getLogger().debug("Virtuoso server trying to connected at {}", this.getVirtuosoUrl());
+		}
+		
+		int numberOfReconnectingTries = 0;
+		while(this.maxTriesConnectionTimeout > numberOfReconnectingTries) {
+			try {
+				connection = new VirtGraph(this.getVirtuosoUrl(), this.getUsername(), this.getPassword());
+				connection.setQueryTimeout(getTimeout());
+				getLogger().info("Virtuoso server connected at {}", this.getVirtuosoUrl());
+				return;
+			} catch (Exception e) {
+				getLogger().warn("Tried to establish connection ({}), but failed: {}", numberOfReconnectingTries, e.getMessage());
+				e.printStackTrace();
+				numberOfReconnectingTries++;
+				
+				if(this.maxTriesConnectionTimeout <= numberOfReconnectingTries) {
+					getLogger().error("Failed to establish connection. Max tries exceeded!");
+					throw new RuntimeException(e);
+				}
+				
+				try {
+					TimeUnit.SECONDS.sleep(5);
+				} catch (Exception e2) {
+					getLogger().warn("Failed to wait for 5 seconds: {}", e2.getMessage());
+					e2.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@Override
 	public ResultSet select(String sparql) throws SparqlQueryFailed {
+		short numberOfTries = 0;
+		// try N times if there was a timeout
+		while(numberOfTries < this.maxTriesConnectionTimeout || numberOfTries == 0) {
+			try {
+				return this.select(sparql, numberOfTries);
+			} catch (Exception e) {
+				getLogger().error("Error while executing a SELECT query: {}", e.getMessage());
+				e.printStackTrace();
+				
+				if( e.getMessage().contains(VIRTUOSO_PROBLEM_STRING) ) { // not nice
+					getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);
+					this.initConnection();
+					numberOfTries++;
+				} else {
+					getLogger().error("Error happened. Returns SparqlQueryFailed exception.");
+					throw new SparqlQueryFailed(sparql, this.virtuosoUrl, e);
+				}
+			}
+		}
+		return null; // should never happen
+	}
+	
+	private ResultSet select(String sparql, short numberOfTries) {
 		long start = getTime();
-		getLogger().info("execute SELECT query: {}", sparql);
+		getLogger().info("execute SELECT query (try: {}): {}", numberOfTries, sparql);
 		Query query = QueryFactory.create(sparql);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, this.connection);
 		ResultSetRewindable resultsRewindable = ResultSetFactory.makeRewindable(vqe.execSelect());
@@ -96,8 +162,31 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 
 	@Override
 	public boolean ask(String sparql) throws SparqlQueryFailed {
+		short numberOfTries = 0;
+		// try N times if there was a timeout
+		while(numberOfTries < this.maxTriesConnectionTimeout || numberOfTries == 0) {
+			try {
+				return this.ask(sparql, numberOfTries);
+			} catch (Exception e) {
+				getLogger().error("Error while executing a ASK query: {}", e.getMessage());
+				e.printStackTrace();
+				
+				if( e.getMessage().contains(VIRTUOSO_PROBLEM_STRING) ) { // not nice
+					getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);
+					this.initConnection();
+					numberOfTries++;
+				} else {
+					getLogger().error("Error happened. Returns SparqlQueryFailed exception.");
+					throw new SparqlQueryFailed(sparql, this.virtuosoUrl, e);
+				}
+			}
+		}
+		return false; // should never happen
+	}
+	
+	private boolean ask(String sparql, short numberOfTries) throws SparqlQueryFailed {
 		long start = getTime();
-		getLogger().info("execute ASK query: {}", sparql);
+		getLogger().info("execute ASK query (try: {}): {}", numberOfTries, sparql);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(QueryFactory.create(sparql), this.connection);
 		boolean result = vqe.execAsk();
 		this.logTime(getTime() - start, "ASK on " + this.getVirtuosoUrl() + ": " + sparql);
@@ -106,8 +195,31 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 
 	@Override
 	public void update(String sparql, URI graph) throws SparqlQueryFailed {
+		short numberOfTries = 0;
+		// try N times if there was a timeout
+		while(numberOfTries < this.maxTriesConnectionTimeout || numberOfTries == 0) {
+			try {
+				this.update(sparql, graph, numberOfTries);
+				return;
+			} catch (Exception e) {
+				getLogger().error("Error while executing a UPDATE query: {}", e.getMessage());
+				e.printStackTrace();
+				
+				if( e.getMessage().contains(VIRTUOSO_PROBLEM_STRING) ) { // not nice
+					getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);
+					this.initConnection();
+					numberOfTries++;
+				} else {
+					getLogger().error("Error happened. Returns SparqlQueryFailed exception.");
+					throw new SparqlQueryFailed(sparql, this.virtuosoUrl, e);
+				}
+			}
+		}
+	}
+	
+	private void update(String sparql, URI graph, short numberOfTries) throws SparqlQueryFailed {
 		long start = getTime();
-		getLogger().info("execute UPDATE query on graph {}: {}", graph, sparql);
+		getLogger().info("execute UPDATE query on graph {} (try: {}): {}", graph, numberOfTries, sparql);
 		VirtuosoUpdateRequest vur = VirtuosoUpdateFactory.create(sparql, this.connection);
 		vur.exec();
 		this.logTime(getTime() - start, "UPDATE on " + this.getVirtuosoUrl() + ": " + sparql);
@@ -115,11 +227,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 
 	@Override
 	public void update(String sparql) throws SparqlQueryFailed {
-		long start = getTime();
-		getLogger().info("execute UPDATE query: {}", sparql);
-		VirtuosoUpdateRequest vur = VirtuosoUpdateFactory.create(sparql, this.connection);
-		vur.exec();
-		this.logTime(getTime() - start, "UPDATE on " + this.getVirtuosoUrl() + ": " + sparql);
+		this.update(sparql, null);
 	}
 
 	@Override

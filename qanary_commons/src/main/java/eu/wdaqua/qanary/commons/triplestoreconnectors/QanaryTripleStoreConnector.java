@@ -22,6 +22,8 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
+	
+	private static final long MAX_ACCEPTABLE_QUERY_EXECUTION_TIME = 10000;
 
 	public abstract void connect(); // TODO: add exception
 
@@ -53,7 +55,11 @@ public abstract class QanaryTripleStoreConnector {
 	 * @param duration
 	 */
 	protected void logTime(long duration, String description) {
-		logger.info("runtime measurement: {} ms for {}", duration, description);
+		if( duration > MAX_ACCEPTABLE_QUERY_EXECUTION_TIME) {
+			logger.warn("runtime measurement: {} ms for {} (was very long)", duration, description);
+		} else {
+			logger.info("runtime measurement: {} ms for {}", duration, description);
+		}
 	}
 
 	/**
