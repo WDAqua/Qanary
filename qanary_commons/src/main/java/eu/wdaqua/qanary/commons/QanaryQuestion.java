@@ -303,7 +303,7 @@ public class QanaryQuestion<T> {
 				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
-				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
+				+ "     BIND (IRI(CONCAT(\"urn:qanary:annotation:representation:text:\", STR(RAND()))) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
 		this.getQanaryTripleStoreConnector().update(sparqlquery);
@@ -328,7 +328,7 @@ public class QanaryQuestion<T> {
 				+ "	 	?a oa:annotatedAt ?time  "//
 				+ "	} " //
 				+ "} WHERE { " //
-				+ "     BIND (IRI(str(RAND())) AS ?a) ." //
+				+ "     BIND (IRI(CONCAT(\"urn:qanary:annotation:representation:audio:\", STR(RAND()))) AS ?a) ." //
 				+ "     BIND (now() as ?time) " //
 				+ "}";
 		this.getQanaryTripleStoreConnector().update(sparqlquery);
@@ -506,7 +506,7 @@ public class QanaryQuestion<T> {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<byte[]> responseRaw = restTemplate.getForEntity(
 				this.getUriAudioRepresentation() + QanaryConfiguration.questionRawDataUrlSuffix, byte[].class);
-		logger.info("Audio Representation retrived");
+		logger.info("Audio Representation retrieved");
 		return responseRaw.getBody();
 	}
 
@@ -561,7 +561,7 @@ public class QanaryQuestion<T> {
 					+ "     oa:annotatedBy <" + qanaryUtils.getComponentUri() + "> ; " //
 					+ "	    oa:annotatedAt ?time . " //
 					+ "}} WHERE { " //
-					+ "     BIND (IRI(str(RAND())) AS ?a) ." //
+					+ "     BIND (IRI(CONCAT(\"urn:qanary:annotation:instance:\", STR(RAND()))) AS ?a) ." //
 					+ "     BIND (now() as ?time) " //
 					+ "}";
 
@@ -689,7 +689,7 @@ public class QanaryQuestion<T> {
 				+ "	   oa:AnnotatedAt ?time  " //
 				+ "}} " //
 				+ "WHERE { " //
-				+ "	BIND (IRI(str(RAND())) AS ?a) ." //
+				+ "	BIND (IRI(CONCAT(\"urn:qanary:annotation:representation:text:\", STR(RAND()))) AS ?a) ." //
 				+ "	BIND (now() as ?time) " //
 				+ "}";
 		logger.info("SPARQL query: {}", sparql);
@@ -719,7 +719,7 @@ public class QanaryQuestion<T> {
 				+ " } " //
 				+ "} " //
 				+ "WHERE { " //
-				+ "	BIND (IRI(str(RAND())) AS ?a) . " //
+				+ "	BIND (IRI(CONCAT(\"urn:qanary:annotation:questionlanguage:\", STR(RAND()))) AS ?a) . " //
 				+ "	BIND (now() as ?time) . " //
 				+ "}";
 		this.getQanaryTripleStoreConnector().update(sparql);
@@ -798,7 +798,7 @@ public class QanaryQuestion<T> {
 				+ " }" //
 				+ "} " //
 				+ "WHERE { " //
-				+ "	BIND (IRI(str(RAND())) AS ?a) . " //
+				+ "	BIND (IRI(CONCAT(\"urn:qanary:annotation:dataset:\", STR(RAND()))) AS ?a) . " //
 				+ "	BIND (now() as ?time) . " //
 				+ "}";
 		this.getQanaryTripleStoreConnector().update(sparql);

@@ -19,7 +19,7 @@ GRAPH ?graph  {
     }
 }
 WHERE {
-    BIND (IRI(str(RAND())) AS ?newAnnotation) .
-    BIND (IRI(str(RAND())) AS ?answer) .
+    BIND (IRI(CONCAT("urn:qanary:annotation:answer:json:", STR(RAND()))) AS ?newAnnotation) .
+    BIND (IRI(CONCAT("urn:qanary:answer:", STR(RAND()))) AS ?answer) .
     BIND (now() as ?time) .
 }

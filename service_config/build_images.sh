@@ -1,21 +1,27 @@
 #!/bin/bash
+
 # replace secrets
-if [ -z "$STARDOG_PASSWORD" ]
+if [ -z "$VIRTUOSO_PASSWORD" ]
 then
-  echo "STARDOG_PASSWORD is not set. Check your secrets."
+  echo "VIRTUOSO_PASSWORD is not set. Check your secrets."
   exit
 else
-  sed -i "s/SECRETS_STARDOG_PASSWORD/$STARDOG_PASSWORD/g" ./service_config/files/pipeline
+  sed -i "s/SECRETS_VIRTUOSO_PASSWORD/$VIRTUOSO_PASSWORD/g" ./service_config/files/pipeline
 fi
 
 # build Docker Images and store name and tag
-if ! mvn clean install -DskipTests;
+if ! mvn -B clean install -DskipTests;
 then
   # build failed
   exit 1
 fi
 
-docker image ls | grep -oP "qanary.*\.[0-9] " > images.temp
+echo "Docker images"
+docker image ls
+docker image ls | grep -oP "qanary.*\.[0-9]+ " > images.temp
+
+echo "Locally available Docker images:"
+cat images.temp
 
 # read image list
 images=$(cat images.temp)

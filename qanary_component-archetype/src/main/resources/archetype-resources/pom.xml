@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>${groupId}</groupId>
-	<artifactId>${artifactId}</artifactId>
+	<artifactId>${artifactId.toLowerCase()}</artifactId>
 	<version>${version}</version>
 
 	<parent>
@@ -15,17 +15,47 @@
 	</parent>
 	<properties>
 		<java.version>17</java.version>
+		<qanary.version>[3.9.0,4.0.0)</qanary.version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 
-			a artifactId not following the naming conventions, (c.f., https://maven.apache.org/guides/mini/guide-naming-conventions.html) -->
+			an artifactId not following the naming conventions, (c.f., https://maven.apache.org/guides/mini/guide-naming-conventions.html) -->
 		<docker.image.name>${artifactId.toLowerCase()}</docker.image.name>
 		<dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 	</properties>
 
 	<dependencies>
-		<!-- common minimum dependencies are inherited from parent -->
-		<!-- specify optional commmon dependencies (see <dependencyManagement> in parent) -->
+		<dependency>
+			<groupId>eu.wdaqua.qanary</groupId>
+			<artifactId>qa.component</artifactId>
+			<version>${qanary.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<version>1.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>hamcrest-core</artifactId>
+					<groupId>org.hamcrest</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>

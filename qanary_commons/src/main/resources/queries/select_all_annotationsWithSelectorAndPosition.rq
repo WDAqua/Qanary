@@ -1,0 +1,18 @@
+PREFIX dbr: <http://dbpedia.org/resource/> 
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/> 
+PREFIX qa: <http://www.wdaqua.eu/qa#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+SELECT *
+FROM ?graph 
+WHERE { 
+    ?annotation    	oa:hasBody   	?hasBody .
+    ?annotation 	oa:hasTarget 	?hasTarget .
+    ?hasTarget 		oa:hasSource    ?hasSource .
+    ?hasTarget     	oa:hasSelector  ?hasSelector .
+    ?hasSelector 	rdf:type    	oa:TextPositionSelector .
+    ?hasSelector  	oa:start    	?start .
+    ?hasSelector  	oa:end      	?end .
+    OPTIONAL { 
+		?annotation qa:score	?score .  # we cannot be sure that a score is provided
+	}
+}
