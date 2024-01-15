@@ -4,8 +4,10 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?annotationId ?annotationType ?hasTarget ?hasBody ?qaScore  ?annotatedBy ?annotatedAt ?subproperty ?subvalue ?subsubproperty ?subsubvalue {
-  GRAPH ?graph  {
+SELECT ?annotationId ?annotationType ?hasTarget ?hasBody ?qaScore  ?annotatedBy ?annotatedAt ?subproperty ?subvalue ?subsubproperty ?subsubvalue 
+FROM ?graph # only this form works while using the Virtuoso triplestore
+WHERE {
+#  GRAPH ?graph  {
     ?annotationId oa:annotatedBy ?annotatedBy .
     ?annotationId rdf:type ?annotationType .
       FILTER REGEX (STR(?annotatedBy), ?componentName )
@@ -21,6 +23,6 @@ SELECT ?annotationId ?annotationType ?hasTarget ?hasBody ?qaScore  ?annotatedBy 
         ?subvalue ?subsubproperty ?subsubvalue .
       }
     }
-  }
+#  }
 }
 ORDER BY ?annotationId ?annotationType ?annotatedAt

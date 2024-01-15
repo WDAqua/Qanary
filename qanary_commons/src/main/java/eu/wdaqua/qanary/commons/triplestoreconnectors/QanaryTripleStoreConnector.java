@@ -22,6 +22,8 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
+	
+	private static final long MAX_ACCEPTABLE_QUERY_EXECUTION_TIME = 10000;
 
 	public abstract void connect(); // TODO: add exception
 
@@ -53,7 +55,11 @@ public abstract class QanaryTripleStoreConnector {
 	 * @param duration
 	 */
 	protected void logTime(long duration, String description) {
-		logger.info("runtime measurement: {} ms for {}", duration, description);
+		if( duration > MAX_ACCEPTABLE_QUERY_EXECUTION_TIME) {
+			logger.warn("runtime measurement: {} ms for {} (was very long)", duration, description);
+		} else {
+			logger.info("runtime measurement: {} ms for {}", duration, description);
+		}
 	}
 
 	/**
@@ -199,9 +205,19 @@ public abstract class QanaryTripleStoreConnector {
 	public static String readFileFromResourcesWithMap(String filenameWithRelativePath, QuerySolutionMap bindings)
 			throws IOException {
 		String sparqlQueryString = readFileFromResources(filenameWithRelativePath);
+		
+		if(logger.isDebugEnabled()) {
+			logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
+			String debugMessage = "Try to apply the variables to the SPARQL query template:";
+			for( String varName : bindings.asMap().keySet() ) {
+				debugMessage += String.format("\n\t%s -> %s", varName, bindings.asMap().get(varName));
+			}
+			logger.debug(debugMessage);
+		}
+		
 		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
-
-		logger.debug("readFileFromResourcesWithMap sparqlQueryString: {}", sparqlQueryString);
+		
+		logger.debug("create SPARQL query text before QueryFactory: {}", pq.toString());
 
 		if ((sparqlQueryString).contains("\nSELECT ") || sparqlQueryString.startsWith("SELECT")) {
 			Query query = QueryFactory.create(pq.toString());

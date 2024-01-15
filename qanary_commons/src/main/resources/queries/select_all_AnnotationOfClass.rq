@@ -7,7 +7,7 @@ FROM ?graph
 WHERE {
 ?annotationId a qa:AnnotationOfClass .
 ?annotationId oa:hasTarget [
-	a oa:SpecificClass ;
+	a oa:SpecificResource ;
  	oa:hasSource ?hasSource ;
 ] .
 ?annotationId oa:hasBody ?hasBody ;

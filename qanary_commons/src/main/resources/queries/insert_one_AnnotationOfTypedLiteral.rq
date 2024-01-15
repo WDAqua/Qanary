@@ -28,9 +28,9 @@ GRAPH ?graph  {
     }
 }
 WHERE {
-    BIND (IRI(str(RAND())) AS ?newAnnotation) .
-    BIND (IRI(str(RAND())) AS ?answer) .
-    BIND (IRI(str(RAND())) AS ?newTypeAnnotation) .
-    BIND (IRI(str(RAND())) AS ?answerType) .
+    BIND (IRI(CONCAT("urn:qanary:annotation:answer:", STR(RAND()))) AS ?newAnnotation) .
+    BIND (IRI(CONCAT("urn:qanary:annotation:answer:type:", STR(RAND()))) AS ?newTypeAnnotation) .
+    BIND (IRI(CONCAT("urn:qanary:answer:", STR(RAND()))) AS ?answer) .
+    BIND (IRI(CONCAT("urn:qanary:answer:type:", STR(RAND()))) AS ?answerType) .
     BIND (now() as ?time) . 
 }

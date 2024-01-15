@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,7 +70,7 @@ public class QanaryServiceController {
 			operationId = "showDescriptionOnGetRequestOnRoot", //
 			description = "for showing information in a Web browser" //  
 	)
-    public QanaryMessage annotatequestion(HttpServletRequest request, @RequestBody String message) throws Exception {
+    public ResponseEntity<?> annotatequestion(HttpServletRequest request, @RequestBody String message) throws Exception {
         logger.info("annotatequestion: {}", message);
         long start = QanaryUtils.getTime();
 
@@ -81,11 +83,17 @@ public class QanaryServiceController {
         this.qanaryComponent.setQanaryMessage(myQanaryMessage);
         this.qanaryComponent.setUtils(myQanaryMessage);
         
-        this.qanaryComponent.process(myQanaryMessage);
+        try {
+            this.qanaryComponent.process(myQanaryMessage);
+		} catch (Exception e) {
+			logger.error("Something went wrong while executing the 'process' method: {}", e.getMessage());
+			return new ResponseEntity<String>(e.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+        
 
         logger.debug("processing took: {} ms", QanaryUtils.getTime() - start);
 
-        return myQanaryMessage;
+        return new ResponseEntity<QanaryMessage>(myQanaryMessage, HttpStatus.OK);
     }
 
     /**
