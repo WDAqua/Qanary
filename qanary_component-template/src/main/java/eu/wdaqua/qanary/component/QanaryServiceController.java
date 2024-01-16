@@ -135,7 +135,7 @@ public class QanaryServiceController {
     		String sessionDataValue = env.getProperty(name, "This text is shown as the property " + name + " is not defined (e.g., in application.properties).");
 	    	session.setAttribute(sessionDataName, sessionDataValue);
     		logger.info("session | {} -> {}={}", name, sessionDataName, session.getAttribute(sessionDataName));
-		}
+	}
 
     	Map<String,String> envImportantPropertyNameValue = new HashMap<>();
     	envImportantPropertyNameValue.put("component_description_url", QanaryConfiguration.description);
@@ -157,16 +157,16 @@ public class QanaryServiceController {
         envImportantPropertyNameValue.put("componentImplementationVendor", extendingComponent.getPackage().getSpecificationVendor());
 
     } catch (Exception e) {
-        logger.debug("No class implementing QanaryComponent could be found during runtime!");
-        logger.debug(e.getMessage());
+        logger.warn("No class implementing QanaryComponent could be found during runtime!");
+        logger.warn(e.getMessage());
     }
 
     	for (Map.Entry<String, String> entry : envImportantPropertyNameValue.entrySet()) {
-			String key = entry.getKey();
-			String val = entry.getValue();
+		String key = entry.getKey();
+		String val = entry.getValue();
 	    	session.setAttribute(key, val);
     		logger.info("session | {}={}", key, session.getAttribute(key));
-		}
+	}
     	
     	return QanaryConfiguration.description_file;
     }
