@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.component.exceptions.AmbiguousExtendingComponentClass;
+import eu.wdaqua.qanary.component.exceptions.NoExtendingComponentClass;
 import io.swagger.v3.oas.annotations.Operation;
 
 
@@ -148,6 +150,7 @@ public class QanaryServiceController {
     	envImportantPropertyNameValue.put("SpecificationVersion", getClass().getPackage().getSpecificationVersion());
 
     try {
+        //find the specific implemented Qanary component
         Class<? extends QanaryComponent> extendingComponent = getExtendingComponent();
         envImportantPropertyNameValue.put("componentImplementationVersion", extendingComponent.getPackage().getImplementationVersion());
         envImportantPropertyNameValue.put("componentImplementationTitle", extendingComponent.getPackage().getImplementationTitle());
@@ -168,26 +171,29 @@ public class QanaryServiceController {
     	return QanaryConfiguration.description_file;
     }
 
-    // TODO: add documentation
+    /**
+     * get the specific implemented component that extends eu.wdaqua.qanary.component
+     * 
+     * @return
+     * @throws Exception
+     */
     private Class<? extends QanaryComponent> getExtendingComponent() throws Exception {
         Reflections reflections = new Reflections(
                 new ConfigurationBuilder()
                     .addScanners(Scanners.SubTypes.filterResultsBy(s->true))
                     .forPackages("eu.wdaqua.qanary.component")); 
-        // TODO: caution: what about custom components outside of this classpath?
+        // use reflections to find subtypes of eu.wdaqua.qanary.component
         Set<Class<? extends QanaryComponent>> classes = reflections.getSubTypesOf(QanaryComponent.class);
         // exactly one class is expected
         if (classes.size() == 1) {
             logger.debug("Found class: {}", classes.iterator().next().getName());
             logger.debug("version: {}", classes.iterator().next().getPackage().getImplementationVersion());
+            // return the first (and only) one
             return classes.iterator().next();
         } else if (classes.size() == 0) {
-            //throw new NoExtendingComponentClassException();
-            throw new Exception("no extending component");
+            throw new NoExtendingComponentClass(QanaryComponent.class);
         } else {
-            logger.warn("ambiguous");
-            //throw new AmbiguousExtendingComponentClassException();
-            throw new Exception("ambiguous extending component");
+            throw new AmbiguousExtendingComponentClass(QanaryComponent.class);
         }
     }
 }
