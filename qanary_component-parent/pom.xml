@@ -23,9 +23,11 @@
 		<spring-boot-admin.version>2.7.11</spring-boot-admin.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<json-path.version>2.4.0</json-path.version>
+		<springdoc.version>1.7.0</springdoc.version>
 	</properties>
 
 	<!-- common dependencies that are implemented by all components -->
+
 	<dependencies>
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
@@ -113,7 +115,7 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>1.7.0</version>
+				<version>${springdoc.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>io.swagger.core.v3</groupId>
