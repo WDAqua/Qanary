@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
-    <version>3.8.3</version>
+    <version>3.8.4</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,7 +13,7 @@
     </parent>
     <properties>
         <java.version>11</java.version>
-        <spring-boot-admin.version>2.7.14</spring-boot-admin.version>
+        <spring-boot-admin.version>2.7.15</spring-boot-admin.version>
         <qanary.version>[3.11.3,4.0.0)</qanary.version>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
         <docker.image.prefix>qanary</docker.image.prefix>
