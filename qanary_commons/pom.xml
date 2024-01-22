@@ -275,10 +275,10 @@
 	<!-- START - Setup for deployment to maven repository -->
 	<!-- -->
 
-	<!-- Project name, Description, URL --> <!-- TODO: Replace properties -->
+	<!-- Project name, Description, URL -->
 	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
 	<description>**DESCRIPTION**</description>
-	<url>**URL**</url>
+	<url>https://github.com/WDAqua/Qanary/</url>
 
 	<!-- Set up distribution management (for maven deploy plugin) -->
 	<distributionManagement>
@@ -296,17 +296,17 @@
 		<url>https://github.com/WDAqua/Qanary</url>
 	</scm>
 
-	<!-- Developer information --> <!-- TODO: Replace properties -->
+	<!-- Developer information -->
 	<developers>
 		<developer>
-			<name>**NAMEr**</name>
+			<name>**NAME**</name>
 			<email>**EMAIL**</email>
 			<organization>**ORGA**</organization>
 			<organizationUrl>**ORGA_URL**</organizationUrl>
 		</developer>
 	</developers>
 
-	<!-- Licence information --> <!-- TODO: Replace properties if necessary -->
+	<!-- Licence information -->
 	<licenses>
 		<license>
 			<name>**The Apache License, Version 2.0**</name> <!-- Example for Apache2 Licence -->
