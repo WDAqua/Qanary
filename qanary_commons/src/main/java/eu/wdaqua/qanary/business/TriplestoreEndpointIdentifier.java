@@ -35,10 +35,7 @@ public class TriplestoreEndpointIdentifier {
 
 	/**
 	 * if required by the configuration the endpoint URL is rewritten
-	 * 
-	 * @param url
-	 * @return
-	 * @throws URISyntaxException 
+	 *
 	 */
 	@Deprecated
 	public URI getSelectEndpoint(URI uri) throws URISyntaxException {
@@ -53,10 +50,7 @@ public class TriplestoreEndpointIdentifier {
 
 	/**
 	 * if required by the configuration the endpoint URL is rewritten
-	 * 
-	 * @param url
-	 * @return
-	 * @throws URISyntaxException 
+	 *
 	 */
 	@Deprecated
 	public URI getAskEndpoint(URI uri) throws URISyntaxException {
@@ -69,10 +63,7 @@ public class TriplestoreEndpointIdentifier {
 
 	/**
 	 * if required by the configuration the endpoint URL is rewritten
-	 * 
-	 * @param url
-	 * @return
-	 * @throws URISyntaxException 
+	 *
 	 */
 	@Deprecated
 	public URI getUpdateEndpoint(URI uri) throws URISyntaxException {
@@ -87,10 +78,7 @@ public class TriplestoreEndpointIdentifier {
 
 	/**
 	 * if required by the configuration the endpoint URL is rewritten
-	 * 
-	 * @param url
-	 * @return
-	 * @throws URISyntaxException 
+	 *
 	 */
 	@Deprecated
 	public URI getCreateEndpoint(URI url) throws URISyntaxException {
@@ -103,10 +91,7 @@ public class TriplestoreEndpointIdentifier {
 
 	/**
 	 * if required by the configuration the endpoint URL is rewritten
-	 * 
-	 * @param url
-	 * @return
-	 * @throws URISyntaxException 
+	 *
 	 */
 	@Deprecated
 	public URI getLoadEndpoint(URI uri) throws URISyntaxException {

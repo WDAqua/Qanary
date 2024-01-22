@@ -5,7 +5,7 @@ import java.net.URI;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 /**
- * message object send back to client by /question endpoint in {@link QanarySparqlController}
+ * message object send back to client by /question endpoint in @see eu.wdaqua.qanary.QanarySparqlController
  *
  * @author AnBo
  */
