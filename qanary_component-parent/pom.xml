@@ -22,7 +22,7 @@
 		<qanary.version>[3.9.0,4.0.0)</qanary.version>
 		<spring-boot-admin.version>2.7.18</spring-boot-admin.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
-		<json-path.version>2.4.0</json-path.version>
+		<json-path.version>2.9.0</json-path.version>
 	</properties>
 
 	<!-- common dependencies that are implemented by all components -->
