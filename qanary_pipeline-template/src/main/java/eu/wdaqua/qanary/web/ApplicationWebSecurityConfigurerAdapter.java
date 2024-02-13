@@ -27,6 +27,7 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 		"/gerbil*/**",
 		"/login",
 		"/instances",
+		"/applications/**",
 		"/sparql"
 	};
 
