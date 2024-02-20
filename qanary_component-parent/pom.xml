@@ -19,18 +19,45 @@
 	</parent>
 	<properties>
 		<java.version>17</java.version>
-		<qanary.version>[3.9.0,4.0.0)</qanary.version>
-		<spring-boot-admin.version>2.7.18</spring-boot-admin.version>
+		<spring-boot-admin.version>2.7.11</spring-boot-admin.version>
+		<qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
+		<qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
+		<springdoc.version>1.7.0</springdoc.version>
 		<json-path.version>2.9.0</json-path.version>
 	</properties>
 
 	<!-- common dependencies that are implemented by all components -->
+
 	<dependencies>
 		<dependency>
 			<groupId>eu.wdaqua.qanary</groupId>
 			<artifactId>qa.component</artifactId>
-			<version>${qanary.version}</version>
+			<version>${qanary.component.version}</version>
+			<exclusions>
+					<exclusion>
+							<groupId>org.apache.logging.log4j</groupId>
+							<artifactId>log4j-to-slf4j</artifactId>
+					</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+				<groupId>eu.wdaqua.qanary</groupId>
+				<artifactId>qa.commons</artifactId>
+				<version>${qanary.commons.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+		</dependency>
+		<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>2.20.0</version>
+				<exclusions>
+						<exclusion>
+								<groupId>org.apache.logging.log4j</groupId>
+								<artifactId>log4j-api</artifactId>
+						</exclusion>
+				</exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
 		<dependency>
@@ -80,7 +107,6 @@
 				<groupId>com.jayway.jsonpath</groupId>
 				<artifactId>json-path</artifactId>
 				<version>${json-path.version}</version>
-				<scope>test</scope>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path-assert -->
 			<dependency>
@@ -113,13 +139,23 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>1.7.0</version>
+				<version>${springdoc.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>io.swagger.core.v3</groupId>
 						<artifactId>swagger-annotations</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-webmvc-core</artifactId>
+				<version>${springdoc.version}</version>
+			</dependency> 
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-data-rest</artifactId>
+				<version>${springdoc.version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-core-jakarta -->
 			<dependency>

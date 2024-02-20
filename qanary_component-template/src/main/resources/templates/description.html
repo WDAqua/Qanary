@@ -19,7 +19,8 @@
     </style>
 </head>
 <body>
-	<h1>Qanary component: <span th:text=${session.spring_application_name} th:unless="${session == null}" style="font-style: italic"></span><span th:unless="${session == null}">, v<span th:text=${session.ImplementationVersion} th:unless="${session.ImplementationVersion == null}" ></span></span></h1>
+	<h1>Qanary component: <span th:text=${session.spring_application_name} th:unless="${session == null}" style="font-style: italic"></span><span th:unless="${session == null}">, v<span th:text=${session.componentImplementationVersion} th:unless="${session.componentImplementationVersion == null}" ></span></span></h1>
+	<h2>(<span th:unless="${session == null}">based on <span th:text=${session.ImplementationTitle}></span> v<span th:text=${session.ImplementationVersion} th:unless="${session.ImplementationVersion == null}" ></span></span>)</h2>
     <p th:text=${session.spring_application_description} th:unless="${session == null}"/>
     <p>Given the current configuration, this component should connect to a Qanary system at <a th:text="${session.spring_boot_admin_url}" th:href="${session.spring_boot_admin_url}"></a>.</p>
     <p>API docs (OpenAPI/Swagger) are available at <a th:text="${session.springdoc_swagger_ui_path}" th:href="${session.springdoc_swagger_ui_path}" th:unless="${session == null}"></a>.</p>
