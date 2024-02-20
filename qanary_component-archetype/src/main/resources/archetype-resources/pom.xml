@@ -7,10 +7,10 @@
 	<artifactId>${artifactId.toLowerCase()}</artifactId>
 	<version>${version}</version>
 
-	<parent>
-    <groupId>eu.wdaqua.qanary</groupId>
-    <artifactId>qa.qanarycomponent-parent</artifactId>
-    <version>0.1.0</version>
+	<parent> 
+		<groupId>eu.wdaqua.qanary</groupId> 
+		<artifactId>qa.qanarycomponent-parent</artifactId> 
+		<version>0.1.0</version>
 	</parent>
 	<properties>
 		<java.version>17</java.version>

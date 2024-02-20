@@ -27,13 +27,15 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * @see <a href="https://github.com/WDAqua/Qanary/wiki/How-do-I-integrate-a-new-component-in-Qanary%3F" target="_top">Github wiki howto</a>
  */
 public class ${classname} extends QanaryComponent {
-	// you might use this parameterizable file to store the query that should be
+	// uou might use this parameterizable file to store the query that should be
 	// executed for fetching the annotations required for this component from the
-	// Qanary triplestore
+	// Qanary triplestore.
+	// we encourage re-using existing files from the qa.commons package
 	private static final String FILENAME_FETCH_REQUIRED_ANNOTATIONS = "/queries/fetchRequiredAnnotations.rq";
 	// you might use this parameterizable file to store the query that should be
 	// executed for storing the annotations computed for this component from the
-	// Qanary triplestore
+	// Qanary triplestore.
+	// we encourage re-using existing files from the qa.commons package
 	private static final String FILENAME_STORE_COMPUTED_ANNOTATIONS = "/queries/storeComputedAnnotations.rq";
 	
 	private static final Logger logger = LoggerFactory.getLogger(${classname}.class);
@@ -44,8 +46,8 @@ public class ${classname} extends QanaryComponent {
 		this.applicationName = applicationName;
 
 		// here if the files are available and do contain content
-        QanaryTripleStoreConnector.guardNonEmptyFileFromResources(FILENAME_FETCH_REQUIRED_ANNOTATIONS);
-        QanaryTripleStoreConnector.guardNonEmptyFileFromResources(FILENAME_STORE_COMPUTED_ANNOTATIONS);
+		QanaryTripleStoreConnector.guardNonEmptyFileFromResources(FILENAME_FETCH_REQUIRED_ANNOTATIONS);
+		QanaryTripleStoreConnector.guardNonEmptyFileFromResources(FILENAME_STORE_COMPUTED_ANNOTATIONS);
 	}
 	/**
 	 * implement this method encapsulating the functionality of your Qanary
@@ -58,7 +60,7 @@ public class ${classname} extends QanaryComponent {
 	public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
 		logger.info("process: {}", myQanaryMessage);
 
-		// typical helpers 		
+		// typical helpers
 		QanaryUtils myQanaryUtils = this.getUtils();
 		QanaryTripleStoreConnector connectorToQanaryTriplestore = myQanaryUtils.getQanaryTripleStoreConnector();
 		
@@ -72,14 +74,14 @@ public class ${classname} extends QanaryComponent {
 		// retrieve the data you need to implement your component's functionality
 
 		// TODO: define the SPARQL query fetch the data that your component requires
-        QuerySolutionMap bindingsForSelect = new QuerySolutionMap();
-        // at least the variable GRAPH needs to be replaced by the ingraph as each query needs to be specific for the current process 
-        bindingsForSelect.add("GRAPH", ResourceFactory.createResource(myQanaryQuestion.getInGraph().toASCIIString()));
+		QuerySolutionMap bindingsForSelect = new QuerySolutionMap();
+		// at least the variable GRAPH needs to be replaced by the ingraph as each query needs to be specific for the current process 
+		bindingsForSelect.add("GRAPH", ResourceFactory.createResource(myQanaryQuestion.getInGraph().toASCIIString()));
 
-        // TODO: define your SPARQL UPDATE query in the mentioned file
-        String sparqlSelectQuery = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_FETCH_REQUIRED_ANNOTATIONS, bindingsForSelect);		
+		// TODO: define your SPARQL UPDATE query in the mentioned file
+		String sparqlSelectQuery = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_FETCH_REQUIRED_ANNOTATIONS, bindingsForSelect);		
 		logger.info("generated SPARQL INSERT query: {}", sparqlSelectQuery);
-        ResultSet resultset = connectorToQanaryTriplestore.select(sparqlSelectQuery);
+		ResultSet resultset = connectorToQanaryTriplestore.select(sparqlSelectQuery);
 		while (resultset.hasNext()) {
 			QuerySolution tuple = resultset.next();
 		}
@@ -89,13 +91,10 @@ public class ${classname} extends QanaryComponent {
 		// --------------------------------------------------------------------
 		// TODO: implement the custom code for your component
 
-		
-		
 		// --------------------------------------------------------------------
 		// STEP 3: store computed knowledge about the given question into the Qanary triplestore 
 		// (the global process memory)
 		// --------------------------------------------------------------------
-
 		logger.info("store data in graph {} of Qanary triplestore endpoint {}", //
 				myQanaryMessage.getValues().get(myQanaryMessage.getOutGraph()), //
 				myQanaryMessage.getValues().get(myQanaryMessage.getEndpoint()));
@@ -103,11 +102,11 @@ public class ${classname} extends QanaryComponent {
 		// push the new data to the Qanary triplestore
 
 		// TODO: define the SPARQL query fetch the data that your component requires
-        QuerySolutionMap bindingsForUpdate = new QuerySolutionMap();
-        // at least the variable GRAPH needs to be replaced by the outgraph as each query needs to be specific for the current process 
-        bindingsForUpdate.add("GRAPH", ResourceFactory.createResource(myQanaryQuestion.getOutGraph().toASCIIString()));
+		QuerySolutionMap bindingsForUpdate = new QuerySolutionMap();
+		// at least the variable GRAPH needs to be replaced by the outgraph as each query needs to be specific for the current process 
+		bindingsForUpdate.add("GRAPH", ResourceFactory.createResource(myQanaryQuestion.getOutGraph().toASCIIString()));
 
-        // TODO: define your SPARQL UPDATE query in the mentioned file
+		// TODO: define your SPARQL UPDATE query in the mentioned file
 		String sparqlUpdateQuery = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_STORE_COMPUTED_ANNOTATIONS, bindingsForUpdate);
 		logger.info("generated SPARQL UPDATE query: {}", sparqlUpdateQuery);
 		connectorToQanaryTriplestore.update(sparqlUpdateQuery);
