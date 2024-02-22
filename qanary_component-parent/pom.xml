@@ -19,7 +19,7 @@
 	</parent>
 	<properties>
 		<java.version>17</java.version>
-		<spring-boot-admin.version>2.7.11</spring-boot-admin.version>
+		<spring-boot-admin.version>2.7.18</spring-boot-admin.version>
 		<qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
 		<qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
