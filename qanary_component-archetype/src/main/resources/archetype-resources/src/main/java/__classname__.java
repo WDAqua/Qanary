@@ -27,7 +27,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * @see <a href="https://github.com/WDAqua/Qanary/wiki/How-do-I-integrate-a-new-component-in-Qanary%3F" target="_top">Github wiki howto</a>
  */
 public class ${classname} extends QanaryComponent {
-	// yuou might use this parameterizable file to store the query that should be
+	//you might use this parameterizable file to store the query that should be
 	// executed for fetching the annotations required for this component from the
 	// Qanary triplestore.
 	// we encourage re-using existing files from the qa.commons package
