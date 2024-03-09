@@ -18,16 +18,21 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Import GPG Key
+      uses:
+
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'adopt'
+        distribution: 'temurin'
         server-id: ossrh
-        server-username: ${{ secrets.OSSRH_PASSWORD }}
-        server-password: ${{ secrets.OSSRH_USERNAME }}
-        gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Publish package
-      run: cat ~/.m2/settings.xml && mvn clean deploy -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -pl qanary_commons
+      run: mvn clean deploy -pl qanary_commons
+      env:
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
