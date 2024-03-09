@@ -26,8 +26,8 @@ jobs:
         server-id: ossrh
         server-username: ${{ secrets.OSSRH_USERNAME }}
         server-password: ${{ secrets.OSSRH_PASSWORD }}
-        gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg-passphrase: "test1"
+        gpg-private-key: "test2"
 
     - name: Print settings.xml
       run: cat $HOME/.m2/settings.xml
