@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -28,6 +28,9 @@ jobs:
         server-password: ${{ secrets.OSSRH_PASSWORD }}
         gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+    - name: Print settings.xml
+      run: cat $HOME/.m2/settings.xml
 
     - name: Publish package
       run: mvn clean deploy -pl qanary_commons
