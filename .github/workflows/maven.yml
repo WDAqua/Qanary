@@ -24,14 +24,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         server-id: ossrh
-        server-username: MAVEN_USERNAME # env variable for username in deploy
-        server-password: MAVEN_PASSWORD # env variable for token in deploy
-        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+        server-username: ${{ secrets.OSSRH_USERNAME }}
+        server-password: ${{ secrets.OSSRH_PASSWORD }}
+        gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Publish package
       run: mvn clean deploy -pl qanary_commons
-      env:
-        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
