@@ -26,6 +26,8 @@ jobs:
         server-id: ossrh
         server-username: ${{ secrets.OSSRH_PASSWORD }}
         server-password: ${{ secrets.OSSRH_USERNAME }}
+        gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Publish package
       run: mvn clean deploy -X --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
