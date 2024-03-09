@@ -6,8 +6,6 @@ name: Java CI with Maven
 on:
   push:
     branches: [ master ]
-    paths:
-      - 'qanary_commons'
   pull_request:
     branches: [ master ]
 
@@ -19,6 +17,12 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+
+    - name: Set module name
+      run: echo "::set-env name=MODULE::${{ matrix.module }}"
+      env:
+        matrix:
+          module: qanary_commons
 
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v3
@@ -32,4 +36,4 @@ jobs:
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Publish package
-      run: mvn clean deploy -X --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+      run: mvn clean deploy -X --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -pl $MODULE
