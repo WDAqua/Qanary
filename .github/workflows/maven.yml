@@ -17,9 +17,6 @@ jobs:
     steps:
     - name: Checkout Repository # extend sparse checkout if more package need to be deployed
       uses: actions/checkout@v4
-      with:
-        path: qanary_commons
-
 
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v4
