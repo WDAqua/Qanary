@@ -18,9 +18,6 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Import GPG Key
-      uses:
-
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v3
       with:
