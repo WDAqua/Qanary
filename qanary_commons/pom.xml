@@ -277,7 +277,7 @@
 
 	<!-- Project name, Description, URL -->
 	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
-	<description>**DESCRIPTION**</description>
+	<description>Qanary commons package</description>
 	<url>https://github.com/WDAqua/Qanary/</url>
 
 	<!-- Set up distribution management (for maven deploy plugin) -->
@@ -299,18 +299,18 @@
 	<!-- Developer information -->
 	<developers>
 		<developer>
-			<name>**NAME**</name>
-			<email>**EMAIL**</email>
-			<organization>**ORGA**</organization>
-			<organizationUrl>**ORGA_URL**</organizationUrl>
+			<name>Andreas Both</name>
+			<email>andreas.both@htwk-leipzig.de</email>
+			<organization>WDAqua</organization>
+			<organizationUrl>http://wdaqua.eu/</organizationUrl>
 		</developer>
 	</developers>
 
 	<!-- Licence information -->
 	<licenses>
 		<license>
-			<name>**The Apache License, Version 2.0**</name> <!-- Example for Apache2 Licence -->
-			<url>**http://www.apache.org/licenses/LICENSE-2.0.txt**</url> <!-- Example for Apache2 Licence -->
+			<name>The Apache License, Version 2.0</name> <!-- Example for Apache2 Licence -->
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> <!-- Example for Apache2 Licence -->
 		</license>
 	</licenses>
 
@@ -341,6 +341,27 @@
 							</rules>
 							<fail>true</fail>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Signing the artifact -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<configuration>
+					<gpgArguments>
+						<arg>--pinentry-mode</arg>
+						<arg>loopback</arg>
+					</gpgArguments>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
