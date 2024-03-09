@@ -30,4 +30,4 @@ jobs:
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Publish package
-      run: mvn clean deploy -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -pl qanary_commons
+      run: cat ~/.m2/settings.xml && mvn clean deploy -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -pl qanary_commons
