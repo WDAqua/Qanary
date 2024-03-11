@@ -29,8 +29,8 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Publish package
-      run: cat $HOME/.m2/settings.xml  && mvn -s $HOME/.m2/settings.xml deploy -pl qanary_commons
+      run: mvn -B -pl qanary_commons -am deploy -s $HOME/.m2/settings.xml
       env:
-        MAVEN_USERNAME: MAVEN_USERNAME
-        MAVEN_CENTRAL_TOKEN: MAVEN_CENTRAL_TOKEN
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
