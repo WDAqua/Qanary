@@ -25,8 +25,8 @@ jobs:
         server-id: 'ossrh' # Value of the distributionManagement/repository/id field of the pom.xml
         server-username: ${{ secrets.OSSRH_USERNAME }} # env variable for username in deploy
         server-password: ${{ secrets.OSSRH_PASSWORD }} # env variable for token in deploy
-        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
-        gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }} # env variable for GPG private key passphrase
+        gpg-private-key: 'test' # Value of the GPG private key to import
+        gpg-passphrase: 'test' # env variable for GPG private key passphrase
 
     - name: Print settings.xml # Debugging purposes
       run: cat $HOME/.m2/settings.xml
