@@ -29,7 +29,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Publish package
-      run: cd qanary_commons
+      run: mvn deploy -pl qanary_commons
       env:
         MAVEN_USERNAME: 'abc'
         MAVEN_CENTRAL_TOKEN: 'def'
