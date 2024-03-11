@@ -29,9 +29,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Verify GPG Key
-      run: mvn verify -Dgpg.passphrase=MAVEN_GPG_PASSPHRASE
-      env:
-        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      run: mvn verify -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PASSPHRASE }} -pl qanary_commons
     
     - name: Publish package
       run: mvn deploy -pl qanary_commons
