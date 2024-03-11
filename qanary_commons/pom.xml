@@ -346,6 +346,15 @@
 					</execution>
 				</executions>
 			</plugin>
+
+                	<plugin>
+                    		<artifactId>maven-release-plugin</artifactId>
+                    		<version>3.0.1</version>
+                    		<configuration>
+                        		<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+                    		</configuration>
+                	</plugin>
+			
 			<!-- Signing the artifact -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
