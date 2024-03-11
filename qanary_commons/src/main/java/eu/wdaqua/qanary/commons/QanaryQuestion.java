@@ -33,8 +33,6 @@ import java.util.UUID;
  *
  * TODO: should be refactored to distinguished class for different
  * representations like text, audio, ...
- *
- * @param <T>
  */
 public class QanaryQuestion<T> {
 
