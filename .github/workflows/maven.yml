@@ -13,8 +13,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
     steps:
     - uses: actions/checkout@v4
@@ -25,17 +23,17 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
         server-id: 'ossrh' # Value of the distributionManagement/repository/id field of the pom.xml
-        server-username: ${{ secrets.OSSRH_USERNAME }} # env variable for username in deploy
-        server-password: ${{ secrets.OSSRH_PASSWORD }} # env variable for token in deploy
-        gpg-private-key: 'test' # Value of the GPG private key to import
-        gpg-passphrase: $GPG_PASSPHRASE
+        server-username: MAVEN_USERNAME # env variable for username in deploy
+        server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Print settings.xml # Debugging purposes
       run: cat $HOME/.m2/settings.xml
 
     - name: Publish package
       run: mvn deploy -pl qanary_commons
-      #env:
-       # MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-       # MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
-       # MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      env:
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
