@@ -29,7 +29,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Publish package
-      run: cd qanary_commons && cat/home/runner/.m2/settings.xml
+      run: cd qanary_commons && cat /home/runner/.m2/settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
