@@ -35,7 +35,7 @@ jobs:
     #    passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
     
     - name: Publish package
-      run: cd qanary_commons && mvn deploy Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }}
+      run: cd qanary_commons && mvn deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }}
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
