@@ -8,6 +8,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  pull_request_target: [ master ]
 
 jobs:
   build:
@@ -18,7 +19,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Check secrets
-      run: echo "Maven_username is ${{ secrets.API_KEY }}" && echo "Private key is ${{ secrets.VIRTUOSO_PASSWORD }}"
+      run: echo "Maven_username is ${{ secrets.OSSRH_USERNAME }}" && echo "Private key is ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}"
 
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v4
@@ -39,4 +40,4 @@ jobs:
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
-        MAVEN_GPG_PASSPHRASE: 'test'
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
