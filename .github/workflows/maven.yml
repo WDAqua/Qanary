@@ -17,6 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check secrets
+      run: echo "Maven_username is ${{ secrets.OSSRH_USERNAME }}" && echo "Private key is ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}"
+
     - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v4
       with: # running setup-java again overwrites the settings.xml
@@ -32,7 +35,7 @@ jobs:
       run: cat $HOME/.m2/settings.xml
 
     - name: Publish package
-      run: echo "maven username is $MAVEN_USERNAME" && echo "maven pw is $MAVEN_CENTRAL_TOKEN" && mvn deploy -pl qanary_commons
+      run: mvn deploy -pl qanary_commons
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
