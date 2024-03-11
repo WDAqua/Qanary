@@ -27,15 +27,9 @@ jobs:
         server-password: MAVEN_CENTRAL_TOKEN
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
-
-    #- name: Import GPG key
-    #  uses: crazy-max/ghaction-import-gpg@v6
-    #  with:
-    #    gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-    #    passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
     
     - name: Publish package
-      run: cd qanary_commons && mvn deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }}
+      run:  mvn deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
