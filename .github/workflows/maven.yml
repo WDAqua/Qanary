@@ -5,9 +5,12 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+#    branches: [ master ]
+    branches: '*'
+#  pull_request:
+#    branches: [ master ]
+#  pull_request_target:
+#    branches: [ master ]
 
 jobs:
   build:
@@ -16,10 +19,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 17
+
+    - name: Check secrets
+      run: echo "Maven_username is ${{ secrets.OSSRH_USERNAME }}" && echo "Private key is ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}"
+
+    - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v4
-      with:
-        java-version: 17
-        distribution: 'adopt'
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      with: # running setup-java again overwrites the settings.xml
+        distribution: 'temurin'
+        java-version: '17'
+        server-id: 'ossrh' # Value of the distributionManagement/repository/id field of the pom.xml
+        server-username: MAVEN_USERNAME # env variable for username in deploy
+        server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+    - name: Print settings.xml # Debugging purposes
+      run: cat $HOME/.m2/settings.xml
+# Debugging
+#    - name: Publish package
+#      run: mvn deploy -pl qanary_commons
+#      env:
+#        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+#        MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
+#        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
