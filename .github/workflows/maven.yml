@@ -13,6 +13,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
     steps:
     - uses: actions/checkout@v4
@@ -26,7 +28,7 @@ jobs:
         server-username: ${{ secrets.OSSRH_USERNAME }} # env variable for username in deploy
         server-password: ${{ secrets.OSSRH_PASSWORD }} # env variable for token in deploy
         gpg-private-key: 'test' # Value of the GPG private key to import
-        gpg-passphrase: 'test' # env variable for GPG private key passphrase
+        gpg-passphrase: GPG_PASSPHRASE
 
     - name: Print settings.xml # Debugging purposes
       run: cat $HOME/.m2/settings.xml
