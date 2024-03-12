@@ -10,7 +10,7 @@ else
 fi
 
 # build Docker Images and store name and tag
-if ! mvn -B clean install -DskipTests;
+if ! mvn -B clean install -DskipTests -Dgpg.skip=true;
 then
   # build failed
   exit 1

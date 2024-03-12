@@ -18,8 +18,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
  * the class is a covering standard tasks users of the Qanary methodology might
  * have
  *
- * if you are missing helper methods than please request them via
- * {@see <a href="https://github.com/WDAqua/Qanary/issues/new">Github</a>}
+ * if you are missing helper methods than please request them via @see <a href="https://github.com/WDAqua/Qanary/issues/new">Github</a>
  *
  * @author AnBo
  */
