@@ -162,9 +162,16 @@ public abstract class QanaryTripleStoreConnector {
 	 * @return
 	 * @throws IOException
 	 */
+	@Deprecated
 	public static String insertAnnotationOfTypedLiteral(QuerySolutionMap bindings) throws IOException {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfTypedLiteral.rq", bindings);
 	}
+
+	public static String insertAnnotationOfAnswerType(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerType.rq", bindings);
+
+	}
+
 
 	/**
 	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
@@ -188,6 +195,18 @@ public abstract class QanaryTripleStoreConnector {
 	 */
 	public static String insertAnnotationOfAnswerJson(QuerySolutionMap bindings) throws IOException {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerJson.rq", bindings);
+	}
+
+	/**
+	 * add AnnotationOfImprovedQuestion as it is done typically in Qanary QueryBuilder 
+	 * components 
+	 *
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfImprovedQuestion(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfImprovedQuestion.rq", bindings);
 	}
 
 	public static String getAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
