@@ -449,7 +449,7 @@ public class QanaryQuestion<T> {
 
 		while (resultSet.hasNext()) {
 			QuerySolution result = resultSet.next();
-			String translatedQuestionString = result.get("translation").asLiteral().getString();
+			String translatedQuestionString = result.get("hasBody").asLiteral().getString();
 			// take the first best result
 			return translatedQuestionString;
 		}
