@@ -135,7 +135,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * get SELECT query to get the answer with the highest score in a graph
+	 * get SELECT query to get the answer SPARQL with the highest score in a graph
 	 *
 	 * @param graph
 	 * @return
@@ -143,6 +143,27 @@ public abstract class QanaryTripleStoreConnector {
 	 */
 	public static String getHighestScoreAnnotationOfAnswerInGraph(URI graph) throws IOException {
 		String sparqlQueryString = readFileFromResources("/queries/select_highestScore_AnnotationOfAnswerSPARQL.rq");
+
+		QuerySolutionMap bindings = new QuerySolutionMap();
+		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		Query query = QueryFactory.create(pq.toString());
+		logger.info("generated query:\n{}", query.toString());
+
+		return query.toString();
+	}
+
+	/**
+	 * get SELECT query to get the answer SPARQL with the lowest index in a graph
+	 * (for implementations where order of created query candidates matters)
+	 *
+	 * @param graph
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getLowestIndexAnnotationOfAnswerInGraph(URI graph) throws IOException {
+		String sparqlQueryString = readFileFromResources("/queries/select_lowestIndex_AnnotationOfAnswerSPARQL.rq");
 
 		QuerySolutionMap bindings = new QuerySolutionMap();
 		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
