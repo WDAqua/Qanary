@@ -6,19 +6,19 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 INSERT { 
 GRAPH ?graph  {
-        ?newTypeAnnotation rdf:type qa:AnnotationOfAnswerType .
+        ?newTypeAnnotation rdf:type qa:AnnotationOfAnswerDataType .
         ?newTypeAnnotation oa:hasTarget ?targetQuestion .
-        ?newTypeAnnotation oa:hasBody ?annotationOfAnswerType .
+        ?newTypeAnnotation oa:hasBody ?annotationOfAnswerDataType .
         ?newTypeAnnotation qa:score ?confidence .
         ?newTypeAnnotation oa:annotatedAt ?time .
         ?newTypeAnnotation oa:annotatedBy ?application . 
 
-        ?answerType rdf:type qa:AnswerType .
-        ?answerType rdf:value ?answerDataType .
+        ?annotationOfAnswerDataType rdf:type qa:AnswerDataType .
+        ?annotationOfAnswerDataType rdf:value ?answerDataType .
     }
 }
 WHERE {
     BIND (IRI(CONCAT("urn:qanary:annotation:answer:type:", STR(RAND()))) AS ?newTypeAnnotation) .
-    BIND (IRI(CONCAT("urn:qanary:answer:type:", STR(RAND()))) AS ?answerType) .
+    BIND (IRI(CONCAT("urn:qanary:answer:type:", STR(RAND()))) AS ?annotationOfAnswerDataType) .
     BIND (now() as ?time) . 
 }

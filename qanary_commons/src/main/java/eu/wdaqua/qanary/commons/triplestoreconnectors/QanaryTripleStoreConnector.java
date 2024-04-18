@@ -188,8 +188,15 @@ public abstract class QanaryTripleStoreConnector {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfTypedLiteral.rq", bindings);
 	}
 
-	public static String insertAnnotationOfAnswerType(QuerySolutionMap bindings) throws IOException {
-		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerType.rq", bindings);
+	/**
+	 * add AnnotationOfAnswerDataType as it may be required by Qanary QueryExecuter components
+	 *
+	 * @param bindings
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfAnswerDataType(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerDataType.rq", bindings);
 
 	}
 
