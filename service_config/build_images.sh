@@ -10,10 +10,10 @@ else
 fi
 
 # create settings.xml
-export LocalMavenM2Dir="$env:USERPROFILE\.m2\settings.xml"
-echo $LocalMavenM2Dir
-touch $LocalMavenM2Dir
-cat ./service_config/settings.xml>$LocalMavenM2Dir
+touch "~\.m2\settings.xml"
+cat ./service_config/settings.xml>"~\.m2\settings.xml"
+
+cat "~\.m2\settings.xml"
 
 # build and push Docker Images
 if ! mvn -B clean install docker:build docker:push -DskipTests -Dgpg.skip=true;
