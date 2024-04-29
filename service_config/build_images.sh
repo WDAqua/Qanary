@@ -11,7 +11,8 @@ fi
 
 # create settings.xml
 export LocalMavenM2Dir="$env:USERPROFILE\.m2\settings.xml"
-touch LocalMavenM2Dir
+echo $LocalMavenM2Dir
+touch $LocalMavenM2Dir
 cat ./service_config/settings.xml>$LocalMavenM2Dir
 
 # build and push Docker Images
