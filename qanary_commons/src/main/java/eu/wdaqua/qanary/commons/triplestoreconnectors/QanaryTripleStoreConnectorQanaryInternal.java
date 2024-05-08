@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -14,14 +15,14 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFactory;
-import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.sparql.exec.QueryExecBuilder; // QueryExecBuilder is required for RDFConnection
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,10 +82,25 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 	@Override
 	public ResultSet select(String sparql) throws SparqlQueryFailed {
 		QueryExecution queryExecution = this.connection.query(sparql);
-		getLogger().warn("Component name: {} with Select query: {}", this.applicationName, queryExecution.getQuery().toString());
+		logData(sparql);
 		ResultSet myResultSet = queryExecution.execSelect();
 		ResultSetRewindable resultSet = ResultSetFactory.makeRewindable(myResultSet);
 		return resultSet;
+	}
+
+	private void logData(String sparql) {
+		QuerySolutionMap querySolutionMap = new QuerySolutionMap();
+		Query query = QueryFactory.create(sparql);
+		querySolutionMap.add("graph",ResourceFactory.createResource(query.getGraphURIs().get(0)));
+		querySolutionMap.add("component", ResourceFactory.createResource("urn:qanary:" + this.applicationName));
+		querySolutionMap.add("questionID", ResourceFactory.createResource("urn:qanary:currentQuestion"));
+		querySolutionMap.add("body", ResourceFactory.createPlainLiteral(sparql));
+		try {
+			this.update(QanaryTripleStoreConnector.readFileFromResourcesWithMap("/queries/insert_explanation_data_sparql_query.rq", querySolutionMap));
+		} catch(Exception e) {
+			getLogger().error("Logging failed, {}", e);
+		}
+
 	}
 
 	@Override
