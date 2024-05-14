@@ -115,7 +115,8 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 	}
 
 	@Override
-	public boolean ask(String sparql) throws SparqlQueryFailed {		
+	public boolean ask(String sparql) throws SparqlQueryFailed {
+		logData(sparql);
 		return this.connection.queryAsk(sparql);
 	}
 
