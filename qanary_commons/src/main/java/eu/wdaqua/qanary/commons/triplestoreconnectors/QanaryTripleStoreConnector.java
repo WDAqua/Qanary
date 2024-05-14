@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import eu.wdaqua.qanary.commons.QanaryUtils;
@@ -22,20 +24,12 @@ import org.slf4j.LoggerFactory;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
 	
 	private static final long MAX_ACCEPTABLE_QUERY_EXECUTION_TIME = 10000;
-
-	private String processGraph;
-	private String processComponent;
-
-	public void setProcessInformation(String processGraph, String processComponent) {
-		this.processGraph = processGraph;
-		this.processComponent = processComponent;
-		logger.info("Processed information: {} {}", this.processComponent, this.processGraph);
-	}
 
 	public abstract void connect(); // TODO: add exception
 
@@ -46,24 +40,6 @@ public abstract class QanaryTripleStoreConnector {
 	public abstract void update(String sparql, URI graph) throws SparqlQueryFailed;
 
 	public abstract void update(String sparql) throws SparqlQueryFailed;
-
-	public void storeProcessedData(String body) throws URISyntaxException, SparqlQueryFailed, IOException {
-		try {
-			URI graph = new URI(processGraph);
-			// use Query file and insert values
-			QuerySolutionMap querySolutionMap = new QuerySolutionMap();
-			querySolutionMap.add("body", ResourceFactory.createPlainLiteral(body));
-			querySolutionMap.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
-			querySolutionMap.add("component", ResourceFactory.createPlainLiteral(processComponent));
-			String query = this.readFileFromResourcesWithMap("/queries/insert_explanation_data_sparql_query.rq", querySolutionMap);
-			logger.info("Explanation query: {}", query);
-			// insert annotation to triplestore
-			this.update(query, graph);
-		} catch(Exception e) {
-			logger.error("{}", e.toString());
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * return a readable description of the triplestore endpoint

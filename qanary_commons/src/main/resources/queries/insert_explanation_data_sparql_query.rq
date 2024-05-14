@@ -9,6 +9,7 @@ GRAPH ?graph {
         ?newAnnotation oa:hasBody ?body .
         ?newAnnotation oa:annotatedAt ?time .
         ?newAnnotation oa:annotatedBy ?component .
+        ?newAnnotation oa:hasTarget ?questionID .
     }
 }
 WHERE {
