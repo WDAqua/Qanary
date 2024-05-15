@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import eu.wdaqua.qanary.commons.QanaryUtils;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -23,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 public abstract class QanaryTripleStoreConnector {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryTripleStoreConnector.class);
