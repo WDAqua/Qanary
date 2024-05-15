@@ -132,9 +132,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
 		// try N times if there was a timeout
 		while(numberOfTries < this.maxTriesConnectionTimeout || numberOfTries == 0) {
 			try {
-				ResultSet rs = this.select(sparql, numberOfTries);
-				this.storeProcessedData(sparql);
-				return rs;
+				return this.select(sparql, numberOfTries);
 			} catch (Exception e) {
 				getLogger().error("Error while executing a SELECT query: {}", e.getMessage());
 				e.printStackTrace();
