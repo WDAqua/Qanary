@@ -6,12 +6,15 @@
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.component</artifactId>
 	<version>3.9.3</version>
+	<description></description>
 
-	<parent> 
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.15</version>
+	<parent>
+		<groupId>eu.wdaqua.qanary</groupId>
+		<artifactId>qanary_centralized_configuration</artifactId>
+		<version>0.1.0</version>
+		<relativePath>../centralizedConfigurationPoms/pom.xml</relativePath>
 	</parent>
+
 	<properties>
 		<java.version>11</java.version>
 		<spring-boot-admin.version>2.6.11</spring-boot-admin.version>

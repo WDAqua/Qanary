@@ -2,12 +2,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.wdaqua.qanary</groupId>
 	<artifactId>qa.commons</artifactId>
+	<description>Qanary commons package</description>
 	<version>3.11.5</version>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.7</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>eu.wdaqua.qanary</groupId>
+		<artifactId>qanary_centralized_configuration</artifactId>
+		<version>0.1.0</version>
+		<relativePath>../centralizedConfigurationPoms/pom.xml</relativePath>
 	</parent>
 
 	<properties>
@@ -275,8 +276,6 @@
 	<!-- START - Setup for deployment to maven repository -->
 
 	<!-- Project name, Description, URL -->
-	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
-	<description>Qanary commons package</description>
 	<url>https://github.com/WDAqua/Qanary/</url>
 
 	<!-- Set up distribution management (for maven deploy plugin) -->
@@ -343,73 +342,6 @@
 							</rules>
 							<fail>true</fail>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-                	<plugin>
-                    		<artifactId>maven-release-plugin</artifactId>
-                    		<version>3.0.1</version>
-                    		<configuration>
-                        		<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                    		</configuration>
-                	</plugin>
-	                <plugin>
-                   		<groupId>org.sonatype.plugins</groupId>
-                   		<artifactId>nexus-staging-maven-plugin</artifactId>
-                    		<version>1.6.13</version>
-                	    	<extensions>true</extensions>
-        	            	<configuration>
-	                        	<serverId>ossrh</serverId>
-                        		<nexusUrl>https://oss.sonatype.org</nexusUrl>
-                        		<autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    		</configuration>
-               		 </plugin>
-			
-			<!-- Signing the artifact -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<gpgArguments>
-						<arg>--pinentry-mode</arg>
-						<arg>loopback</arg>
-					</gpgArguments>
-				</configuration>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Required for maven repository deployment -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>

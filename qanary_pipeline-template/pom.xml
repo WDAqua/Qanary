@@ -6,11 +6,15 @@
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
     <version>3.8.5</version>
+    <description></description>
+
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.8</version>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>qanary_centralized_configuration</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../centralizedConfigurationPoms/pom.xml</relativePath>
     </parent>
+
     <properties>
         <java.version>11</java.version>
         <spring-boot-admin.version>2.7.15</spring-boot-admin.version>

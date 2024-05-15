@@ -30,5 +30,4 @@
     </build>
 
     <description>Archetype for a Qanary component written using the Spring Boot framework</description>
-    <url>https://github.com/WDAqua/Qanary</url>
 </project>

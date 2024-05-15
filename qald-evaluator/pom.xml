@@ -4,12 +4,16 @@
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qald.evaluator</artifactId>
     <version>1.0.6</version>
+    <description></description>
+    <url>https://github.com/WDAqua/Qanary</url>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.5</version>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>qanary_centralized_configuration</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../centralizedConfiguration/pom.xml</relativePath>
     </parent>
+
     <properties>
         <java.version>11</java.version>
     </properties>
