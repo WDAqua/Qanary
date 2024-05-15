@@ -27,7 +27,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
     
     - name: Deploy and Release artifact
-      run:  mvn deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons
+      run:  mvn deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons,qanary_pipeline-template,qanary_component-template
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
