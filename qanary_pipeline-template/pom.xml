@@ -267,7 +267,7 @@
 
     <!-- Project name, Description, URL -->
     <name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
-    <description>Qanary commons package</description>
+    <description>Qanary pipeline template package</description>
     <url>https://github.com/WDAqua/Qanary/</url>
 
     <!-- Set up distribution management (for maven deploy plugin) -->
