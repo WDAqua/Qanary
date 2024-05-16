@@ -11,7 +11,10 @@ WHERE {
         ?annotationId oa:hasTarget ?hasTarget ;
         oa:hasBody ?hasBody .
         OPTIONAL {
-        ?annotationId qa:score ?score .
+                ?annotationId qa:score ?score .
+        }
+        OPTIONAL {
+                ?annotationId qa:index ?index .
         }
         ?annotationId oa:annotatedAt ?annotatedAt ;
         oa:annotatedBy ?annotatedBy . 
