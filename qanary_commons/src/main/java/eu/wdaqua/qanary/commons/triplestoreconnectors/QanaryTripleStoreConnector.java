@@ -155,7 +155,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * Get SELECT query to get the answer SPARQL with the lowest index in a graph </br>
+	 * Get SELECT query to get the answer SPARQL with the lowest index in a graph <br/>
 	 * (for implementations where order of created query candidates matters).
 	 *
 	 * @param graph
@@ -201,7 +201,7 @@ public abstract class QanaryTripleStoreConnector {
 	 * @param bindings
 	 * @deprecated 
 	 * Annotation of literal values using AnnotationAnswer, as it is done in this method, is 
-	 * discouraged. Use {@link #insertAnnotationOfAnswerJson()} instead, to annotate the 
+	 * discouraged. Use {@link #insertAnnotationOfAnswerJson(QuerySolutionMap)} instead, to annotate the
 	 * result JSON of a SPARQL query. 
 	 * @return
 	 * @throws IOException
@@ -214,7 +214,7 @@ public abstract class QanaryTripleStoreConnector {
 	/**
 	 * Get INSERT query to annotate the answer data type.
 	 *
-	 * @param bindings required bindings for the query: </br>
+	 * @param bindings required bindings for the query: <br/>
 	 * ?graph, ?targetQuestion, ?answerDataType, ?confidence, ?application 
 	 * @return
 	 * @throws IOException
@@ -226,8 +226,8 @@ public abstract class QanaryTripleStoreConnector {
 	/**
 	 * get INSERT query to annotate SPARQL query that should compute the answer. 
 	 *
-	 * @param bindings required bindings for the query: </br>
-	 * ?graph, ?targetQuestion, ?selectQueryThatShouldComputeTheAnswer, </br>
+	 * @param bindings required bindings for the query: <br/>
+	 * ?graph, ?targetQuestion, ?selectQueryThatShouldComputeTheAnswer, <br/>
 	 * ?confidence, ?index, ?application
 	 * @return
 	 * @throws IOException
@@ -239,7 +239,7 @@ public abstract class QanaryTripleStoreConnector {
 	/**
 	 * Get INSERT query to annotate answer JSON.
 	 *
-	 * @param bindings required bindings for the query: </br>
+	 * @param bindings required bindings for the query: <br/>
 	 * ?graph, ?targetQuestion, ?jsonAnswer, ?confidence, ?application
 	 * @return
 	 * @throws IOException
@@ -251,7 +251,7 @@ public abstract class QanaryTripleStoreConnector {
 	/**
 	 * Get INSERT query to annotate an improved question.
 	 *
-	 * @param bindings required bindings for the query: </br>
+	 * @param bindings required bindings for the query: <br/>
 	 * ?graph, ?targetQuestion, ?improvedQuestionText, ?confidence, ?application
 	 * @return
 	 * @throws IOException
