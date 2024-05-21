@@ -55,7 +55,7 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 	}
 
 	private void setApplicationName(String applicationName) {
-		this.applicationName = applicationName; // set to "urn:qanary:" + name // Check vulnerabilities
+		this.applicationName = "urn:qanary:" + applicationName;
 	}
 
 	private URI getEndpoint() {
@@ -66,17 +66,6 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 	public void connect() {
 		org.apache.jena.query.ARQ.init();  // maybe it helps to prevent problems?
 		this.connection = RDFConnection.connect(this.getEndpoint().toASCIIString());
-		/* 	TODO; RDFConnectionRemote doesn't accept org.apache.jena.HttpClient/ClosedHttpClient anymore, instead it uses java.HttpClient
-			TODO; ClosedHttpClient cannot be casted into HttpClient. Therefore, it is not possible to pass the Header as
-			TODO; java.HttpClient doesn't consist a header, but a HttpRequest does.
-			TODO; QueryExecution (Jena) instead still accept a org.jena.HttpClient where a header can be added.
-		Header header = new BasicHeader("QANARY_COMPONENT_LOGGING", String.valueOf(dataLogging));
-		List<Header> headers = new ArrayList<>() {{add(header);}};
-		org.apache.http.client.HttpClient httpClient = HttpClients.custom().setDefaultHeaders(headers).build();
-
-		RDFConnection rdfConnection = RDFConnectionRemote.newBuilder().destination(this.getEndpoint().toASCIIString()).httpClient((HttpClient) httpClient).build();
-		this.connection = rdfConnection;
-		*/
 	}
 
 	@Override
@@ -92,7 +81,7 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 		QuerySolutionMap querySolutionMap = new QuerySolutionMap();
 		Query query = QueryFactory.create(sparql);
 		querySolutionMap.add("graph",ResourceFactory.createResource(query.getGraphURIs().get(0)));
-		querySolutionMap.add("component", ResourceFactory.createResource("urn:qanary:" + this.applicationName));
+		querySolutionMap.add("component", ResourceFactory.createResource(this.applicationName));
 		querySolutionMap.add("questionID", ResourceFactory.createResource("urn:qanary:currentQuestion"));
 		querySolutionMap.add("body", ResourceFactory.createPlainLiteral(sparql));
 		try {
