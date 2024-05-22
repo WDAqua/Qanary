@@ -5,7 +5,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 INSERT {
 GRAPH ?graph {
-        ?newAnnotation rdf:type qa:AnnotationOfLog .
+        ?newAnnotation rdf:type qa:AnnotationOfLogQuery .
         ?newAnnotation oa:hasBody ?body .
         ?newAnnotation oa:annotatedAt ?time .
         ?newAnnotation oa:annotatedBy ?component .
