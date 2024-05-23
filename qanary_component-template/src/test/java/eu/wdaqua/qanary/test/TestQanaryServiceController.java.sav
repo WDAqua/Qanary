@@ -1,4 +1,4 @@
-package eu.wdaqua.qanary.component;
+package eu.wdaqua.qanary.test;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
