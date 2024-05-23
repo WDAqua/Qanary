@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class QanaryExplanationController {
@@ -20,7 +20,7 @@ public class QanaryExplanationController {
             operationId = "explainComponent", //
             description = "Returns an explanation for this component within the specified graph." //
     )
-    public ResponseEntity<?> explainComponent(@RequestParam String graphUri) { // To be done
+    public ResponseEntity<?> explainComponent(@PathVariable String graphUri) { // To be done
         return new ResponseEntity<>("Not yet implemented", HttpStatus.BAD_REQUEST);
     }
 
