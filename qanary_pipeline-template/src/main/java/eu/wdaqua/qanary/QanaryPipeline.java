@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.slf4j.Logger;
@@ -31,13 +32,14 @@ import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import eu.wdaqua.qanary.component.QanaryComponent;
 
 @SpringBootApplication
 @de.codecentric.boot.admin.server.config.EnableAdminServer
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
 @ComponentScan({ "eu.wdaqua.qanary" })
-public class QanaryPipeline {
+public class QanaryPipeline extends QanaryComponent{
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
 
@@ -152,6 +154,47 @@ public class QanaryPipeline {
 				.termsOfService("http://swagger.io/terms/") //
 				.license(new License().name("Apache 2.0").url("http://springdoc.org")) //
 		);
+	}
+
+	@Override
+	public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
+
+		// This method is only executed when the Qanary pipeline component is called as component
+		// It follows the standard of all process() implementations
+
+		// 1. Get all information === Question
+		// 2. Compute new information === Execute the own pipeline
+		// 3. Store information === Response JSON
+
+		// STEP 1:
+		/*
+		 * has access to current question via methods
+		 * doesn't select any queries ==> We've to store input data somehow different, generalized
+		 *
+		 */
+
+
+
+		// STEP 2:
+		/*
+		 * Calls its own components
+		 * How and where are they defined? Are they somehow passed or determined?
+		 * (Call for registered components possible -> API working?)
+		 * ==> Extend /annotatequestion with componentListParam?
+		 * ==> Component should serve one explicit function -> Pre-defined components
+		 * Returns @see{QanaryQuestionAnsweringRun.class}
+		 */
+
+
+
+		// STEP 3:
+		/*
+		 * Store the response, e.g. the graph, questionURI, etc.
+		 */
+
+
+
+		return null;
 	}
 
 
