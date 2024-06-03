@@ -1,0 +1,8 @@
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+
+SELECT DISTINCT ?component
+FROM ?graph
+WHERE {
+?annotationID oa:annotatedBy ?component .
+}
