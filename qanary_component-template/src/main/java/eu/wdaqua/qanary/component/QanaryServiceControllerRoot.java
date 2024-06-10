@@ -22,7 +22,7 @@ import java.util.*;
 
 // Conditional controller
 @Controller
-@ConditionalOnProperty(name = "pipeline.is.component", matchIfMissing = true, havingValue = "true")
+@ConditionalOnProperty(name = "pipeline.component", matchIfMissing = true, havingValue = "true")
 public class QanaryServiceControllerRoot {
 
     private final Logger logger = LoggerFactory.getLogger(QanaryServiceControllerRoot.class);
