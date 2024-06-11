@@ -1,0 +1,14 @@
+PREFIX  urn:  <http://fliqz.com/>
+PREFIX  qa:   <http://www.wdaqua.eu/qa#>
+PREFIX  oa:   <http://www.w3.org/ns/openannotation/core/>
+
+CONSTRUCT {
+  ?s ?p ?o .
+  ?s oa:annotatedBy ?newcomponent .
+}
+FROM <urn:graph:24c3e420-21d4-4038-8e8d-322d3ed269a8>
+WHERE {
+    ?s oa:annotatedBy ?component .
+    ?s ?p ?o .
+    FILTER(?p != oa:annotatedBy)
+}

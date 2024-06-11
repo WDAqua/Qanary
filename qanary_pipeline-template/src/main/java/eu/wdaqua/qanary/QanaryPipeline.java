@@ -1,11 +1,16 @@
 package eu.wdaqua.qanary;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryQuestion;
+import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
+import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.slf4j.Logger;
@@ -42,7 +47,11 @@ import eu.wdaqua.qanary.component.QanaryComponent;
 public class QanaryPipeline extends QanaryComponent{
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
+	@Value("${}")
+	private List<String> QANARY_COMPONENTS;
 
+	@Autowired
+	private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
 	@Autowired
 	public QanaryPipelineConfiguration qanaryPipelineConfiguration;  
 
@@ -166,14 +175,7 @@ public class QanaryPipeline extends QanaryComponent{
 		// 2. Compute new information === Execute the own pipeline
 		// 3. Store information === Response JSON
 
-		// STEP 1:
-		/*
-		 * has access to current question via methods
-		 * doesn't select any queries ==> We've to store input data somehow different, generalized
-		 *
-		 */
-
-
+		String question = null;
 
 		// STEP 2:
 		/*
@@ -185,12 +187,15 @@ public class QanaryPipeline extends QanaryComponent{
 		 * Returns @see{QanaryQuestionAnsweringRun.class}
 		 */
 
+		QanaryQuestionAnsweringRun qaRun = qanaryQuestionAnsweringController.createOrUpdateAndRunQuestionAnsweringSystemHelper(
+				null, question, null, QANARY_COMPONENTS, "", null, null, null);
+
+		URI subGraph = qaRun.getInGraph();
+
+		// STEP 3: Insert data with CONSTRUCT Query to the parent graph
 
 
-		// STEP 3:
-		/*
-		 * Store the response, e.g. the graph, questionURI, etc.
-		 */
+
 
 
 
