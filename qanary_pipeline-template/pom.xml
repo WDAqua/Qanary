@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
-    <version>3.9.0</version>
+    <version>3.9.0-component</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -143,7 +143,7 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.0.1</version>
+            <version>4.10.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -265,6 +265,12 @@
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.component</artifactId>
             <version>3.10.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-core</artifactId>
+            <version>4.10.0</version>
         </dependency>
     </dependencies>
 
