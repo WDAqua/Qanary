@@ -1,0 +1,22 @@
+name: Execute tests for pull requests
+
+on:
+  pull_request:
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with: # The environment variables are defined when needed (here, when the package is being published)
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Execute tests
+        run: mvn test
+
