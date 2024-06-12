@@ -136,8 +136,7 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * expose the model with the Qanary triplestore endpoint
-	 * 
-	 * @throws URISyntaxException
+	 *
 	 * @throws TripleStoreNotProvided
 	 */
 	@ModelAttribute("triplestoreEndpointOfCurrentQanaryPipeline")
@@ -219,7 +218,7 @@ public class QanaryQuestionAnsweringController {
 
 	/**
 	 * start question answering process with textual question
-	 * 
+	 *
 	 * <pre>
 		curl --location --request POST 'http://localhost:8080/startquestionansweringwithtextquestion' \
 		--header 'Content-Type: application/json' \
@@ -230,11 +229,11 @@ public class QanaryQuestionAnsweringController {
 		        "BirthDataQueryBuilderWikidata",
 		        "SparqlExecuter"
 		    ],
-		    "additionalTriples": "<urn:s1> <urn:p1> <urn:o1> . <urn:s2> <urn:p2> <urn:o2> ."
+		    "additionalTriples": &lt;urn:s1&gt; &lt;urn:p1&gt; &lt;urn:o1&gt; . &lt;urn:s2&gt; &lt;urn:p2&gt; &lt;urn:o2&gt; ."
 		}'
-	 * </pre>
-	 * 
-	 * 
+	   </pre>
+	 *
+	 *
 	 * @param myRequestQuestionAnsweringProcess
 	 * @return
 	 * @throws Exception
@@ -266,7 +265,7 @@ public class QanaryQuestionAnsweringController {
 	              "BirthDataQueryBuilderWikidata",
 	              "SparqlExecuter"
 		      ],
-		      "additionalTriples": "PREFIX oa: <http://www.w3.org/ns/openannotation/core/>    <urn:s> oa:hasTarget <urn:o>  ."
+		      "additionalTriples": "PREFIX oa: &lt;http://www.w3.org/ns/openannotation/core/&gt;    &lt;urn:s&gt; oa:hasTarget &lt;urn:o&gt;  ."
 	      }'
 	 * </pre>
 	 * 
@@ -417,11 +416,9 @@ public class QanaryQuestionAnsweringController {
 	
 	/**
 	 * returns information about the run identified by the provided runId
-	 * 
-	 * @param runId
+	 *
 	 * @return
-	 * @throws URISyntaxException 
-	 * @throws Exception
+	 * @throws URISyntaxException
 	 */
 	@RequestMapping(value = QUESTIONANSWERING + "/{graph}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody

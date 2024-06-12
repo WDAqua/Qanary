@@ -10,6 +10,7 @@ GRAPH ?graph  {
         ?newAnnotation oa:hasTarget ?targetQuestion .
         ?newAnnotation oa:hasBody ?selectQueryThatShouldComputeTheAnswer .
         ?newAnnotation qa:score ?confidence .
+        ?newAnnotation qa:index ?index .
         ?newAnnotation oa:annotatedAt ?time .
         ?newAnnotation oa:annotatedBy ?application . 
     }

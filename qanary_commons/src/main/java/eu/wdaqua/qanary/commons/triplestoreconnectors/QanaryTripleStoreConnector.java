@@ -36,14 +36,14 @@ public abstract class QanaryTripleStoreConnector {
 	public abstract void update(String sparql) throws SparqlQueryFailed;
 
 	/**
-	 * return a readable description of the triplestore endpoint
+	 * Return a readable description of the triplestore endpoint.
 	 * 
 	 * @return
 	 */
 	public abstract String getFullEndpointDescription();
 
 	/**
-	 * get current time in milliseconds
+	 * Get current time in milliseconds.
 	 */
 	protected static long getTime() {
 		return System.currentTimeMillis();
@@ -76,7 +76,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * read SPARQL query from files in resources folder
+	 * Read SPARQL query from files in resources folder.
 	 * 
 	 * @param filenameWithRelativePath
 	 * @return
@@ -95,7 +95,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * get SELECT query to count the number of triples in a graph
+	 * Get SELECT query to count the number of triples in a graph.
 	 * 
 	 * @param graph
 	 * @return
@@ -115,7 +115,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * get SELECT query to count the number AnnotationOfAnswer in a graph
+	 * Get SELECT query to count the number AnnotationOfAnswer in a graph.
 	 * 
 	 * @param graph
 	 * @return
@@ -135,7 +135,7 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * get SELECT query to get the answer with the highest score in a graph
+	 * Get SELECT query to get the answer SPARQL with the highest score in a graph.
 	 *
 	 * @param graph
 	 * @return
@@ -155,22 +155,80 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * add AnnotationAnswer and AnnotationOfAnswerType to allow annotating typed literals
-	 * as it may be required by Qanary QueryBuilder components
+	 * Get SELECT query to get the answer SPARQL with the lowest index in a graph <br/>
+	 * (for implementations where order of created query candidates matters).
 	 *
-	 * @param bindings
+	 * @param graph
 	 * @return
 	 * @throws IOException
 	 */
+	public static String getLowestIndexAnnotationOfAnswerInGraph(URI graph) throws IOException {
+		String sparqlQueryString = readFileFromResources("/queries/select_lowestIndex_AnnotationOfAnswerSPARQL.rq");
+
+		QuerySolutionMap bindings = new QuerySolutionMap();
+		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		Query query = QueryFactory.create(pq.toString());
+		logger.info("generated query:\n{}", query.toString());
+
+		return query.toString();
+	}
+
+	/**
+	 * Get SELECT query to get all answer SPARQL in a graph.
+	 *
+	 * @param graph
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getAllAnnotationOfAnswerSPARQL(URI graph) throws IOException {
+		String sparqlQueryString = readFileFromResources("/queries/select_all_AnnotationOfAnswerSPARQL.rq");
+
+		QuerySolutionMap bindings = new QuerySolutionMap();
+		bindings.add("graph", ResourceFactory.createResource(graph.toASCIIString()));
+
+		ParameterizedSparqlString pq = new ParameterizedSparqlString(sparqlQueryString, bindings);
+		Query query = QueryFactory.create(pq.toString());
+		logger.info("generated query:\n{}", query.toString());
+
+		return query.toString();
+	}
+
+	/**
+	 * Get INSERT query for AnnotationAnswer and AnnotationOfAnswerType to annotate typed literals.
+	 *
+	 * @param bindings
+	 * @deprecated 
+	 * Annotation of literal values using AnnotationAnswer, as it is done in this method, is 
+	 * discouraged. Use {@link #insertAnnotationOfAnswerJson(QuerySolutionMap)} instead, to annotate the
+	 * result JSON of a SPARQL query. 
+	 * @return
+	 * @throws IOException
+	 */
+	@Deprecated
 	public static String insertAnnotationOfTypedLiteral(QuerySolutionMap bindings) throws IOException {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfTypedLiteral.rq", bindings);
 	}
 
 	/**
-	 * add AnnotationOfAnswerSPARQL as it is done typically in Qanary QueryBuilder
-	 * components
+	 * Get INSERT query to annotate the answer data type.
 	 *
-	 * @param bindings
+	 * @param bindings required bindings for the query: <br/>
+	 * ?graph, ?targetQuestion, ?answerDataType, ?confidence, ?application 
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfAnswerDataType(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerDataType.rq", bindings);
+	}
+
+	/**
+	 * get INSERT query to annotate SPARQL query that should compute the answer. 
+	 *
+	 * @param bindings required bindings for the query: <br/>
+	 * ?graph, ?targetQuestion, ?selectQueryThatShouldComputeTheAnswer, <br/>
+	 * ?confidence, ?index, ?application
 	 * @return
 	 * @throws IOException
 	 */
@@ -179,10 +237,10 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * add AnnotationOfAnswerJson as it is done typically in Qanary QueryExecutor
-	 * components
+	 * Get INSERT query to annotate answer JSON.
 	 *
-	 * @param bindings
+	 * @param bindings required bindings for the query: <br/>
+	 * ?graph, ?targetQuestion, ?jsonAnswer, ?confidence, ?application
 	 * @return
 	 * @throws IOException
 	 */
@@ -190,12 +248,20 @@ public abstract class QanaryTripleStoreConnector {
 		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfAnswerJson.rq", bindings);
 	}
 
-	public static String getAnnotationOfAnswerSPARQL(QuerySolutionMap bindings) throws IOException {
-		return readFileFromResourcesWithMap("/queries/select_all_AnnotationOfAnswerSPARQL.rq", bindings);
+	/**
+	 * Get INSERT query to annotate an improved question.
+	 *
+	 * @param bindings required bindings for the query: <br/>
+	 * ?graph, ?targetQuestion, ?improvedQuestionText, ?confidence, ?application
+	 * @return
+	 * @throws IOException
+	 */
+	public static String insertAnnotationOfImprovedQuestion(QuerySolutionMap bindings) throws IOException {
+		return readFileFromResourcesWithMap("/queries/insert_one_AnnotationOfImprovedQuestion.rq", bindings);
 	}
 
 	/**
-	 * read query from file and apply bindings
+	 * Read query from file and apply bindings.
 	 *
 	 * @param filenameWithRelativePath
 	 * @param bindings
@@ -237,10 +303,10 @@ public abstract class QanaryTripleStoreConnector {
 	}
 
 	/**
-	 * ensures that files exists in the resources and are non-empty
+	 * Ensures that files exists in the resources and are non-empty.
 	 * 
-	 * e.g., useful for component constructors to ensure that SPRARQL query template
-	 * files (*.rq) are valid
+	 * Useful for component constructors to ensure that SPRARQL query template
+	 * files (*.rq) are valid.
 	 * 
 	 * @param filenameInResources
 	 */

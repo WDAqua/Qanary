@@ -33,6 +33,10 @@ public abstract class QanaryComponent {
     public Environment getEnvironment() {
     	return this.env;
     }
+
+	public String getApplicationName() {
+		return this.env.getProperty("spring.application.name");
+	}
     
 
     /**
@@ -66,7 +70,7 @@ public abstract class QanaryComponent {
      */
     public QanaryUtils getUtils(QanaryMessage qanaryMessage) {
     	try {
-            return new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint()));
+            return new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(),this.getApplicationName()));
 		} catch (Exception e) {
 			throw new RuntimeException(e); // TODO: not needed --> replace
 		}
@@ -84,7 +88,7 @@ public abstract class QanaryComponent {
      */
     public QanaryQuestion<String> getQanaryQuestion(QanaryMessage qanaryMessage) {
     	try {
-    		return new QanaryQuestion<String>(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint()));
+    		return new QanaryQuestion<String>(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), this.getApplicationName()));
 		} catch (Exception e) {
 			throw new RuntimeException(e); // TODO: not needed --> replace
 		}
