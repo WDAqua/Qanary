@@ -20,6 +20,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -54,6 +55,7 @@ public class QanaryQuestion<T> {
 	private QanaryConfigurator myQanaryConfigurator;
 
   private String FILENAME_SELECT_TRANSLATION_ANNOTATION = "/queries/select_all_AnnotationOfQuestionTranslation.rq";
+  private String REQUIRED_TRIPLES = "/queries/insert_required_triples.rq";
 	private String FILENAME_SELECT_URI_TEXTUAL_REPRESENTATION = "/queries/select_uri_textual_representation.rq";
 
 	/**
@@ -139,8 +141,26 @@ public class QanaryQuestion<T> {
 		// loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
 		qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 
+		loadRequiredTriplesToTriplestore(qanaryConfigurator.getQanaryTripleStoreConnector());
 
 		initFromTriplestore(qanaryConfigurator);
+	}
+
+	/**
+	 * Function that inserts required triples for graph initialization
+	 * @param qanaryTripleStoreConnector
+	 */
+	private void loadRequiredTriplesToTriplestore(QanaryTripleStoreConnector qanaryTripleStoreConnector) {
+		QuerySolutionMap querySolutionMap = new QuerySolutionMap();
+		querySolutionMap.add("graph", ResourceFactory.createResource(namedGraph.toASCIIString()));
+		try {
+			String sparqlQuery = QanaryTripleStoreConnector.readFileFromResourcesWithMap(REQUIRED_TRIPLES, querySolutionMap);
+			qanaryTripleStoreConnector.update(sparqlQuery);
+		} catch(IOException e) {
+			logger.warn("Read query from file failed with message: {}", e.getMessage());
+		} catch(SparqlQueryFailed e) {
+			logger.warn("Inserting required triples to triplestore failed, skipping.");
+		}
 	}
 
 	/**
@@ -197,8 +217,7 @@ public class QanaryQuestion<T> {
 	
 	/**
 	 * init object properties from a given triplestore URI
-	 * 
-	 * @param triplestore
+	 *
 	 * @throws URISyntaxException
 	 */
 	private void initFromTriplestore(final QanaryConfigurator myQanaryConfigurator) throws URISyntaxException {
@@ -449,7 +468,7 @@ public class QanaryQuestion<T> {
 
 		while (resultSet.hasNext()) {
 			QuerySolution result = resultSet.next();
-			String translatedQuestionString = result.get("translation").asLiteral().getString();
+			String translatedQuestionString = result.get("hasBody").asLiteral().getString();
 			// take the first best result
 			return translatedQuestionString;
 		}
