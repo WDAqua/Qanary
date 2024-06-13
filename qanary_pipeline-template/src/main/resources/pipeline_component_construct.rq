@@ -3,12 +3,9 @@ PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT {
-    GRAPH ?graph {
   ?s ?p ?o .
-  ?s oa:annotatedBy ?newcomponent .
-    }
-}
-WHERE {
+  ?s oa:annotatedBy ?newComponent .
+} WHERE {
     ?s oa:annotatedBy ?component .
     ?s ?p ?o .
     FILTER(?p != oa:annotatedBy)

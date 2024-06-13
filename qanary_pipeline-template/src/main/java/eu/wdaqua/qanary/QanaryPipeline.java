@@ -3,25 +3,15 @@ package eu.wdaqua.qanary;
 import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
-import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
-import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolutionMap;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +26,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -47,16 +35,11 @@ import java.util.Map;
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
 @ComponentScan({"eu.wdaqua.qanary"})
-public class QanaryPipeline extends QanaryComponent {
+public class QanaryPipeline {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
     @Autowired
     public QanaryPipelineConfiguration qanaryPipelineConfiguration;
-    @Value("${qanary.components}")
-    private List<String> QANARY_COMPONENTS;
-
-    @Autowired
-    private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
 
     public static void main(final String[] args) {
         // define usage of configuration file 'application.local.properties'
@@ -167,50 +150,6 @@ public class QanaryPipeline extends QanaryComponent {
                 .license(new License().name("Apache 2.0").url("http://springdoc.org")) //
         );
     }
-
-    @Override
-    public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
-
-        // This method is only executed when the Qanary pipeline component is called as component
-        // It follows the standard of all process() implementations
-
-        // 1. Get all information === Question
-        // 2. Compute new information === Execute the own pipeline
-        // 3. Store information === Response JSON
-
-        String question = null;
-
-        // STEP 2:
-        /*
-         * Calls its own components
-         * How and where are they defined? Are they somehow passed or determined?
-         * (Call for registered components possible -> API working?)
-         * ==> Extend /annotatequestion with componentListParam?
-         * ==> Component should serve one explicit function -> Pre-defined components
-         * Returns @see{QanaryQuestionAnsweringRun.class}
-         */
-
-        QanaryQuestionAnsweringRun qaRun = qanaryQuestionAnsweringController.createOrUpdateAndRunQuestionAnsweringSystemHelper(
-                null, question, null, QANARY_COMPONENTS, "", null, null, null);
-
-        URI subGraph = qaRun.getInGraph();
-
-        // STEP 3: Insert data with CONSTRUCT Query to the parent graph
-        QuerySolutionMap bindings = new QuerySolutionMap();
-        bindings.add("graph", ResourceFactory.createResource(subGraph.toASCIIString()));
-        String sparqlQuery = QanaryTripleStoreConnector.readFileFromResourcesWithMap("/pipeline_component_construct.rq", bindings);
-        transferGraphData(sparqlQuery, myQanaryMessage.getInGraph());
-
-        return null;
-    }
-
-    private void transferGraphData(String sparqlQuery, URI targetGraph) {
-        RDFConnection connection = RDFConnection.connectPW("http://demos.swe.htwk-leipzig.de:40141/sparql", "readWrite", "0LZBOSoA3BaG9CYMbK4Z"); // TODO: Move!
-        Query query = QueryFactory.create(sparqlQuery);
-        Model model = connection.queryConstruct(query);
-        connection.load(targetGraph.toString(), model);
-    }
-
 
     /*
      * @EventListener(ClientApplicationRegisteredEvent.class) public void

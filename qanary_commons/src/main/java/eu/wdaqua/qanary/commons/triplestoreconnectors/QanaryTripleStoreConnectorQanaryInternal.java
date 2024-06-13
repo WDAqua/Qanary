@@ -2,6 +2,7 @@ package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
@@ -78,6 +79,21 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     public void update(String sparql) throws SparqlQueryFailed {
         logger.debug("UPDATE on {}: {}", this.getEndpoint().toASCIIString(), sparql);
         this.connection.update(sparql);
+    }
+
+    @Override
+    public void update(Model model) {
+
+    }
+
+    @Override
+    public Model construct(String sparql) {
+        return null;
+    }
+
+    @Override
+    public Model construct(String sparql, URI graph) {
+        return null;
     }
 
     @Override
