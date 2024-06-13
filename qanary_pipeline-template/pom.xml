@@ -13,7 +13,7 @@
     </parent>
     <properties>
         <java.version>11</java.version>
-        <spring-boot-admin.version>2.7.15</spring-boot-admin.version>
+        <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
         <qanary.version>[3.13.0,4.0.0)</qanary.version>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
         <docker.image.prefix>qanary</docker.image.prefix>
