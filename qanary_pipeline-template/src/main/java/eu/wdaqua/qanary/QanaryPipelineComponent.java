@@ -100,7 +100,7 @@ public class QanaryPipelineComponent extends QanaryComponent {
         }
     }
 
-    private String getQuestionWithQuestionId(String questionId) {
+    protected String getQuestionWithQuestionId(String questionId) {
         logger.info("Question ID: {}", questionId);
         return webClient.get().uri(questionId + "/raw").retrieve().bodyToMono(String.class).block();
     }
