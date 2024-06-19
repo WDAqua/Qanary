@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -43,15 +44,14 @@ public class QanaryPipelineComponentTest {
     private final String questionID = "http://localhost:8080";
     private final String EXAMPLE_QUESTION = "Example question";
 
-    @Mock
+    @MockBean
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
 
-    @InjectMocks
+    @Autowired
     private QanaryPipelineComponent qanaryPipelineComponent;
 
     @Before
     public void setup() {
-        doNothing().when(qanaryTripleStoreConnector).connect();
         WebClient webClient = WebClient.builder().build();
         ReflectionTestUtils.setField(qanaryPipelineComponent, "webClient", webClient);
     }
@@ -72,6 +72,10 @@ public class QanaryPipelineComponentTest {
                         .withBody(EXAMPLE_QUESTION)));
         String result = qanaryPipelineComponent.getQuestionWithQuestionId(questionID);
         Assert.assertEquals(EXAMPLE_QUESTION, result);
+    }
+
+    public void transferGraphDataTest() {
+
     }
 
 
