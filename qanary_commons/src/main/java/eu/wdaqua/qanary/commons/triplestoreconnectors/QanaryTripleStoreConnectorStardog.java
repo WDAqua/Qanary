@@ -193,11 +193,6 @@ public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnecto
     }
 
     @Override
-    public void update(Model model) {
-
-    }
-
-    @Override
     public Model construct(String sparql) {
         return null;
     }

@@ -1,0 +1,10 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+  ?s ?p ?o .
+} WHERE {
+    ?s ?p ?o .
+    ?s oa:annotatedBy ?a .
+}

@@ -743,8 +743,8 @@ public class QanaryQuestionAnsweringController {
      * @throws QanaryComponentNotAvailableException
      * @throws QanaryExceptionServiceCallNotOk
      */
-    private QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
-                                                            QanaryMessage myQanaryMessage)
+    public QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
+                                                           QanaryMessage myQanaryMessage)
             throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
         logger.info("executeComponentList on \"{}\": {}", question, componentsToBeCalled);
         // execute synchronous calls to all components with the same message

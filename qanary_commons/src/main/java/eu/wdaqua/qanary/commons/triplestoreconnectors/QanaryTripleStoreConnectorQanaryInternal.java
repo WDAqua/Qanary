@@ -82,11 +82,6 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     }
 
     @Override
-    public void update(Model model) {
-
-    }
-
-    @Override
     public Model construct(String sparql) {
         return null;
     }

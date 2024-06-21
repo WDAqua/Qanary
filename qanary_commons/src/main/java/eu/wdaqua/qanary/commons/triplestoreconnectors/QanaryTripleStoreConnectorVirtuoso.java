@@ -1,10 +1,8 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -227,37 +225,12 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
     }
 
     @Override
-    public void update(Model model) {
-        StmtIterator iterator = model.listStatements();
-        iterator.forEach(statement -> {
-            Triple triple = statement.asTriple();
-            this.connection.performAdd(triple);
-        });
-    }
-
-    public void update(Triple triple) {
-        this.connection.performAdd(triple);
-    }
-
-    @Override
     public Model construct(String sparql) {
         return this.construct(sparql, null);
     }
 
     @Override
     public Model construct(String sparql, URI graph) {
-        /*
-        VirtGraph constructConnection = new VirtGraph(graph.toASCIIString(), this.virtuosoUrl, this.username, this.password);
-        logger.info("Construct query: {} on endpoint: {}", sparql, getFullEndpointDescription());
-        try {
-            VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(sparql, constructConnection);
-            return vqe.execConstruct();
-        } catch (Exception e) {
-            logger.warn("Error: {}", e.getMessage());
-            return null;
-        }
-         */
-        // Mapp graph to Jena model
         Model virtModel = VirtModel.openDatabaseModel(graph.toASCIIString(), this.virtuosoUrl, this.username, this.password);
         logger.info("Graph to model size: {}", virtModel.size());
         QueryExecution vqe = VirtuosoQueryExecutionFactory.create(sparql, virtModel);

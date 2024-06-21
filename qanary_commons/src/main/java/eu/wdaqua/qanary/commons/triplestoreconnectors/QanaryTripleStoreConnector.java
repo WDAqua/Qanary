@@ -303,8 +303,6 @@ public abstract class QanaryTripleStoreConnector {
 
     public abstract void update(String sparql) throws SparqlQueryFailed;
 
-    public abstract void update(Model model);
-
     public abstract Model construct(String sparql);
 
     public abstract Model construct(String sparql, URI graph);
