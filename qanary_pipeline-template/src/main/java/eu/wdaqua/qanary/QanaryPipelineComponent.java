@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(name = "pipeline.as.component", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "pipeline.as.component", havingValue = "true")
 public class QanaryPipelineComponent extends QanaryComponent {
 
     private final String QUESTION_QUERY = "/select_questionId.rq";
@@ -54,8 +54,6 @@ public class QanaryPipelineComponent extends QanaryComponent {
         qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
         qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
 
-        logger.info("external endpoint (local): {}, internal endpoint: {}", externalEndpoint.toASCIIString(), internalEndpoint.toASCIIString());
-
         // Get question and execute internal pipeline with it
         URI questionId = new URI(getQuestionIdWithQuery(myQanaryMessage.getInGraph().toASCIIString(), qanaryTripleStoreConnector));
 
@@ -70,16 +68,19 @@ public class QanaryPipelineComponent extends QanaryComponent {
 
         // Write internal annotations to parent endpoint and graph
         Model constructedTriples = constructTriplesFromSubGraph(subGraph, qanaryTripleStoreConnector);
-        updateTriplesFromModel(myQanaryMessage.getInGraph(), constructedTriples, INSERT_QUERY, qanaryTripleStoreConnector);
+        updateTriplesFromModel(myQanaryMessage.getInGraph(), constructedTriples, qanaryTripleStoreConnector);
+
+        // Clear endpoint graphs specified earlier
+        qanaryTripleStoreConnector.clearEndpointGraphs();
 
         return myQanaryMessage;
     }
 
-    private void updateTriplesFromModel(URI graph, Model constructedTriples, String queryPath, QanaryTripleStoreProxy qanaryTripleStoreConnector) {
+    private void updateTriplesFromModel(URI graph, Model constructedTriples, QanaryTripleStoreProxy qanaryTripleStoreConnector) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             constructedTriples.write(byteArrayOutputStream, "Turtle");
             String triplesAsString = byteArrayOutputStream.toString(StandardCharsets.UTF_8);
-            String query = QanaryTripleStoreConnector.readFileFromResources(queryPath)
+            String query = QanaryTripleStoreConnector.readFileFromResources(INSERT_QUERY)
                     .replace("?graph", "<" + graph.toASCIIString() + ">")
                     .replace("?triples", triplesAsString);
             qanaryTripleStoreConnector.updateInternal(query);
