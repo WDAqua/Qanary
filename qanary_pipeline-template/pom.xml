@@ -14,7 +14,7 @@
     <properties>
         <java.version>11</java.version>
         <spring-boot-admin.version>2.7.15</spring-boot-admin.version>
-        <qanary.version>[3.15.0,4.0.0)</qanary.version>
+        <qanary.version>[3.16.0,4.0.0)</qanary.version>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
         <docker.image.prefix>qanary</docker.image.prefix>
         <docker.image.name>qanary-pipeline</docker.image.name>
@@ -22,6 +22,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <springdoc.version>1.7.0</springdoc.version>
+        <jena.version>4.10.0</jena.version>
     </properties>
     <dependencies>
         <dependency>
@@ -157,22 +158,10 @@
             <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-            <version>4.10.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-            <version>4.10.0</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-querybuilder</artifactId>
-            <version>4.10.0</version>
+            <version>${jena.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
@@ -271,12 +260,6 @@
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.component</artifactId>
             <version>3.10.0</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.wdaqua.qanary</groupId>
-            <artifactId>qa.commons</artifactId>
-            <version>3.15.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
