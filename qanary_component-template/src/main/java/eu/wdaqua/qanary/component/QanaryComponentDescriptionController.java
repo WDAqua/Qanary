@@ -27,6 +27,7 @@ import java.util.Enumeration;
  * provides access to the components definition in different RDF formats
  */
 @Controller
+// Used by default, but excluded when a pipeline doesn't act as component
 @ConditionalOnProperty(name = "pipeline.as.component", matchIfMissing = true, havingValue = "true")
 public class QanaryComponentDescriptionController {
 

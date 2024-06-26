@@ -15,6 +15,7 @@ import java.util.Properties;
 @RestController
 @Configuration
 @ComponentScan("eu.wdaqua.qanary.component")
+// Used by default, but excluded when a pipeline doesn't act as component
 @ConditionalOnProperty(name = "pipeline.as.component", matchIfMissing = true, havingValue = "true")
 public class QanaryService {
 

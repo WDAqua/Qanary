@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 @Component
 @Configuration
 @EnableCaching
+// Used by default, but excluded when a pipeline doesn't act as component
 @ConditionalOnProperty(name = "pipeline.as.component", matchIfMissing = true, havingValue = "true")
 public class QanaryComponentConfiguration {
     private final Logger logger = LoggerFactory.getLogger(QanaryComponentConfiguration.class);

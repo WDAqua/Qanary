@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
+// Only created when the pipeline should act as a component, otherwise not
 @ConditionalOnProperty(name = "pipeline.as.component", havingValue = "true")
 public class QanaryPipelineComponent extends QanaryComponent {
 
@@ -45,9 +46,17 @@ public class QanaryPipelineComponent extends QanaryComponent {
     public QanaryPipelineComponent() {
     }
 
+    /**
+     * Implementation of the QanaryComponent 'process()' method. Executes its own pipeline with pre-defined components and writes the results
+     * to the parent triplestore as annotated of this component.
+     *
+     * @param myQanaryMessage QanaryMessage passed from the "parent" pipeline
+     * @throws Exception
+     */
     @Override
     public QanaryMessage process(QanaryMessage myQanaryMessage) throws Exception {
 
+        // Get required information
         URI externalEndpoint = this.qanaryConfigurator.getEndpoint();
         URI internalEndpoint = myQanaryMessage.getEndpoint();
         QanaryTripleStoreProxy qanaryTripleStoreConnector = this.qanaryConfigurator.getQanaryTripleStoreConnector();
@@ -76,6 +85,15 @@ public class QanaryPipelineComponent extends QanaryComponent {
         return myQanaryMessage;
     }
 
+    /**
+     * Inserts all statements within the passed @param constructedTriples Model to an UPDATE query and executes it.
+     * Uses a separate query and string replacement rather than variable replacement (readResourcesFromFileWithMap), as the converted map
+     * cannot be parsed to a single RDFNode.
+     *
+     * @param graph                      Target graph
+     * @param constructedTriples         Model with statements
+     * @param qanaryTripleStoreConnector
+     */
     private void updateTriplesFromModel(URI graph, Model constructedTriples, QanaryTripleStoreProxy qanaryTripleStoreConnector) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             constructedTriples.write(byteArrayOutputStream, "Turtle");
@@ -89,6 +107,14 @@ public class QanaryPipelineComponent extends QanaryComponent {
         }
     }
 
+    /**
+     * Executes a construct query to the graph @param graph with the passed QanaryTripleStoreConnector
+     *
+     * @param graph                      Graph on which the CONSTRUCT is executed
+     * @param qanaryTripleStoreConnector
+     * @return Model
+     * @throws IOException
+     */
     public Model constructTriplesFromSubGraph(URI graph, QanaryTripleStoreConnector qanaryTripleStoreConnector) throws IOException {
         QuerySolutionMap qsm = new QuerySolutionMap();
         qsm.add("newComponent", ResourceFactory.createResource("urn:qanary:" + this.getApplicationName()));
@@ -96,6 +122,16 @@ public class QanaryPipelineComponent extends QanaryComponent {
         return qanaryTripleStoreConnector.construct(sparqlQuery, graph);
     }
 
+    /**
+     * Fetches the questionID from the parent.
+     *
+     * @param graphUri                   The parent's graph
+     * @param qanaryTripleStoreConnector
+     * @return QuestionID as String
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws SparqlQueryFailed
+     */
     private String getQuestionIdWithQuery(String graphUri, QanaryTripleStoreConnector qanaryTripleStoreConnector) throws IOException, URISyntaxException, SparqlQueryFailed {
         QuerySolutionMap qsm = new QuerySolutionMap();
         qsm.add("graph", ResourceFactory.createResource(graphUri));

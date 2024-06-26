@@ -22,7 +22,9 @@ import java.util.*;
 
 // Conditional controller
 @Controller
+// Used by default, but excluded when a pipeline doesn't act as component
 @ConditionalOnProperty(name = "pipeline.as.component", matchIfMissing = true, havingValue = "true")
+
 public class QanaryServiceControllerRoot {
 
     private final Logger logger = LoggerFactory.getLogger(QanaryServiceControllerRoot.class);
