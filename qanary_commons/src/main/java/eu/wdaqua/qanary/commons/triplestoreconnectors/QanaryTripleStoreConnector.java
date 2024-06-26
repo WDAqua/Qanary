@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 
 public abstract class QanaryTripleStoreConnector {
@@ -295,7 +296,7 @@ public abstract class QanaryTripleStoreConnector {
 
     public abstract void connect(); // TODO: add exception
 
-    public abstract ResultSet select(String sparql) throws SparqlQueryFailed;
+    public abstract ResultSet select(String sparql) throws SparqlQueryFailed, URISyntaxException;
 
     public abstract boolean ask(String sparql) throws SparqlQueryFailed;
 

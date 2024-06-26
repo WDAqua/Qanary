@@ -3,7 +3,7 @@ package eu.wdaqua.qanary;
 import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
@@ -56,6 +56,11 @@ public class QanaryPipeline {
     }
 
     @Bean
+    public QanaryTripleStoreProxy qanaryTripleStoreProxy() {
+        return new QanaryTripleStoreProxy();
+    }
+
+    @Bean
     public QanaryComponentRegistrationChangeNotifier getComponentRegistrationChangeNotifier(
             InstanceRepository repository) {
         return new QanaryComponentRegistrationChangeNotifier(repository);
@@ -68,7 +73,7 @@ public class QanaryPipeline {
      * @return
      * @throws TripleStoreNotWorking
      */
-    private void checkTripleStoreConnection(QanaryTripleStoreConnector myQanaryTripleStoreConnector) throws TripleStoreNotWorking {
+    private void checkTripleStoreConnection(QanaryTripleStoreProxy myQanaryTripleStoreConnector) throws TripleStoreNotWorking {
         int numberOfTests = 1;
         int maxNumberOfTests = 10;
 		/*// TODO: needs to be extracted and moved to abstract class QanaryTripleStoreConnector
@@ -93,7 +98,7 @@ public class QanaryPipeline {
     @Bean
     public QanaryConfigurator configurator( //
                                             QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier, //
-                                            QanaryTripleStoreConnector myQanaryTripleStoreConnector
+                                            QanaryTripleStoreProxy myQanaryTripleStoreConnector
     ) throws TripleStoreNotWorking, TripleStoreNotProvided {
         this.checkTripleStoreConnection(myQanaryTripleStoreConnector);
 

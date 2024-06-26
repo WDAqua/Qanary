@@ -2,7 +2,7 @@ package eu.wdaqua.qanary.business;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +28,7 @@ public class QanaryConfigurator {
     private final int port;
     private final String host;
     private final URI endpoint;
-    private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
+    private final QanaryTripleStoreProxy myQanaryTripleStoreConnector;
     private final URI qanaryOntology;
     // default configuration defined in the currently used application
     // context (e.g., defined in application.properties)
@@ -42,7 +42,7 @@ public class QanaryConfigurator {
                                int serverport, //
                                URI qanaryOntology, //
                                URI triplestoreendpoint, // TODO: remove?
-                               QanaryTripleStoreConnector myQanaryTripleStoreConnector //
+                               QanaryTripleStoreProxy myQanaryTripleStoreConnector //
     ) {
         this.restTemplate = restTemplate;
         this.setDefaultComponentNames(defaultComponents);
@@ -55,7 +55,7 @@ public class QanaryConfigurator {
         logger.warn("make sure the triplestore is available at {}", triplestoreendpoint);
     }
 
-    public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
+    public QanaryTripleStoreProxy getQanaryTripleStoreConnector() {
         return this.myQanaryTripleStoreConnector;
     }
 

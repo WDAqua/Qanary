@@ -9,6 +9,7 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
@@ -85,7 +86,7 @@ public class QanaryQuestionAnsweringController {
                                               final QanaryComponentRegistrationChangeNotifier myComponentNotifier, //
                                               final QanaryPipelineConfiguration myQanaryPipelineConfiguration, //
                                               final TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier, //
-                                              final QanaryTripleStoreConnector myQanaryTripleStoreConnector, //
+                                              final QanaryTripleStoreProxy myQanaryTripleStoreConnector, //
                                               final Environment environment //
     ) {
         this.qanaryConfigurator = qanaryConfigurator;

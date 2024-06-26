@@ -9,4 +9,4 @@ INSERT {
     GRAPH ?graph {
         ?triples
     }
-}
+} WHERE {}
