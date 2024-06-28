@@ -7,23 +7,22 @@
     <artifactId>qa.qanarycomponent-parent</artifactId>
     <version>0.2.0</version>
     <packaging>pom</packaging>
-
-    <parent>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
-        <relativePath/>
-    </parent>
-    <properties>
-        <java.version>17</java.version>
-        <spring-boot-admin.version>2.7.12</spring-boot-admin.version>
-        <qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
-        <qanary.commons.version>[3.16.0,4.0.0)</qanary.commons.version>
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <springdoc.version>1.7.0</springdoc.version>
-        <json-path.version>2.9.0</json-path.version>
-    </properties>
+	<parent>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.12</version>
+		<relativePath/>
+	</parent>
+	<properties>
+		<java.version>17</java.version>
+		<spring-boot-admin.version>2.7.12</spring-boot-admin.version>
+		<qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
+		<qanary.commons.version>[3.16.0,4.0.0)</qanary.commons.version>
+		<junit-jupiter.version>5.8.2</junit-jupiter.version>
+		<springdoc.version>1.7.0</springdoc.version>
+		<json-path.version>2.9.0</json-path.version>
+	</properties>
 
     <!-- common dependencies that are implemented by all components -->
 
@@ -163,5 +162,124 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+	<!-- START - Setup for deployment to maven repository -->
+
+	<!-- Project name, Description, URL; inherited by default -->
+	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
+	<description>Qanary component template package</description>
+	<url>https://github.com/WDAqua/Qanary/</url>
+
+	<!-- Set up distribution management (for maven deploy plugin) -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<!-- Source-Control-Management information (SCM) -->
+	<scm>
+		<connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
+		<developerConnection>scm:git:ssh://github.com/WDAqua/Qanary.git</developerConnection>
+		<url>https://github.com/WDAqua/Qanary</url>
+	</scm>
+
+	<!-- Developer information, inherited by default -->
+	<developers>
+		<developer>
+			<name>Andreas Both</name>
+			<email>andreas.both@htwk-leipzig.de</email>
+			<organization>WDAqua</organization>
+			<organizationUrl>http://wdaqua.eu/</organizationUrl>
+		</developer>
+	</developers>
+
+	<!-- Licence information, inherited by default -->
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name> <!-- Example for Apache2 Licence -->
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> <!-- Example for Apache2 Licence -->
+		</license>
+	</licenses>
+
+	<!-- -->
+	<!-- END - Setup for deployment to maven repository -->
+
+	<build>
+		<plugins>
+			<!-- Deployment/Release related plugins -->
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.13</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+
+			<!-- Signing the artifact -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<gpgArguments>
+						<arg>--pinentry-mode</arg>
+						<arg>loopback</arg>
+					</gpgArguments>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Required for maven repository deployment -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

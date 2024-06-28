@@ -30,7 +30,7 @@ jobs:
       run: mvn clean install -Dgpg.skip
     
     - name: Deploy and Release artifact
-      run:  mvn clean deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons,qanary_pipeline-template,qanary_component-template
+      run:  mvn clean deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons,qanary_pipeline-template,qanary_component-template,qanary_component-parent
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}

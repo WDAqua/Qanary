@@ -1,0 +1,8 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+INSERT {
+	GRAPH ?graph {
+        qa:AnnotationOfLogQuery rdfs:subClassOf qa:AnnotationOfLog .
+	}
+} WHERE {}

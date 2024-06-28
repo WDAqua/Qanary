@@ -243,33 +243,33 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>2.11.0</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.1</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-    </dependencies>
-    <repositories>
-        <repository>
-            <id>Stardog</id>
-            <name>Stardog Maven Repository</name>
-            <url>https://maven.stardog.com/</url>
-        </repository>
-    </repositories>
+        </dependency>		
+		    <dependency>
+			    <groupId>org.glassfish.jaxb</groupId>
+			    <artifactId>jaxb-runtime</artifactId>
+			    <version>4.0.5</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>jakarta.xml.bind</groupId>
+			    <artifactId>jakarta.xml.bind-api</artifactId>
+			    <version>4.0.2</version>
+    		</dependency>
+    		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+    		<dependency>
+		      <groupId>javax.xml.bind</groupId>
+		      <artifactId>jaxb-api</artifactId>
+		      <version>2.3.1</version>
+		    </dependency>
+	    </dependencies>
+	    <repositories>
+		    <repository>
+			    <id>Stardog</id>
+			    <name>Stardog Maven Repository</name>
+			    <url>https://maven.stardog.com/</url>
+		  </repository>
+	  </repositories>
 
     <!-- START - Setup for deployment to maven repository -->
 

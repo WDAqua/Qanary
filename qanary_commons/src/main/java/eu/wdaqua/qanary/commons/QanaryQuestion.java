@@ -19,6 +19,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -858,5 +859,4 @@ public class QanaryQuestion<T> {
         public String confidence;
         public String knowledgegraphEndpoint;
     }
-
 }
