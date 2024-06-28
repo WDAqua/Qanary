@@ -1,0 +1,13 @@
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+    GRAPH <testUri> {
+        <annotation>      <oa:annotatedBy>  "test" .
+
+    }
+} WHERE {}

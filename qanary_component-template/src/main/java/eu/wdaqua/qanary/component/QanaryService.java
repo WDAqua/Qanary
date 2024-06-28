@@ -1,19 +1,22 @@
 package eu.wdaqua.qanary.component;
 
-import java.util.Properties;
-
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Properties;
 
 @SpringBootApplication
 @EnableAutoConfiguration
 @RestController
 @Configuration
 @ComponentScan("eu.wdaqua.qanary.component")
+// Used by default, but excluded when a pipeline doesn't act as component
+@ConditionalOnProperty(name = "pipeline.as.component", matchIfMissing = true, havingValue = "true")
 public class QanaryService {
 
     /**

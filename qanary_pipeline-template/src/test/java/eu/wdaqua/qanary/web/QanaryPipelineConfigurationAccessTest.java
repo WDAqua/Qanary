@@ -1,8 +1,6 @@
 package eu.wdaqua.qanary.web;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,19 +13,20 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ContextConfiguration(name = "contextWithFakeBean")
-@TestPropertySource(properties={"configuration.username=qanary","configuration.password=mySecret" })
+@TestPropertySource(properties = {"configuration.username=qanary", "configuration.password=mySecret"})
 class QanaryPipelineConfigurationAccessTest {
 
-	@Autowired
+    @Autowired
     private MockMvc mvc;
 
-	@MockBean
-	private QanaryTripleStoreConnector mockedQanaryTripleStoreConnector;
+    @MockBean
+    private QanaryTripleStoreProxy mockedQanaryTripleStoreConnector;
 
 //    static {
 //        System.setProperty("configuration.username", "qanary");
@@ -37,17 +36,17 @@ class QanaryPipelineConfigurationAccessTest {
     @Test
     void testQanaryConfigurationAccessControl() throws Exception {
         mvc.perform(
-                MockMvcRequestBuilders.get("/configuration").accept(MediaType.APPLICATION_JSON))
+                        MockMvcRequestBuilders.get("/configuration").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(302))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("http://localhost/login")); 
+                .andExpect(redirectedUrl("http://localhost/login"));
 
         mvc.perform(
-                MockMvcRequestBuilders.post("/login")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .content("username=qanary&password=mySecret"))
-            .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/"))
-            .andReturn();
+                        MockMvcRequestBuilders.post("/login")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .content("username=qanary&password=mySecret"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"))
+                .andReturn();
     }
 }
