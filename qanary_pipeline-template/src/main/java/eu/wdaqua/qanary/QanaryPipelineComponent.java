@@ -77,7 +77,8 @@ public class QanaryPipelineComponent extends QanaryComponent {
 
         // Write internal annotations to parent endpoint and graph
         Model constructedTriples = constructTriplesFromSubGraph(subGraph, qanaryTripleStoreConnector);
-        updateTriplesFromModel(myQanaryMessage.getInGraph(), constructedTriples, qanaryTripleStoreConnector);
+        String insertQuery = constructQueryFromModel(constructedTriples, myQanaryMessage.getInGraph(), INSERT_QUERY);
+        qanaryTripleStoreConnector.updateInternal(insertQuery);
 
         // Clear endpoint graphs specified earlier
         qanaryTripleStoreConnector.clearEndpointGraphs();
@@ -86,24 +87,24 @@ public class QanaryPipelineComponent extends QanaryComponent {
     }
 
     /**
-     * Inserts all statements within the passed @param constructedTriples Model to an UPDATE query and executes it.
-     * Uses a separate query and string replacement rather than variable replacement (readResourcesFromFileWithMap), as the converted map
-     * cannot be parsed to a single RDFNode.
+     * Creates a query for the passed query from path. Utilizes a model and converts it to triple-statements
+     * Uses String replacement rather than variable replacement (!)
      *
-     * @param graph                      Target graph
-     * @param constructedTriples         Model with statements
-     * @param qanaryTripleStoreConnector
+     * @param constructedTriples Model with Statements
+     * @param graph              Target graph
+     * @param pathToQuery        Path to query, should consist of "?graph" as well as "?triples"
+     * @return executable query
      */
-    private void updateTriplesFromModel(URI graph, Model constructedTriples, QanaryTripleStoreProxy qanaryTripleStoreConnector) {
+    public String constructQueryFromModel(Model constructedTriples, URI graph, String pathToQuery) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             constructedTriples.write(byteArrayOutputStream, "Turtle");
             String triplesAsString = byteArrayOutputStream.toString(StandardCharsets.UTF_8);
-            String query = QanaryTripleStoreConnector.readFileFromResources(INSERT_QUERY)
+            return QanaryTripleStoreConnector.readFileFromResources(pathToQuery)
                     .replace("?graph", "<" + graph.toASCIIString() + ">")
                     .replace("?triples", triplesAsString);
-            qanaryTripleStoreConnector.updateInternal(query);
         } catch (Exception e) {
-            logger.warn("Error: {}", e.getMessage());
+            logger.warn("Error while converting Model to triples and inserting it to the passed query: {}", e.getMessage());
+            return "";
         }
     }
 
