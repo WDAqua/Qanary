@@ -7,7 +7,6 @@
     <artifactId>qa.qanarycomponent-parent</artifactId>
     <version>0.2.0</version>
     <packaging>pom</packaging>
-    <name>qanary-component-parent</name>
 	<parent>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
 		<groupId>org.springframework.boot</groupId>
