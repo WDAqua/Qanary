@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import de.codecentric.boot.admin.server.domain.events.InstanceEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceStatusChangedEvent;
 import de.codecentric.boot.admin.server.notify.AbstractEventNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
+import org.springframework.cache.annotation.Cacheable;
 import reactor.core.publisher.Mono;
 
 public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNotifier {
@@ -44,6 +46,8 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 						logger.warn("registering component \"{}\" has no callable URL ({})", instanceName,
 								instance.getRegistration().getServiceUrl());
 					}
+				} else if(status.toUpperCase().compareTo("OFFLINE") == 0) {
+					availableComponents.remove(instanceName);
 				} else {
 					availableComponents.put(instanceName, null);
 				}
@@ -53,12 +57,20 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 		});
 	}
 	
-	protected void addAvailableComponent(String instanceName, Instance instance) {
+			protected void addAvailableComponent(String instanceName, Instance instance) {
 		this.getAvailableComponents().put(instanceName, instance);
 	}
 
 	public List<String> getAvailableComponentNames() {
 		return new ArrayList<>(availableComponents.keySet());
+	}
+
+	@Cacheable
+	public Map<String, String> getComponentsAndAvailability() {
+		return this.availableComponents.entrySet().stream().collect(Collectors.toMap(
+				Map.Entry::getKey,
+				entry -> entry.getValue().getStatusInfo().getStatus()
+		));
 	}
 
 	public Map<String, Instance> getAvailableComponents() {
