@@ -46,10 +46,8 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 						logger.warn("registering component \"{}\" has no callable URL ({})", instanceName,
 								instance.getRegistration().getServiceUrl());
 					}
-				} else if(status.toUpperCase().compareTo("OFFLINE") == 0) {
-					availableComponents.remove(instanceName);
 				} else {
-					availableComponents.put(instanceName, null);
+					availableComponents.put(instanceName, instance);
 				}
 			} else {
 				logger.debug("Instance {} ({}) {}", instanceName, event.getInstance(), event.getType());
@@ -65,12 +63,11 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 		return new ArrayList<>(availableComponents.keySet());
 	}
 
-	@Cacheable
-	public Map<String, String> getComponentsAndAvailability() {
-		return this.availableComponents.entrySet().stream().collect(Collectors.toMap(
-				Map.Entry::getKey,
-				entry -> entry.getValue().getStatusInfo().getStatus()
-		));
+	@Cacheable(value = "availableComponents") // TODO: Handle changes ?
+	public Map<String, String> getComponentsAndAvailability(Map<String, Instance> availableComponents) {
+		Map<String,String> comps = availableComponents.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e->e.getValue().getStatusInfo().getStatus()));
+		logger.info("Comps: {}", comps);
+		return comps;
 	}
 
 	public Map<String, Instance> getAvailableComponents() {
