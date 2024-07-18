@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -79,7 +80,7 @@ public class QanaryComponentsManagementController {
                                                                            @PathVariable String componentName) {
         String acceptHeader = request.getHeader("Accept");
         logger.info("forward using the Accept header: {}", acceptHeader);
-        return getServiceDescriptionOfComponent(componentName, acceptHeader);
+        return getServiceDescriptionOfComponent(HtmlUtils.htmlEscape(componentName), acceptHeader);
     }
 
     /**
