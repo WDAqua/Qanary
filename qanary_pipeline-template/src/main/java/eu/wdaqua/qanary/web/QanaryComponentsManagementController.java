@@ -78,7 +78,7 @@ public class QanaryComponentsManagementController {
             description = "Returns set of RDF triples (presented in defined format), these triples describe the required inputs (data types) and expectedly produced outputs of the requested component. If the component is not available, then the request will result in an HTTP code 404 (not found).")
     public ResponseEntity<String> getServiceDescriptionOfComponentAsJsonLD(HttpServletRequest request,
                                                                            @PathVariable String componentName) {
-        String acceptHeader = request.getHeader("Accept");
+        String acceptHeader = HtmlUtils.htmlEscape(request.getHeader("Accept"));
         logger.info("forward using the Accept header: {}", acceptHeader);
         return getServiceDescriptionOfComponent(HtmlUtils.htmlEscape(componentName), acceptHeader);
     }
