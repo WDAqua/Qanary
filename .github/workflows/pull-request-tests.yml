@@ -17,6 +17,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Build artifacts # To resolve internal, not yet published new versions
+        run: mvn clean install -Dgpg.skip -DskipTests -Ddockerfile.skip
+
       - name: Execute tests
         run: mvn test
 

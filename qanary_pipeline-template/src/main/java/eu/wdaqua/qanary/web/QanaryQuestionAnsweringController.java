@@ -129,9 +129,9 @@ public class QanaryQuestionAnsweringController {
 	 * expose the model with the component names
 	 */
 	@ModelAttribute("componentList")
-	public List<String> componentList() {
-		logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
-		return myComponentNotifier.getAvailableComponentNames();
+	public Map<String,String> componentList() {
+			logger.info("available components: {}", myComponentNotifier.getAvailableComponentNames());
+		return myComponentNotifier.getComponentsAndAvailability(myComponentNotifier.getAvailableComponents());
 	}
 
 	/**
