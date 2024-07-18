@@ -346,7 +346,7 @@
         // remove any AnnotationCount components so that props can be updated correctly
         function removeAnnotationCount() {
             /*<![CDATA[*/
-            let components = [[${componentList}]]
+            let components = Object.keys([[${componentList}]])
             for (i = 0; i < components.length; i++) {
                 let element = document.getElementById("annotationcount"+components[i]);
                 if(element){
@@ -360,9 +360,8 @@
         function getNumberOfAnnotations(graph) {
             console.log(graph)
             /*<![CDATA[*/
-            let components = [[${componentList}]]
+            let components = Object.keys([[${componentList}]]);
             for (i = 0; i < components.length; i++) {
-                console.log(components[i]);
                 console.log(graph)
                 elementID = "annotationcount" + components[i];
                 props = {
