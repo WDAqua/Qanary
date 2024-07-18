@@ -60,6 +60,7 @@ import java.util.Map.Entry;
  */
 @Controller
 public class QanaryQuestionAnsweringController {
+  
     // the string used for the endpoints w.r.t. the question answering process
     public static final String QUESTIONANSWERING = "/questionanswering";
     public static final String QUESTIONANSWERINGFULL = "/questionansweringfull";
