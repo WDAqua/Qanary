@@ -1,12 +1,10 @@
 package eu.wdaqua.qanary;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.mock;
-
-import java.util.LinkedList;
-import java.util.List;
-
+import de.codecentric.boot.admin.server.domain.entities.Instance;
+import de.codecentric.boot.admin.server.domain.values.Registration;
+import de.codecentric.boot.admin.server.domain.values.StatusInfo;
+import eu.wdaqua.qanary.business.QanaryComponent;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -17,11 +15,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import de.codecentric.boot.admin.server.domain.entities.Instance;
-import de.codecentric.boot.admin.server.domain.values.Registration;
-import de.codecentric.boot.admin.server.domain.values.StatusInfo;
-import eu.wdaqua.qanary.business.QanaryComponent;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,67 +28,65 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 @AutoConfigureWebClient
 class QanaryComponentRegistrationChangeNotifierTest {
 
-	@Autowired
-	QanaryComponentRegistrationChangeNotifier myNotifier;
+    final static String COMPONENTNAME = "myMockedInstance";
+    @Autowired
+    QanaryComponentRegistrationChangeNotifier myNotifier;
+    @MockBean
+    private QanaryTripleStoreProxy myQanaryTripleStoreConnector;
 
-	@MockBean
-	private QanaryTripleStoreConnector myQanaryTripleStoreConnector;
+    /**
+     * add component and test its availability
+     */
+    @Test
+    void testAddComponentAndCheckAvailability() {
 
-	final static String COMPONENTNAME = "myMockedInstance";
+        assertNotEquals(null, myNotifier);
+        myNotifier.getAvailableComponents().clear();
+        assertEquals(0, myNotifier.getAvailableComponentNames().size());
 
-	/**
-	 * add component and test its availability
-	 */
-	@Test
-	void testAddComponentAndCheckAvailability() {
+        Instance myMockedInstance = Mockito.mock(Instance.class);
+        String myMockedInstanceName = COMPONENTNAME;
 
-		assertNotEquals(null, myNotifier);
-		myNotifier.getAvailableComponents().clear();
-		assertEquals(0, myNotifier.getAvailableComponentNames().size());
+        Registration myMockedRegistration = mock(Registration.class);
+        Mockito.when(myMockedInstance.getRegistration()).thenReturn(myMockedRegistration);
+        StatusInfo myMockedStatusInfo = mock(StatusInfo.class);
+        Mockito.when(myMockedInstance.getStatusInfo()).thenReturn(myMockedStatusInfo);
 
-		Instance myMockedInstance = Mockito.mock(Instance.class);
-		String myMockedInstanceName = COMPONENTNAME;
+        myNotifier.addAvailableComponent(myMockedInstanceName, myMockedInstance);
+        Mockito.when(myMockedInstance.getRegistration().getName()).thenReturn(COMPONENTNAME);
 
-		Registration myMockedRegistration = mock(Registration.class);
-		Mockito.when(myMockedInstance.getRegistration()).thenReturn(myMockedRegistration);
-		StatusInfo myMockedStatusInfo = mock(StatusInfo.class);
-		Mockito.when(myMockedInstance.getStatusInfo()).thenReturn(myMockedStatusInfo);
+        assertEquals(1, myNotifier.getAvailableComponentNames().size());
 
-		myNotifier.addAvailableComponent(myMockedInstanceName, myMockedInstance);
-		Mockito.when(myMockedInstance.getRegistration().getName()).thenReturn(COMPONENTNAME);
+        assertNotEquals(null, myNotifier.getAvailableComponents().getOrDefault(COMPONENTNAME, null));
+        assertEquals(COMPONENTNAME, myNotifier.getAvailableComponentNames().get(0));
+        assertEquals(COMPONENTNAME, myNotifier.getAvailableComponents().get(COMPONENTNAME).getRegistration().getName());
+    }
 
-		assertEquals(1, myNotifier.getAvailableComponentNames().size());
+    /**
+     * set status of component to UP and test if it is considered as usable
+     */
+    @Test
+    void testAddComponentAndCheckAvailabilityAndUp() {
+        this.testAddComponentAndCheckAvailability();
 
-		assertNotEquals(null, myNotifier.getAvailableComponents().getOrDefault(COMPONENTNAME, null));
-		assertEquals(COMPONENTNAME, myNotifier.getAvailableComponentNames().get(0));
-		assertEquals(COMPONENTNAME, myNotifier.getAvailableComponents().get(COMPONENTNAME).getRegistration().getName());
-	}
+        Instance myMockedInstance = myNotifier.getAvailableComponents().getOrDefault(COMPONENTNAME, null);
+        assertNotEquals(null, myMockedInstance);
 
-	/**
-	 * set status of component to UP and test if it is considered as usable
-	 */
-	@Test
-	void testAddComponentAndCheckAvailabilityAndUp() {
-		this.testAddComponentAndCheckAvailability();
+        // test for UP component
+        extracted(myMockedInstance, true, 1);
+        // test for DOWN component
+        extracted(myMockedInstance, false, 0);
+    }
 
-		Instance myMockedInstance = myNotifier.getAvailableComponents().getOrDefault(COMPONENTNAME, null);
-		assertNotEquals(null, myMockedInstance);
+    private void extracted(Instance myMockedInstance, boolean up, int expectedNumberOfUsableComponents) {
+        Mockito.when(myMockedInstance.getStatusInfo().isUp()).thenReturn(up);
 
-		// test for UP component
-		extracted(myMockedInstance, true, 1);
-		// test for DOWN component
-		extracted(myMockedInstance, false, 0);
-	}
+        List<String> requestedComponentNames = new LinkedList<>();
+        requestedComponentNames.add(COMPONENTNAME);
+        List<QanaryComponent> availableComponents = myNotifier.getAvailableComponentsFromNames(requestedComponentNames);
+        assertEquals(expectedNumberOfUsableComponents, availableComponents.size());
 
-	private void extracted(Instance myMockedInstance, boolean up, int expectedNumberOfUsableComponents) {
-		Mockito.when(myMockedInstance.getStatusInfo().isUp()).thenReturn(up);
-
-		List<String> requestedComponentNames = new LinkedList<>();
-		requestedComponentNames.add(COMPONENTNAME);
-		List<QanaryComponent> availableComponents = myNotifier.getAvailableComponentsFromNames(requestedComponentNames);
-		assertEquals(expectedNumberOfUsableComponents, availableComponents.size());
-
-		// check if component status is correctly evaluated
-		assertEquals(up, myNotifier.isComponentUsable(myMockedInstance));
-	}
+        // check if component status is correctly evaluated
+        assertEquals(up, myNotifier.isComponentUsable(myMockedInstance));
+    }
 }
