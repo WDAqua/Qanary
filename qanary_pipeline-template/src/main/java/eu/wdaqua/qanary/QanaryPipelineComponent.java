@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -36,7 +37,10 @@ public class QanaryPipelineComponent extends QanaryComponent {
     private final String QUESTION_QUERY = "/select_questionId.rq";
     private final String CONSTRUCT_QUERY = "/pipeline_component_construct.rq";
     private final String INSERT_QUERY = "/insert_constructed_triples.rq";
+    private final String GRAPH_QUERY = "/queries/select_all_graphs_with_questionId.rq";
+    private final String ANNOTATED_BY_COMPONENT_TRIPLE = "?s oa:annotatedBy ?component .";
     private final Logger logger = LoggerFactory.getLogger(QanaryPipelineComponent.class);
+    private QanaryTripleStoreProxy qanaryTripleStoreConnector;
     @Autowired
     private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
     @Autowired
@@ -60,9 +64,9 @@ public class QanaryPipelineComponent extends QanaryComponent {
         // Get required information
         URI externalEndpoint = this.qanaryConfigurator.getEndpoint();
         URI internalEndpoint = myQanaryMessage.getEndpoint();
-        QanaryTripleStoreProxy qanaryTripleStoreConnector = this.qanaryConfigurator.getQanaryTripleStoreConnector();
-        qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
-        qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
+        this.qanaryTripleStoreConnector = this.qanaryConfigurator.getQanaryTripleStoreConnector();
+        this.qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
+        this.qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
 
         // Get question and execute internal pipeline with it
         URI questionId = new URI(getQuestionIdWithQuery(myQanaryMessage.getInGraph().toASCIIString(), qanaryTripleStoreConnector));
@@ -148,9 +152,32 @@ public class QanaryPipelineComponent extends QanaryComponent {
     }
 
     @Override
-    public String explain(QanaryExplanationData data) {
+    public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
         // do something different
+        // collect sub-component explanations and request external service
+        String pacGraph = getGraphFromQuestionId(data.getQuestionId());
+        List<String> explanations = new ArrayList<>();
+
         return null;
+    }
+
+    public String getGraphFromQuestionId(String questionId) throws IOException, URISyntaxException, SparqlQueryFailed {
+        String componentTriples = createComponentTriples();
+        String query = QanaryTripleStoreConnector.readFileFromResources(GRAPH_QUERY)
+                .replace("?componentAnnotations", componentTriples)
+                .replace("?questionId", "<" + questionId + ">");
+        // Ignore problem of multiple graphs at a time; annotatedAt could partly solve this
+        return qanaryTripleStoreConnector.select(query).next().get("g").toString(); // return first,
+    }
+
+    public String createComponentTriples() {
+        String triples = "";
+        for (String component : QANARY_COMPONENTS) {
+            triples += ANNOTATED_BY_COMPONENT_TRIPLE
+                    .replace("?s", "?" + component)
+                    .replace("?component", "urn:qanary:" + component);
+        }
+        return triples;
     }
 
 

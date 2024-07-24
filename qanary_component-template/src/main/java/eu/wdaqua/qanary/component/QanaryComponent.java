@@ -6,6 +6,7 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -17,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
@@ -61,7 +65,7 @@ public abstract class QanaryComponent {
         return this.getQanaryQuestion().getTextualRepresentation();
     }
 
-    public String explain(QanaryExplanationData data) {
+    public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
         JSONObject jsonObject = new JSONObject().put("graph", data.getGraph()).put("component", this.getApplicationName());
         return this.webClient.post().bodyValue(jsonObject).retrieve().bodyToMono(String.class).block();
     }
