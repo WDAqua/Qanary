@@ -28,7 +28,8 @@ public class ApplicationWebSecurityConfigurerAdapter extends WebSecurityConfigur
 		"/login",
 		"/instances",
 		"/applications/**",
-		"/sparql"
+		"/sparql",
+		"/explain"
 	};
 
 	public ApplicationWebSecurityConfigurerAdapter(@Autowired Environment env) {

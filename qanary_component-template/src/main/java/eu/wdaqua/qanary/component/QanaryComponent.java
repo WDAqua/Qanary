@@ -7,10 +7,6 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.QuerySolutionMap;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +43,12 @@ public abstract class QanaryComponent {
         return this.env.getProperty("spring.application.name");
     }
 
-    @Value("${explanation.service}")
-    private String explanationService;
-    private final WebClient webClient = WebClient.builder().baseUrl(explanationService + "/explain").build();
+    private WebClient webClient;
+
+    @Value("${explanation.service:#null}")
+    public void setupWebClient(String explanationService) {
+        this.webClient = WebClient.builder().baseUrl(explanationService + "/explain").build();
+    }
 
     /**
      * needs to be implemented for any new Qanary component
@@ -66,8 +65,7 @@ public abstract class QanaryComponent {
     }
 
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
-        JSONObject jsonObject = new JSONObject().put("graph", data.getGraph()).put("component", this.getApplicationName());
-        return this.webClient.post().bodyValue(jsonObject).retrieve().bodyToMono(String.class).block();
+        return this.webClient.post().bodyValue(data).retrieve().bodyToMono(String.class).block();
     }
 
     public QanaryUtils getUtils() {

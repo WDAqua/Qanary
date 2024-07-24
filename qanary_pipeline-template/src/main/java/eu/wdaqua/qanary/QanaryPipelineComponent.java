@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary;
 
+import de.codecentric.boot.admin.server.domain.entities.Instance;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
@@ -10,6 +11,7 @@ import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.component.QanaryExplanationData;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -20,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +33,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 // Only created when the pipeline should act as a component, otherwise not
@@ -40,15 +46,26 @@ public class QanaryPipelineComponent extends QanaryComponent {
     private final String GRAPH_QUERY = "/queries/select_all_graphs_with_questionId.rq";
     private final String ANNOTATED_BY_COMPONENT_TRIPLE = "?s oa:annotatedBy ?component .";
     private final Logger logger = LoggerFactory.getLogger(QanaryPipelineComponent.class);
+    private final String EXPLAIN_ENDPOINT = "/explain";
+    private WebClient webClient = WebClient.builder().build();
     private QanaryTripleStoreProxy qanaryTripleStoreConnector;
     @Autowired
     private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
-    @Autowired
     private QanaryConfigurator qanaryConfigurator;
     @Value("${qanary.components}")
-    private List<String> QANARY_COMPONENTS;
+    private List<String> QANARY_COMPONENTS; // The non-prefixed component-names !!!
+    @Autowired
+    private QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
+    @Value("${explanation.service}")
+    private String explanationService;
 
     public QanaryPipelineComponent() {
+    }
+
+    @Autowired
+    public void setupTripleStoreConnector(QanaryConfigurator qanaryConfigurator) {
+        this.qanaryConfigurator = qanaryConfigurator;
+        this.qanaryTripleStoreConnector = qanaryConfigurator.getQanaryTripleStoreConnector();
     }
 
     /**
@@ -64,7 +81,6 @@ public class QanaryPipelineComponent extends QanaryComponent {
         // Get required information
         URI externalEndpoint = this.qanaryConfigurator.getEndpoint();
         URI internalEndpoint = myQanaryMessage.getEndpoint();
-        this.qanaryTripleStoreConnector = this.qanaryConfigurator.getQanaryTripleStoreConnector();
         this.qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
         this.qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
 
@@ -153,12 +169,29 @@ public class QanaryPipelineComponent extends QanaryComponent {
 
     @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
-        // do something different
-        // collect sub-component explanations and request external service
         String pacGraph = getGraphFromQuestionId(data.getQuestionId());
-        List<String> explanations = new ArrayList<>();
+        List<QanaryExplanationData> dataList = new ArrayList<>();
+        Map<String, Instance> componentsAndInstances = qanaryComponentRegistrationChangeNotifier.getAvailableComponents();
+        for (String qanaryComponent : QANARY_COMPONENTS) {
+            dataList.add(new QanaryExplanationData(
+                            pacGraph,
+                            data.getQuestionId(),
+                            qanaryComponent,
+                            qanaryComponentRegistrationChangeNotifier.getAvailableComponents().get(qanaryComponent).getRegistration().getServiceUrl()
+            ));
+        }
+        List<String> subComponentExplanations = fetchSubComponentExplanations(dataList).collectList().block();
+        // TODO: Send to explanationService to compose them and return it; TODO: Add status handling
+        // return webClient.post().uri(this.explanationService + EXPLAIN_ENDPOINT).bodyValue(null/*TODO:*/).retrieve().bodyToMono(String.class).block();
+        return StringUtils.join(subComponentExplanations).toString();
+    }
 
-        return null;
+    public Flux<String> fetchSubComponentExplanations(List<QanaryExplanationData> data) {
+        return Flux.fromIterable(data).flatMapSequential(this::getComponentExplanation);
+    }
+
+    public Mono<String> getComponentExplanation(QanaryExplanationData data) {
+        return webClient.post().uri(data.getServerHost() + "/explain").bodyValue(data).retrieve().bodyToMono(String.class);
     }
 
     public String getGraphFromQuestionId(String questionId) throws IOException, URISyntaxException, SparqlQueryFailed {
@@ -174,8 +207,8 @@ public class QanaryPipelineComponent extends QanaryComponent {
         String triples = "";
         for (String component : QANARY_COMPONENTS) {
             triples += ANNOTATED_BY_COMPONENT_TRIPLE
-                    .replace("?s", "?" + component)
-                    .replace("?component", "urn:qanary:" + component);
+                    .replace("?s", "?" + component.replace("-",""))
+                    .replace("?component", "<urn:qanary:" + component + ">");
         }
         return triples;
     }

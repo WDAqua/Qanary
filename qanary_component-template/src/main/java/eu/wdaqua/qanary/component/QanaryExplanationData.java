@@ -11,6 +11,13 @@ public class QanaryExplanationData {
 
         }
 
+        public QanaryExplanationData(String graph, String questionId, String component, String serverHost) {
+            this.graph = graph;
+            this.questionId = questionId;
+            this.component = component;
+            this.serverHost = serverHost;
+        }
+
         public String getComponent() {
             return component;
         }
