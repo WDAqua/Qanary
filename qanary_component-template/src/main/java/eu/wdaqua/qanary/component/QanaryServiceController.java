@@ -3,6 +3,7 @@ package eu.wdaqua.qanary.component;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 @Controller
 // Used by default, but excluded when a pipeline doesn't act as component
@@ -88,5 +91,15 @@ public class QanaryServiceController {
     @GetMapping(value = {QanaryConfiguration.annotatequestion, "/" + QanaryConfiguration.annotatequestion})
     public String showDescriptionOnGetRequest(HttpServletResponse response) throws Exception {
         return filenameOnlyPostInteractionAllowed;
+    }
+
+    @PostMapping(value = {"/explain"})
+    @Operation(
+            summary = "Explanation endpoint for Qanary component.", //
+            operationId = "explainComponent", //
+            description = "Returns an explanation for this component within the specified graph." //
+    )
+    public ResponseEntity<?> explainComponent(@RequestBody QanaryExplanationData data) throws URISyntaxException, IOException, SparqlQueryFailed { // To be done
+        return new ResponseEntity<>(this.qanaryComponent.explain(data), HttpStatus.OK);
     }
 }

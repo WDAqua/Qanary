@@ -7,6 +7,7 @@ import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.component.QanaryComponent;
+import eu.wdaqua.qanary.component.QanaryExplanationData;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 import org.apache.jena.query.QuerySolutionMap;
@@ -144,6 +145,12 @@ public class QanaryPipelineComponent extends QanaryComponent {
             logger.error("{}", e.getMessage());
             return null;
         }
+    }
+
+    @Override
+    public String explain(QanaryExplanationData data) {
+        // do something different
+        return null;
     }
 
 

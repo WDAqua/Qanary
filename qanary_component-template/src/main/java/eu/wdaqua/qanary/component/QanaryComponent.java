@@ -6,11 +6,17 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.QuerySolutionMap;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
@@ -37,6 +43,9 @@ public abstract class QanaryComponent {
         return this.env.getProperty("spring.application.name");
     }
 
+    @Value("${explanation.service}")
+    private String explanationService;
+    private final WebClient webClient = WebClient.builder().baseUrl(explanationService + "/explain").build();
 
     /**
      * needs to be implemented for any new Qanary component
@@ -50,6 +59,11 @@ public abstract class QanaryComponent {
      */
     public String getQuestionRawData() throws Exception {
         return this.getQanaryQuestion().getTextualRepresentation();
+    }
+
+    public String explain(QanaryExplanationData data) {
+        JSONObject jsonObject = new JSONObject().put("graph", data.getGraph()).put("component", this.getApplicationName());
+        return this.webClient.post().bodyValue(jsonObject).retrieve().bodyToMono(String.class).block();
     }
 
     public QanaryUtils getUtils() {

@@ -1,3 +1,4 @@
+/*
 package eu.wdaqua.qanary.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -97,3 +96,5 @@ public class QanaryExplanation {
     }
 
 }
+
+*/
