@@ -2,7 +2,7 @@ PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX qa: <http://www.wdaqua.eu/qa#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
-SELECT ?g
+SELECT DISTINCT ?g
 WHERE {
 	GRAPH ?g {
 		?questionId owl:sameAs <urn:qanary:currentQuestion> .
