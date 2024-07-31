@@ -6,20 +6,32 @@ name: Java CI with Maven
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
-  build:
+  release:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 17
+
+    - name: Set up Maven Central Repository # Configures settings.xml with required credentials
       uses: actions/setup-java@v4
-      with:
-        java-version: 17
-        distribution: 'adopt'
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      with: # The environment variables are defined when needed (here, when the package is being published)
+        distribution: 'temurin'
+        java-version: '17'
+        server-id: 'ossrh' 
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_CENTRAL_TOKEN
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+    - name: Install dependencies
+      run: mvn clean install -Dgpg.skip
+    
+    - name: Deploy and Release artifact
+      run:  mvn clean deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons,qanary_pipeline-template,qanary_component-template,qanary_component-parent
+      env:
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}

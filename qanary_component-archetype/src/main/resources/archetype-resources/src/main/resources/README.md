@@ -15,10 +15,10 @@ The template is stored in the [`templates` folder](./templates/).
 
 ## Banner.txt
 
-The `banner.txt` file is used to display a banner in the console when the component is started.
+A `banner.txt` file might be used to display a banner in the console when the component is started.
 Here a template file is provided which can be used to create a banner.txt file.
 
 ## Component description
 
-The component description `component-description.ttl` is used to describe the component using RDF.
+The component description `component-description.ttl` should be used to describe the component using the RDF format.
 Here a template file is provided which can be used to create a component description.

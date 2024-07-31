@@ -59,7 +59,6 @@ public class QanaryPipelineConfigurationController {
 
     /**
      * returns configurable properties and their values based on the Environment
-     * @throws Exception
      */
     @RequestMapping(
         value = QanaryConfigurationAccessParameters.CONFIGURATIONENDPOINT, 

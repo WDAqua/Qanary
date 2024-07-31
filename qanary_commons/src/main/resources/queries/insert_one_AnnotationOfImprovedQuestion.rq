@@ -1,0 +1,22 @@
+PREFIX qa: <http://www.wdaqua.eu/qa#> 
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+INSERT { 
+GRAPH ?graph { 
+  ?annotationImprovedQuestion  a 	qa:AnnotationOfImprovedQuestion ; 
+ 		oa:hasTarget    ?question ; 
+ 		oa:hasBody      ?improvedQuestion ; 
+ 		oa:annotatedBy  ?application ; 
+ 		oa:annotatedAt  ?time ; 
+ 		qa:score        ?score . 
+
+  ?improvedQuestion a    qa:ImprovedQuestion ; 
+         rdf:value 		?improvedQuestionText . 
+  } 
+} 
+WHERE { 
+  BIND (IRI(str(RAND())) AS ?annotationImprovedQuestion) . 
+  BIND (IRI(str(RAND())) AS ?improvedQuestion) . 
+  BIND (now() AS ?time) . 
+}  

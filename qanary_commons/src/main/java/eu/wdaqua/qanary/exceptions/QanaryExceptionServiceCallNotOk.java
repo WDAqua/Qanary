@@ -16,16 +16,25 @@ public class QanaryExceptionServiceCallNotOk extends Exception {
 	private String componentName;
 
 	public QanaryExceptionServiceCallNotOk(String componentName, long duration, HttpStatus myHttpStatus) {
-		super("Call to service " + componentName + " was not performed correctly (duration: " + duration
-				+ " ms). Returns " + myHttpStatus.name() + "/" + myHttpStatus.value());
+		super(String.format(
+				"Call to Qanary component {} was not performed correctly (duration: {} ms); it returned {}. |\n{}", //
+				componentName, //
+				duration, //
+				myHttpStatus.name(), //
+				myHttpStatus.value() //
+		));
 		this.componentName = componentName;
 		this.duration = duration;
 		this.errormessage = myHttpStatus.name() + "/" + myHttpStatus.value();
 	}
 
 	public QanaryExceptionServiceCallNotOk(String componentName, long duration, String message, String stackTrace) {
-		super("Call to service " + componentName + " was not performed correctly (duration: " + duration
-				+ " ms). Results in " + message + "\n" + stackTrace);
+		super(String.format(
+				"Call to Qanary component {} was not performed correctly (duration: {} ms); it returned {}. |\n{}", //
+				componentName, //
+				duration, //
+				message, //
+				stackTrace));
 		this.componentName = componentName;
 		this.duration = duration;
 		this.errormessage = message + "\n" + stackTrace;

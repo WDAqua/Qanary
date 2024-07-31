@@ -11,8 +11,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-import eu.wdaqua.qanary.component.QanaryComponentConfiguration;
 import eu.wdaqua.qanary.component.QanaryComponent;
+import eu.wdaqua.qanary.component.QanaryComponentConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication
 @EnableAutoConfiguration
@@ -22,7 +25,6 @@ import eu.wdaqua.qanary.component.QanaryComponent;
  * note: there is no need to change something here
  */
 public class Application {
-
 	/**
 	* this method is needed to make the QanaryComponent in this project known
 	* to the QanaryServiceController in the qanary_component-template
@@ -36,9 +38,23 @@ public class Application {
 	}
 
 	@Autowired
-	public QanaryComponentConfiguration qanaryComponentConfiguration;
-	
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+	public QanaryComponentConfiguration qanaryComponentConfiguration; 
+
+	public static void main(String[] args) { 
+		SpringApplication.run(Application.class, args); 
+	}
+
+	@Bean
+	public OpenAPI customOpenAPI(
+			@Value("${spring.application.name}") final String appName) {
+		String appVersion = getClass().getPackage().getImplementationVersion();
+		// TODO: change the title and description as you see fit 
+		return new OpenAPI().info(new Info() //
+				.title("Qanary component " + appName) //
+				.version(appVersion) //
+				.description("Initial springdocs for Qanary component " + appName) //
+				.termsOfService("http://swagger.io/terms/") //
+				.license(new License().name("Apache 2.0").url("http://springdoc.org")) //
+		);
+	}
 }

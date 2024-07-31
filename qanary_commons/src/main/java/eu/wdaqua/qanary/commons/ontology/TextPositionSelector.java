@@ -6,8 +6,7 @@ import java.net.URISyntaxException;
 import org.apache.jena.reasoner.IllegalParameterException;
 
 /**
- * represents the textpositionselector concept of the W3C OpenAnnotation commons {@linktourl
- * https://www.w3.org/ns/oa#d4e667}
+ * represents the textpositionselector concept of the W3C OpenAnnotation commons @see <a href="https://www.w3.org/ns/oa#d4e667">W3C OpenAnnotation commons</a>
  *
  * TODO: implement a builder pattern for creating objects
  *
