@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>eu.wdaqua.qanary</groupId>
-	<artifactId>qa.qanarycomponent-parent</artifactId>
-	<version>0.1.0</version>
-	<packaging>pom</packaging>
-
-	<name>qanary-component-parent</name>
-
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>eu.wdaqua.qanary</groupId>
+    <artifactId>qa.qanarycomponent-parent</artifactId>
+    <version>0.2.0</version>
+    <packaging>pom</packaging>
 	<parent>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
 		<groupId>org.springframework.boot</groupId>
@@ -19,7 +16,7 @@
 	</parent>
 	<properties>
 		<java.version>17</java.version>
-		<spring-boot-admin.version>2.7.11</spring-boot-admin.version>
+		<spring-boot-admin.version>2.7.12</spring-boot-admin.version>
 		<qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
 		<qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -27,143 +24,262 @@
 		<json-path.version>2.9.0</json-path.version>
 	</properties>
 
-	<!-- common dependencies that are implemented by all components -->
+    <!-- common dependencies that are implemented by all components -->
 
-	<dependencies>
-		<dependency>
-			<groupId>eu.wdaqua.qanary</groupId>
-			<artifactId>qa.component</artifactId>
-			<version>${qanary.component.version}</version>
-			<exclusions>
-					<exclusion>
-							<groupId>org.apache.logging.log4j</groupId>
-							<artifactId>log4j-to-slf4j</artifactId>
-					</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-				<groupId>eu.wdaqua.qanary</groupId>
-				<artifactId>qa.commons</artifactId>
-				<version>${qanary.commons.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-		</dependency>
-		<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-to-slf4j</artifactId>
-				<version>2.20.0</version>
-				<exclusions>
-						<exclusion>
-								<groupId>org.apache.logging.log4j</groupId>
-								<artifactId>log4j-api</artifactId>
-						</exclusion>
-				</exclusions>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring-boot-admin.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<version>${spring-boot-admin.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-client</artifactId>
-			<version>${spring-boot-admin.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/junit/junit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>hamcrest-core</artifactId>
-					<groupId>org.hamcrest</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest-all -->
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.3</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>eu.wdaqua.qanary</groupId>
+            <artifactId>qa.component</artifactId>
+            <version>${qanary.component.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>eu.wdaqua.qanary</groupId>
+            <artifactId>qa.commons</artifactId>
+            <version>${qanary.commons.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.22.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot-admin.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot-admin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+            <version>${spring-boot-admin.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hamcrest-core</artifactId>
+                    <groupId>org.hamcrest</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest-all -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<!-- common dependencies that may be implemented by some components -->
-	<dependencyManagement>
-		<dependencies>
-			<!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
-			<dependency>
-				<groupId>com.jayway.jsonpath</groupId>
-				<artifactId>json-path</artifactId>
-				<version>${json-path.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path-assert -->
-			<dependency>
-				<groupId>com.jayway.jsonpath</groupId>
-				<artifactId>json-path-assert</artifactId>
-				<version>${json-path.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-			<dependency>
-					<groupId>com.google.code.gson</groupId>
-					<artifactId>gson</artifactId>
-					<version>2.10.1</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui -->
-			<dependency>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>${springdoc.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>io.swagger.core.v3</groupId>
-						<artifactId>swagger-annotations</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-webmvc-core</artifactId>
-				<version>${springdoc.version}</version>
-			</dependency> 
-			<dependency>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-data-rest</artifactId>
-				<version>${springdoc.version}</version>
-			</dependency>
-			<!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-core-jakarta -->
-			<dependency>
-					<groupId>io.swagger.core.v3</groupId>
-					<artifactId>swagger-core-jakarta</artifactId>
-					<version>2.2.16</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <!-- common dependencies that may be implemented by some components -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${json-path.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path-assert -->
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path-assert</artifactId>
+                <version>${json-path.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.10.1</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${springdoc.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger.core.v3</groupId>
+                        <artifactId>swagger-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-webmvc-core</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-data-rest</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-core-jakarta -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core-jakarta</artifactId>
+                <version>2.2.16</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+	<!-- START - Setup for deployment to maven repository -->
+
+	<!-- Project name, Description, URL; inherited by default -->
+	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
+	<description>Qanary component template package</description>
+	<url>https://github.com/WDAqua/Qanary/</url>
+
+	<!-- Set up distribution management (for maven deploy plugin) -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<!-- Source-Control-Management information (SCM) -->
+	<scm>
+		<connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
+		<developerConnection>scm:git:ssh://github.com/WDAqua/Qanary.git</developerConnection>
+		<url>https://github.com/WDAqua/Qanary</url>
+	</scm>
+
+	<!-- Developer information, inherited by default -->
+	<developers>
+		<developer>
+			<name>Andreas Both</name>
+			<email>andreas.both@htwk-leipzig.de</email>
+			<organization>WDAqua</organization>
+			<organizationUrl>http://wdaqua.eu/</organizationUrl>
+		</developer>
+	</developers>
+
+	<!-- Licence information, inherited by default -->
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name> <!-- Example for Apache2 Licence -->
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> <!-- Example for Apache2 Licence -->
+		</license>
+	</licenses>
+
+	<!-- -->
+	<!-- END - Setup for deployment to maven repository -->
+
+	<build>
+		<plugins>
+			<!-- Deployment/Release related plugins -->
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.13</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+
+			<!-- Signing the artifact -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<gpgArguments>
+						<arg>--pinentry-mode</arg>
+						<arg>loopback</arg>
+					</gpgArguments>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Required for maven repository deployment -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
