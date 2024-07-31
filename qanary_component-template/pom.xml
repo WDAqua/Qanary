@@ -14,7 +14,7 @@
     </parent>
     <properties>
         <java.version>11</java.version>
-		<spring-boot-admin.version>2.7.14</spring-boot-admin.version>
+	<spring-boot-admin.version>2.7.14</spring-boot-admin.version>
         <jena.version>4.10.0</jena.version>
     </properties>
 
