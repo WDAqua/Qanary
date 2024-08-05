@@ -1,20 +1,22 @@
 package eu.wdaqua.qanary.component;
 
+import java.util.Map;
+
 public class QanaryExplanationData {
 
         private String graph;
         private String questionId;
-        private String component;
         private String serverHost;
+        private String component;
+        private Map<String,String> explanations;
 
         public QanaryExplanationData() {
 
         }
 
-        public QanaryExplanationData(String graph, String questionId, String component, String serverHost) {
+        public QanaryExplanationData(String graph, String questionId, String serverHost) {
             this.graph = graph;
             this.questionId = questionId;
-            this.component = component;
             this.serverHost = serverHost;
         }
 
@@ -22,7 +24,15 @@ public class QanaryExplanationData {
             return component;
         }
 
-        public String getGraph() {
+    public void setExplanations(Map<String, String> explanations) {
+        this.explanations = explanations;
+    }
+
+    public Map<String, String> getExplanations() {
+        return explanations;
+    }
+
+    public String getGraph() {
             return graph;
         }
 

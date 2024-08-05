@@ -65,6 +65,8 @@ public abstract class QanaryComponent {
     }
 
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
+        data.setComponent(this.getApplicationName());
+        logger.info("Explaining component: {}", data.getComponent());
         return this.webClient.post().bodyValue(data).retrieve().bodyToMono(String.class).block();
     }
 

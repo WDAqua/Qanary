@@ -16,6 +16,7 @@ import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -169,21 +171,24 @@ public class QanaryPipelineComponent extends QanaryComponent {
 
     @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
+        logger.info("Explaining component: {}", this.getApplicationName());
         String pacGraph = getGraphFromQuestionId(data.getQuestionId());
         List<QanaryExplanationData> dataList = new ArrayList<>();
-        Map<String, Instance> componentsAndInstances = qanaryComponentRegistrationChangeNotifier.getAvailableComponents();
         for (String qanaryComponent : QANARY_COMPONENTS) {
             dataList.add(new QanaryExplanationData(
                             pacGraph,
                             data.getQuestionId(),
-                            qanaryComponent,
                             qanaryComponentRegistrationChangeNotifier.getAvailableComponents().get(qanaryComponent).getRegistration().getServiceUrl()
             ));
         }
         List<String> subComponentExplanations = fetchSubComponentExplanations(dataList).collectList().block();
-        // TODO: Send to explanationService to compose them and return it; TODO: Add status handling
-        // return webClient.post().uri(this.explanationService + EXPLAIN_ENDPOINT).bodyValue(null/*TODO:*/).retrieve().bodyToMono(String.class).block();
-        return StringUtils.join(subComponentExplanations).toString();
+        Map<String,String> componentAndExplanation = new HashMap<>();
+        for(int i = 0; i < dataList.size(); i++) {
+            componentAndExplanation.put(QANARY_COMPONENTS.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
+        }
+        data.setComponent(this.getApplicationName());
+        data.setExplanations(componentAndExplanation);
+        return this.webClient.post().uri(explanationService + "/explain").bodyValue(data).retrieve().bodyToMono(String.class).block();
     }
 
     public Flux<String> fetchSubComponentExplanations(List<QanaryExplanationData> data) {
