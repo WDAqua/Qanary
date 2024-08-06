@@ -7,6 +7,8 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.explainability.QanaryExplanation;
+import eu.wdaqua.qanary.explainability.QanaryExplanationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ import java.net.URISyntaxException;
  * @author AnBo
  */
 @Component
-public abstract class QanaryComponent {
+public abstract class QanaryComponent implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryComponent.class);
 
@@ -64,6 +66,7 @@ public abstract class QanaryComponent {
         return this.getQanaryQuestion().getTextualRepresentation();
     }
 
+    @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
         data.setComponent(this.getApplicationName());
         logger.info("Explaining component: {}", data.getComponent());

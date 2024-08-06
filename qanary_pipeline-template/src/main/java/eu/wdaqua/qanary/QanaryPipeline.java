@@ -4,14 +4,18 @@ import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
+import eu.wdaqua.qanary.explainability.QanaryExplanation;
+import eu.wdaqua.qanary.explainability.QanaryExplanationData;
 import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -35,7 +41,7 @@ import java.util.Map;
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,
 // removable
 @ComponentScan({"eu.wdaqua.qanary"})
-public class QanaryPipeline {
+public class QanaryPipeline implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
     @Autowired
@@ -154,6 +160,11 @@ public class QanaryPipeline {
                 .termsOfService("http://swagger.io/terms/") //
                 .license(new License().name("Apache 2.0").url("http://springdoc.org")) //
         );
+    }
+
+    @Override
+    public String explain(QanaryExplanationData qanaryExplanationData) throws IOException, URISyntaxException, SparqlQueryFailed {
+        return "Test123"; // TODO!
     }
 
     /*

@@ -92,14 +92,4 @@ public class QanaryServiceController {
     public String showDescriptionOnGetRequest(HttpServletResponse response) throws Exception {
         return filenameOnlyPostInteractionAllowed;
     }
-
-    @PostMapping(value = {"/explain"})
-    @Operation(
-            summary = "Explanation endpoint for Qanary component.", //
-            operationId = "explainComponent", //
-            description = "Returns an explanation for this component within the specified graph." //
-    )
-    public ResponseEntity<?> explainComponent(@RequestBody QanaryExplanationData data) throws URISyntaxException, IOException, SparqlQueryFailed { // To be done
-        return new ResponseEntity<>(this.qanaryComponent.explain(data), HttpStatus.OK);
-    }
 }
