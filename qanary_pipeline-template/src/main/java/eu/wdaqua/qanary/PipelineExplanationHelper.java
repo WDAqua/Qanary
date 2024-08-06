@@ -94,7 +94,7 @@ public class PipelineExplanationHelper {
         ResultSet results = this.qanaryTripleStoreConnector.select(query);
         List<String> list = new ArrayList<>();
         while(results.hasNext()) {
-            list.add(results.next().get("component").toString());
+            list.add(results.next().get("component").toString().replace("urn:qanary:",""));
         }
         return list;
     }

@@ -176,7 +176,7 @@ public class QanaryPipeline implements QanaryExplanation {
             dataList.add(new QanaryExplanationData(
                     qanaryExplanationData.getGraph(),
                     qanaryExplanationData.getQuestionId(),
-                    pipelineExplanationHelper.getQanaryComponentRegistrationChangeNotifier().getAvailableComponents().get(qanaryComponent.replace("urn:qanary:","")).getRegistration().getServiceUrl()
+                    pipelineExplanationHelper.getQanaryComponentRegistrationChangeNotifier().getAvailableComponents().get(qanaryComponent).getRegistration().getServiceUrl()
             ));
         }
         List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
