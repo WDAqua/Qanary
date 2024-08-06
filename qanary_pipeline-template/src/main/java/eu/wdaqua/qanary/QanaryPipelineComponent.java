@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -44,23 +46,17 @@ public class QanaryPipelineComponent extends QanaryComponent {
     private final String QUESTION_QUERY = "/select_questionId.rq";
     private final String CONSTRUCT_QUERY = "/pipeline_component_construct.rq";
     private final String INSERT_QUERY = "/insert_constructed_triples.rq";
-    private final String GRAPH_QUERY = "/queries/select_all_graphs_with_questionId.rq";
-    private final String ANNOTATED_BY_COMPONENT_TRIPLE = "?s oa:annotatedBy ?component .";
     private final Logger logger = LoggerFactory.getLogger(QanaryPipelineComponent.class);
-    private final String EXPLAIN_ENDPOINT = "/explain";
-    private WebClient webClient;
-    private QanaryTripleStoreProxy qanaryTripleStoreConnector;
-    @Autowired
-    private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
-    private QanaryConfigurator qanaryConfigurator;
     @Value("${qanary.components}")
     private List<String> QANARY_COMPONENTS; // The non-prefixed component-names !!!
+    private QanaryTripleStoreProxy qanaryTripleStoreConnector;
+    private QanaryConfigurator qanaryConfigurator;
     @Autowired
     private QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
-    @Value("${explanation.service:#null}")
-    public void setupWebClient(String explanationService) {
-        this.webClient = WebClient.builder().baseUrl(explanationService + "/explain").build();
-    }
+    @Autowired
+    private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
+    @Autowired
+    private PipelineExplanationHelper pipelineExplanationHelper;
 
     public QanaryPipelineComponent() {
     }
@@ -69,6 +65,7 @@ public class QanaryPipelineComponent extends QanaryComponent {
     public void setupTripleStoreConnector(QanaryConfigurator qanaryConfigurator) {
         this.qanaryConfigurator = qanaryConfigurator;
         this.qanaryTripleStoreConnector = qanaryConfigurator.getQanaryTripleStoreConnector();
+
     }
 
     /**
@@ -173,7 +170,7 @@ public class QanaryPipelineComponent extends QanaryComponent {
     @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
         logger.info("Explaining component: {}", this.getApplicationName());
-        String pacGraph = getGraphFromQuestionId(data.getQuestionId());
+        String pacGraph = pipelineExplanationHelper.getGraphFromQuestionId(data.getQuestionId());
         List<QanaryExplanationData> dataList = new ArrayList<>();
         for (String qanaryComponent : QANARY_COMPONENTS) {
             dataList.add(new QanaryExplanationData(
@@ -182,41 +179,14 @@ public class QanaryPipelineComponent extends QanaryComponent {
                     qanaryComponentRegistrationChangeNotifier.getAvailableComponents().get(qanaryComponent).getRegistration().getServiceUrl()
             ));
         }
-        List<String> subComponentExplanations = fetchSubComponentExplanations(dataList).collectList().block();
+        List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
         Map<String,String> componentAndExplanation = new HashMap<>();
         for(int i = 0; i < dataList.size(); i++) {
             componentAndExplanation.put(QANARY_COMPONENTS.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
         }
         data.setComponent(this.getApplicationName());
         data.setExplanations(componentAndExplanation);
-        return this.webClient.post().bodyValue(data).retrieve().bodyToMono(String.class).block();
-    }
-
-    public Flux<String> fetchSubComponentExplanations(List<QanaryExplanationData> data) {
-        return Flux.fromIterable(data).flatMapSequential(this::getComponentExplanation);
-    }
-
-    public Mono<String> getComponentExplanation(QanaryExplanationData data) {
-        return webClient.post().uri(data.getServerHost() + "/explain").bodyValue(data).retrieve().bodyToMono(String.class);
-    }
-
-    public String getGraphFromQuestionId(String questionId) throws IOException, URISyntaxException, SparqlQueryFailed {
-        String componentTriples = createComponentTriples();
-        String query = QanaryTripleStoreConnector.readFileFromResources(GRAPH_QUERY)
-                .replace("?componentAnnotations", componentTriples)
-                .replace("?questionId", "<" + questionId + ">");
-        // Ignore problem of multiple graphs at a time; annotatedAt could partly solve this
-        return qanaryTripleStoreConnector.select(query).next().get("g").toString(); // return first
-    }
-
-    public String createComponentTriples() {
-        String triples = "";
-        for (String component : QANARY_COMPONENTS) {
-            triples += ANNOTATED_BY_COMPONENT_TRIPLE
-                    .replace("?s", "?" + component.replace("-",""))
-                    .replace("?component", "<urn:qanary:" + component + ">");
-        }
-        return triples;
+        return pipelineExplanationHelper.requestPipelineExplanation(data);
     }
 
 

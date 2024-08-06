@@ -15,7 +15,6 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -44,6 +46,10 @@ import java.util.Map;
 public class QanaryPipeline implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
+    @Value("${spring.application.name}")
+    private String applicationName;
+    @Autowired
+    private PipelineExplanationHelper pipelineExplanationHelper;
     @Autowired
     public QanaryPipelineConfiguration qanaryPipelineConfiguration;
 
@@ -107,7 +113,6 @@ public class QanaryPipeline implements QanaryExplanation {
                                             QanaryTripleStoreProxy myQanaryTripleStoreConnector
     ) throws TripleStoreNotWorking, TripleStoreNotProvided {
         this.checkTripleStoreConnection(myQanaryTripleStoreConnector);
-
         return new QanaryConfigurator( //
                 restTemplate(), //
                 qanaryPipelineConfiguration.getPredefinedComponents(), // from config
@@ -164,7 +169,24 @@ public class QanaryPipeline implements QanaryExplanation {
 
     @Override
     public String explain(QanaryExplanationData qanaryExplanationData) throws IOException, URISyntaxException, SparqlQueryFailed {
-        return "Test123"; // TODO!
+        // Fetch subcomponent explanations == All annotations made on the original KG
+        List<String> components = pipelineExplanationHelper.getUsedComponents(qanaryExplanationData.getGraph());
+        List<QanaryExplanationData> dataList = new ArrayList<>();
+        for (String qanaryComponent : components) {
+            dataList.add(new QanaryExplanationData(
+                    qanaryExplanationData.getGraph(),
+                    qanaryExplanationData.getQuestionId(),
+                    pipelineExplanationHelper.getQanaryComponentRegistrationChangeNotifier().getAvailableComponents().get(qanaryComponent.replace("urn:qanary:","")).getRegistration().getServiceUrl()
+            ));
+        }
+        List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
+        Map<String,String> componentAndExplanation = new HashMap<>();
+        for(int i = 0; i < dataList.size(); i++) {
+            componentAndExplanation.put(components.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
+        }
+        qanaryExplanationData.setComponent(this.applicationName);
+        qanaryExplanationData.setExplanations(componentAndExplanation);
+        return pipelineExplanationHelper.requestPipelineExplanation(qanaryExplanationData);
     }
 
     /*
