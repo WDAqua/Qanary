@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.qanarycomponent-parent</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
 	<parent>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
@@ -18,7 +18,7 @@
 		<java.version>17</java.version>
 		<spring-boot-admin.version>2.7.12</spring-boot-admin.version>
 		<qanary.component.version>[3.9.2,4.0.0)</qanary.component.version>
-		<qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
+		<qanary.commons.version>[3.17.0,4.0.0)</qanary.commons.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<springdoc.version>1.7.0</springdoc.version>
 		<json-path.version>2.9.0</json-path.version>
