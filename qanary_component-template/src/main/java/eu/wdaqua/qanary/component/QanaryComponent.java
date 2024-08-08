@@ -6,11 +6,19 @@ import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.explainability.QanaryExplanation;
+import eu.wdaqua.qanary.explainability.QanaryExplanationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * represent the behavior of an annotator following the Qanary methodology
@@ -18,7 +26,7 @@ import org.springframework.stereotype.Component;
  * @author AnBo
  */
 @Component
-public abstract class QanaryComponent {
+public abstract class QanaryComponent implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryComponent.class);
 
@@ -37,6 +45,12 @@ public abstract class QanaryComponent {
         return this.env.getProperty("spring.application.name");
     }
 
+    private WebClient webClient;
+
+    @Value("${explanation.service:#null}")
+    public void setupWebClient(String explanationService) {
+        this.webClient = WebClient.builder().baseUrl(explanationService + "/explain").build();
+    }
 
     /**
      * needs to be implemented for any new Qanary component
@@ -50,6 +64,13 @@ public abstract class QanaryComponent {
      */
     public String getQuestionRawData() throws Exception {
         return this.getQanaryQuestion().getTextualRepresentation();
+    }
+
+    @Override
+    public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
+        data.setComponent(this.getApplicationName());
+        logger.info("Explaining component: {}", data.getComponent());
+        return this.webClient.post().bodyValue(data).retrieve().bodyToMono(String.class).block();
     }
 
     public QanaryUtils getUtils() {
