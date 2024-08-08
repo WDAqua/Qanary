@@ -2,6 +2,7 @@ package eu.wdaqua.qanary.explainability;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class QanaryExplanationController {
             return new ResponseEntity<>(this.qanaryExplanation.explain(qanaryExplanationData), HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error with message: {}", e.getMessage());
-            return new ResponseEntity<>("Error occurred", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Couldn't explain requested component.", HttpStatus.BAD_REQUEST);
         }
     }
 

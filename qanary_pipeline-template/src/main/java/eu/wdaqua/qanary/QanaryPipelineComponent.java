@@ -19,13 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -182,10 +177,11 @@ public class QanaryPipelineComponent extends QanaryComponent {
         List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
         Map<String,String> componentAndExplanation = new HashMap<>();
         for(int i = 0; i < dataList.size(); i++) {
-            componentAndExplanation.put(QANARY_COMPONENTS.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
+            componentAndExplanation.put(QANARY_COMPONENTS.get(i),subComponentExplanations.get(i));
         }
         data.setComponent(this.getApplicationName());
         data.setExplanations(componentAndExplanation);
+        data.setGraph(pacGraph);
         return pipelineExplanationHelper.requestPipelineExplanation(data);
     }
 
