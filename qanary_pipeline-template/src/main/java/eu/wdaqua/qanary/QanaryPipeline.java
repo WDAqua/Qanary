@@ -167,6 +167,9 @@ public class QanaryPipeline implements QanaryExplanation {
         );
     }
 
+    /**
+     * returns an explanation for the post-hoc behavior of a specific execution
+     */
     @Override
     public String explain(QanaryExplanationData qanaryExplanationData) throws IOException, URISyntaxException, SparqlQueryFailed {
         // Fetch subcomponent explanations == All annotations made on the original KG
