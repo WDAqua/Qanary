@@ -1,8 +1,10 @@
+# This SPARQL query is designed to retrieve a distinct list of components that have been used to create annotations within a specific named graph (Qanary process graph) in a triplestore. 
+# These components are part of a Qanary pipeline.
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX qa: <http://www.wdaqua.eu/qa#>
 
 SELECT DISTINCT ?component
 FROM ?graph
 WHERE {
-?annotationID oa:annotatedBy ?component .
+  ?annotationID oa:annotatedBy ?component .
 }
