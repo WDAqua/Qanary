@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>3.11.0</version>
+    <version>3.11.1</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -14,7 +14,7 @@
     </parent>
     <properties>
         <java.version>11</java.version>
-	<spring-boot-admin.version>2.7.14</spring-boot-admin.version>
+	<spring-boot-admin.version>2.7.16</spring-boot-admin.version>
         <jena.version>4.10.0</jena.version>
     </properties>
 

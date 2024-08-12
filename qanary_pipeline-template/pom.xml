@@ -237,7 +237,7 @@
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.component</artifactId>
-            <version>3.11.0</version>
+            <version>3.11.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
