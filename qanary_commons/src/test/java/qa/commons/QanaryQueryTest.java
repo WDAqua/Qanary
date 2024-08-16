@@ -37,9 +37,7 @@ public class QanaryQueryTest {
 	private final PrefixMappingImpl prefixMapping; 
 
     /**
-     * Use QanaryQueryTest.COMMON_PREFIXES or define your own prefix mappings. 
-     *
-     * @param prefixMapping
+     * @param prefixMapping use QanaryQueryTest.COMMON_PREFIXES or define your own prefix mappings. 
      */
 	public QanaryQueryTest(Map<String, String> prefixMapping) {
         this.prefixMapping = new PrefixMappingImpl();
@@ -101,8 +99,8 @@ public class QanaryQueryTest {
      * Assert that the supplied query contains a specific triple.
      *
      * @param queryString
-     * @param subject a literal with lexical form, datatype IRI and optionally a language tag
-     * @param predicate a URI string or variable
+     * @param subject a URI string or variable name
+     * @param predicate a URI string or variable name
      * @param object a URI string or variable name
      */
     public void queryContainsTriple(String queryString, String subject, String predicate, String object) {
@@ -135,7 +133,7 @@ public class QanaryQueryTest {
      * Assert that the supplied query contains a specific triple.
      *
      * @param queryString
-     * @param subject a URI string or variable name
+     * @param subject a literal with lexical form, datatype IRI and optionally a language tag
      * @param predicate a URI string or variable name 
      * @param object a URI string or variable name
      */
@@ -149,18 +147,15 @@ public class QanaryQueryTest {
 
     }
 
-    // TODO: consider methods for complete list matches
-    //public boolean containsAllGraphs(List<String> expectedGraphs) {
-    //    return CollectionUtils.isEqualCollection(this.graphs, expectedGraphs);
-    //}
-    // public boolean containsAllFilterKeyValuePairs() {}
-    // public boolean containsAllTriples() {}
-
     //
     // CONTENT PARSING
     // 
 
-    // parses the query to extract graphs, filters and triples 
+    /** Parses the query to extract graphs, filters and triples.
+     * This does not work for INSERT queries (all update queries)
+     *
+     * @param queryString
+     */
     private ParsedQueryContent parseQueryContent(String queryString) {
         List<String> graphs = new LinkedList<>();
         List<String> filters = new LinkedList<>();
