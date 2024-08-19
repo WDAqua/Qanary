@@ -83,8 +83,9 @@ public class PipelineExplanationHelper {
      * @return graph
      * @throws IOException
      * @throws SparqlQueryFailed
+     * @throws URISyntaxException
      */
-    public String getGraphFromQuestionId(String questionId) throws IOException, SparqlQueryFailed {
+    public String getGraphFromQuestionId(String questionId) throws IOException, URISyntaxException, SparqlQueryFailed {
         String componentTriples = createComponentTriples();
         String query = QanaryTripleStoreConnector.readFileFromResources(GRAPH_QUERY)
                 .replace("?componentAnnotations", componentTriples)
