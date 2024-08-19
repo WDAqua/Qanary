@@ -162,6 +162,9 @@ public class QanaryPipelineComponent extends QanaryComponent {
         }
     }
 
+    /**
+     * returns an (post-hoc) explanation for a specific execution run
+     */
     @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
         logger.info("Explaining component: {}", this.getApplicationName());

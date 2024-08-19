@@ -14,7 +14,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
+/**
+ * This controller class handles HTTP POST requests for providing explanations for Qanary components.
+ * By default, it uses a {@link QanaryExplanation} service to generate explanations based on the provided data.
+ * In case of a specific explanation that should be provided by a component, it should overwrite this class by a specific implementation.
+ */
 @Controller
 public class QanaryExplanationController {
 
