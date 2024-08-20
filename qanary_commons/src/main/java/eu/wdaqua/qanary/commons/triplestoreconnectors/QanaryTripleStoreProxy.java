@@ -57,7 +57,7 @@ public class QanaryTripleStoreProxy extends QanaryTripleStoreConnector {
     }
 
     @Override
-    public ResultSet select(String sparql) throws SparqlQueryFailed, URISyntaxException {
+    public ResultSet select(String sparql) throws SparqlQueryFailed {
         ResultSet results = externalConnector.select(sparql);
         if (internalConnector != null && !results.hasNext()) {
             getLogger().info("Requesting parent endpoint and graph");
