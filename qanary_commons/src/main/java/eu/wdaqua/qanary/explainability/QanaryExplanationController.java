@@ -26,8 +26,8 @@ public class QanaryExplanationController {
     private Logger logger = LoggerFactory.getLogger(QanaryExplanationController.class);
 
     @Autowired
-    public void setQanaryExplanationService(QanaryExplanation qanaryExplanation) {
-        this.qanaryExplanation = qanaryExplanation;
+    public void setQanaryExplanationService(QanaryExplanation qanaryComponent) {
+        this.qanaryExplanation = qanaryComponent;
     }
 
     @PostMapping("/explain")

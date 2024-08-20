@@ -296,7 +296,7 @@ public abstract class QanaryTripleStoreConnector {
 
     public abstract void connect(); // TODO: add exception
 
-    public abstract ResultSet select(String sparql) throws SparqlQueryFailed, URISyntaxException;
+    public abstract ResultSet select(String sparql) throws SparqlQueryFailed;
 
     public abstract boolean ask(String sparql) throws SparqlQueryFailed;
 
