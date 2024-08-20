@@ -1,0 +1,13 @@
+# This SPARQL query is designed to identify the named graph(s) within a triplestore where a specific question, identified by its unique ID, is associated with the current question being processed in a Qanary pipeline.
+# ?componentAnnotations should be replaced in the source code
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX qa: <http://www.wdaqua.eu/qa#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT DISTINCT ?g
+WHERE {
+	GRAPH ?g {
+		?questionId owl:sameAs <urn:qanary:currentQuestion> .
+    	?componentAnnotations
+	}
+}

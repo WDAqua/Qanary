@@ -8,6 +8,7 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.component.QanaryComponent;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.explainability.QanaryExplanationData;
 import eu.wdaqua.qanary.web.QanaryQuestionAnsweringController;
 import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -25,9 +27,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
+@Primary // To inject this explain() implementation to the QanaryExplanationController
 // Only created when the pipeline should act as a component, otherwise not
 @ConditionalOnProperty(name = "pipeline.as.component", havingValue = "true")
 public class QanaryPipelineComponent extends QanaryComponent {
@@ -36,14 +42,25 @@ public class QanaryPipelineComponent extends QanaryComponent {
     private final String CONSTRUCT_QUERY = "/pipeline_component_construct.rq";
     private final String INSERT_QUERY = "/insert_constructed_triples.rq";
     private final Logger logger = LoggerFactory.getLogger(QanaryPipelineComponent.class);
+    @Value("${qanary.components}")
+    private List<String> QANARY_COMPONENTS; // The non-prefixed component-names !!!
+    private QanaryTripleStoreProxy qanaryTripleStoreConnector;
+    private QanaryConfigurator qanaryConfigurator;
+    @Autowired
+    private QanaryComponentRegistrationChangeNotifier qanaryComponentRegistrationChangeNotifier;
     @Autowired
     private QanaryQuestionAnsweringController qanaryQuestionAnsweringController;
     @Autowired
-    private QanaryConfigurator qanaryConfigurator;
-    @Value("${qanary.components}")
-    private List<String> QANARY_COMPONENTS;
+    private PipelineExplanationHelper pipelineExplanationHelper;
 
     public QanaryPipelineComponent() {
+    }
+
+    @Autowired
+    public void setupTripleStoreConnector(QanaryConfigurator qanaryConfigurator) {
+        this.qanaryConfigurator = qanaryConfigurator;
+        this.qanaryTripleStoreConnector = qanaryConfigurator.getQanaryTripleStoreConnector();
+
     }
 
     /**
@@ -59,9 +76,8 @@ public class QanaryPipelineComponent extends QanaryComponent {
         // Get required information
         URI externalEndpoint = this.qanaryConfigurator.getEndpoint();
         URI internalEndpoint = myQanaryMessage.getEndpoint();
-        QanaryTripleStoreProxy qanaryTripleStoreConnector = this.qanaryConfigurator.getQanaryTripleStoreConnector();
-        qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
-        qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
+        this.qanaryTripleStoreConnector.setInternalConnector(internalEndpoint, this.getApplicationName());
+        this.qanaryTripleStoreConnector.setInternEndpointGraph(myQanaryMessage.getInGraph());
 
         // Get question and execute internal pipeline with it
         URI questionId = new URI(getQuestionIdWithQuery(myQanaryMessage.getInGraph().toASCIIString(), qanaryTripleStoreConnector));
@@ -144,6 +160,32 @@ public class QanaryPipelineComponent extends QanaryComponent {
             logger.error("{}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * returns an (post-hoc) explanation for a specific execution run
+     */
+    @Override
+    public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
+        logger.info("Explaining component: {}", this.getApplicationName());
+        String pacGraph = pipelineExplanationHelper.getGraphFromQuestionId(data.getQuestionId());
+        List<QanaryExplanationData> dataList = new ArrayList<>();
+        for (String qanaryComponent : QANARY_COMPONENTS) {
+            dataList.add(new QanaryExplanationData(
+                    pacGraph,
+                    data.getQuestionId(),
+                    qanaryComponentRegistrationChangeNotifier.getAvailableComponents().get(qanaryComponent).getRegistration().getServiceUrl()
+            ));
+        }
+        List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
+        Map<String,String> componentAndExplanation = new HashMap<>();
+        for(int i = 0; i < dataList.size(); i++) {
+            componentAndExplanation.put(QANARY_COMPONENTS.get(i),subComponentExplanations.get(i));
+        }
+        data.setComponent(this.getApplicationName());
+        data.setExplanations(componentAndExplanation);
+        data.setGraph(pacGraph);
+        return pipelineExplanationHelper.requestPipelineExplanation(data);
     }
 
 
