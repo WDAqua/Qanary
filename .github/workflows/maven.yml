@@ -28,9 +28,20 @@ jobs:
 
     - name: Install dependencies
       run: mvn clean install -Dgpg.skip
+
+    - name: Determine release list
+      run: |
+        chmod +x ./version_script.sh
+        ./version_script.sh
+
+    - name: Parse the modules
+      run: |
+        # Read the modules from the environment variable
+        IFS=',' read -r -a MODULES_ARRAY <<< "${{ env.ARTIFACTS_TO_BE_RELEASED }}"
+        echo "Modules: ${MODULES_ARRAY[@]}"     
     
     - name: Deploy and Release artifact
-      run:  mvn clean deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl qanary_commons,qanary_pipeline-template,qanary_component-template,qanary_component-parent
+      run:  mvn clean deploy -Dgpg.keyname=${{ secrets.MAVEN_GPG_KEYNAME }} -pl ${{ env.ARTIFACTS_TO_BE_RELEASED }}
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
