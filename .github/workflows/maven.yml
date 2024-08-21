@@ -26,13 +26,13 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+    - name: Determine release list
+      run: 
+        chmod +x ./service_config/version_check.sh
+        ./service_config/version_check.sh
+
     - name: Install dependencies
       run: mvn clean install -Dgpg.skip
-
-    - name: Determine release list
-      run: |
-        chmod +x ./service_config/version_script.sh
-        ./service_config/version_script.sh
     
     - name: Deploy and Release artifact
       run:  |
