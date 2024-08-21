@@ -25,8 +25,8 @@ for artifact in "${artifacts[@]}"; do
     done < <(find "../$artifact" -name "pom.xml")
 done
 
-# Join the array elements into a string with a comma as delimiter
-ARTIFACTS_TO_BE_RELEASED_STR=$(IFS=","; echo "${artifacts_to_be_released[*]}")
-echo "Final list of artifacts to be released: ${ARTIFACTS_TO_BE_RELEASED_STR[@]}"
-# Use GitHub Actions command to set an environment variable
-echo "ARTIFACTS_TO_BE_RELEASED=$ARTIFACTS_TO_BE_RELEASED_STR" >> $GITHUB_ENV                
+  # Join the array elements into a string with a comma as delimiter
+  ARTIFACTS_TO_BE_RELEASED_STR=$(IFS=","; echo "${artifacts_to_be_released[*]}")
+  echo "Final list of artifacts to be released: ${ARTIFACTS_TO_BE_RELEASED_STR}"
+  # Use GitHub Actions command to set an environment variable
+  echo "::set-env name=ARTIFACTS_TO_BE_RELEASED::${ARTIFACTS_TO_BE_RELEASED_STR}"
