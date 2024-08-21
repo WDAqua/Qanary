@@ -31,8 +31,8 @@ jobs:
 
     - name: Determine release list
       run: |
-        chmod +x ../../service_config/version_script.sh
-        ../../service_config/version_script.sh
+        chmod +x ./service_config/version_script.sh
+        ./service_config/version_script.sh
     
     - name: Deploy and Release artifact
       run:  |
