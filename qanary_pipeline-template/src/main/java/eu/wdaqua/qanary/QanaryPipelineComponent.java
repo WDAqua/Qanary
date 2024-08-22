@@ -167,7 +167,7 @@ public class QanaryPipelineComponent extends QanaryComponent {
      */
     @Override
     public String explain(QanaryExplanationData data) throws IOException, URISyntaxException, SparqlQueryFailed {
-        logger.info("Explaining component: {}", this.getApplicationName());
+        logger.info("Start: Explaining component\n-------------------------------------------------------");
         String pacGraph = pipelineExplanationHelper.getGraphFromQuestionId(data.getQuestionId());
         List<QanaryExplanationData> dataList = new ArrayList<>();
         for (String qanaryComponent : QANARY_COMPONENTS) {
@@ -185,6 +185,7 @@ public class QanaryPipelineComponent extends QanaryComponent {
         data.setComponent(this.getApplicationName());
         data.setExplanations(componentAndExplanation);
         data.setGraph(pacGraph);
+        logger.info("End: Explaining component\n-------------------------------------------------------");
         return pipelineExplanationHelper.requestPipelineExplanation(data);
     }
 

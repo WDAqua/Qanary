@@ -172,8 +172,10 @@ public class QanaryPipeline implements QanaryExplanation {
      */
     @Override
     public String explain(QanaryExplanationData qanaryExplanationData) throws IOException, URISyntaxException, SparqlQueryFailed {
+        logger.info("Start: Explaining component\n-------------------------------------------------------");
         // Fetch subcomponent explanations == All annotations made on the original KG
         List<String> components = pipelineExplanationHelper.getUsedComponents(qanaryExplanationData.getGraph());
+        logger.info("Found sub-components: {}", components);
         List<QanaryExplanationData> dataList = new ArrayList<>();
         for (String qanaryComponent : components) {
             dataList.add(new QanaryExplanationData(
@@ -189,6 +191,7 @@ public class QanaryPipeline implements QanaryExplanation {
         }
         qanaryExplanationData.setComponent(this.applicationName);
         qanaryExplanationData.setExplanations(componentAndExplanation);
+        logger.info("End: Explaining component\n-------------------------------------------------------");
         return pipelineExplanationHelper.requestPipelineExplanation(qanaryExplanationData);
     }
 
