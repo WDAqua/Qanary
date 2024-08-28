@@ -1,10 +1,7 @@
     package eu.wdaqua.qanary.annotations;
 
-    import eu.wdaqua.qanary.commons.QanaryMessage;
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-    import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-    import org.apache.jena.query.QuerySolution;
     import org.apache.jena.query.QuerySolutionMap;
     import org.apache.jena.rdf.model.ResourceFactory;
     import org.aspectj.lang.JoinPoint;
@@ -12,7 +9,6 @@
     import org.aspectj.lang.annotation.*;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
-    import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Component;
 
@@ -53,11 +49,13 @@
         public void logAroundWithAnnotation(JoinPoint joinPoint, Object result) throws Throwable {
             Object[] args = joinPoint.getArgs();
             String methodName = joinPoint.getSignature().getName();
-            logMethodData(args, result, methodName);
+            String className = joinPoint.getTarget().getClass().getName();
+            logMethodData(args, result, methodName, className);
         }
 
-        public void logMethodData(Object[] args, Object result, String methodName) throws IOException, SparqlQueryFailed {
+        public void logMethodData(Object[] args, Object result, String methodName, String className) throws IOException, SparqlQueryFailed {
             QuerySolutionMap qsm = new QuerySolutionMap();
+            qsm.add("class", ResourceFactory.createPlainLiteral(className));
             qsm.add("method", ResourceFactory.createPlainLiteral(methodName));
             qsm.add("input", ResourceFactory.createPlainLiteral(args.toString()));
             qsm.add("output", ResourceFactory.createPlainLiteral(result.toString()));
