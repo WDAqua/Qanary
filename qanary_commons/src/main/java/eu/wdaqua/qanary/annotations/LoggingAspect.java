@@ -17,17 +17,12 @@ import java.util.Arrays;
 public class LoggingAspect {
 
     private Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
-
-    @Pointcut("execution(* eu.wdaqua.qanary..*(..))")
-    public void allExecutions() {
-
-    }
-
-    @Pointcut("execution(public eu.wdaqua.qanary.commons.QanaryMessage process(eu.wdaqua.qanary.    commons.QanaryMessage))")
-    public void processExecution() {
-    }
-
     private URI currentProcessGraph;
+
+    @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))")
+    public void allExecutionsInComponent() {
+
+    }
 
     @Around(value = "allExecutions()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -39,19 +34,11 @@ public class LoggingAspect {
         return result;
     }
 
-    @Around(value = "processExecution()" )
-    public Object logAroundProcess(ProceedingJoinPoint joinPoint) throws Throwable {
-        QanaryMessage qanaryMessage = (QanaryMessage)  joinPoint.getArgs()[0];
-        this.currentProcessGraph = qanaryMessage.getInGraph();
-        logger.info(">>> Method: {}", joinPoint.toLongString());
-        return joinPoint.proceed();
+    @Around("execution(* *(..)) && @within(LogExecution)")
+    public Object logAroundWithAnnotation(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Object result = joinPoint.proceed();
+        return result;
     }
-
-
-
-
-
-
-
 
 }
