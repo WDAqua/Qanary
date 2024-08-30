@@ -6,7 +6,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 INSERT {
 GRAPH ?graph {
     ?a  rdf:type    qa:AnnotationOfLogMethod ;
-        qa:className    ?class
+        qa:className    ?class ;
         qa:methodName   ?method ;
         qa:input    ?input ;
         qa:output   ?output ;

@@ -1,9 +1,13 @@
     package eu.wdaqua.qanary.annotations;
 
+    import eu.wdaqua.qanary.business.QanaryComponent;
+    import eu.wdaqua.qanary.commons.QanaryMessage;
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+    import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorVirtuoso;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
     import org.apache.jena.query.QuerySolutionMap;
     import org.apache.jena.rdf.model.ResourceFactory;
+    import org.apache.tomcat.jni.Proc;
     import org.aspectj.lang.JoinPoint;
     import org.aspectj.lang.ProceedingJoinPoint;
     import org.aspectj.lang.annotation.*;
@@ -14,7 +18,10 @@
 
     import java.io.IOException;
     import java.net.URI;
+    import java.util.ArrayList;
     import java.util.Arrays;
+    import java.util.List;
+    import java.util.stream.Collectors;
 
     @Aspect
     @Component
@@ -22,45 +29,119 @@
 
         private Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
         private URI currentProcessGraph;
+        private List<MethodObject> methodList = new ArrayList<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
-        private QanaryTripleStoreConnector qanaryTripleStoreConnector;
+        private QanaryTripleStoreConnector qanaryTripleStoreConnector = new QanaryTripleStoreConnectorVirtuoso("jdbc:virtuoso://localhost:1111", "dba", "dba",10);
 
         @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))")
         public void allExecutionsInComponent() {
 
         }
 
-        @Autowired
-        public void setupTriplestore(QanaryTripleStoreConnector qanaryTripleStoreProxy) {
-            this.qanaryTripleStoreConnector = qanaryTripleStoreProxy;
+        @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
+        public void processExecution() {
+
         }
 
-        @Around(value = "allExecutionsInComponent()")
-        public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
-            Object[] args = joinPoint.getArgs();
-            String methodName = joinPoint.getSignature().getName();
-            logger.info(">> {}() - {}", methodName, Arrays.toString(args));
-            logger.info("<< {}() - {}", "a");
-            Object result = joinPoint.proceed();
-            return result;
-        }
-
-        @AfterReturning(value = "execution(* *(..)) && @within(LogExecution) && !execution(* qanaryTripleStoreProxy(..))", returning = "result")
-        public void logAroundWithAnnotation(JoinPoint joinPoint, Object result) throws Throwable {
-            Object[] args = joinPoint.getArgs();
-            String methodName = joinPoint.getSignature().getName();
-            String className = joinPoint.getTarget().getClass().getName();
-            logMethodData(args, result, methodName, className);
+        @Before(value = "processExecution()")
+        public void logGraphFromProcess(JoinPoint joinPoint) throws Throwable {
+            QanaryMessage qanaryMessage = (QanaryMessage) Arrays.asList(joinPoint.getArgs()).get(0);
+            this.currentProcessGraph = qanaryMessage.getInGraph();
+            logger.info(">>>>>>>>>>>>>>>>>>>>>> Graph found: {}", this.currentProcessGraph.toASCIIString());
         }
 
         public void logMethodData(Object[] args, Object result, String methodName, String className) throws IOException, SparqlQueryFailed {
             QuerySolutionMap qsm = new QuerySolutionMap();
+            qsm.add("graph", ResourceFactory.createResource(this.currentProcessGraph.toASCIIString()));
             qsm.add("class", ResourceFactory.createPlainLiteral(className));
             qsm.add("method", ResourceFactory.createPlainLiteral(methodName));
-            qsm.add("input", ResourceFactory.createPlainLiteral(args.toString()));
-            qsm.add("output", ResourceFactory.createPlainLiteral(result.toString()));
+            qsm.add("input", ResourceFactory.createPlainLiteral(Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "))));
+            qsm.add("output", ResourceFactory.createPlainLiteral(result == null ? "void" : result.toString()));
             String query = QanaryTripleStoreConnector.readFileFromResourcesWithMap(LOGGING_QUERY, qsm);
             this.qanaryTripleStoreConnector.update(query);
+        }
+
+        @Pointcut("execution(* annotatequestion(..))") // Is this enough?
+        public void componentContextIdentifier() {}
+
+        /**
+         * Resets the context properties
+         * @return
+         */
+        @Before(value = "componentContextIdentifier()")
+        public void startComponentContext() {
+            logger.info(">>>>>>>>>>>>>>>>>>>>>>> START CONTEXT");
+            this.methodList = new ArrayList<>();
+            this.currentProcessGraph = null;
+        }
+
+        /**
+         * First: Stores the methods to the triplestore
+         */
+        @AfterReturning(value = "componentContextIdentifier()")
+        public void endComponentContext() throws IOException, SparqlQueryFailed {
+            for(MethodObject method : this.methodList) {
+                this.logMethodData(
+                        method.getInput(),
+                        method.getOutput(),
+                        method.getMethodName(),
+                        method.getClassName()
+                );
+            }
+        }
+
+        class MethodObject {
+            private String className;
+            private String methodName;
+            private Object[] input;
+            private Object output;
+
+            public Object getOutput() {
+                return output;
+            }
+
+            public Object[] getInput() {
+                return input;
+            }
+
+            public String getClassName() {
+                return className;
+            }
+
+            public String getMethodName() {
+                return methodName;
+            }
+
+            public void setClassName(String className) {
+                this.className = className;
+            }
+
+            public void setInput(Object[] input) {
+                this.input = input;
+            }
+
+            public void setMethodName(String methodName) {
+                this.methodName = methodName;
+            }
+
+            public void setOutput(Object output) {
+                this.output = output;
+            }
+        }
+
+        /**
+         * Store method as soon as it returned value
+         * @param joinPoint JoinPoint
+         * @param result Result of any data type (It is required to provide an informative toString() method)
+         */
+        @AfterReturning(value = "allExecutionsInComponent()", returning = "result")
+        public void addResultToMethodFromComponentContext(JoinPoint joinPoint, Object result) {
+            MethodObject method = new MethodObject();
+            method.setInput(joinPoint.getArgs());
+            method.setMethodName(joinPoint.getSignature().getName());
+            method.setClassName(joinPoint.getTarget().getClass().getName());
+            method.setOutput(result);
+            this.methodList.add(method);
         }
 
     }
