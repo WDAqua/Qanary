@@ -1,19 +1,19 @@
     package eu.wdaqua.qanary.annotations;
 
-    import eu.wdaqua.qanary.business.QanaryComponent;
     import eu.wdaqua.qanary.commons.QanaryMessage;
+    import eu.wdaqua.qanary.commons.QanaryUtils;
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-    import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorVirtuoso;
+    import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
     import org.apache.jena.query.QuerySolutionMap;
     import org.apache.jena.rdf.model.ResourceFactory;
-    import org.apache.tomcat.jni.Proc;
     import org.aspectj.lang.JoinPoint;
-    import org.aspectj.lang.ProceedingJoinPoint;
-    import org.aspectj.lang.annotation.*;
+    import org.aspectj.lang.annotation.AfterReturning;
+    import org.aspectj.lang.annotation.Aspect;
+    import org.aspectj.lang.annotation.Before;
+    import org.aspectj.lang.annotation.Pointcut;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
-    import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Component;
 
     import java.io.IOException;
@@ -31,7 +31,15 @@
         private URI currentProcessGraph;
         private List<MethodObject> methodList = new ArrayList<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
-        private QanaryTripleStoreConnector qanaryTripleStoreConnector = new QanaryTripleStoreConnectorVirtuoso("jdbc:virtuoso://localhost:1111", "dba", "dba",10);
+        private QanaryTripleStoreConnector qanaryTripleStoreConnector;
+
+        public void setQanaryTripleStoreConnector(QanaryTripleStoreConnector qanaryTripleStoreConnector) {
+            if(qanaryTripleStoreConnector != null) {
+                this.qanaryTripleStoreConnector = qanaryTripleStoreConnector;
+            }
+            // else: it's a component; set QTSC when process executed
+        }
+
 
         @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))")
         public void allExecutionsInComponent() {
@@ -46,6 +54,10 @@
         @Before(value = "processExecution()")
         public void logGraphFromProcess(JoinPoint joinPoint) throws Throwable {
             QanaryMessage qanaryMessage = (QanaryMessage) Arrays.asList(joinPoint.getArgs()).get(0);
+            if(this.qanaryTripleStoreConnector == null) {
+                QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null"));
+                this.qanaryTripleStoreConnector = qanaryUtils.getQanaryTripleStoreConnector();
+            }
             this.currentProcessGraph = qanaryMessage.getInGraph();
             logger.info(">>>>>>>>>>>>>>>>>>>>>> Graph found: {}", this.currentProcessGraph.toASCIIString());
         }

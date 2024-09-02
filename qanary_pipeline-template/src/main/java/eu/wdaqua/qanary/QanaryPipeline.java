@@ -70,7 +70,7 @@ public class QanaryPipeline implements QanaryExplanation {
     }
 
     @Bean
-    public QanaryTripleStoreProxy qanaryTripleStoreProxy() {
+        public QanaryTripleStoreProxy qanaryTripleStoreProxy() {
         return new QanaryTripleStoreProxy();
     }
 
