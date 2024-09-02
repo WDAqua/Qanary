@@ -43,12 +43,69 @@
             // else: it's a component; set QTSC when process executed
         }
 
-
-        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))")
-        public void allExecutionsInComponent() {
+        @Pointcut("execution(* eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.startquestionansweringwithtextquestion(..))")
+        public void startOfQaProcessForPipeline() {
 
         }
 
+        @Pointcut("execution(* eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.executeComponentList(..))")
+        public void executionOfComponentList() {
+
+        }
+
+        @Pointcut("execution(* eu.wdaqua.qanary.Pipeline.*(..))")
+        public void executedPipelineMethods() {
+
+        }
+
+        /* TODO: Need for implementation?
+        @Pointcut("execution(* eu.wdaqua.qanary.web..startquestionansweringwithtextquestion(..))")
+        public void executedPipelineMethodsFromController() {
+
+        }
+        */
+
+
+        @Before(value = "executionOfComponentList()")
+        public void storeGraphForPipeline(JoinPoint joinPoint) {
+            QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
+            this.currentProcessGraph = qanaryMessage.getInGraph();
+        }
+
+        @Before(value = "startOfQaProcessForPipeline()")
+        public void initPipelineQaProcess() {
+            this.methodList = new ArrayList<>();
+        }
+
+        @AfterReturning(value = "executedPipelineMethods()", returning = "result")
+        public void logPipelineMethods(JoinPoint joinPoint, Object result) {
+            MethodObject method = new MethodObject();
+            method.setInput(joinPoint.getArgs());
+            method.setMethodName(joinPoint.getSignature().getName());
+            method.setClassName(joinPoint.getTarget().getClass().getName());
+            method.setOutput(result);
+            this.methodList.add(method);
+        }
+
+        @AfterReturning(value = "startOfQaProcessForPipeline()")
+        public void storeLoggedData() throws IOException, SparqlQueryFailed {
+            for(MethodObject method : this.methodList) {
+                this.logMethodData(
+                        method.getInput(),
+                        method.getOutput(),
+                        method.getMethodName(),
+                        method.getClassName()
+                );
+            }
+        }
+
+        // Target all methods within any Qanary component
+        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))")
+        public void allExecutionsWithinAComponentOrPac() {
+
+        }
+
+        // Targets components as well as PaC
         @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
         public void processExecution() {
 
@@ -62,7 +119,6 @@
                 this.qanaryTripleStoreConnector = qanaryUtils.getQanaryTripleStoreConnector();
             }
             this.currentProcessGraph = qanaryMessage.getInGraph();
-            logger.info(">>>>>>>>>>>>>>>>>>>>>> Graph found: {}", this.currentProcessGraph.toASCIIString());
         }
 
         public void logMethodData(Object[] args, Object result, String methodName, String className) throws IOException, SparqlQueryFailed {
@@ -77,7 +133,8 @@
             this.qanaryTripleStoreConnector.update(query);
         }
 
-        @Pointcut("execution(* annotatequestion(..))") // Is this enough?
+        // Starting point for component and PaC
+        @Pointcut("execution(* annotatequestion(..))")
         public void componentContextIdentifier() {}
 
         /**
@@ -117,7 +174,7 @@
             }
 
             public Object[] getInput() {
-                return input;
+                return input;// Is this enough?
             }
 
             public String getClassName() {
@@ -150,7 +207,7 @@
          * @param joinPoint JoinPoint
          * @param result Result of any data type (It is required to provide an informative toString() method)
          */
-        @AfterReturning(value = "allExecutionsInComponent()", returning = "result")
+        @AfterReturning(value = "allExecutionsWithinAComponentOrPac()", returning = "result")
         public void addResultToMethodFromComponentContext(JoinPoint joinPoint, Object result) {
             MethodObject method = new MethodObject();
             method.setInput(joinPoint.getArgs());
