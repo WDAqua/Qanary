@@ -10,7 +10,8 @@ GRAPH ?graph {
         qa:methodName   ?method ;
         qa:input    ?input ;
         qa:output   ?output ;
-        oa:annotatedAt  ?time .
+        oa:annotatedAt  ?time ;
+        oa:annotatedBy  ?annotatedBy .
 }}
 WHERE {
     BIND (IRI(CONCAT("urn:qanary:logging:method:", STR(RAND()))) AS ?a) .

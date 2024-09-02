@@ -14,6 +14,7 @@
     import org.aspectj.lang.annotation.Pointcut;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
+    import org.springframework.beans.factory.annotation.Value;
     import org.springframework.stereotype.Component;
 
     import java.io.IOException;
@@ -32,6 +33,8 @@
         private List<MethodObject> methodList = new ArrayList<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
         private QanaryTripleStoreConnector qanaryTripleStoreConnector;
+        @Value("${spring.application.name}")
+        private String applicationName;
 
         public void setQanaryTripleStoreConnector(QanaryTripleStoreConnector qanaryTripleStoreConnector) {
             if(qanaryTripleStoreConnector != null) {
@@ -69,6 +72,7 @@
             qsm.add("method", ResourceFactory.createPlainLiteral(methodName));
             qsm.add("input", ResourceFactory.createPlainLiteral(Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "))));
             qsm.add("output", ResourceFactory.createPlainLiteral(result == null ? "void" : result.toString()));
+            qsm.add("annotatedBy", ResourceFactory.createResource(this.applicationName));
             String query = QanaryTripleStoreConnector.readFileFromResourcesWithMap(LOGGING_QUERY, qsm);
             this.qanaryTripleStoreConnector.update(query);
         }
