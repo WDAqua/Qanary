@@ -2,7 +2,6 @@ package eu.wdaqua.qanary;
 
 import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
-import eu.wdaqua.qanary.annotations.LogExecution;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
@@ -39,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@LogExecution
 @SpringBootApplication
 @de.codecentric.boot.admin.server.config.EnableAdminServer
 // @EnableDiscoveryClient // registers itself as client for the Spring Boot admin server,

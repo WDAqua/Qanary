@@ -1,6 +1,5 @@
 package eu.wdaqua.qanary;
 
-import eu.wdaqua.qanary.annotations.LogExecution;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
@@ -33,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@LogExecution
 @Component
 @Primary // To inject this explain() implementation to the QanaryExplanationController
 // Only created when the pipeline should act as a component, otherwise not

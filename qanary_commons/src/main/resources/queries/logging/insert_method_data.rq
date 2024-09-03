@@ -8,8 +8,8 @@ GRAPH ?graph {
     ?a  rdf:type    qa:AnnotationOfLogMethod ;
         qa:className    ?class ;
         qa:methodName   ?method ;
-        qa:input    ?input ;
-        qa:output   ?output ;
+        ?input
+        ?output
         oa:annotatedAt  ?time ;
         oa:annotatedBy  ?annotatedBy .
 }}
