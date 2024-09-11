@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,11 +22,14 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     private URI endpoint;
     private RDFConnection connection;
     private String applicationName;
+    private Environment env;
+    private boolean doLog;
 
     public QanaryTripleStoreConnectorQanaryInternal(URI endpoint, String applicationName) throws URISyntaxException {
         this.setApplicationName(applicationName);
         this.endpoint = endpoint;
         this.connect();
+        this.doLog = this.env.getProperty("activeLogging") == null ? false : this.env.getProperty("activeLogging");
     }
 
     public String getApplicationName() {
@@ -49,7 +53,8 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     @Override
     public ResultSet select(String sparql) throws SparqlQueryFailed {
         QueryExecution queryExecution = this.connection.query(sparql);
-        logData(sparql);
+        if(doLog)
+            logData(sparql);
         ResultSet myResultSet = queryExecution.execSelect();
         ResultSetRewindable resultSet = ResultSetFactory.makeRewindable(myResultSet);
         return resultSet;
