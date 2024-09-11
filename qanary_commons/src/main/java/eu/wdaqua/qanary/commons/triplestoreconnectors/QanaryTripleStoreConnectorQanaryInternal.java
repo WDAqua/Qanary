@@ -23,13 +23,13 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     private RDFConnection connection;
     private String applicationName;
     private Environment env;
-    private boolean doLog;
+    private String doLog;
 
     public QanaryTripleStoreConnectorQanaryInternal(URI endpoint, String applicationName) throws URISyntaxException {
         this.setApplicationName(applicationName);
         this.endpoint = endpoint;
         this.connect();
-        this.doLog = this.env.getProperty("activeLogging") == null ? false : this.env.getProperty("activeLogging");
+        this.doLog = this.env.getProperty("activeLogging") == null ? "false" : this.env.getProperty("activeLogging");
     }
 
     public String getApplicationName() {
@@ -53,7 +53,7 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     @Override
     public ResultSet select(String sparql) throws SparqlQueryFailed {
         QueryExecution queryExecution = this.connection.query(sparql);
-        if(doLog)
+        if(doLog == "true")
             logData(sparql);
         ResultSet myResultSet = queryExecution.execSelect();
         ResultSetRewindable resultSet = ResultSetFactory.makeRewindable(myResultSet);
