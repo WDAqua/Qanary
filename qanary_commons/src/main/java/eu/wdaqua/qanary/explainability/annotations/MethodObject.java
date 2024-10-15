@@ -1,60 +1,93 @@
 package eu.wdaqua.qanary.explainability.annotations;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class MethodObject {
-    private String className;
-    private String methodName;
+
+//    private UUID uuid;
+    private UUID caller;
+    private String method;
+    private String explanationType; // enum?
+    private String explanationValue;
     private Object[] input;
     private Object output;
-    private String outputType;
-    private List<String> inputTypes;
+    private String annotatedBy;
 
-    public List<String> getInputTypes() {
-        return inputTypes;
+    public MethodObject(UUID caller, String method, Object[] input, String annotatedBy) {
+        this.caller = caller;
+        this.method = method;
+        this.input = input;
+        this.annotatedBy = annotatedBy;
     }
 
-    public void setInputTypes(List<String> inputTypes) {
-        this.inputTypes = inputTypes;
-    }
-
-    public String getOutputType() {
-        return outputType;
-    }
-
-    public void setOutputType(String outputType) {
-        this.outputType = outputType;
+    public Object[] getInput() {
+        return input;
     }
 
     public Object getOutput() {
         return output;
     }
 
-    public Object[] getInput() {
-        return input;// Is this enough?
+    public String getAnnotatedBy() {
+        return annotatedBy;
     }
 
-    public String getClassName() {
-        return className;
+    public UUID getCaller() {
+        return caller;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getExplanationType() {
+        return explanationType;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public String getExplanationValue() {
+        return explanationValue;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setAnnotatedBy(String annotatedBy) {
+        this.annotatedBy = annotatedBy;
+    }
+
+    public void setCaller(UUID caller) {
+        this.caller = caller;
+    }
+
+    public void setExplanationType(String explanationType) {
+        this.explanationType = explanationType;
+    }
+
+    public void setExplanationValue(String explanationValue) {
+        this.explanationValue = explanationValue;
     }
 
     public void setInput(Object[] input) {
         this.input = input;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public void setOutput(Object output) {
         this.output = output;
+    }
+
+    @Override
+    public String toString() {
+        return "MethodObject{" +
+                "caller=" + caller +
+                ", method='" + method + '\'' +
+                ", explanationType='" + explanationType + '\'' +
+                ", explanationValue='" + explanationValue + '\'' +
+                ", input=" + Arrays.toString(input) +
+                ", output=" + output +
+                ", annotatedBy='" + annotatedBy + '\'' +
+                '}';
     }
 }

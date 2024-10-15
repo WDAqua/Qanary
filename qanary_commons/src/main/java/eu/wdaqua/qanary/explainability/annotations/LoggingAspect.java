@@ -3,7 +3,10 @@
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
     import org.aspectj.lang.JoinPoint;
+    import org.aspectj.lang.annotation.AfterReturning;
     import org.aspectj.lang.annotation.Aspect;
+    import org.aspectj.lang.annotation.Before;
+    import org.aspectj.lang.annotation.Pointcut;
     import org.aspectj.lang.reflect.MethodSignature;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
@@ -13,9 +16,7 @@
     import java.io.IOException;
     import java.lang.reflect.Method;
     import java.net.URI;
-    import java.util.ArrayList;
-    import java.util.Arrays;
-    import java.util.List;
+    import java.util.*;
     import java.util.stream.Collectors;
 
     @Aspect
@@ -24,11 +25,12 @@
 
         private Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
         protected URI currentProcessGraph;
-        protected List<MethodObject> methodList = new ArrayList<>();
+        protected Map<UUID, MethodObject> methodList = new HashMap<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
         protected QanaryTripleStoreConnector qanaryTripleStoreConnector;
         @Value("${spring.application.name}")
         private String applicationName;
+        private Stack callStack = new Stack<UUID>();
 
         public Logger getLogger() {
             return logger;
@@ -187,6 +189,7 @@
         }
         */
 
+        /*
         public void addMethodToList(JoinPoint joinPoint, Object result) {
             MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
             Method method_ = methodSignature.getMethod();
@@ -224,5 +227,63 @@
                 );
             }
         }
+        */
 
+        ///////////////////////////////////////////////////////
+
+        // TODO: When should the logging start?
+        @Pointcut("execution(* annotatequestion(..))")
+        public void startByAnnotateQuestion() {};
+
+        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))")
+        public void storeMethodExecutionInComponent() {};
+
+        @AfterReturning(value = "storeMethodExecutionInComponent()", returning = "result")
+        public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
+            UUID currentMethodUuid = (UUID) this.callStack.peek();
+            MethodObject method = this.methodList.get(currentMethodUuid);
+            method.setOutput(result);
+            this.methodList.replace(currentMethodUuid, method);
+            this.callStack.pop();
+            if(this.callStack.isEmpty()) {
+                // Done
+                this.logger.info("Execution done, list of methods printed to txt-file.");
+                this.methodList.forEach((k,v) -> {
+                    logger.info("{}", v.toString());
+                });
+            }
+        }
+
+        @Before(value = "storeMethodExecutionInComponent()")
+        public void implementationStoreMethodExecutionInComponentBefore(JoinPoint joinPoint) {
+            // Get caller and self-push to stack
+            UUID caller = checkAndGetFromStack();
+            UUID uuid = UUID.randomUUID();
+            this.callStack.push(uuid);
+
+            // Get required data
+            String method = joinPoint.getSignature().getName();
+            Object[] input = joinPoint.getArgs();
+
+            this.methodList.put(
+                    uuid,
+                    new MethodObject(caller, method, input, this.applicationName) // Caller == null IF first tracked method call
+            );
+
+        }
+
+        public UUID checkAndGetFromStack() {
+            try {
+                return (UUID) this.callStack.peek();
+            } catch(EmptyStackException e) {
+                return null;
+            }
+        }
+
+        /* COMPONENT POINTCUTS
+        * Execution begins on annotatequestion
+        * Caller = Item on Stack
+        *
+        *
+        */
     }

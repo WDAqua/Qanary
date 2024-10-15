@@ -6,12 +6,20 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 INSERT {
 GRAPH ?graph {
     ?a  rdf:type    qa:AnnotationOfLogMethod ;
-        qa:className    ?class ;
-        qa:methodName   ?method ;
-        ?input
-        ?output
-        oa:annotatedAt  ?time ;
-        oa:annotatedBy  ?annotatedBy .
+        prov:actedOnBehalfOf ?caller ;
+        qa:methodName ?method ;
+        x:explanation [
+            rdf:type ?explanationType ;
+            rdf:value ?explanationValue ;
+        ] ;
+        x:input rdf:List [
+        ...
+        ] ;
+        x:output rdf:List [
+        ...
+        ] ;
+        oa:annotatedAt ?time ;
+        oa:annotatedBy ?annotatedBy .
 }}
 WHERE {
     BIND (IRI(CONCAT("urn:qanary:logging:method:", STR(RAND()))) AS ?a) .
