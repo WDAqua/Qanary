@@ -111,100 +111,35 @@
         public void logMethodData(UUID methodUuid, MethodObject method) throws IOException, SparqlQueryFailed {
             String query = QanaryTripleStoreConnector.readFileFromResources(LOGGING_QUERY);
             query = query.replace("?graph", "<" + this.currentProcessGraph.toASCIIString() + ">");
-            query = query.replace("?class", "'" + className + "'");
-            query = query.replace("?method", "'" + methodName + "'");
+            query = query.replace("?a", "<" + methodUuid.toString() + ">");
+            query = query.replace("?caller", "<" + method.getCaller().toString() + ">");
+            query = query.replace("?method", "'" + method.getMethod() + "'");
             query = query.replace("?annotatedBy", "<urn:qanary:" + this.applicationName + ">");
-            if(args != null) {
-                query = query
-                        .replace("?input", "qa:input '" + Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", ")) + "' ; qa:inputTypes '" + argTypes + "' ;");
+            if(method.getInput() != null) {
+                query = query.replace("?input", "");
             } else {
                 query = query.replace("?input", "");
             }
-            if(result != null) { // TODOs as shortcuts for IDE's?
-                query = query // TODO: Replace Lists with Seq?  // TODO: Multiple triples for multiple args
-                        .replace("?output", "qa:output '" + result + "' ; qa:outputType '" + resultType + "' ;");
+            if(method.getOutput() != null) { // TODOs as shortcuts for IDE's?
+                query = query.replace("?output", "");
             } else {
                 query = query.replace("?output", "");
             }
+            query = query.replace("?explanationType", "temp").replace("?explanationValue", "tempValue");
             logger.info("Query: {}", query);
             this.qanaryTripleStoreConnector.update(query);
         }
-/*
-        // Starting point for component and PaC
-        @Pointcut("execution(* annotatequestion(..))")
-        public void componentContextIdentifier() {}
 
-        /**
-         * Resets the context properties
-         * @return
-         */
-        /*
-        @Before(value = "componentContextIdentifier()")
-        public void startComponentContext() {
-            logger.info(">>>>>>>>>>>>>>>>>>>>>>> START CONTEXT");
-            this.methodList = new ArrayList<>();
-            this.currentProcessGraph = null;
-        }
-        */
-
-        /**
-         * First: Stores the methods to the triplestore
-         */
-        /*
-        @AfterReturning(value = "componentContextIdentifier()")
-        public void endComponentContext() throws IOException, SparqlQueryFailed {
-            for(MethodObject method : this.methodList) {
-                this.logMethodData(
-                        method.getInput(),
-                        method.getOutput(),
-                        method.getMethodName(),
-                        method.getClassName()
-                );
-            }
-        }
-
-        /**
-         * Store method as soon as it returned value
-         * @param joinPoint JoinPoint
-         * @param result Result of any data type (It is required to provide an informative toString() method)
-
-        @AfterReturning(value = "allExecutionsWithinAComponentOrPac()", returning = "result")
-        public void addResultToMethodFromComponentContext(JoinPoint joinPoint, Object result) {
-            addMethodToList(joinPoint, result);
-        }
-        */
-
-        /*
-        public void addMethodToList(JoinPoint joinPoint, Object result) {
-            MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-            Method method_ = methodSignature.getMethod();
-            Class<?>[] parameterTypes = method_.getParameterTypes();
-            MethodObject method = new MethodObject();
-            if(joinPoint.getArgs().length != 0) {
-                method.setInput(joinPoint.getArgs());
-                method.setInputTypes(Arrays.stream(parameterTypes).map(Class::getName).collect(Collectors.toList()));
-            } else {
-                method.setInputTypes(null);
-                method.setInput(null);
-            }
-            method.setMethodName(joinPoint.getSignature().getName());
-            method.setClassName(joinPoint.getTarget().getClass().getName());
-            method.setOutput(result);
-            try {
-                method.setOutputType(result.getClass().getName());
-            } catch(NullPointerException e) {
-                this.getLogger().error("Void return type");
-                method.setOutputType(null);
-                method.setOutput(null); // redundant but explicit
-            }
-            this.methodList.add(method);
-        }
-
-         */
-
-            public void logMethods() throws SparqlQueryFailed, IOException{
+            public void logMethods() throws RuntimeException{
+                // k = UUID of the actual method; v = Method details
             this.methodList.forEach((k,v) -> {
-                this.logMethodData(k, v);
+                try {
+                    this.logMethodData(k, v);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (SparqlQueryFailed e) {
+                    throw new RuntimeException(e);
+                }
             });
         }
 
