@@ -2,6 +2,8 @@ PREFIX qa: <http://www.wdaqua.eu/qa#>
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX x: <http://example.org#>
 
 INSERT {
 GRAPH ?graph {
@@ -11,17 +13,20 @@ GRAPH ?graph {
         x:explanation [
             rdf:type ?explanationType ;
             rdf:value ?explanationValue ;
+            prov:wasGeneratedBy ?explanation_generator ;
+            x:score ?explanationScore
         ] ;
-        x:input rdf:List [
-        ...
-        ] ;
-        x:output rdf:List [
-        ...
-        ] ;
+        x:input ([
+            rdf:type x:A ;  # Replace "A" with a URI
+            rdf:value "B"
+        ]) ;
+        x:output ([
+            rdf:type x:C ;  # Replace "C" with a URI
+            rdf:value "D"
+        ]) ;
         oa:annotatedAt ?time ;
         oa:annotatedBy ?annotatedBy .
 }}
 WHERE {
-    BIND (IRI(CONCAT("urn:qanary:logging:method:", STR(RAND()))) AS ?a) .
     BIND (now() as ?time)
 }

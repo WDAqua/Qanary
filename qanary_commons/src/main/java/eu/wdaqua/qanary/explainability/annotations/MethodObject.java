@@ -1,13 +1,11 @@
 package eu.wdaqua.qanary.explainability.annotations;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 public class MethodObject {
 
-//    private UUID uuid;
-    private UUID caller;
+//    private String uuid;
+    private String caller;
     private String method;
     private String explanationType; // enum?
     private String explanationValue;
@@ -15,7 +13,7 @@ public class MethodObject {
     private Object output;
     private String annotatedBy;
 
-    public MethodObject(UUID caller, String method, Object[] input, String annotatedBy) {
+    public MethodObject(String caller, String method, Object[] input, String annotatedBy) {
         this.caller = caller;
         this.method = method;
         this.input = input;
@@ -34,7 +32,7 @@ public class MethodObject {
         return annotatedBy;
     }
 
-    public UUID getCaller() {
+    public String getCaller() {
         return caller;
     }
 
@@ -54,7 +52,7 @@ public class MethodObject {
         this.annotatedBy = annotatedBy;
     }
 
-    public void setCaller(UUID caller) {
+    public void setCaller(String caller) {
         this.caller = caller;
     }
 
