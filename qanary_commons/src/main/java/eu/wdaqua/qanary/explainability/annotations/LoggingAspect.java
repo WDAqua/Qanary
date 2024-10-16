@@ -7,30 +7,28 @@
     import org.aspectj.lang.annotation.Aspect;
     import org.aspectj.lang.annotation.Before;
     import org.aspectj.lang.annotation.Pointcut;
-    import org.aspectj.lang.reflect.MethodSignature;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
     import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.stereotype.Controller;
+    import org.springframework.stereotype.Service;
 
     import java.io.IOException;
-    import java.lang.reflect.Method;
     import java.net.URI;
     import java.util.*;
     import java.util.stream.Collectors;
 
     @Aspect
-    @Controller
-    public abstract class LoggingAspect {
+    @Service
+    public class LoggingAspect {
 
         private Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
         protected URI currentProcessGraph;
         protected Map<UUID, MethodObject> methodList = new HashMap<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
         protected QanaryTripleStoreConnector qanaryTripleStoreConnector;
+        private Stack callStack = new Stack<UUID>();
         @Value("${spring.application.name}")
         private String applicationName;
-        private Stack callStack = new Stack<UUID>();
 
         public Logger getLogger() {
             return logger;
@@ -107,23 +105,10 @@
 
         }
 
-        // Targets components as well as PaC
-        @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
-        public void processExecution() {
 
-        }
+ */
 
-        @Before(value = "processExecution()")
-        public void logGraphFromProcess(JoinPoint joinPoint) throws Throwable {
-            QanaryMessage qanaryMessage = (QanaryMessage) Arrays.asList(joinPoint.getArgs()).get(0);
-            if(this.qanaryTripleStoreConnector == null) {
-                QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null"));
-                this.qanaryTripleStoreConnector = qanaryUtils.getQanaryTripleStoreConnector();
-            }
-            this.currentProcessGraph = qanaryMessage.getInGraph();
-        }
-*/
-        public void logMethodData(Object[] args, Object result, String methodName, String className, List<String> argTypes, String resultType) throws IOException, SparqlQueryFailed {
+        public void logMethodData(UUID methodUuid, MethodObject method) throws IOException, SparqlQueryFailed {
             String query = QanaryTripleStoreConnector.readFileFromResources(LOGGING_QUERY);
             query = query.replace("?graph", "<" + this.currentProcessGraph.toASCIIString() + ">");
             query = query.replace("?class", "'" + className + "'");
@@ -215,42 +200,35 @@
             this.methodList.add(method);
         }
 
-        public void logMethods() throws IOException, SparqlQueryFailed {
-            for(MethodObject method : this.methodList) {
-                this.logMethodData(
-                        method.getInput(),
-                        method.getOutput(),
-                        method.getMethodName(),
-                        method.getClassName(),
-                        method.getInputTypes(),
-                        method.getOutputType()
-                );
-            }
+         */
+
+            public void logMethods() throws SparqlQueryFailed, IOException{
+            this.methodList.forEach((k,v) -> {
+                this.logMethodData(k, v);
+            });
         }
-        */
+
 
         ///////////////////////////////////////////////////////
 
-        // TODO: When should the logging start?
+        // TODO: When should the logging start? At Controller call or process-call?
+
         @Pointcut("execution(* annotatequestion(..))")
         public void startByAnnotateQuestion() {};
 
-        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))")
+        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))") // || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))
         public void storeMethodExecutionInComponent() {};
+        // TODO: CHeck different paths for all components
 
         @AfterReturning(value = "storeMethodExecutionInComponent()", returning = "result")
-        public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
+        public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) throws IOException, SparqlQueryFailed {
             UUID currentMethodUuid = (UUID) this.callStack.peek();
             MethodObject method = this.methodList.get(currentMethodUuid);
             method.setOutput(result);
             this.methodList.replace(currentMethodUuid, method);
             this.callStack.pop();
             if(this.callStack.isEmpty()) {
-                // Done
-                this.logger.info("Execution done, list of methods printed to txt-file.");
-                this.methodList.forEach((k,v) -> {
-                    logger.info("{}", v.toString());
-                });
+                logMethods();
             }
         }
 
@@ -269,6 +247,7 @@
                     uuid,
                     new MethodObject(caller, method, input, this.applicationName) // Caller == null IF first tracked method call
             );
+            logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Method call to method {}", method);
 
         }
 
