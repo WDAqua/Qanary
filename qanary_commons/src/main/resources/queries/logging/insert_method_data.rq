@@ -10,20 +10,14 @@ GRAPH ?graph {
     ?a  rdf:type    qa:AnnotationOfLogMethod ;
         prov:actedOnBehalfOf ?caller ;
         qa:methodName ?method ;
-        x:explanation [
-            rdf:type ?explanationType ;
-            rdf:value ?explanationValue ;
-            prov:wasGeneratedBy ?explanation_generator ;
-            x:score ?explanationScore
-        ] ;
-        x:input ([
-            rdf:type x:A ;  # Replace "A" with a URI
-            rdf:value "B"
-        ]) ;
-        x:output ([
-            rdf:type x:C ;  # Replace "C" with a URI
-            rdf:value "D"
-        ]) ;
+#        x:explanation [
+#            rdf:type ?explanationType ;
+#            rdf:value ?explanationValue ;
+#            prov:wasGeneratedBy ?explanation_generator ;
+#            x:score ?explanationScore
+#        ] ;
+        x:input ?output ;
+        x:output ?output ;
         oa:annotatedAt ?time ;
         oa:annotatedBy ?annotatedBy .
 }}
