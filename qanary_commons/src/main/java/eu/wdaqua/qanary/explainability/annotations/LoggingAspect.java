@@ -20,8 +20,8 @@
     import java.net.URISyntaxException;
     import java.util.*;
 
-    @Aspect
     @Service
+    @Aspect
     public class LoggingAspect {
 
         private Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
@@ -32,6 +32,15 @@
         private Stack callStack = new Stack<String>();
         @Value("${spring.application.name}")
         private String applicationName;
+        public static String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
+
+        public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
+            return qanaryTripleStoreConnector;
+        }
+
+        public URI getCurrentProcessGraph() {
+            return currentProcessGraph;
+        }
 
         public void logMethodData(String methodUuid, MethodObject method) throws IOException, SparqlQueryFailed {
             String query = QanaryTripleStoreConnector.readFileFromResources(LOGGING_QUERY);
@@ -45,22 +54,23 @@
             this.qanaryTripleStoreConnector.update(query);
         }
 
-        public void logMethods() throws RuntimeException{
+        public void logMethods(Map<String,MethodObject> methodMap) throws RuntimeException{
             // k = UUID of the actual method; v = Method details
-            this.methodList.forEach((k,v) -> {
-                try {
-                    this.logMethodData(k, v);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (SparqlQueryFailed e) {
-                    throw new RuntimeException(e);
+            try {
+                methodMap.forEach((k,v) -> {
+                    try {
+                        this.logMethodData(k, v);
+                    } catch (IOException | SparqlQueryFailed e) {
+                        logger.error("Method with uuid {} was not logged due to an exception with the error message: {}", k, e.getMessage());
+                    }
+                });
+                } catch (NullPointerException e) {
+                    logger.error(MAP_IS_NULL_ERROR);
                 }
-            });
         }
 
-        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..))") // || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))
+        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipelineComponent..*(..))") // || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))
         public void storeMethodExecutionInComponent() {};
-        // TODO: CHeck different paths for all components
 
         @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
         public void processExecution() {};
@@ -97,7 +107,7 @@
                     logger.warn("Skipped logging as no processing graph was found");
                 }
                 else {
-                    logMethods();
+                    logMethods(this.methodList);
                     this.currentProcessGraph = null;
                 }
             }
