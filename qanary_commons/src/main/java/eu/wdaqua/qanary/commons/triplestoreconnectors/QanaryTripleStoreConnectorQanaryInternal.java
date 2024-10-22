@@ -11,7 +11,6 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,20 +25,17 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     private URI endpoint;
     private RDFConnection connection;
     private String applicationName;
-    private Environment env;
-    private String doLog;
-    @Autowired
     private ExplainabilityLogger explainabilityLogger;
 
     public QanaryTripleStoreConnectorQanaryInternal(URI endpoint, String applicationName) throws URISyntaxException {
         this.setApplicationName(applicationName);
         this.endpoint = endpoint;
         this.connect();
-        this.doLog = this.env.getProperty("activeLogging") == null ? "false" : this.env.getProperty("activeLogging");
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    @Autowired
+    private void setExplainabilityLogger(ExplainabilityLogger explainabilityLogger) {
+        this.explainabilityLogger = explainabilityLogger;
     }
 
     private void setApplicationName(String applicationName) {
