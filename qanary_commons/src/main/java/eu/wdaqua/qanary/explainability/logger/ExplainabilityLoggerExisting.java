@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExplainabilityLoggerExisting implements ExplainabilityLogger {
 
+    public ExplainabilityLoggerExisting() {
+        logger.debug("ExplainabilityLoggerExisting created");
+    }
+
     private Logger logger = LoggerFactory.getLogger(ExplainabilityLoggerExisting.class);
 
     public void logSparqlQuery(String sparqlQuery, String applicationName, QanaryTripleStoreConnector qanaryTripleStoreConnector) {

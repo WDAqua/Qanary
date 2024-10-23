@@ -10,8 +10,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -25,17 +25,14 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     private URI endpoint;
     private RDFConnection connection;
     private String applicationName;
+    
+    @Inject
     private ExplainabilityLogger explainabilityLogger;
 
     public QanaryTripleStoreConnectorQanaryInternal(URI endpoint, String applicationName) throws URISyntaxException {
         this.setApplicationName(applicationName);
         this.endpoint = endpoint;
         this.connect();
-    }
-
-    @Autowired
-    private void setExplainabilityLogger(ExplainabilityLogger explainabilityLogger) {
-        this.explainabilityLogger = explainabilityLogger;
     }
 
     private void setApplicationName(String applicationName) {
