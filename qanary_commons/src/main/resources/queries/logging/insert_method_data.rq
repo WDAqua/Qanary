@@ -16,8 +16,8 @@ GRAPH ?graph {
 #            prov:wasGeneratedBy ?explanation_generator ;
 #            x:score ?explanationScore
 #        ] ;
-        x:input ?output ;
-        x:output ?output ;
+        x:input ?input ;
+        x:output ?output ; # Return value is bound to 1 object, hence it can be solved w/o lists, or similar
         oa:annotatedAt ?time ;
         oa:annotatedBy ?annotatedBy .
 }}

@@ -5,6 +5,7 @@
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+    import org.apache.jena.rdf.model.ResourceFactory;
     import org.aspectj.lang.JoinPoint;
     import org.aspectj.lang.annotation.AfterReturning;
     import org.aspectj.lang.annotation.Aspect;
@@ -42,6 +43,13 @@
             return currentProcessGraph;
         }
 
+        /**
+         * Logs method by using the defined logging query.
+         * @param methodUuid UUID of the method to be logged
+         * @param method Oject that contains all details needed to get logged
+         * @throws IOException During read-process of logging-query
+         * @throws SparqlQueryFailed During update-process with the final query
+         */
         public void logMethodData(String methodUuid, MethodObject method) throws IOException, SparqlQueryFailed {
             String query = QanaryTripleStoreConnector.readFileFromResources(LOGGING_QUERY);
             query = query.replace("?graph", "<" + this.currentProcessGraph.toASCIIString() + ">");
@@ -49,9 +57,43 @@
             query = query.replace("?a", "<" + methodUuid + ">");
             query = query.replace("?caller", "<" + method.getCaller() + ">");
             query = query.replace("?method", "'" + method.getMethod() + "'");
+            query = query.replace("?output", generateOutputDataRepresentation(method.getOutput()));
+            query = query.replace("?input", generateInputDataRepresentation(method.getInput()));
             //query = query.replace("?explanationType", "'temp'").replace("?explanationValue", "'tempValue'").replace("?explanation_generator", "'generator'").replace("?explanationScore","1.0");
-            logger.info("Query: {}", query);
+            logger.info("Method-log query: {}", query);
             this.qanaryTripleStoreConnector.update(query);
+        }
+
+        /**
+         * Transforms object list to SPARQL-conform representation to store data
+         * @param inputData
+         * @return
+         */
+        public String generateInputDataRepresentation(Object[] inputData) {
+            String representation = "(";
+            if(inputData.length == 0 || inputData == null)
+                return "()";
+            for(int i = 0; i < inputData.length; i++) {
+                Object var = inputData[i]; //TODO: What for difficult string representations?
+                String varRepresentation = "[ " + "rdf:type \"" + var.getClass() + "\" ;" + "rdf:value \"" + ResourceFactory.createPlainLiteral(var.toString()) + "\" ]";
+                representation += varRepresentation;
+            };
+            representation += ")";
+            return representation;
+        }
+
+        /**
+         * Creates SPARQL-conform representation for the output data
+         * @param outputData
+         * @return
+         */
+        public String generateOutputDataRepresentation(Object outputData) {
+            if(outputData == null)
+                return "[]";
+            return "[ rdf:type \"" +
+                    ResourceFactory.createPlainLiteral(outputData.getClass().toString()).toString() +
+                    "\" ; rdf:value \"" + ResourceFactory.createPlainLiteral(outputData.toString()).toString() +
+                    "\"]";
         }
 
         public void logMethods(Map<String,MethodObject> methodMap) throws RuntimeException{
