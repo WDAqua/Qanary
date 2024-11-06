@@ -91,8 +91,8 @@
             if(outputData == null)
                 return "[]";
             return "[ rdf:type \"" +
-                    ResourceFactory.createPlainLiteral(outputData.getClass().toString()).toString() +
-                    "\" ; rdf:value \"" + ResourceFactory.createPlainLiteral(outputData.toString()).toString() +
+                    ResourceFactory.createPlainLiteral(outputData.getClass().toString()) +
+                    "\" ; rdf:value \"" + ResourceFactory.createPlainLiteral(outputData.toString()) +
                     "\"]";
         }
 

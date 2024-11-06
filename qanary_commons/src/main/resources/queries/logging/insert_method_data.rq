@@ -17,7 +17,7 @@ GRAPH ?graph {
 #            x:score ?explanationScore
 #        ] ;
         x:input ?input ;
-        x:output ?output ; # Return value is bound to 1 object, hence it can be solved w/o lists, or similar
+        x:output ?output ;
         oa:annotatedAt ?time ;
         oa:annotatedBy ?annotatedBy .
 }}
