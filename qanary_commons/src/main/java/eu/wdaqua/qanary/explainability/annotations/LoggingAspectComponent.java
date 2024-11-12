@@ -115,12 +115,7 @@
         public void setGraphFromProcessExecution(JoinPoint joinPoint) throws URISyntaxException {
             QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[0];
             this.setProcessGraph(qanaryMessage.getInGraph());
-            // DEBUG
-            Object[] objects = joinPoint.getArgs();
-            for (int i = 0; i < objects.length; i++) {
-                logger.error("Execution with inputs: {}", objects[i].toString());
-            }
-             if(this.getQanaryTripleStoreConnector() == null) {
+            if(this.getQanaryTripleStoreConnector() == null) {
                 QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null")); // TODO: Application name
                 this.setQanaryTripleStoreConnector(qanaryUtils.getQanaryTripleStoreConnector());
             }
@@ -139,13 +134,9 @@
             this.methodList.replace(currentMethodUuid, method);
             this.callStack.pop();
             if(this.callStack.isEmpty()) {
-                if(this.getProcessGraph() == null) {
-                    logger.warn("Skipped logging as no processing graph was found");
-                }
-                else {
-                    logMethods(this.methodList);
-                    this.setProcessGraph(null);
-                }
+                logMethods(this.methodList);
+                this.setProcessGraph(null); // Process ended
+                this.methodList.clear(); // Clear stored methods
             }
         }
 
