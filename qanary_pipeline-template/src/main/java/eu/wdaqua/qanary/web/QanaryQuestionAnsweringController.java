@@ -8,6 +8,7 @@ import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryQuestion;
 import eu.wdaqua.qanary.commons.QanaryQuestionTextual;
 import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
@@ -71,7 +72,7 @@ public class QanaryQuestionAnsweringController {
     // TODO include QanaryPipelineConfigurationController
     private final QanaryComponentRegistrationChangeNotifier myComponentNotifier;
     private final QanaryPipelineConfiguration myQanaryPipelineConfiguration;
-    private final QanaryTripleStoreProxy myQanaryTripleStoreConnector;
+    private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
     private final Environment environment;
     private final int maxQanaryQuestionAnsweringProcesses = 1000;
     private TriplestoreEndpointIdentifier myTriplestoreEndpointIdentifier;
