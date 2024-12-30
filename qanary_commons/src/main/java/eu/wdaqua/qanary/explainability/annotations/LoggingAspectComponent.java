@@ -5,7 +5,9 @@
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
     import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
     import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-    import org.apache.jena.rdf.model.ResourceFactory;
+
+import org.apache.jena.atlas.web.HttpException;
+import org.apache.jena.rdf.model.ResourceFactory;
     import org.aspectj.lang.JoinPoint;
     import org.aspectj.lang.annotation.AfterReturning;
     import org.aspectj.lang.annotation.Aspect;
@@ -17,10 +19,12 @@
     import org.springframework.stereotype.Service;
 
     import java.io.IOException;
-    import java.net.URISyntaxException;
+import java.net.URI;
+import java.net.URISyntaxException;
     import java.util.*;
 
-    public aspect LoggingAspectComponent {
+    @Aspect
+    public class LoggingAspectComponent extends LoggingAspect {
 
         // FROM ABSTRACT CLASS
 
@@ -79,7 +83,6 @@
             query = query.replace("?input", generateInputDataRepresentation(method.getInput()));
             //query = query.replace("?explanationType", "'temp'").replace("?explanationValue", "'tempValue'").replace("?explanation_generator", "'generator'").replace("?explanationScore","1.0");
             logger.info("Method-log query: {}", query);
-            this.getQanaryTripleStoreConnector().update(query);
         }
 
         /**
@@ -93,7 +96,7 @@
                 return "()";
             for(int i = 0; i < inputData.length; i++) {
                 Object var = inputData[i]; //TODO: What for difficult string representations?
-                String varRepresentation = "[ " + "rdf:type \"" + var.getClass() + "\" ;" + "rdf:value \"" + ResourceFactory.createPlainLiteral(var.toString().replace("\n", " ")) + "\" ]";
+                String varRepresentation = "[ " + "rdf:type \"" + var.getClass() + "\" ;" + "rdf:value \"" + ResourceFactory.createPlainLiteral(var.toString().replace("\n", " ").replace("\\", "")) + "\" ]";
                 representation += varRepresentation;
             };
             representation += ")";
@@ -203,7 +206,7 @@
             try {
                 return (String) this.callStack.peek();
             } catch(EmptyStackException e) {
-                return "";
+                return "init";
             }
         }
 
