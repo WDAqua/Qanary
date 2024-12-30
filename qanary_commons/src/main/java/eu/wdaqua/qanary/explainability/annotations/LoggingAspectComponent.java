@@ -27,7 +27,7 @@
         private Logger logger = LoggerFactory.getLogger(LoggingAspectComponent.class);
         private Map<String, MethodObject> methodList = new HashMap<>();
         private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
-        private Stack callStack = new Stack<String>();
+        private Stack<String> callStack = new Stack<String>();
         @Value("${spring.application.name}")
         private String applicationName;
         public static String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
@@ -77,11 +77,11 @@
          * @return
          */
         public String generateOutputDataRepresentation(Object outputData) {
-            if(outputData == null)
+            if(outputData.equals(null))
                 return "[]";
             return "[ rdf:type \"" +
                     ResourceFactory.createPlainLiteral(outputData.getClass().toString()) +
-                    "\" ; rdf:value \"" + ResourceFactory.createPlainLiteral(outputData.toString().replace("\n", " ")) +
+                    "\" ; rdf:value \"" + ResourceFactory.createPlainLiteral(outputData.toString().replace("\n", " ").replace("\\", "'")) +
                     "\"]";
         }
 
@@ -100,8 +100,11 @@
                 }
         }
 
-        @Pointcut("execution(* eu.wdaqua.qanary.component..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipelineComponent..*(..))") // || execution(* eu.wdaqua.qanary.QanaryPipelineComponent.*(..))
-        public void storeMethodExecutionInComponent() {};
+        // Separated due to overlapping pointcuts and thus condition race
+        @Pointcut("!execution(* process(eu.wdaqua.qanary.commons.QanaryMessage)) && " +
+                  "(execution(* eu.wdaqua.qanary.component..*(..)) || " +
+                  "execution(* eu.wdaqua.qanary.QanaryPipelineComponent..*(..)))"
+        ) public void storeMethodExecutionInComponent() {};
 
         @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
         public void processExecution() {};
@@ -113,12 +116,14 @@
          */
         @Before(value = "processExecution()")
         public void setGraphFromProcessExecution(JoinPoint joinPoint) throws URISyntaxException {
+            resetConfiguration();
             QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[0];
             this.setProcessGraph(qanaryMessage.getInGraph());
             if(this.getQanaryTripleStoreConnector() == null) {
                 QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage, new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null")); // TODO: Application name
                 this.setQanaryTripleStoreConnector(qanaryUtils.getQanaryTripleStoreConnector());
             }
+            implementationStoreMethodExecutionInComponentBefore(joinPoint);
         }
 
         /**
@@ -163,14 +168,19 @@
 
         /**
          * Helper function to get the caller method's uuid. If the stack is empty at the beginning, it returns "init"
-         * @return UUID for the latest stack item; "init" if stack is empty (first method call)
+         * @return UUID for the latest stack item; "" if stack is empty (first method call)
          */
         public String checkAndGetFromStack() {
             try {
                 return (String) this.callStack.peek();
             } catch(EmptyStackException e) {
-                return "init";
+                return "";
             }
+        }
+
+        public void resetConfiguration() {
+            this.callStack.clear();
+            this.methodList.clear();
         }
 
     }
