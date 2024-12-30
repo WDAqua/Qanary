@@ -1,0 +1,8 @@
+<aspectj>
+    <aspects>
+        <aspect name="eu.wdaqua.qanary.explainability.annotations.LoggingAspectComponent"/>
+        <weaver options="-verbose -showWeaveInfo">
+            <include within="eu.wdaqua.qanary.component..*"/>
+        </weaver>
+    </aspects>
+</aspectj>

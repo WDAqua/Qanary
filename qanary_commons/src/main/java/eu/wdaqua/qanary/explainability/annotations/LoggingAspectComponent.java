@@ -20,9 +20,38 @@
     import java.net.URISyntaxException;
     import java.util.*;
 
-    @Aspect
-    @Service
-    public class LoggingAspectComponent extends LoggingAspect{
+    public aspect LoggingAspectComponent {
+
+        // FROM ABSTRACT CLASS
+
+    private URI processGraph;
+    private QanaryTripleStoreConnector qanaryTripleStoreConnector;
+
+    public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
+        return qanaryTripleStoreConnector;
+    }
+
+    public void setQanaryTripleStoreConnector(QanaryTripleStoreConnector qanaryTripleStoreConnector) {
+        this.qanaryTripleStoreConnector = qanaryTripleStoreConnector;
+    }
+
+    public URI getProcessGraph() {
+        return processGraph;
+    }
+
+    public void setProcessGraph(URI processGraph) {
+        this.processGraph = processGraph;
+    }
+
+    public QanaryTripleStoreConnectorQanaryInternal createTriplestoreConnectorFromJoinPoint(JoinPoint joinPoint, String applicationName) throws URISyntaxException {
+        QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
+        return new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), applicationName);
+    }
+
+    public URI createGraphFromJoinPoint(JoinPoint joinPoint) {
+        QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
+        return qanaryMessage.getInGraph();
+    }
 
         private Logger logger = LoggerFactory.getLogger(LoggingAspectComponent.class);
         private Map<String, MethodObject> methodList = new HashMap<>();
