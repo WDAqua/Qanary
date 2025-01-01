@@ -5,8 +5,6 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-
-import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -16,12 +14,15 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+
+/**
+ * TODO: Application name problem
+ */
 
 @Aspect
 public class LoggingAspectComponent extends LoggingAspect {
@@ -62,7 +63,24 @@ public class LoggingAspectComponent extends LoggingAspect {
     private Stack<String> callStack = new Stack<String>();
     @Value("${spring.application.name}")
     private String applicationName;
-    public static String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
+    public final String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
+    public final String EMPTY_STACK_ITEM = "init";
+
+    public Stack<String> getCallStack() {
+        return callStack;
+    }
+
+    public void setCallStack(Stack<String> callStack) {
+        this.callStack = callStack;
+    }
+
+    public Map<String, MethodObject> getMethodList() {
+        return methodList;
+    }
+
+    public void setMethodList(Map<String, MethodObject> methodList) {
+        this.methodList = methodList;
+    }
 
     /**
      * Logs method by using the defined logging query.
@@ -72,7 +90,8 @@ public class LoggingAspectComponent extends LoggingAspect {
      * @throws IOException       During read-process of logging-query
      * @throws SparqlQueryFailed During update-process with the final query
      */
-    public void logMethodData(String methodUuid, MethodObject method) throws IOException, SparqlQueryFailed {
+    public void logMethodData(String methodUuid, MethodObject method)
+            throws IOException, SparqlQueryFailed, NullPointerException {
         String query = QanaryTripleStoreConnector.readFileFromResources(LOGGING_QUERY);
         query = query.replace("?graph", "<" + this.getProcessGraph().toASCIIString() + ">");
         query = query.replace("?annotatedBy", "<urn:qanary:" + this.applicationName + ">");
@@ -81,10 +100,6 @@ public class LoggingAspectComponent extends LoggingAspect {
         query = query.replace("?method", "'" + method.getMethod() + "'");
         query = query.replace("?output", generateOutputDataRepresentation(method.getOutput()));
         query = query.replace("?input", generateInputDataRepresentation(method.getInput()));
-        // query = query.replace("?explanationType",
-        // "'temp'").replace("?explanationValue",
-        // "'tempValue'").replace("?explanation_generator",
-        // "'generator'").replace("?explanationScore","1.0");
         logger.info("Method-log query: {}", query);
         this.qanaryTripleStoreConnector.update(query);
     }
@@ -100,7 +115,7 @@ public class LoggingAspectComponent extends LoggingAspect {
         if (inputData.length == 0 || inputData == null)
             return "()";
         for (int i = 0; i < inputData.length; i++) {
-            Object var = inputData[i]; // TODO: What for difficult string representations?
+            Object var = inputData[i];
             String varRepresentation = "[ " + "rdf:type \"" + var.getClass() + "\" ;" + "rdf:value \""
                     + ResourceFactory.createPlainLiteral(var.toString().replace("\n", " ").replace("\\", "")) + "\" ]";
             representation += varRepresentation;
@@ -132,7 +147,7 @@ public class LoggingAspectComponent extends LoggingAspect {
             methodMap.forEach((k, v) -> {
                 try {
                     this.logMethodData(k, v);
-                } catch (IOException | SparqlQueryFailed e) {
+                } catch (IOException | SparqlQueryFailed | NullPointerException e) {
                     logger.error("Method with uuid {} was not logged due to an exception with the error message: {}", k,
                             e.getMessage());
                 }
@@ -167,9 +182,7 @@ public class LoggingAspectComponent extends LoggingAspect {
         this.setProcessGraph(qanaryMessage.getInGraph());
         if (this.getQanaryTripleStoreConnector() == null) {
             QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage,
-                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null")); // TODO:
-                                                                                                        // Application
-                                                                                                        // name
+                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null"));
             this.setQanaryTripleStoreConnector(qanaryUtils.getQanaryTripleStoreConnector());
         }
         implementationStoreMethodExecutionInComponentBefore(joinPoint);
@@ -213,9 +226,7 @@ public class LoggingAspectComponent extends LoggingAspect {
 
         this.methodList.put(
                 uuid,
-                new MethodObject(caller, method, input, this.applicationName) // Caller == null IF first tracked method
-                                                                              // call
-        );
+                new MethodObject(caller, method, input, this.applicationName));
     }
 
     /**
@@ -229,7 +240,7 @@ public class LoggingAspectComponent extends LoggingAspect {
         try {
             return (String) this.callStack.peek();
         } catch (EmptyStackException e) {
-            return "init";
+            return EMPTY_STACK_ITEM;
         }
     }
 
