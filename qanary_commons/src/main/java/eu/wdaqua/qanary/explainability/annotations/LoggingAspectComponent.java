@@ -13,7 +13,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,11 +20,12 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 /**
- * TODO: Application name problem
+ * This class' purpose is to log all method executions within the process()-method.
+ * It is done by starting the logging process before the process()-method is called and ending it when the method returns.
  */
 
 @Aspect
-public class LoggingAspectComponent extends LoggingAspect {
+public class LoggingAspectComponent {
 
     private URI processGraph;
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
@@ -61,7 +61,6 @@ public class LoggingAspectComponent extends LoggingAspect {
     private Map<String, MethodObject> methodList = new HashMap<>();
     private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
     private Stack<String> callStack = new Stack<String>();
-    @Value("${spring.application.name}")
     private String applicationName;
     public final String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
     public final String EMPTY_STACK_ITEM = "init";
@@ -182,7 +181,7 @@ public class LoggingAspectComponent extends LoggingAspect {
         this.setProcessGraph(qanaryMessage.getInGraph());
         if (this.getQanaryTripleStoreConnector() == null) {
             QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage,
-                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), "null"));
+                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), this.applicationName));
             this.setQanaryTripleStoreConnector(qanaryUtils.getQanaryTripleStoreConnector());
         }
         implementationStoreMethodExecutionInComponentBefore(joinPoint);
@@ -247,6 +246,18 @@ public class LoggingAspectComponent extends LoggingAspect {
     public void resetConfiguration() {
         this.callStack.clear();
         this.methodList.clear();
+    }
+
+    // APPLICATION NAME RELATED
+
+    @Pointcut("execution(* getApplicationName())")
+    public void applicationNamePointcut() {
+    }
+
+    @AfterReturning(value = "applicationNamePointcut()", returning = "result")
+    public void getApplicationNameAfterReturning(JoinPoint joinPoint, Object result) {
+        this.applicationName = (String) result;
+        logger.info("Application name set to: {}", this.applicationName);
     }
 
 }

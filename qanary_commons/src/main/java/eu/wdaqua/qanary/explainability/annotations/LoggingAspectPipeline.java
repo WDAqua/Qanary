@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import java.net.URISyntaxException;
 
 @Aspect
-public class LoggingAspectPipeline extends LoggingAspect{
+public class LoggingAspectPipeline {
 
     ////////////////// CONFIG FOR PIPELINE
     /*
