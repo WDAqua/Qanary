@@ -39,7 +39,7 @@ public class LoggingAspectPipeline {
      * QanaryTripleStoreEndpoint: Fetched from
      */
 
-    private String processGraph;
+    private URI processGraph;
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
     private final Logger logger = LoggerFactory.getLogger(LoggingAspectPipeline.class);
     private Map<UUID, MethodObject> methodObjectMap = new HashMap<>();
@@ -47,8 +47,9 @@ public class LoggingAspectPipeline {
     private final String EMPTY_STACK_ITEM = "init";
     private final String applicationName = "QanaryPipeline";
     private final String MAP_IS_NULL_ERROR = "Method map is null";
+    private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
 
-    public String getProcessGraph() {
+    public URI getProcessGraph() {
         return processGraph;
     }
 
@@ -56,7 +57,7 @@ public class LoggingAspectPipeline {
         return qanaryTripleStoreConnector;
     }
 
-    public void setProcessGraph(String processGraph) {
+    public void setProcessGraph(URI processGraph) {
         this.processGraph = processGraph;
     }
     
@@ -98,7 +99,7 @@ public class LoggingAspectPipeline {
     @Before(value = "setTriplestoreAndGraphForPipeline()")
     public void setTriplestoreAndGraphForPipeline(JoinPoint joinPoint) throws URISyntaxException {
         QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
-        this.processGraph = qanaryMessage.getOutGraph().toString();
+        this.processGraph = qanaryMessage.getOutGraph();
         if (this.getQanaryTripleStoreConnector() == null) {
             QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage,
                     new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), this.applicationName));
