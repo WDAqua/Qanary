@@ -1,6 +1,6 @@
 package eu.wdaqua.qanary.explainability.annotations;
 
-
+import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -9,8 +9,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.jsonldjava.utils.Obj;
 
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
@@ -178,7 +176,12 @@ public class LoggingAspectPipeline {
         query = query.replace("?output", generateOutputDataRepresentation(method.getOutput()));
         query = query.replace("?input", generateInputDataRepresentation(method.getInput()));
         logger.info("Method-log query: {}", query);
-        this.qanaryTripleStoreConnector.update(query);
+        try {
+            this.qanaryTripleStoreConnector.update(query);
+        } catch(HttpException e) {
+            logger.error("Logging failed due to an HTTP exception with the error message: {}. If this isn't a test, check implementation", e.getMessage());
+        }
+
     }
 
     /**
