@@ -28,8 +28,14 @@ The following sub-projects are part of the Qanary core frameworks:
 
 [source](https://github.com/WDAqua/Qanary/tree/master/qanary_pipeline-template)
 
-More details follow soon.
+The Qanary Pipeline facilitates the development of QA systems by providing a structured architecture for integrating various components such as named entity recognition, relation detection, query building, etc. With its modular design, Qanary supports adding, replacing, and enhancing components with ease.
 
+### Features
+
+- **Modular Design**: Easily integrate and manage multiple QA components.
+- **RDF and Ontologies**: Leverages semantic web technologies for intermediate data flow representation.
+- **Extensible**: Quickly prototype and extend your QA systems with new features.
+- **Interoperable**: Standards-compliant components communicate seamlessly.
 
 <a name="qanarycomponenttemplate"></a>
 ## Qanary component template
