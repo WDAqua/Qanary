@@ -5,7 +5,10 @@
 
 *TL;DR: The Qanary framework takes a best-of-breed approach to the integration of Question Answering (QA) components. It enables rapid development of QA systems that are flexible, extensible, and reusable as well as provide built-in features to measure the quality of the QA quality.*
 
-Qanary is a methodology for creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.eu) where Question Answering Systems (QAS) are researched and developed. For all the publications related to Qanary please see the section [publications](#qanarypublications). W.r.t. questions, ideas, or any feedback related to Qanary please do not hesitate to [contact the core developers](https://github.com/WDAqua/Qanary/wiki/Who-do-I-talk-to%3F). However, if you would like to see a QA system built using the Qanary framework, one of our core developers has built a complete end-to-end QA system that allows one to query several RDF data stores: http://wdaqua.eu/qa.
+Qanary is a methodology for creating Question Answering Systems it is part of the [WDAqua project](http://wdaqua.eu) where Question Answering Systems (QAS) are researched and developed. 
+For all the publications related to Qanary please see the section [publications](#qanarypublications). 
+Regarding questions, ideas, or any feedback related to Qanary please do not hesitate to [contact the core developers](https://github.com/WDAqua/Qanary/wiki/Who-do-I-talk-to%3F). 
+However, if you would like to see a QA system built using the Qanary framework, one of our core developers has built a complete end-to-end QA system that allows one to query several RDF data stores: http://wdaqua.eu/qa.
 
 
 Please go to the [GitHub Wiki page](https://github.com/WDAqua/Qanary/wiki) of this repository to get more insights on how to use this framework, how to add new components etc.
