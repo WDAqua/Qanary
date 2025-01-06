@@ -75,7 +75,7 @@ For additional publications, we suggest to [follow this list of publications](ht
 
 ## How to run the code
 
-How to build a complete *tiny Question Answering system* driven by Qanary is described [here](https://github.com/WDAqua/Qanary-question-answering-components/blob/master/README.md#build-and-run-a-minimal-set-of-components).
+How to build a complete *tiny component-oriented Question Answering System* driven by the Qanary framework is described [here](https://github.com/WDAqua/Qanary-question-answering-components/blob/master/README.md#build-and-run-a-minimal-set-of-components).
 
 ### Without creating Docker images 
 
