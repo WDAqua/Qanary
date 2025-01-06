@@ -17,10 +17,10 @@ Although many components are available already, this is still just the beginning
 
 The following sub-projects are part of the Qanary core frameworks:
 
- * [**Qanary Pipeline**](#qanarypipeline) implementation: a central component where components for question answering systems are connected automatically and can be called by Web UIs
+ * [**Qanary Pipeline**](#qanarypipeline) implementation: a central component where components for Question Answering Systems are connected automatically and can be called by Web UIs
  * Qanary component implementations: components providing wrappers to existing functionality or implementing new question-answering approaches
     * a [**Qanary component template**](#qanarycomponenttemplate) implementation: use this to build you own component ([howto](https://github.com/WDAqua/Qanary/wiki/How-do-I-create-a-new-Qanary-component%3F)) as it provides [several features]()
- * the additional resource [**QALD evaluator**](#qaldevaluator): a client for the Qanary Pipeline evaluating the capabilities w.r.t. named entity recognition and disambiguation of a given Qanary Pipeline configuration with the [QALD benchmark](http://qald.sebastianwalter.org/) (Question Answering over Linked Data) data
+ * The additional resource [**QALD evaluator**](#qaldevaluator): a client for the Qanary Pipeline evaluating the capabilities w.r.t. named entity recognition and disambiguation of a given Qanary Pipeline configuration with the [QALD benchmark](http://qald.sebastianwalter.org/) (Question Answering over Linked Data) data
     * [**QALD annotated with named entities**](#qaldnerddataset): questions of [QALD](http://qald.sebastianwalter.org/) annotated with named entities containing
 
 <a name="qanarypipeline"></a>
@@ -133,4 +133,4 @@ How to build a complete *tiny Question Answering system* driven by Qanary is des
  
  ### Using Qanary for your work
  
- * Our Wiki page contains all the information about how to integrate a new component and describes also the easy usability of the Qanary framework. We have illustrated the inclusion of a new component with an example on the Wiki page. Please take a look at it.
+ * Our [Wiki](https://github.com/WDAqua/Qanary/wiki) contains all the information about how to integrate a new component and describes also the easy usability of the Qanary framework. We have illustrated the inclusion of a new component with an example on the Wiki page. Please take a look at it.
