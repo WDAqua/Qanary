@@ -1,5 +1,10 @@
 package eu.wdaqua.qanary.explainability.annotations;
 
+import eu.wdaqua.qanary.commons.QanaryMessage;
+import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
+import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
+import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.aspectj.lang.JoinPoint;
@@ -10,20 +15,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.wdaqua.qanary.commons.QanaryMessage;
-import eu.wdaqua.qanary.commons.QanaryUtils;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
-import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
-import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EmptyStackException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 
 // Potentially outsource duplicate code from LoggingAspectComponent, when known how abstract classes can be used in AspectJ.
 @Aspect
@@ -91,7 +86,7 @@ public class LoggingAspectPipeline {
     public void setTriplestoreAndGraphForPipeline() {};
 
     // Any class in the package eu.wdaqua.qanary.web or eu.wdaqua.qanary(Pipeline)
-    @Pointcut("execution(* eu.wdaqua.qanary.web..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipeline..*(..)) || execution(* eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier..*(..))")
+    @Pointcut("(execution(* eu.wdaqua.qanary.web..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipeline..*(..)) || execution(* eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier..*(..))) && !execution(* eu.wdaqua.qanary.web.QanarySparqlProtocolController..*(..))")
     public void logMethodCallPointcut() {};
 
     @Before(value = "setTriplestoreAndGraphForPipeline()")
