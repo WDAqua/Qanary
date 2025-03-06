@@ -24,7 +24,13 @@ import java.util.*;
 @Aspect
 public class LoggingAspectPipeline {
 
-    ////////////////// CONFIG FOR PIPELINE
+    private static Stack<UUID> methodStack = new Stack<>();
+    private final Logger logger = LoggerFactory.getLogger(LoggingAspectPipeline.class);
+    private final String EMPTY_STACK_ITEM = "init";
+    private final String applicationName = "QanaryPipeline";
+    private final String MAP_IS_NULL_ERROR = "Method map is null";
+    private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
+    /// /////////////// CONFIG FOR PIPELINE
     /*
      * START: /questionanswering from controller
      * END: RETURN /questionanswering from controller
@@ -34,26 +40,28 @@ public class LoggingAspectPipeline {
 
     private URI processGraph;
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
-    private final Logger logger = LoggerFactory.getLogger(LoggingAspectPipeline.class);
     private Map<UUID, MethodObject> methodObjectMap = new HashMap<>();
-    private Stack<UUID> methodStack = new Stack<>();
-    private final String EMPTY_STACK_ITEM = "init";
-    private final String applicationName = "QanaryPipeline";
-    private final String MAP_IS_NULL_ERROR = "Method map is null";
-    private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
+
+    public static Stack<UUID> getMethodStack() {
+        return methodStack;
+    }
+
+    public void setMethodStack(Stack<UUID> methodStack) {
+        this.methodStack = methodStack;
+    }
 
     public URI getProcessGraph() {
         return processGraph;
+    }
+
+    public void setProcessGraph(URI processGraph) {
+        this.processGraph = processGraph;
     }
 
     public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
         return qanaryTripleStoreConnector;
     }
 
-    public void setProcessGraph(URI processGraph) {
-        this.processGraph = processGraph;
-    }
-    
     public void setQanaryTripleStoreConnector(QanaryTripleStoreConnector qanaryTripleStoreConnector) {
         this.qanaryTripleStoreConnector = qanaryTripleStoreConnector;
     }
@@ -62,16 +70,8 @@ public class LoggingAspectPipeline {
         return methodObjectMap;
     }
 
-    public Stack<UUID> getMethodStack() {
-        return methodStack;
-    }
-
     public void setMethodObjectMap(Map<UUID, MethodObject> methodObjectMap) {
         this.methodObjectMap = methodObjectMap;
-    }
-
-    public void setMethodStack(Stack<UUID> methodStack) {
-        this.methodStack = methodStack;
     }
 
     @Pointcut(
@@ -80,14 +80,24 @@ public class LoggingAspectPipeline {
                     "execution(public org.springframework.http.ResponseEntity<eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun> eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.startquestionansweringwithtextquestionThroughJson(..)) || " +
                     "execution(public org.springframework.http.ResponseEntity<?> eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.createQuestionAnswering(..)) || " +
                     "execution(public org.springframework.http.ResponseEntity<?> eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.createQuestionAnsweringFull(..))"
-    ) public void startProcessForPipeline() {};
+    )
+    public void startProcessForPipeline() {
+    }
+
+    ;
 
     @Pointcut("execution(* eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.executeComponentList(..))")
-    public void setTriplestoreAndGraphForPipeline() {};
+    public void setTriplestoreAndGraphForPipeline() {
+    }
+
+    ;
 
     // Any class in the package eu.wdaqua.qanary.web or eu.wdaqua.qanary(Pipeline)
     @Pointcut("(execution(* eu.wdaqua.qanary.web..*(..)) || execution(* eu.wdaqua.qanary.QanaryPipeline..*(..)) || execution(* eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier..*(..))) && !execution(* eu.wdaqua.qanary.web.QanarySparqlProtocolController..*(..))")
-    public void logMethodCallPointcut() {};
+    public void logMethodCallPointcut() {
+    }
+
+    ;
 
     @Before(value = "setTriplestoreAndGraphForPipeline()")
     public void setTriplestoreAndGraphForPipeline(JoinPoint joinPoint) throws URISyntaxException {
@@ -154,7 +164,7 @@ public class LoggingAspectPipeline {
 
     /**
      * Logs method by using the defined logging query.
-     * 
+     *
      * @param methodUuid UUID of the method to be logged
      * @param method     Oject that contains all details needed to get logged
      * @throws IOException       During read-process of logging-query
@@ -173,7 +183,7 @@ public class LoggingAspectPipeline {
         logger.info("Method-log query: {}", query);
         try {
             this.qanaryTripleStoreConnector.update(query);
-        } catch(HttpException e) {
+        } catch (HttpException e) {
             logger.error("Logging failed due to an HTTP exception with the error message: {}. If this isn't a test, check implementation", e.getMessage());
         }
 
@@ -181,7 +191,7 @@ public class LoggingAspectPipeline {
 
     /**
      * Transforms object list to SPARQL-conform representation to store data
-     * 
+     *
      * @param inputData
      * @return
      */
@@ -202,7 +212,7 @@ public class LoggingAspectPipeline {
 
     /**
      * Creates SPARQL-conform representation for the output data
-     * 
+     *
      * @param outputData
      * @return
      */
@@ -242,7 +252,6 @@ public class LoggingAspectPipeline {
     public boolean isMethodCallExpected() {
         return false;
     }
-
 
 
 }

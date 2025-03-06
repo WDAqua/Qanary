@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
+import eu.wdaqua.qanary.communications.RestTemplateWithExplainability;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -46,12 +49,12 @@ import java.util.Map;
 public class QanaryPipeline implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
+    @Autowired
+    public QanaryPipelineConfiguration qanaryPipelineConfiguration;
     @Value("${spring.application.name}")
     private String applicationName;
     @Autowired
     private PipelineExplanationHelper pipelineExplanationHelper;
-    @Autowired
-    public QanaryPipelineConfiguration qanaryPipelineConfiguration;
 
     public static void main(final String[] args) {
         // define usage of configuration file 'application.local.properties'
@@ -125,8 +128,15 @@ public class QanaryPipeline implements QanaryExplanation {
     }
 
     @Bean
+    @ConditionalOnMissingBean(RestTemplateWithExplainability.class)
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    @ConditionalOnBean(RestTemplateWithExplainability.class)
+    public RestTemplate restTemplate(final RestTemplateWithExplainability restTemplateWithExplainability) {
+        return restTemplateWithExplainability;
     }
 
     @Bean
@@ -183,9 +193,9 @@ public class QanaryPipeline implements QanaryExplanation {
             ));
         }
         List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
-        Map<String,String> componentAndExplanation = new HashMap<>();
-        for(int i = 0; i < dataList.size(); i++) {
-            componentAndExplanation.put(components.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
+        Map<String, String> componentAndExplanation = new HashMap<>();
+        for (int i = 0; i < dataList.size(); i++) {
+            componentAndExplanation.put(components.get(i), subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
         }
         qanaryExplanationData.setComponent(this.applicationName);
         qanaryExplanationData.setExplanations(componentAndExplanation);
