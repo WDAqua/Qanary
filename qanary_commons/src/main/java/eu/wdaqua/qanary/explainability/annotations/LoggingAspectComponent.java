@@ -14,10 +14,15 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.EmptyStackException;
+import java.util.Map;
+import java.util.Stack;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class' purpose is to log all method executions within the process()-method.
@@ -27,8 +32,17 @@ import java.util.*;
 @Aspect
 public class LoggingAspectComponent {
 
+    public final String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
+    public final String EMPTY_STACK_ITEM = "init";
+    private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
     private URI processGraph;
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
+    private Logger logger = LoggerFactory.getLogger(LoggingAspectComponent.class);
+    private Map<String, MethodObject> methodList = new ConcurrentHashMap<>();
+    private Stack<String> callStack = new Stack<String>();
+    private String applicationName;
+    private boolean activeTracing = false;
+    private String CROSS_COMPONENT_CALL_PROCESS_ID = null;
 
     public QanaryTripleStoreConnector getQanaryTripleStoreConnector() {
         return qanaryTripleStoreConnector;
@@ -47,7 +61,7 @@ public class LoggingAspectComponent {
     }
 
     public QanaryTripleStoreConnectorQanaryInternal createTriplestoreConnectorFromJoinPoint(JoinPoint joinPoint,
-            String applicationName) throws URISyntaxException {
+                                                                                            String applicationName) throws URISyntaxException {
         QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
         return new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), applicationName);
     }
@@ -56,14 +70,6 @@ public class LoggingAspectComponent {
         QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[2];
         return qanaryMessage.getInGraph();
     }
-
-    private Logger logger = LoggerFactory.getLogger(LoggingAspectComponent.class);
-    private Map<String, MethodObject> methodList = new HashMap<>();
-    private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
-    private Stack<String> callStack = new Stack<String>();
-    private String applicationName;
-    public final String MAP_IS_NULL_ERROR = "Passed map is null; No method logged";
-    public final String EMPTY_STACK_ITEM = "init";
 
     public Stack<String> getCallStack() {
         return callStack;
@@ -83,7 +89,7 @@ public class LoggingAspectComponent {
 
     /**
      * Logs method by using the defined logging query.
-     * 
+     *
      * @param methodUuid UUID of the method to be logged
      * @param method     Oject that contains all details needed to get logged
      * @throws IOException       During read-process of logging-query
@@ -105,7 +111,7 @@ public class LoggingAspectComponent {
 
     /**
      * Transforms object list to SPARQL-conform representation to store data
-     * 
+     *
      * @param inputData
      * @return
      */
@@ -126,7 +132,7 @@ public class LoggingAspectComponent {
 
     /**
      * Creates SPARQL-conform representation for the output data
-     * 
+     *
      * @param outputData
      * @return
      */
@@ -142,6 +148,7 @@ public class LoggingAspectComponent {
 
     public void logMethods(Map<String, MethodObject> methodMap) throws RuntimeException {
         // k = UUID of the actual method; v = Method details
+        logger.info("Logging Methods");
         try {
             methodMap.forEach((k, v) -> {
                 try {
@@ -156,28 +163,46 @@ public class LoggingAspectComponent {
         }
     }
 
-    // Separated due to overlapping pointcuts and thus condition race
-    @Pointcut("!execution(* process(eu.wdaqua.qanary.commons.QanaryMessage)) && " +
-            "(execution(* eu.wdaqua.qanary.component..*(..)) || " +
-            "execution(* eu.wdaqua.qanary.QanaryPipelineComponent..*(..)))")
-    public void storeMethodExecutionInComponent() {
-    };
-
     @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
     public void processExecution() {
-    };
+    }
+
+    @Pointcut("execution(* *(..)) && !execution(* process(eu.wdaqua.qanary.commons.QanaryMessage)) && !within(eu.wdaqua.qanary.explainability..*)")
+    public void anyExecution() {
+    }
+
+    /**
+     * Checks if an object matches the @class HttpServletRequest from class @class eu.wdaqua.qanary.component.QanaryServiceController
+     *
+     * @param args
+     */
+    public boolean checkForProcessIdAndSetup(Object[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof HttpServletRequest) {
+                HttpServletRequest request = (HttpServletRequest) args[i];
+                String processId = request.getHeader("processId");
+                if (processId != null && !processId.isEmpty()) {
+                    logger.debug("Found cross-component call processId: {}", processId);
+                    this.CROSS_COMPONENT_CALL_PROCESS_ID = processId;
+                    resetConfiguration();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Sets the graph from the executed process context (i.e. the
      * process(QanaryMessage message) method)
-     * 
+     *
      * @param joinPoint JoinPoint
      * @throws URISyntaxException Get the endpoint from the QanaryMessage
      */
     @Before(value = "processExecution()")
     public void setGraphFromProcessExecution(JoinPoint joinPoint) throws URISyntaxException {
-        resetConfiguration();
         QanaryMessage qanaryMessage = (QanaryMessage) joinPoint.getArgs()[0];
+        logger.debug("Set process graph: {}", qanaryMessage.getInGraph());
         this.setProcessGraph(qanaryMessage.getInGraph());
         if (this.getQanaryTripleStoreConnector() == null) {
             QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage,
@@ -187,59 +212,80 @@ public class LoggingAspectComponent {
         implementationStoreMethodExecutionInComponentBefore(joinPoint);
     }
 
+    @AfterReturning(value = "processExecution()", returning = "result")
+    public void runDefaultReturnBehaviourForReturn(JoinPoint joinPoint, Object result) {
+        implementationStoreMethodExecutionInComponentAfter(joinPoint, result);
+    }
+
     /**
      * Sets the returned object for each stored method
-     * 
+     *
      * @param joinPoint JoinPoint
      * @param result    Returned object
      */
-    @AfterReturning(value = "storeMethodExecutionInComponent()", returning = "result")
+    @AfterReturning(value = "anyExecution()", returning = "result")
     public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
-        String currentMethodUuid = (String) this.callStack.peek();
-        MethodObject method = this.methodList.get(currentMethodUuid);
-        method.setOutput(result);
-        this.methodList.replace(currentMethodUuid, method);
-        this.callStack.pop();
-        if (this.callStack.isEmpty()) {
-            logMethods(this.methodList);
-            this.setProcessGraph(null); // Process ended
-            this.methodList.clear(); // Clear stored methods
+        if (this.activeTracing) {
+            String currentMethodUuid = this.callStack.peek();
+            MethodObject method = this.methodList.get(currentMethodUuid);
+            method.setOutput(result);
+            this.methodList.replace(currentMethodUuid, method);
+            this.callStack.pop();
+            // Log all stack items
+            logger.info("Stack: {}", this.callStack);
+            if (this.callStack.isEmpty()) {
+                this.activeTracing = false;
+                logMethods(this.methodList);
+                this.setProcessGraph(null); // Process ended
+                this.methodList.clear(); // Clear stored methods
+            }
         }
     }
 
     /**
      * Creates a UUID for the designated method and puts it on the execution-stack.
-     * 
+     *
      * @param joinPoint JoinPoint
      */
-    @Before(value = "storeMethodExecutionInComponent()")
+    @Before(value = "anyExecution()")
     public void implementationStoreMethodExecutionInComponentBefore(JoinPoint joinPoint) {
-        // Get caller and self-push to stack
-        String caller = checkAndGetFromStack();
-        String uuid = UUID.randomUUID().toString();
-        this.callStack.push(uuid);
+        if (!this.activeTracing) {
+            Object[] args = joinPoint.getArgs();
+            this.activeTracing = checkForProcessIdAndSetup(args);
+        }
+        if (this.activeTracing) {
+            logger.info("Before logging method {}", joinPoint.getSignature().getName());
+            // Get caller and self-push to stack
+            String caller = checkAndGetFromStack();
+            String uuid = UUID.randomUUID().toString();
+            logger.info("UUID for method {}: {}", joinPoint.getSignature().getName(), uuid);
+            this.callStack.push(uuid);
+            logger.info("Before Stack: {}", this.callStack);
 
-        // Get required data
-        String method = joinPoint.getSignature().getName();
-        Object[] input = joinPoint.getArgs();
+            // Get required data
+            String method = joinPoint.getSignature().getName();
+            Object[] input = joinPoint.getArgs();
 
-        this.methodList.put(
-                uuid,
-                new MethodObject(caller, method, input, this.applicationName));
+            this.methodList.put(
+                    uuid,
+                    new MethodObject(caller, method, input, this.applicationName));
+        }
     }
 
     /**
      * Helper function to get the caller method's uuid. If the stack is empty at the
      * beginning, it returns "init"
-     * 
+     *
      * @return UUID for the latest stack item; "" if stack is empty (first method
-     *         call)
+     * call)
      */
     public String checkAndGetFromStack() {
         try {
             return (String) this.callStack.peek();
         } catch (EmptyStackException e) {
-            return EMPTY_STACK_ITEM;
+            return CROSS_COMPONENT_CALL_PROCESS_ID == null
+                    ? EMPTY_STACK_ITEM
+                    : CROSS_COMPONENT_CALL_PROCESS_ID;
         }
     }
 
