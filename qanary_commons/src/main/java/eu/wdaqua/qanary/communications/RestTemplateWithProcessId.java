@@ -6,14 +6,13 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @ConditionalOnProperty(value = "explainability_logging", matchIfMissing = true)
-public class RestTemplateWithExplainability extends RestTemplate {
+public class RestTemplateWithExplainability extends RestTemplateWithCaching {
 
     public RestTemplateWithExplainability() {
         super(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));

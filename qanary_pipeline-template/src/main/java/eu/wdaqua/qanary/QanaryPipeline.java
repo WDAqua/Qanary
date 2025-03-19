@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
-import eu.wdaqua.qanary.communications.RestTemplateWithExplainability;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotWorking;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -55,6 +53,8 @@ public class QanaryPipeline implements QanaryExplanation {
     private String applicationName;
     @Autowired
     private PipelineExplanationHelper pipelineExplanationHelper;
+    @Autowired
+    private RestTemplate restTemplate;
 
     public static void main(final String[] args) {
         // define usage of configuration file 'application.local.properties'
@@ -117,7 +117,7 @@ public class QanaryPipeline implements QanaryExplanation {
     ) throws TripleStoreNotWorking, TripleStoreNotProvided {
         this.checkTripleStoreConnection(myQanaryTripleStoreConnector);
         return new QanaryConfigurator( //
-                restTemplate(), //
+                restTemplate, //
                 qanaryPipelineConfiguration.getPredefinedComponents(), // from config
                 qanaryPipelineConfiguration.getHost(), // from config
                 qanaryPipelineConfiguration.getPort(), // from config
@@ -126,17 +126,10 @@ public class QanaryPipeline implements QanaryExplanation {
                 myQanaryTripleStoreConnector //
         );
     }
-
-    @Bean
-    @ConditionalOnMissingBean(RestTemplateWithExplainability.class)
+    
+    @ConditionalOnMissingBean(RestTemplate.class)
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }
-
-    @Bean
-    @ConditionalOnBean(RestTemplateWithExplainability.class)
-    public RestTemplate restTemplate(final RestTemplateWithExplainability restTemplateWithExplainability) {
-        return restTemplateWithExplainability;
     }
 
     @Bean
