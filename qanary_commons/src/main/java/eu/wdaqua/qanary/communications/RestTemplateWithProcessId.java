@@ -1,21 +1,24 @@
 package eu.wdaqua.qanary.communications;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * By default, this RestTemplate extension is disabled and only activated when its property is set to 'true'
+ * It implements an interceptor to provide cross-component logging by appending the processId that leads to the cross-component
+ * call to the API-Request header.
+ */
 @Service
-@ConditionalOnProperty(value = "explainability_logging", matchIfMissing = true)
-public class RestTemplateWithExplainability extends RestTemplateWithCaching {
+@ConditionalOnProperty(value = "explainability_logging", havingValue = "true", matchIfMissing = false)
+public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithExplainability() {
-        super(new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()));
+    public RestTemplateWithProcessId() {
+        super(new CacheOfRestTemplateResponse());
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
