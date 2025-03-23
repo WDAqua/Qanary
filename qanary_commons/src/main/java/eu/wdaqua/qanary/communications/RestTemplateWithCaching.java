@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.communications;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -18,17 +19,21 @@ import java.util.List;
  */
 
 @Service
-@ConditionalOnMissingBean(RestTemplateWithProcessId.class)
-@ConditionalOnProperty(value = "request_caching", havingValue = "true", matchIfMissing = false)
+@ConditionalOnMissingBean(RestTemplateWithProcessId.class) // RestTemplateWithProcessId extends this RestTemplate
 public class RestTemplateWithCaching extends RestTemplate {
+
+    @Value("${rest.template.setting}")
+    private String restTemplateSetting;
 
     public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
+        } // A = Both, B = CacheRestTemplate
+        if(restTemplateSetting == "A" || restTemplateSetting == "B" || restTemplateSetting.equals(null)) { // Null for default component behavior
+            interceptors.add(new RestTemplateCacheResponseInterceptor(myCacheResponse)); // TODO: Only on property
+            this.setInterceptors(interceptors);
         }
-        interceptors.add(new RestTemplateCacheResponseInterceptor(myCacheResponse));
-        this.setInterceptors(interceptors);
         logger.warn(this.getClass().getCanonicalName() + " was initialized"); // old style logger from RestTemplate
     }
 }
