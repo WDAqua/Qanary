@@ -22,13 +22,15 @@ import java.util.Objects;
 @ConditionalOnMissingBean(RestTemplateWithProcessId.class) // RestTemplateWithProcessId extends this RestTemplate
 public class RestTemplateWithCaching extends RestTemplate {
 
-    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, @Value("${rest.template.setting:C}") String restTemplateSetting) {
+    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, @Value("${rest.template.setting") String restTemplateSetting) {
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         } // A = Both, B = CacheRestTemplate
         if (Objects.equals(restTemplateSetting, "A") || Objects.equals(restTemplateSetting, "B") || restTemplateSetting == null) { // Null for default component behavior
             interceptors.add(new RestTemplateCacheResponseInterceptor(myCacheResponse)); // TODO: Only on property
+            this.setInterceptors(interceptors);
+        } else {
             this.setInterceptors(interceptors);
         }
         logger.warn(this.getClass().getCanonicalName() + " was initialized"); // old style logger from RestTemplate
