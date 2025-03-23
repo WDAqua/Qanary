@@ -1,5 +1,6 @@
 package eu.wdaqua.qanary.communications;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -18,8 +19,8 @@ import java.util.List;
 @ConditionalOnExpression("'${rest.template.setting}' == 'A' or '${rest.template.setting}' == 'C'") // A = Both, C = ProcessIdRestTemplate
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithProcessId() {
-        super(new CacheOfRestTemplateResponse());
+    public RestTemplateWithProcessId(@Value("${rest.template.setting}") String restTemplateSetting) {
+        super(new CacheOfRestTemplateResponse(), restTemplateSetting);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
