@@ -22,7 +22,7 @@ import java.util.List;
 @ConditionalOnMissingBean(RestTemplateWithProcessId.class) // RestTemplateWithProcessId extends this RestTemplate
 public class RestTemplateWithCaching extends RestTemplate {
 
-    @Value("${rest.template.setting}")
+    @Value("${rest.template.setting:A}")
     private String restTemplateSetting;
 
     public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
