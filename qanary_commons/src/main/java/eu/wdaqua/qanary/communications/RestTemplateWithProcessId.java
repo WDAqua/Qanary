@@ -19,7 +19,7 @@ import java.util.List;
 @ConditionalOnExpression("'${rest.template.setting}' == 'A' or '${rest.template.setting}' == 'C'") // A = Both, C = ProcessIdRestTemplate
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithProcessId(@Value("${rest.template.setting:A}") String restTemplateSetting) {
+    public RestTemplateWithProcessId(@Value("${rest.template.setting:C}") String restTemplateSetting) {
         super(new CacheOfRestTemplateResponse(), restTemplateSetting);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
