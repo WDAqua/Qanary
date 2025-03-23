@@ -218,10 +218,10 @@ public class QanaryAspect {
                     new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), getApplicationName()));
             setQanaryTripleStoreConnector(qanaryUtils.getQanaryTripleStoreConnector());
         }
+        implementationStoreMethodExecutionInComponentBeforeForComponent(joinPoint);
     }
 
-
-    @AfterReturning(value = "componentAspect() || anyQanaryAndPipelineExecution()", returning = "result")
+    @AfterReturning(value = "componentAspect() || anyQanaryAndPipelineExecution() || processExecution()", returning = "result")
     public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
         if (isActiveTracing()) {
             String currentMethodUuid = getCallStack().peek();
