@@ -30,7 +30,7 @@ public class LoggingAspectTest {
     public void setup() {
         this.qanaryAspect = new QanaryAspect();
         // this.loggingAspectComponent.setQanaryTripleStoreConnector(mock(QanaryTripleStoreConnectorVirtuoso.class));
-        this.qanaryAspect.setCallStack(new Stack<>());
+        QanaryAspect.setCallStack(new Stack<>());
         joinPoint = mock(JoinPoint.class);
         signature = mock(Signature.class);
         // Mock the Signature object to return sample values
@@ -115,7 +115,7 @@ public class LoggingAspectTest {
     @Test
     public void nonEmptyStackTest() {
         String TEST_STACK_ITEM = "testStackItem";
-        this.qanaryAspect.getCallStack().push(TEST_STACK_ITEM);
+        QanaryAspect.getCallStack().push(TEST_STACK_ITEM);
         assertEquals(TEST_STACK_ITEM, this.qanaryAspect.checkAndGetFromStack());
     }
 
@@ -126,7 +126,7 @@ public class LoggingAspectTest {
         this.qanaryAspect.setActiveTracing(true);
         this.qanaryAspect.implementationStoreMethodExecutionInComponentBeforeForComponent(this.joinPoint);
         assertEquals(1, this.qanaryAspect.getMethodList().size());
-        assertFalse(this.qanaryAspect.getCallStack().empty());
+        assertFalse(QanaryAspect.getCallStack().empty());
     }
 
     // implementationStoreMethodExecutionInComponentAfter TESTS
@@ -135,9 +135,9 @@ public class LoggingAspectTest {
     public void implementationStoreMethodExecutionInComponentAfterTest() {
         this.qanaryAspect.setActiveTracing(true);
         this.qanaryAspect.implementationStoreMethodExecutionInComponentBeforeForComponent(this.joinPoint);
-        assertFalse(this.qanaryAspect.getCallStack().empty());
+        assertFalse(QanaryAspect.getCallStack().empty());
         assertEquals(1, this.qanaryAspect.getMethodList().size());
-        this.qanaryAspect.implementationStoreMethodExecutionInComponentAfter(this.joinPoint, mock(Object.class));
+        this.qanaryAspect.implementationStoreMethodExecutionInComponentAfter(this.joinPoint, null);
         assertEquals(0, this.qanaryAspect.getMethodList().size());
     }
 
