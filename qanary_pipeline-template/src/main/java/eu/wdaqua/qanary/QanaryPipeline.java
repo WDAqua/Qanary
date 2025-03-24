@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -46,12 +47,14 @@ import java.util.Map;
 public class QanaryPipeline implements QanaryExplanation {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryPipeline.class);
+    @Autowired
+    public QanaryPipelineConfiguration qanaryPipelineConfiguration;
     @Value("${spring.application.name}")
     private String applicationName;
     @Autowired
     private PipelineExplanationHelper pipelineExplanationHelper;
     @Autowired
-    public QanaryPipelineConfiguration qanaryPipelineConfiguration;
+    private RestTemplate restTemplate;
 
     public static void main(final String[] args) {
         // define usage of configuration file 'application.local.properties'
@@ -114,7 +117,7 @@ public class QanaryPipeline implements QanaryExplanation {
     ) throws TripleStoreNotWorking, TripleStoreNotProvided {
         this.checkTripleStoreConnection(myQanaryTripleStoreConnector);
         return new QanaryConfigurator( //
-                restTemplate(), //
+                restTemplate, //
                 qanaryPipelineConfiguration.getPredefinedComponents(), // from config
                 qanaryPipelineConfiguration.getHost(), // from config
                 qanaryPipelineConfiguration.getPort(), // from config
@@ -123,8 +126,8 @@ public class QanaryPipeline implements QanaryExplanation {
                 myQanaryTripleStoreConnector //
         );
     }
-
-    @Bean
+    
+    @ConditionalOnMissingBean(RestTemplate.class)
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
@@ -183,9 +186,9 @@ public class QanaryPipeline implements QanaryExplanation {
             ));
         }
         List<String> subComponentExplanations = pipelineExplanationHelper.fetchSubComponentExplanations(dataList).collectList().block();
-        Map<String,String> componentAndExplanation = new HashMap<>();
-        for(int i = 0; i < dataList.size(); i++) {
-            componentAndExplanation.put(components.get(i),subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
+        Map<String, String> componentAndExplanation = new HashMap<>();
+        for (int i = 0; i < dataList.size(); i++) {
+            componentAndExplanation.put(components.get(i), subComponentExplanations.get(i));  // TODO?: Prove, that the explanations correspond to the correct component
         }
         qanaryExplanationData.setComponent(this.applicationName);
         qanaryExplanationData.setExplanations(componentAndExplanation);

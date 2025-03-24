@@ -41,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class QanaryQuestionAnsweringControllerTest {
 
     static {
+        System.setProperty("spring.profiles.active", "test");
         System.setProperty("springdoc.api-docs.path", "/api-docs");
         System.setProperty("qanary.process.allow-additional-triples", "true");
     }

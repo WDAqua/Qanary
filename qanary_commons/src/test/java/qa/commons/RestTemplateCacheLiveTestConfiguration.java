@@ -19,7 +19,7 @@ public class RestTemplateCacheLiveTestConfiguration {
 	@Bean
 	@Primary
 	public RestTemplateWithCaching restTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse) {
-		return new RestTemplateWithCaching(myCacheResponse);
+		return new RestTemplateWithCaching(myCacheResponse, null);
 	}
 
 }
