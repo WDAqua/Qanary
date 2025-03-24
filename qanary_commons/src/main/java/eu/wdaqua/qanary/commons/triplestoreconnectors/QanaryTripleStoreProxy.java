@@ -69,7 +69,13 @@ public class QanaryTripleStoreProxy extends QanaryTripleStoreConnector {
 
     @Override
     public boolean ask(String sparql) throws SparqlQueryFailed {
-        return false;
+        boolean result = externalConnector.ask(sparql);
+        if (internalConnector != null && !result) {
+            getLogger().info("Requesting parent endpoint and graph");
+            sparql = externalEndpointGraph == null ? sparql : sparql.replace(externalEndpointGraph.toASCIIString(), internEndpointGraph.toASCIIString());
+            result = internalConnector.ask(sparql);
+        }
+        return result;
     }
 
     @Override

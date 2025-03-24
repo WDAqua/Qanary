@@ -110,8 +110,8 @@ public class QanarySparqlProtocolController {
             throw new SparqlQueryFailed(sparqlQuery, this.getQanaryTripleStoreConnector().getFullEndpointDescription(), e);
         }
 
-        logger.info("ask:{}, select:{}, unknown:{}, query:{}", query.isAskType(), query.isSelectType(),
-                query.isUnknownType(), sparqlQuery);
+        logger.info("ask:{}, select:{}, unknown:{}, query on connector {}: {} ", query.isAskType(), query.isSelectType(),
+                query.isUnknownType(), this.getQanaryTripleStoreConnector().getClass().getName(), sparqlQuery);
 
         // get result of SPARQL query from connected triplestore
         if (query.isAskType()) {
@@ -122,7 +122,7 @@ public class QanarySparqlProtocolController {
             JSONObject json = new JSONObject();
             json.put("head", new JSONObject());
             json.put("boolean", result);
-            logger.debug("JSON response for ASK query: {}", json.toString(0));
+            logger.info("JSON response for ASK query: {}", json.toString(0));
             ResponseEntity<String> responseEntity = ResponseEntity.ok().headers(headers).body(json.toString(2));
             return responseEntity;
         } else if (query.isSelectType()) {
