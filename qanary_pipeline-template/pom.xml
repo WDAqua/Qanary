@@ -366,6 +366,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.github.therapi</groupId>
+                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                            <version>0.15.0</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 

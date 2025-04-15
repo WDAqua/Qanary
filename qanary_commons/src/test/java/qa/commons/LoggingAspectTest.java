@@ -132,7 +132,7 @@ public class LoggingAspectTest {
     // implementationStoreMethodExecutionInComponentAfter TESTS
 
     @Test
-    public void implementationStoreMethodExecutionInComponentAfterTest() {
+    public void implementationStoreMethodExecutionInComponentAfterTest() throws Throwable {
         this.qanaryAspect.setActiveTracing(true);
         this.qanaryAspect.implementationStoreMethodExecutionInComponentBeforeForComponent(this.joinPoint);
         assertFalse(QanaryAspect.getCallStack().empty());

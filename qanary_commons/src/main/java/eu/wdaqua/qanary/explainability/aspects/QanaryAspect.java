@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.explainability.aspects;
 
+import com.github.therapi.runtimejavadoc.MethodJavadoc;
+import com.github.therapi.runtimejavadoc.RuntimeJavadoc;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -139,37 +142,62 @@ public class QanaryAspect {
     public void startProcessForPipeline() {
     }
 
+    /**
+     * This pointcut is defined for the executeComponentList(..) method for the QanaryPipeline.
+     * It serves as a provider for the QanaryTripleStore and process graph
+     */
+    @Pointcut("execution(* eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.executeComponentList(..))")
+    public void setTriplestoreAndGraphForPipeline() {
+    }
+
+    /**
+     * This pointcut is defined for any method of a QanaryComponent without touching the process(QanaryMethod) method
+     */
+    @Pointcut(value = "(" +
+            "execution(* eu.wdaqua.qanary.component..* (..)) || " +
+            "execution(* eu.wdaqua.component..* (..)) || " +
+            "execution(private eu.wdaqua.qanary.component..* *(..)) ||" +
+            "execution(protected eu.wdaqua.component..* *(..))) && " +
+            "!execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
+    public void componentAspect() {
+    }
+
+    /**
+     * This pointcut is defined for the process(QanaryMessage) method
+     */ // TODO: Later, check for QanaryPipelineComponent
+    @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
+    public void processExecution() {
+    }
+
     // JoinPoints //
 
     @Before(value = "anyQanaryAndPipelineExecution()")
     public void implementationStoreMethodExecutionInComponentBeforeForPipeline(JoinPoint joinPoint) {
-        if (!this.activeTracing) {
-            // TODO
-        }
         if (this.activeTracing) {
+            String docstring = extractDocstring(joinPoint);
             // Get caller and self-push to stack
             String caller = checkAndGetFromStack();
             String uuid = UUID.randomUUID().toString();
             this.callStack.push(uuid);
             // Get required data
-            String method = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
+            String methodName = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
             Object[] input = joinPoint.getArgs();
-
-            this.methodList.put(
-                    uuid,
-                    new MethodObject(caller, method, input));
+            MethodObject methodObject = new MethodObject(caller, methodName, input);
+            methodObject.setDocstring(docstring);
+            this.methodList.put(uuid, methodObject);
         }
     }
 
     @Before(value = "componentAspect()")
     public void implementationStoreMethodExecutionInComponentBeforeForComponent(JoinPoint joinPoint) {
         if (!isActiveTracing()) {
-            getLogger().debug("Logging method with not active tracing '{}'", joinPoint.getSignature().getName()); // TODO: Maybe, this can be generalized as one method with ...ForPipeline
+            // Checks if the current executed method is the HttpRequest containing the cross-component processId
             Object[] args = joinPoint.getArgs();
             setActiveTracing(checkForProcessIdAndSetup(args));
         }
         if (isActiveTracing()) {
-            getLogger().debug("Logging method with active tracing '{}'", joinPoint.getSignature().getName());
+            String docstring = extractDocstring(joinPoint);
+            getLogger().debug("Intercepted method '{}' before execution with aspect.", joinPoint.getSignature().getName());
             // Get caller and self-push to stack
             String caller = checkAndGetFromStack();
             String uuid = UUID.randomUUID().toString();
@@ -179,11 +207,10 @@ public class QanaryAspect {
             // Get required data
             String method = joinPoint.getSignature().getName();
             Object[] input = joinPoint.getArgs();
+            MethodObject methodObject = new MethodObject(caller, method, input);
+            methodObject.setDocstring(docstring);
 
-            getMethodList().put(
-                    uuid,
-                    new MethodObject(caller, method, input)
-            );
+            getMethodList().put(uuid, methodObject);
         }
     }
 
@@ -208,11 +235,11 @@ public class QanaryAspect {
         this.processGraph = qanaryMessage.getOutGraph();
         if (qanaryTripleStoreConnector == null) {
             QanaryUtils qanaryUtils = new QanaryUtils(qanaryMessage,
-                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(), 
-                    this.applicationName == null ? "QanaryPipeline" : applicationName));
+                    new QanaryTripleStoreConnectorQanaryInternal(qanaryMessage.getEndpoint(),
+                            this.applicationName == null ? "QanaryPipeline" : applicationName));
             qanaryTripleStoreConnector = qanaryUtils.getQanaryTripleStoreConnector();
         }
-        logger.info("Initialized triplestore and graph for pipeline: {}, {}", this.processGraph, this.qanaryTripleStoreConnector.getFullEndpointDescription());
+        logger.debug("Initialized triplestore and graph for pipeline: {}, {}", this.processGraph, this.qanaryTripleStoreConnector.getFullEndpointDescription());
     }
 
     @Before(value = "processExecution()")
@@ -236,7 +263,7 @@ public class QanaryAspect {
             method.setOutput(result);
             getMethodList().replace(currentMethodUuid, method);
             getCallStack().pop();
-            getLogger().debug("Logging method with {} completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
+            getLogger().debug("Logging method '{}' completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
             // Log all stack items
             if (getCallStack().isEmpty()) {
                 setActiveTracing(false);
@@ -273,39 +300,12 @@ public class QanaryAspect {
     }
 
     @AfterReturning(value = "startProcessForPipeline()", returning = "result")
-    public void endProcessForPipeline(JoinPoint joinPoint, Object result) {
+    public void endProcessForPipeline(JoinPoint joinPoint, Object result) throws Throwable {
         implementationStoreMethodExecutionInComponentAfter(joinPoint, result);
     }
 
 
     // Helper methods //
-
-    /**
-     * This pointcut is defined for the executeComponentList(..) method for the QanaryPipeline.
-     * It serves as a provider for the QanaryTripleStore and process graph
-     */
-    @Pointcut("execution(* eu.wdaqua.qanary.web.QanaryQuestionAnsweringController.executeComponentList(..))")
-    public void setTriplestoreAndGraphForPipeline() {
-    }
-
-    /**
-     * This pointcut is defined for any method of a QanaryComponent without touching the process(QanaryMethod) method
-     */
-    @Pointcut(value =
-            "(execution(* eu.wdaqua.qanary.component..* (..)) || " +
-                    "execution(* eu.wdaqua.component..* (..)) || " +
-                    "execution(private eu.wdaqua.qanary.component..* *(..)) ||" +
-                    "execution(protected eu.wdaqua.component..* *(..))) && " +
-                    "!execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
-    public void componentAspect() {
-    }
-
-    /**
-     * This pointcut is defined for the process(QanaryMessage) method
-     */ // TODO: Later, check for QanaryPipelineComponent
-    @Pointcut("execution(* process(eu.wdaqua.qanary.commons.QanaryMessage))")
-    public void processExecution() {
-    }
 
     /**
      * This method is used to check if the passed args of an JoinPoint contain a HttpServletRequest that provides a processId from a different component
@@ -403,6 +403,7 @@ public class QanaryAspect {
         query = query.replace("?a", "<" + methodUuid + ">");
         query = query.replace("?caller", "<" + method.getCaller() + ">");
         query = query.replace("?method", "'" + method.getMethod() + "'");
+        query = query.replace("?docstring", "'" + method.getDocstring() + "'");
         try {
             query = query.replace("?output", generateOutputDataRepresentation(method.getOutput()));
         } catch (NullPointerException e) {
@@ -447,9 +448,34 @@ public class QanaryAspect {
 
     private boolean isTestEnvironment() {
         return System.getProperty("spring.profiles.active", "").contains("test")
-            || Thread.currentThread().getStackTrace().length > 0 
-            && Arrays.stream(Thread.currentThread().getStackTrace())
+                || Thread.currentThread().getStackTrace().length > 0
+                && Arrays.stream(Thread.currentThread().getStackTrace())
                 .anyMatch(element -> element.getClassName().contains("Test"));
+    }
+
+    private Method getMethodFromJoinPoint(JoinPoint joinPoint) {
+        try {
+            String methodName = joinPoint.getSignature().getName();
+            Class<?>[] parameterTypes = ((org.aspectj.lang.reflect.MethodSignature) joinPoint.getSignature()).getParameterTypes();
+            Method method = joinPoint.getTarget().getClass().getMethod(methodName, parameterTypes);
+            return method;
+        } catch (NoSuchMethodException | NullPointerException e) {
+            return null;
+        }
+    }
+
+    private String extractDocstring(JoinPoint joinPoint) {
+        Method method = getMethodFromJoinPoint(joinPoint);
+        if (method != null) {
+            MethodJavadoc methodJavadoc = RuntimeJavadoc.getJavadoc(method);
+            if (methodJavadoc != null) {
+                logger.info("Docstring: {} for method '{}'", methodJavadoc.getComment().toString(), method.getName().toString());
+                if (methodJavadoc.getComment() != null) {
+                    return methodJavadoc.getComment().toString().replace("\n", " ").replace("'", "\"");
+                }
+            }
+        }
+        return "";
     }
 
 }

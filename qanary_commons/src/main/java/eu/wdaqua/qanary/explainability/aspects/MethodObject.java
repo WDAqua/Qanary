@@ -13,11 +13,20 @@ public class MethodObject {
     private Object output;
     private String annotatedBy;
     private boolean errorOccurred;
+    private String docstring;
 
     public MethodObject(String caller, String method, Object[] input) {
         this.caller = caller;
         this.method = method;
         this.input = input;
+    }
+
+    public String getDocstring() {
+        return docstring;
+    }
+
+    public void setDocstring(String docstring) {
+        this.docstring = docstring;
     }
 
     public boolean isErrorOccurred() {
