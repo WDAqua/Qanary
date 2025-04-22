@@ -22,7 +22,7 @@ import java.util.Objects;
 @ConditionalOnMissingBean(RestTemplateWithProcessId.class) // RestTemplateWithProcessId extends this RestTemplate
 public class RestTemplateWithCaching extends RestTemplate {
 
-    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, @Value("${rest.template.setting") String restTemplateSetting) {
+    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, @Value("${rest.template.setting}") String restTemplateSetting) {
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
