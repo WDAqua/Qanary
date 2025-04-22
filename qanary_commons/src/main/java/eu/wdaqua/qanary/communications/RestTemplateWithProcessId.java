@@ -19,7 +19,7 @@ import java.util.List;
 // A = Both, C = ProcessIdRestTemplate
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithProcessId(@Value("${rest.template.setting") String restTemplateSetting) {
+    public RestTemplateWithProcessId(@Value("${rest.template.setting}") String restTemplateSetting) {
         super(new CacheOfRestTemplateResponse(), restTemplateSetting);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
