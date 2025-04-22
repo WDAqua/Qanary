@@ -4,6 +4,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,10 +16,9 @@ import java.net.URISyntaxException;
  */
 public class QanaryTripleStoreProxy extends QanaryTripleStoreConnector {
 
-    @Autowired // Injects external connector
-    private QanaryTripleStoreConnector externalConnector;
-
+    private QanaryTripleStoreConnector externalConnector = new QanaryTripleStoreConnectorInMemory();
     private QanaryTripleStoreConnectorQanaryInternal internalConnector;
+
     private URI internEndpointGraph;
     private URI externalEndpointGraph;
 
@@ -31,6 +31,16 @@ public class QanaryTripleStoreProxy extends QanaryTripleStoreConnector {
      */
     public void setInternalConnector(URI endpoint, String applicationName) throws URISyntaxException {
         internalConnector = new QanaryTripleStoreConnectorQanaryInternal(endpoint, applicationName);
+    }
+
+    @Autowired(required = false)
+    @Qualifier("externalConnector")
+    // For future Spring versions the use of @Fallback is recommended. Then, the default assignment for
+    // the external connector is no longer necessary
+    // General problem: It injects its self as it is a instance of QanaryTripleStoreConnector as well.
+    public void setExternalConnector(QanaryTripleStoreConnector externalConnector) {
+        getLogger().info("Using {} triple store connector", externalConnector.getClass().getSimpleName());
+        this.externalConnector = externalConnector;
     }
 
     /**
