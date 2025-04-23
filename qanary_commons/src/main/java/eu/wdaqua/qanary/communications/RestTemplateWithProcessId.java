@@ -1,9 +1,6 @@
 package eu.wdaqua.qanary.communications;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -14,12 +11,10 @@ import java.util.List;
  * It implements an interceptor to provide cross-component logging by appending the processId that leads to the cross-component
  * call to the API-Request header.
  */
-@Service
-@ConditionalOnExpression("'${rest.template.setting}' == 'A' or '${rest.template.setting}' == 'C'")
 // A = Both, C = ProcessIdRestTemplate
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithProcessId(@Value("${rest.template.setting}") String restTemplateSetting) {
+    public RestTemplateWithProcessId(String restTemplateSetting) {
         super(new CacheOfRestTemplateResponse(), restTemplateSetting);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();

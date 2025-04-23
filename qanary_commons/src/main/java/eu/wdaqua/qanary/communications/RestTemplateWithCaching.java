@@ -1,9 +1,6 @@
 package eu.wdaqua.qanary.communications;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,16 +15,14 @@ import java.util.Objects;
  * see component CacheConfig for configuring the behavior of the cache
  */
 
-@Service
-@ConditionalOnMissingBean(RestTemplateWithProcessId.class) // RestTemplateWithProcessId extends this RestTemplate
 public class RestTemplateWithCaching extends RestTemplate {
 
-    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, @Value("${rest.template.setting}") String restTemplateSetting) {
+    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, String restTemplateSetting) {
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         } // A = Both, B = CacheRestTemplate
-        if (Objects.equals(restTemplateSetting, "A") || Objects.equals(restTemplateSetting, "B") || restTemplateSetting == null) { // Null for default component behavior
+        if (Objects.equals(restTemplateSetting, "A") || Objects.equals(restTemplateSetting, "B")) { // Don't add interceptor is "C" (ProcessId only) is selected
             interceptors.add(new RestTemplateCacheResponseInterceptor(myCacheResponse)); // TODO: Only on property
             this.setInterceptors(interceptors);
         } else {
