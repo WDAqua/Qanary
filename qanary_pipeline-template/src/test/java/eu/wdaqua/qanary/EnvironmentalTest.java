@@ -60,4 +60,15 @@ public class EnvironmentalTest {
                     );
                 });
     }
+
+    @Test
+    public void restTemplateSettingTestCaseNonExistent() {
+        contextRunner
+                .run(context -> {
+                    assertAll(
+                            () -> Assertions.assertThat(context).hasSingleBean(RestTemplateWithCaching.class)
+                    );
+                });
+    }
+
 }
