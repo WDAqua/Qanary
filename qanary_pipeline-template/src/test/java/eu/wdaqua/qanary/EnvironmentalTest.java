@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -67,6 +68,16 @@ public class EnvironmentalTest {
                 .run(context -> {
                     assertAll(
                             () -> Assertions.assertThat(context).hasSingleBean(RestTemplateWithCaching.class)
+                    );
+                });
+    }
+
+    @Test
+    public void restTemplateSettingTestCaseEmpty() {
+        contextRunner
+                .run(context -> {
+                    assertAll(
+                            () -> Assertions.assertThat(context).hasSingleBean(RestTemplate.class)
                     );
                 });
     }
