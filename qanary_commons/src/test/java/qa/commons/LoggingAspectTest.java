@@ -29,16 +29,22 @@ public class LoggingAspectTest {
     @BeforeEach
     public void setup() {
         this.qanaryAspect = new QanaryAspect();
-        // this.loggingAspectComponent.setQanaryTripleStoreConnector(mock(QanaryTripleStoreConnectorVirtuoso.class));
         QanaryAspect.setCallStack(new Stack<>());
+
+        // Use MethodSignature instead of basic Signature
         joinPoint = mock(JoinPoint.class);
-        signature = mock(Signature.class);
-        // Mock the Signature object to return sample values
+        signature = mock(org.aspectj.lang.reflect.MethodSignature.class);
+
         when(signature.getName()).thenReturn("sampleMethodName");
         when(signature.toShortString()).thenReturn("sampleMethodSignature");
-        // Set up the JoinPoint to return the mocked Signature and CodeSignature
+
+        when(((org.aspectj.lang.reflect.MethodSignature) signature).getParameterTypes()).thenReturn(new Class[0]);
+
         when(joinPoint.getSignature()).thenReturn(signature);
         when(joinPoint.getArgs()).thenReturn(new Object[2]);
+
+        Object mockTarget = mock(Object.class);
+        when(joinPoint.getTarget()).thenReturn(mockTarget);
     }
 
     /*
