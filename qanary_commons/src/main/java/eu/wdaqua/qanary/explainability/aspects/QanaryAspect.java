@@ -26,6 +26,7 @@ public class QanaryAspect {
     private static Stack<String> callStack = new Stack<>();
     private final Logger logger = LoggerFactory.getLogger(QanaryAspect.class);
     private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
+    private final String QANARY_PIPELINE_NAME = "QanaryPipeline";
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
     private URI processGraph = null;
     private Map<String, MethodObject> methodList = new HashMap<>();
@@ -54,7 +55,7 @@ public class QanaryAspect {
     }
 
     public String getApplicationNameForQuery() {
-        return getApplicationName() == null ? "QanaryPipeline" : getApplicationName();
+        return getApplicationName() == null ? QANARY_PIPELINE_NAME : getApplicationName();
     }
 
     public String getCrossComponentProcessId() {
