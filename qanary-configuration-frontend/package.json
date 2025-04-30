@@ -35,6 +35,6 @@
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
-    "axios": "^0.28.0"
+    "axios": "^0.30.0"
   }
 }
