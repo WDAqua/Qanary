@@ -7,6 +7,7 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnectorQanaryInternal;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.explainability.LoggingConfigurator;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -396,6 +397,8 @@ public class QanaryAspect {
      */
     public void logMethodData(String methodUuid, MethodObject method)
             throws IOException, SparqlQueryFailed, NullPointerException {
+        if (!LoggingConfigurator.isMethod_logging())
+            return;
         getLogger().debug("Logging method {}", method.getMethod());
         String query = QanaryTripleStoreConnector.readFileFromResources(getLOGGING_QUERY());
         query = query.replace("?graph", "<" + getProcessGraph().toASCIIString() + ">");

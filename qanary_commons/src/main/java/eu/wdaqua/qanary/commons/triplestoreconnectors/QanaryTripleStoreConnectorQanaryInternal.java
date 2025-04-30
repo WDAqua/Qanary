@@ -1,6 +1,7 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
+import eu.wdaqua.qanary.explainability.LoggingConfigurator;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -56,6 +57,8 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
     }
 
     private void logData(String sparql) {
+        if (!LoggingConfigurator.isQuery_logging())
+            return;
         QuerySolutionMap querySolutionMap = new QuerySolutionMap();
         Query query = QueryFactory.create(sparql);
         querySolutionMap.add("graph", ResourceFactory.createResource(query.getGraphURIs().get(0)));
