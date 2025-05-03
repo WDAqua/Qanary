@@ -21,8 +21,8 @@ public class RestTemplateWithCaching extends RestTemplate {
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
-        } // A = Both, B = CacheRestTemplate
-        if (Objects.equals(restTemplateSetting, "A") || Objects.equals(restTemplateSetting, "B")) { // Don't add interceptor is "C" (ProcessId only) is selected
+        } // Add caching interceptor only if caching is wanted, otherwise this class is only used to extend RestTemplateWithProcessId
+        if (Objects.equals(restTemplateSetting, "both") || Objects.equals(restTemplateSetting, "caching")) {
             interceptors.add(new RestTemplateCacheResponseInterceptor(myCacheResponse)); // TODO: Only on property
             this.setInterceptors(interceptors);
         } else {
