@@ -5,6 +5,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  *         </pre>
  */
 @ConditionalOnProperty(name = {"virtuoso.url", "virtuoso.username", "virtuoso.password"}, matchIfMissing = false)
+@Qualifier("externalConnector")
 @Component
 public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnector {
 

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
-    <version>3.11.2</version>
+    <version>3.12.0</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,7 +14,7 @@
     <properties>
         <java.version>11</java.version>
         <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
-        <qanary.version>[3.19.1,4.0.0)</qanary.version>
+        <qanary.version>[3.20.0,4.0.0)</qanary.version>
         <qanary.components.version>[3.12.0,4.0.0)</qanary.components.version>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
         <docker.image.prefix>qanary</docker.image.prefix>
@@ -366,6 +366,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.github.therapi</groupId>
+                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                            <version>0.15.0</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
@@ -467,8 +474,19 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                        <goals>
+                            <goal>test-compile</goal>
                         </goals>
                     </execution>
                 </executions>

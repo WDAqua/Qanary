@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>3.13.0</version>
+    <version>3.14.0</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,7 +13,7 @@
     </parent>
     <properties>
         <java.version>11</java.version>
-	<spring-boot-admin.version>2.7.16</spring-boot-admin.version>
+        <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
         <jena.version>4.10.0</jena.version>
     </properties>
 
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.commons</artifactId>
-            <version>[3.17.0,4.0.0)</version>
+            <version>[3.20.0,4.0.0)</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -132,6 +132,20 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+        </dependency>
+        <!-- Annotation processor -->
+        <dependency>
+            <groupId>com.github.therapi</groupId>
+            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+            <version>0.13.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Runtime library -->
+        <dependency>
+            <groupId>com.github.therapi</groupId>
+            <artifactId>therapi-runtime-javadoc</artifactId>
+            <version>0.13.0</version>
         </dependency>
     </dependencies>
 
@@ -324,6 +338,20 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.github.therapi</groupId>
+                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                            <version>0.15.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
         </plugins>
     </build>
