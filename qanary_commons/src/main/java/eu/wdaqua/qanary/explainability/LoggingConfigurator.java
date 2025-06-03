@@ -3,6 +3,7 @@ package eu.wdaqua.qanary.explainability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,7 @@ public class LoggingConfigurator {
     private static boolean method_logging;
 
     private static boolean query_logging;
-    private Logger logger = LoggerFactory.getLogger(LoggingConfigurator.class);
+    private final Logger logger = LoggerFactory.getLogger(LoggingConfigurator.class);
 
     public LoggingConfigurator() {
         logger.info("LoggingConfigurator initialized");
@@ -49,6 +50,7 @@ public class LoggingConfigurator {
         return new ResponseEntity<>(getCurrentLoggingInformation(), HttpStatus.OK);
     }
 
+    @Profile("development")
     @PostMapping("/methodlogging")
     public ResponseEntity<String> changeMethodLogging() {
         LoggingConfigurator.method_logging = !method_logging;
@@ -56,6 +58,7 @@ public class LoggingConfigurator {
         return new ResponseEntity<>(getCurrentLoggingInformation(), HttpStatus.OK);
     }
 
+    @Profile("development")
     @PostMapping("/querylogging")
     public ResponseEntity<String> changeQueryLogging() {
         LoggingConfigurator.query_logging = !query_logging;
