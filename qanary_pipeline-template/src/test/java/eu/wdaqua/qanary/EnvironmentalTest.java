@@ -10,6 +10,9 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+/**
+ * This test class is intended to test the existence or lack of property-depending beans
+ */
 @SpringBootTest
 public class EnvironmentalTest {
 
@@ -27,22 +30,29 @@ public class EnvironmentalTest {
             .withPropertyValues("configuration.access=web")
             .withPropertyValues("springdoc.version=1.0.0");
 
+    /**
+     * Test case: Setting 'both' should lead to existence of RestTemplateWithCaching and RestTemplateWithProcessId
+     */
     @Test
     public void restTemplateSettingTestCaseA() {
         contextRunner
-                .withPropertyValues("rest.template.setting=A")
+                .withPropertyValues("rest.template.setting=both")
                 .run(context -> {
                     assertAll(
-                            () -> Assertions.assertThat(context).hasSingleBean(RestTemplateWithCaching.class)
+                            () -> Assertions.assertThat(context)
+                                    .hasSingleBean(RestTemplateWithCaching.class)
                                     .hasSingleBean(RestTemplateWithProcessId.class)
                     );
                 });
     }
 
+    /**
+     * Test case: Setting 'caching' should lead to existence of RestTemplateWithCaching (only)
+     */
     @Test
     public void restTemplateSettingTestCaseB() {
         contextRunner
-                .withPropertyValues("rest.template.setting=B")
+                .withPropertyValues("rest.template.setting=caching")
                 .run(context -> {
                     assertAll(
                             () -> Assertions.assertThat(context).hasSingleBean(RestTemplateWithCaching.class)
@@ -51,10 +61,13 @@ public class EnvironmentalTest {
                 });
     }
 
+    /**
+     * Test case: Setting 'logging' should lead to existence of RestTemplateWithProcessId (without caching functionality)
+     */
     @Test
     public void restTemplateSettingTestCaseC() {
         contextRunner
-                .withPropertyValues("rest.template.setting=C")
+                .withPropertyValues("rest.template.setting=logging")
                 .run(context -> {
                     assertAll(
                             () -> Assertions.assertThat(context).hasSingleBean(RestTemplateWithProcessId.class)
@@ -62,6 +75,10 @@ public class EnvironmentalTest {
                 });
     }
 
+    /**
+     * Test case: Setting non-existent property should lead to RestTemplateWithCaching
+     * All Qanary components will contain caching as before without adding the property to each.
+     */
     @Test
     public void restTemplateSettingTestCaseNonExistent() {
         contextRunner
@@ -72,6 +89,10 @@ public class EnvironmentalTest {
                 });
     }
 
+    /**
+     * Test case: Setting '' (empty) should lead to existence of RestTemplate
+     * Handles a non-defined state
+     */
     @Test
     public void restTemplateSettingTestCaseEmpty() {
         contextRunner

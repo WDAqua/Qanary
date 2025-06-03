@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qald.evaluator</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>2.5.1</version>
+            <version>2.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

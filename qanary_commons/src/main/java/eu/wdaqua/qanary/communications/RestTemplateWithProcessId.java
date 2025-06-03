@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * By default, this RestTemplate extension is disabled and only activated when its property is set to 'true'
+ * This RestTemplate extends the RestTemplateWithCaching to provide either logging, caching or both via a RestTemplate.
  * It implements an interceptor to provide cross-component logging by appending the processId that leads to the cross-component
  * call to the API-Request header.
+ * It can be used by setting the rest.template.setting to either both (caching and logging) or logging.
+ * The creation of the correct bean is controlled by the RestTemplateConfiguration
  */
-// A = Both, C = ProcessIdRestTemplate
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
     public RestTemplateWithProcessId(String restTemplateSetting) {

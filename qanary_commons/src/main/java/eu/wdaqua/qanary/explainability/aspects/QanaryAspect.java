@@ -27,6 +27,7 @@ public class QanaryAspect {
     private static Stack<String> callStack = new Stack<>();
     private final Logger logger = LoggerFactory.getLogger(QanaryAspect.class);
     private final String LOGGING_QUERY = "/queries/logging/insert_method_data.rq";
+    private final String QANARY_PIPELINE_NAME = "QanaryPipeline";
     private QanaryTripleStoreConnector qanaryTripleStoreConnector;
     private URI processGraph = null;
     private Map<String, MethodObject> methodList = new HashMap<>();
@@ -55,7 +56,7 @@ public class QanaryAspect {
     }
 
     public String getApplicationNameForQuery() {
-        return getApplicationName() == null ? "QanaryPipeline" : getApplicationName();
+        return getApplicationName() == null ? QANARY_PIPELINE_NAME : getApplicationName();
     }
 
     public String getCrossComponentProcessId() {
@@ -174,19 +175,8 @@ public class QanaryAspect {
 
     @Before(value = "anyQanaryAndPipelineExecution()")
     public void implementationStoreMethodExecutionInComponentBeforeForPipeline(JoinPoint joinPoint) {
-        if (this.activeTracing) {
-            String docstring = extractDocstring(joinPoint);
-            // Get caller and self-push to stack
-            String caller = checkAndGetFromStack();
-            String uuid = UUID.randomUUID().toString();
-            this.callStack.push(uuid);
-            // Get required data
-            String methodName = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
-            Object[] input = joinPoint.getArgs();
-            MethodObject methodObject = new MethodObject(caller, methodName, input);
-            methodObject.setDocstring(docstring);
-            this.methodList.put(uuid, methodObject);
-        }
+        if (this.activeTracing)
+            addMethodFromJoinPointToList(joinPoint);
     }
 
     @Before(value = "componentAspect()")
@@ -197,21 +187,8 @@ public class QanaryAspect {
             setActiveTracing(checkForProcessIdAndSetup(args));
         }
         if (isActiveTracing()) {
-            String docstring = extractDocstring(joinPoint);
             getLogger().debug("Intercepted method '{}' before execution with aspect.", joinPoint.getSignature().getName());
-            // Get caller and self-push to stack
-            String caller = checkAndGetFromStack();
-            String uuid = UUID.randomUUID().toString();
-            getCallStack().push(uuid);
-            getLogger().debug("UUID: {}", uuid);
-
-            // Get required data
-            String method = joinPoint.getSignature().getName();
-            Object[] input = joinPoint.getArgs();
-            MethodObject methodObject = new MethodObject(caller, method, input);
-            methodObject.setDocstring(docstring);
-
-            getMethodList().put(uuid, methodObject);
+            addMethodFromJoinPointToList(joinPoint);
         }
     }
 
@@ -259,40 +236,33 @@ public class QanaryAspect {
     @AfterReturning(value = "componentAspect() || anyQanaryAndPipelineExecution() || processExecution()", returning = "result")
     public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
         if (isActiveTracing()) {
-            String currentMethodUuid = getCallStack().peek();
-            MethodObject method = getMethodList().get(currentMethodUuid);
-            method.setOutput(result);
-            getMethodList().replace(currentMethodUuid, method);
-            getCallStack().pop();
+            updateMethodWithReturnedValue(result, false);
             getLogger().debug("Logging method '{}' completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
             // Log all stack items
-            if (getCallStack().isEmpty()) {
-                setActiveTracing(false);
-                logMethods(getMethodList());
-                setProcessGraph(null);
-                getMethodList().clear();
-            }
+            if (getCallStack().isEmpty())
+                reset();
         }
     }
 
     @AfterThrowing(value = "componentAspect()")
     public void implementationStoreMethodExecutionInComponentThrowing(JoinPoint joinPoint) {
         if (isActiveTracing()) {
-            String currentMethodUuid = getCallStack().peek();
-            MethodObject method = getMethodList().get(currentMethodUuid);
-            method.setOutput(null);
-            method.setErrorOccurred(true); // TODO: Handle occurred error in logged data, e.g. by return exception message
-            getMethodList().replace(currentMethodUuid, method);
-            getCallStack().pop();
+            updateMethodWithReturnedValue(null, true);
             getLogger().debug("Logging method with {} completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
             // Log all stack items
-            if (getCallStack().isEmpty()) {
-                setActiveTracing(false);
-                logMethods(getMethodList());
-                setProcessGraph(null);
-                getMethodList().clear();
-            }
+            if (getCallStack().isEmpty())
+                reset();
         }
+    }
+
+    private MethodObject updateMethodWithReturnedValue(Object result, boolean errorOccured) {
+        String currentMethodUuid = getCallStack().peek();
+        MethodObject method = getMethodList().get(currentMethodUuid);
+        method.setOutput(result);
+        method.setErrorOccurred(errorOccured);
+        getMethodList().replace(currentMethodUuid, method);
+        getCallStack().pop();
+        return method;
     }
 
     @AfterReturning(value = "applicationNamePointcut()", returning = "result")
@@ -307,6 +277,35 @@ public class QanaryAspect {
 
 
     // Helper methods //
+
+    /**
+     * Starts the logging of all stored methods and resets all values for a next 'run'.
+     */
+    private void reset() {
+        setActiveTracing(false);
+        logMethods(getMethodList());
+        setProcessGraph(null);
+        getMethodList().clear();
+    }
+
+    /**
+     * Extracts all relevant values from the JoinPoint, adds the current method to the stack and pushes the method to the method list.
+     *
+     * @param joinPoint
+     */
+    private void addMethodFromJoinPointToList(JoinPoint joinPoint) {
+        String docstring = extractDocstring(joinPoint);
+        String caller = checkAndGetFromStack();
+        String uuid = UUID.randomUUID().toString();
+        getCallStack().push(uuid);
+        getLogger().debug("Pushed UUID: {}", uuid);
+
+        String methodName = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
+        Object[] input = joinPoint.getArgs();
+        MethodObject methodObject = new MethodObject(caller, methodName, input);
+        methodObject.setDocstring(docstring);
+        getMethodList().put(uuid, methodObject);
+    }
 
     /**
      * This method is used to check if the passed args of an JoinPoint contain a HttpServletRequest that provides a processId from a different component
