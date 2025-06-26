@@ -299,8 +299,10 @@ public class QanaryAspect {
         getCallStack().push(uuid);
         getLogger().debug("Pushed UUID: {}", uuid);
 
+        String fqn = joinPoint.toLongString();
         String methodName = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
         Object[] input = joinPoint.getArgs();
+        // TODO: Convert to list of string, get fqn,
         MethodObject methodObject = new MethodObject(caller, methodName, input);
         methodObject.setDocstring(docstring);
         getMethodList().put(uuid, methodObject);
@@ -337,6 +339,26 @@ public class QanaryAspect {
     }
 
     /**
+     * Helper method to escape strings for SPARQL queries
+     * 
+     * @param input The string to escape
+     * @return A properly escaped string for SPARQL
+     */
+    private String escapeSparqlString(String input) {
+        if (input == null) {
+            return "null";
+        }
+        
+        return input
+                .replace("\\", "\\\\")  // Escape backslashes first
+                .replace("\n", " ")     // Replace newlines with spaces
+                .replace("\r", " ")     // Replace carriage returns
+                .replace("\t", " ")     // Replace tabs with spaces
+                .replace("\"", "\\\"")  // Escape double quotes
+                .replace("'", "\\'");   // Escape single quotes
+    }
+
+    /**
      * Creates SPARQL-conform representation for the output data
      *
      * @param outputData Object of returned object
@@ -345,11 +367,16 @@ public class QanaryAspect {
     public String generateOutputDataRepresentation(Object outputData) {
         if (outputData == null)
             return "[]";
-        return "[ rdf:type \"" +
-                ResourceFactory.createPlainLiteral(outputData.getClass().toString()) +
-                "\" ; rdf:value \""
-                + ResourceFactory.createPlainLiteral(outputData.toString().replace("\n", " ").replace("\\", "'")) +
-                "\"]";
+        
+        String className = escapeSparqlString(outputData.getClass().toString());
+        String outputValue = "";
+        try {
+            outputValue = escapeSparqlString(outputData.toString());
+        } catch (Exception e) {
+            outputValue = "Error getting string representation";
+        }
+        
+        return "[ rdf:type \"" + className + "\" ; rdf:value \"" + outputValue + "\"]";
     }
 
     /**
@@ -360,20 +387,17 @@ public class QanaryAspect {
      */
     public String generateInputDataRepresentation(Object[] inputData) {
         String representation = "(";
-        if (inputData.length == 0 || inputData == null)
+        if (inputData == null || inputData.length == 0)
             return "()";
+            
         for (int i = 0; i < inputData.length; i++) {
             Object var = inputData[i];
             String type;
             String value;
             try {
-                type = "\"" + var.getClass() + "\"";
-                value = "\"" + (var.toString().isEmpty()
-                        ? "null\""
-                        : (var.toString()
-                        .replace("\n", " ")
-                        .replace("\"", "'")
-                        + "\""));
+                type = "\"" + escapeSparqlString(var.getClass().toString()) + "\"";
+                String strValue = var.toString();
+                value = "\"" + (strValue.isEmpty() ? "null" : escapeSparqlString(strValue)) + "\"";
             } catch (NullPointerException e) {
                 type = "\"null\"";
                 value = "\"null\"";
