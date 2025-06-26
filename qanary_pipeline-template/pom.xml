@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
-    <version>3.12.0</version>
+    <version>3.12.1</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -241,6 +241,11 @@
             <version>${qanary.components.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wseresearch</groupId>
+            <artifactId>source-code-processor</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <!-- START - Setup for deployment to maven repository -->
@@ -373,6 +378,22 @@
                             <version>0.15.0</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.wseresearch</groupId>
+                            <artifactId>source-code-processor</artifactId>
+                            <version>0.0.1</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
                 </configuration>
             </plugin>
 
