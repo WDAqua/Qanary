@@ -170,18 +170,6 @@
 	<description>Qanary component template package</description>
 	<url>https://github.com/WDAqua/Qanary/</url>
 
-	<!-- Set up distribution management (for maven deploy plugin) -->
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-
 	<!-- Source-Control-Management information (SCM) -->
 	<scm>
 		<connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
@@ -220,17 +208,15 @@
 					<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.13</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
 
 			<!-- Signing the artifact -->
 			<plugin>
