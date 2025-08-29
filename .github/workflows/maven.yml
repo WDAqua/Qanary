@@ -41,7 +41,7 @@ jobs:
           echo "No artifacts to be released."
         else
           echo "Releasing artifacts: $ARTIFACTS_TO_BE_RELEASED"
-          mvn clean deploy -Dgpg.keyname="$MAVEN_GPG_KEYNAME" -pl "$ARTIFACTS_TO_BE_RELEASED"
+          mvn clean deploy -Dcentral.publish=true -Dgpg.keyname="$MAVEN_GPG_KEYNAME" -pl "$ARTIFACTS_TO_BE_RELEASED"
         fi
       env:
         MAVEN_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
