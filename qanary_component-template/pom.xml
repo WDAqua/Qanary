@@ -12,7 +12,7 @@
         <version>2.6.15</version>
     </parent>
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
         <jena.version>4.10.0</jena.version>
     </properties>
