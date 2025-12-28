@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.qanarycomponent-parent</artifactId>
     <version>0.4.0</version>
     <packaging>pom</packaging>
-	<parent>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.12</version>
-		<relativePath/>
-	</parent>
-	<properties>
-		<java.version>17</java.version>
-		<spring-boot-admin.version>2.7.12</spring-boot-admin.version>
-		<qanary.component.version>[3.14.0,4.0.0)</qanary.component.version>
-		<qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
-		<junit-jupiter.version>5.8.2</junit-jupiter.version>
-		<springdoc.version>1.7.0</springdoc.version>
-		<json-path.version>2.9.0</json-path.version>
-	</properties>
+    <parent>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+        <relativePath />
+    </parent>
+    <properties>
+        <java.version>21</java.version>
+        <spring-boot-admin.version>2.7.12</spring-boot-admin.version>
+        <qanary.component.version>[3.14.0,4.0.0)</qanary.component.version>
+        <qanary.commons.version>[3.11.0,4.0.0)</qanary.commons.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <springdoc.version>1.7.0</springdoc.version>
+        <json-path.version>2.9.0</json-path.version>
+    </properties>
 
     <!-- common dependencies that are implemented by all components -->
 
@@ -163,51 +163,51 @@
         </dependencies>
     </dependencyManagement>
 
-	<!-- START - Setup for deployment to maven repository -->
+    <!-- START - Setup for deployment to maven repository -->
 
-	<!-- Project name, Description, URL; inherited by default -->
-	<name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
-	<description>Qanary component template package</description>
-	<url>https://github.com/WDAqua/Qanary/</url>
+    <!-- Project name, Description, URL; inherited by default -->
+    <name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
+    <description>Qanary component template package</description>
+    <url>https://github.com/WDAqua/Qanary/</url>
 
-	<!-- Source-Control-Management information (SCM) -->
-	<scm>
-		<connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
-		<developerConnection>scm:git:ssh://github.com/WDAqua/Qanary.git</developerConnection>
-		<url>https://github.com/WDAqua/Qanary</url>
-	</scm>
+    <!-- Source-Control-Management information (SCM) -->
+    <scm>
+        <connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
+        <developerConnection>scm:git:ssh://github.com/WDAqua/Qanary.git</developerConnection>
+        <url>https://github.com/WDAqua/Qanary</url>
+    </scm>
 
-	<!-- Developer information, inherited by default -->
-	<developers>
-		<developer>
-			<name>Andreas Both</name>
-			<email>andreas.both@htwk-leipzig.de</email>
-			<organization>WDAqua</organization>
-			<organizationUrl>http://wdaqua.eu/</organizationUrl>
-		</developer>
-	</developers>
+    <!-- Developer information, inherited by default -->
+    <developers>
+        <developer>
+            <name>Andreas Both</name>
+            <email>andreas.both@htwk-leipzig.de</email>
+            <organization>WDAqua</organization>
+            <organizationUrl>http://wdaqua.eu/</organizationUrl>
+        </developer>
+    </developers>
 
-	<!-- Licence information, inherited by default -->
-	<licenses>
-		<license>
-			<name>The Apache License, Version 2.0</name> <!-- Example for Apache2 Licence -->
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> <!-- Example for Apache2 Licence -->
-		</license>
-	</licenses>
+    <!-- Licence information, inherited by default -->
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name> <!-- Example for Apache2 Licence -->
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url> <!-- Example for Apache2 Licence -->
+        </license>
+    </licenses>
 
-	<!-- -->
-	<!-- END - Setup for deployment to maven repository -->
+    <!-- -->
+    <!-- END - Setup for deployment to maven repository -->
 
-	<build>
-		<plugins>
-			<!-- Deployment/Release related plugins -->
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.1</version>
-				<configuration>
-					<tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-				</configuration>
-			</plugin>
+    <build>
+        <plugins>
+            <!-- Deployment/Release related plugins -->
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -218,53 +218,53 @@
                 </configuration>
             </plugin>
 
-			<!-- Signing the artifact -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<gpgArguments>
-						<arg>--pinentry-mode</arg>
-						<arg>loopback</arg>
-					</gpgArguments>
-				</configuration>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+            <!-- Signing the artifact -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-			<!-- Required for maven repository deployment -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+            <!-- Required for maven repository deployment -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
@@ -274,11 +274,11 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <weaveDependencies>
-                    <weaveDependency>
-                        <groupId>eu.wdaqua.qanary</groupId>
-                        <artifactId>qa.commons</artifactId>
-                    </weaveDependency>
-                </weaveDependencies>
+                        <weaveDependency>
+                            <groupId>eu.wdaqua.qanary</groupId>
+                            <artifactId>qa.commons</artifactId>
+                        </weaveDependency>
+                    </weaveDependencies>
                     <verbose>true</verbose>
                     <showWeaveInfo>true</showWeaveInfo>
                 </configuration>
@@ -290,7 +290,7 @@
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
-	</build>
+        </plugins>
+    </build>
 
 </project>
