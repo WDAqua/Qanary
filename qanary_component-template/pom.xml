@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>3.14.0</version>
+    <version>3.15.0</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.6.15</version>
     </parent>
     <properties>
-        <java.version>11</java.version>
+        <java.version>25</java.version>
         <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
         <jena.version>4.10.0</jena.version>
     </properties>
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.commons</artifactId>
-            <version>[3.20.0,4.0.0)</version>
+            <version>[3.21.0,4.0.0)</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -155,18 +155,6 @@
     <name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
     <description>Qanary component template package</description>
     <url>https://github.com/WDAqua/Qanary/</url>
-
-    <!-- Set up distribution management (for maven deploy plugin) -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <!-- Source-Control-Management information (SCM) -->
     <scm>
@@ -235,23 +223,14 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- Deployment/Release related plugins -->
+
             <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <publishingServerId>central</publishingServerId>
                 </configuration>
             </plugin>
 

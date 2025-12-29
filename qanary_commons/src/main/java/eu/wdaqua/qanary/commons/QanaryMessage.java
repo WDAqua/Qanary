@@ -28,8 +28,8 @@ public class QanaryMessage {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryMessage.class);
 
 	private Map<URI, URI> values;
-	
-	private final String valuesattribute = "values"; 
+
+	private final String valuesattribute = "values";
 
 	/**
 	 * dummy constructor needed for communication
@@ -120,5 +120,4 @@ public class QanaryMessage {
 	public Map<URI, URI> getValues() {
 		return this.values;
 	}
-
 }
