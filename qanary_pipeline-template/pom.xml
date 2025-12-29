@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>qa.pipeline</artifactId>
     <groupId>eu.wdaqua.qanary</groupId>
@@ -12,10 +12,10 @@
         <version>2.7.8</version>
     </parent>
     <properties>
-        <java.version>11</java.version>
+        <java.version>21</java.version>
         <spring-boot-admin.version>2.7.16</spring-boot-admin.version>
-        <qanary.version>[3.19.1,4.0.0)</qanary.version>
-        <qanary.components.version>[3.12.0,4.0.0)</qanary.components.version>
+        <qanary.version>[3.21.0,4.0.0)</qanary.version>
+        <qanary.components.version>[3.15.0,4.0.0)</qanary.components.version>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
         <docker.image.prefix>qanary</docker.image.prefix>
         <docker.image.name>qanary-pipeline</docker.image.name>
@@ -24,6 +24,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <springdoc.version>1.7.0</springdoc.version>
         <jena.version>4.10.0</jena.version>
+        <bytebuddy.version>1.17.0</bytebuddy.version>
     </properties>
     <dependencies>
         <dependency>
@@ -241,6 +242,17 @@
             <version>${qanary.components.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${bytebuddy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${bytebuddy.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- START - Setup for deployment to maven repository -->
@@ -249,18 +261,6 @@
     <name>${project.groupId}:${project.artifactId}</name> <!--  Assembling name from project and artifact id-->
     <description>Qanary pipeline template package</description>
     <url>https://github.com/WDAqua/Qanary/</url>
-
-    <!-- Set up distribution management (for maven deploy plugin) -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <!-- Source-Control-Management information (SCM) -->
     <scm>
@@ -321,7 +321,8 @@
             </plugin>
             <!-- https://github.com/fabric8io/docker-maven-plugin -->
             <!-- build Docker image (only for local use): mvn clean install docker:build -->
-            <!-- build Docker image and push (for publishing): mvn clean install docker:build docker:push -->
+            <!-- build Docker image and push (for publishing): mvn clean install docker:build
+            docker:push -->
             <!-- for pushing to docker hub you need to be signed in -->
             <plugin>
                 <groupId>io.fabric8</groupId>
@@ -351,8 +352,10 @@
                             </build>
                         </image>
                     </images>
-                    <!-- If you do not want to log in to Docker Hub via the console, you can also use your username and password -->
-                    <!-- for this it is necessary to use this snipped and to set the env DOCKER_USERNAME and DOCKER_PASSWORD -->
+                    <!-- If you do not want to log in to Docker Hub via the console, you can also
+                    use your username and password -->
+                    <!-- for this it is necessary to use this snipped and to set the env
+                    DOCKER_USERNAME and DOCKER_PASSWORD -->
                     <!--                    <authConfig>-->
                     <!--                        <push>-->
                     <!--                            <username>${env.DOCKER_USERNAME}</username>-->
@@ -366,26 +369,23 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.github.therapi</groupId>
+                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                            <version>0.15.0</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
-            <!-- Deployment/Release related plugins -->
             <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <publishingServerId>central</publishingServerId>
                 </configuration>
             </plugin>
 
@@ -467,8 +467,19 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                        <goals>
+                            <goal>test-compile</goal>
                         </goals>
                     </execution>
                 </executions>

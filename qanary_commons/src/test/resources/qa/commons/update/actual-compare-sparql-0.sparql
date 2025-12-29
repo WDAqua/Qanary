@@ -1,0 +1,24 @@
+PREFIX  qa:   <http://www.wdaqua.eu/qa#>
+PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>
+PREFIX  oa:   <http://www.w3.org/ns/openannotation/core/>
+PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX  dbr:  <http://dbpedia.org/resource/>
+PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+INSERT {
+  GRAPH <urn:qanary#outGraph> {
+    ?newAnnotation rdf:type qa:AnnotationOfAnswerJson .
+    ?newAnnotation oa:hasTarget <urn:qanary#question> .
+    ?newAnnotation oa:hasBody ?answer .
+    ?newAnnotation oa:annotatedAt ?time .
+    ?newAnnotation oa:annotatedBy <urn:qanary:ChatGPTWrapperMockedTest> .
+    ?answer rdf:type qa:AnswerJson .
+    ?answer rdf:value "{\"choices\":[{\"text\":\"\\n\\nThis is indeed a test\",\"index\":0,\"finish_reason\":\"length\"}]}" .
+    qa:AnswerJson rdfs:subClassOf qa:Answer .
+  }
+}
+WHERE
+  { BIND(IRI(concat("urn:qanary:annotation:answer:json:", str(rand()))) AS ?newAnnotation)
+    BIND(IRI(concat("urn:qanary:answer:", str(rand()))) AS ?answer)
+    BIND(now() AS ?time)
+  }

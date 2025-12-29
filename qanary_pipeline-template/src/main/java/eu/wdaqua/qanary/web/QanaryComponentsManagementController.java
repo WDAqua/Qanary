@@ -5,7 +5,6 @@ import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
-import eu.wdaqua.qanary.communications.RestTemplateWithCaching;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import io.swagger.v3.oas.annotations.Operation;
 import net.sf.json.JSONObject;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,16 +40,16 @@ public class QanaryComponentsManagementController {
     private final static String QUERYGETBASETRIPLESOFCOMPONENTINGRAPH = "/queries/select_base_triples_of_component_annotations_in_a_graph.rq";
     private final QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier;
     private final String rdfservicedescription = "component-description"; // TODO: remove duplicate to service name
-    private final RestTemplateWithCaching myRestTemplateWithCaching;
+    private final RestTemplate restTemplate;
     private final QanaryTripleStoreConnector myQanaryTripleStoreConnector;
 
     public QanaryComponentsManagementController(
             QanaryComponentRegistrationChangeNotifier myQanaryComponentRegistrationChangeNotifier,
-            RestTemplateWithCaching myRestTemplateWithCaching,
+            RestTemplate restTemplate,
             QanaryTripleStoreProxy myQanaryTripleStoreConnector
     ) {
         this.myQanaryComponentRegistrationChangeNotifier = myQanaryComponentRegistrationChangeNotifier;
-        this.myRestTemplateWithCaching = myRestTemplateWithCaching;
+        this.restTemplate = restTemplate;
         this.myQanaryTripleStoreConnector = myQanaryTripleStoreConnector;
 
         QanaryTripleStoreConnector.guardNonEmptyFileFromResources(QUERYGETBASETRIPLESOFCOMPONENTINGRAPH);
@@ -107,7 +107,7 @@ public class QanaryComponentsManagementController {
             headers.set("Accept", format);
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
             // TODO: might be configured for caching
-            ResponseEntity<String> serviceResponse = myRestTemplateWithCaching.exchange(endpoint, HttpMethod.GET,
+            ResponseEntity<String> serviceResponse = restTemplate.exchange(endpoint, HttpMethod.GET,
                     requestEntity, String.class);
             logger.info("response body: ", serviceResponse.getBody());
             return serviceResponse;

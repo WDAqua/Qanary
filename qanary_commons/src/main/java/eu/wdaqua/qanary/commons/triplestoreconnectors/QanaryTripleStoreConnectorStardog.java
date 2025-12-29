@@ -6,6 +6,7 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
  *         </pre>
  */
 @ConditionalOnProperty(name = {"stardog.url", "stardog.username", "stardog.password"}, matchIfMissing = false)
+@Qualifier("externalConnector")
 @Component
 public class QanaryTripleStoreConnectorStardog extends QanaryTripleStoreConnector {
 

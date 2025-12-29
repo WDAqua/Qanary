@@ -16,6 +16,7 @@ GRAPH ?graph {
 #            prov:wasGeneratedBy ?explanation_generator ;
 #            x:score ?explanationScore
 #        ] ;
+        x:docstring ?docstring ;
         x:input ?input ;
         x:output ?output ;
         oa:annotatedAt ?time ;
