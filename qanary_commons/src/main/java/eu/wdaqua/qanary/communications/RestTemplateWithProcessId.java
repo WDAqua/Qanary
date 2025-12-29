@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
-    public RestTemplateWithProcessId(String restTemplateSetting) {
-        super(new CacheOfRestTemplateResponse(), restTemplateSetting);
+    public RestTemplateWithProcessId(String restTemplateSetting, CacheOfRestTemplateResponse cacheOfRestTemplateResponse) {
+        super(cacheOfRestTemplateResponse, restTemplateSetting);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {

@@ -1,6 +1,5 @@
 package qa.commons;
 
-import com.complexible.stardog.plan.filter.functions.rdfterm.Object;
 import eu.wdaqua.qanary.explainability.aspects.QanaryAspect;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
@@ -43,7 +42,7 @@ public class LoggingAspectTest {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(joinPoint.getArgs()).thenReturn(new Object[2]);
 
-        Object mockTarget = mock(Object.class);
+        java.lang.Object mockTarget = mock(java.lang.Object.class);
         when(joinPoint.getTarget()).thenReturn(mockTarget);
     }
 

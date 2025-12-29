@@ -88,7 +88,8 @@ public class QanaryQuestion<T> {
         String addPriorConversation = "";
         if (priorConversation != null && !priorConversation.toASCIIString().trim().isEmpty()) {
             logger.info("previous graph (qa:priorConversation) provided: |{}|", priorConversation);
-            addPriorConversation = "<" + questionUrlString + "> qa:priorConversation <" + priorConversation.toASCIIString() + "> . ";
+            addPriorConversation = "<" + questionUrlString + "> qa:priorConversation <"
+                    + priorConversation.toASCIIString() + "> . ";
         } else {
             logger.warn("No previous graph (qa:priorConversation) provided.");
         }
@@ -113,7 +114,6 @@ public class QanaryQuestion<T> {
         // loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
         qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
 
-
         // Prepare the question, answer and dataset objects
         sparqlquery = "" //
                 + "PREFIX oa: <http://www.w3.org/ns/openannotation/core/> \n" //
@@ -137,7 +137,6 @@ public class QanaryQuestion<T> {
         logger.info("SPARQL query (initial annotations for question {}):\n{}", questionUrlString, sparqlquery);
         // loadTripleStore(sparqlquery, qanaryConfigurator); // TODO: remove
         qanaryConfigurator.getQanaryTripleStoreConnector().update(sparqlquery);
-
 
         initFromTriplestore(qanaryConfigurator);
     }
@@ -379,7 +378,8 @@ public class QanaryQuestion<T> {
             QuerySolutionMap bindingsForSelect = new QuerySolutionMap();
             bindingsForSelect.add("graph", ResourceFactory.createResource(this.getOutGraph().toASCIIString()));
 
-            String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_SELECT_URI_TEXTUAL_REPRESENTATION, bindingsForSelect);
+            String sparql = QanaryTripleStoreConnector
+                    .readFileFromResourcesWithMap(FILENAME_SELECT_URI_TEXTUAL_REPRESENTATION, bindingsForSelect);
             logger.info("SPARQL query: {}", sparql);
             ResultSet resultSet = this.qanaryUtils.getQanaryTripleStoreConnector().select(sparql);
 
@@ -442,7 +442,8 @@ public class QanaryQuestion<T> {
         bindingsForSelect.add("targetQuestion", ResourceFactory.createResource(this.getUri().toASCIIString()));
         bindingsForSelect.add("language", ResourceFactory.createStringLiteral(language));
 
-        String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_SELECT_TRANSLATION_ANNOTATION, bindingsForSelect);
+        String sparql = QanaryTripleStoreConnector.readFileFromResourcesWithMap(FILENAME_SELECT_TRANSLATION_ANNOTATION,
+                bindingsForSelect);
         logger.info("SPARQL query: {}", sparql);
         ResultSet resultSet = this.qanaryUtils.getQanaryTripleStoreConnector().select(sparql);
 
@@ -615,7 +616,8 @@ public class QanaryQuestion<T> {
     }
 
     public String getSparqlResult() throws SparqlQueryFailed, URISyntaxException {
-        // added try and catch to prevent indexOutOfBoundsException and NullPointerException, returns empty String if no Query was found
+        // added try and catch to prevent indexOutOfBoundsException and
+        // NullPointerException, returns empty String if no Query was found
         String sparqlResult = "";
         try {
             sparqlResult = this.getSparqlResults().get(0).query;
@@ -640,12 +642,13 @@ public class QanaryQuestion<T> {
         logger.debug("getJsonResult: SELECT using:\n{}", sparql);
         ResultSet resultset = this.getQanaryTripleStoreConnector().select(sparql);
 
-        // OLD: the default value has to be null to distinguish missing values from empty values
+        // OLD: the default value has to be null to distinguish missing values from
+        // empty values
         // NEW: returning null would result in "null" being part of the response JSON,
-        //		return an empty string instead.
-        //		This way, a distinction is still possible:
-        //		missing values: ""
-        //		empty values: []
+        // return an empty string instead.
+        // This way, a distinction is still possible:
+        // missing values: ""
+        // empty values: []
         String sparqlAnnotation = null;
         while (resultset.hasNext()) {
             sparqlAnnotation = resultset.next().get("json").asLiteral().toString();
@@ -858,5 +861,9 @@ public class QanaryQuestion<T> {
         public String query;
         public String confidence;
         public String knowledgegraphEndpoint;
+    }
+
+    public QanaryUtils getQanaryUtils() {
+        return qanaryUtils;
     }
 }
