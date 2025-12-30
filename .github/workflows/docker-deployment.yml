@@ -10,7 +10,7 @@ jobs:
     env:
       VIRTUOSO_PASSWORD: ${{ secrets.VIRTUOSO_PASSWORD }}
     steps:
-      - name: Set up JDK 15
+      - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: "25"
