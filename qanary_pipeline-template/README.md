@@ -1,6 +1,7 @@
-<img size="448" src="https://github.com/WDAqua/Qanary/blob/master/doc/logo-qanary-pixelart-black-background.png?raw=true">
 
 # Build and Run the Qanary Pipeline
+
+<img align="right"  width="300" src="https://github.com/WDAqua/Qanary/blob/master/doc/logo-qanary-pixelart-black-background.png?raw=true">
 
 [The Qanary wiki pages](https://github.com/WDAqua/Qanary/wiki/What-is-Qanary%3F) should answer all questions that might come up when developing a question answering system using Qanary.
 
@@ -14,7 +15,7 @@ These pages in particular are relevant for configuring, building, and starting a
 
 Requirement: The [`qanary-commons` package](https://github.com/WDAqua/Qanary/tree/master/qanary_commons) is installed on your system.
 
-To build an executable JAR file and the corresponding Docker image run:
+To build an executable JAR file and the corresponding Docker image, run the command:
 
 ```shell
 mvn package
@@ -24,7 +25,7 @@ The created JAR file is located in the automatically created directory `target`.
 
 ## Execute the Qanary Pipeline JAR file
 
-To execute the JAR file with Java until version 16 run the following command:
+To execute the JAR file with Java until version 16, run the following command:
 
 ```shell
 java -jar --illegal-access=permit target/qa.pipeline-X.Y.Z.jar
@@ -45,3 +46,7 @@ While starting the Qanary pipeline, you can recognize the correct configuration 
 ```shell
 Triplestore is accessible and returns triples.
 ```
+
+Otherwise, a warning will be displayed that the Qanary pipeline cannot access the configured Qanary triplestore, i.e., the knowledge base where process information (all state information about each given task) is stored. 
+The warning is shown three times.
+If the triplestore is still not accessible, the Qanary pipeline will stop, and the Java application will consequently terminate.
