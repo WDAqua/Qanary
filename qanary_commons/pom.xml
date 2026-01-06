@@ -401,6 +401,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
 
@@ -486,7 +487,7 @@
                     <complianceLevel>1.8</complianceLevel>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <showWeaveInfo>true</showWeaveInfo>
+                    <showWeaveInfo>false</showWeaveInfo>
                     <verbose>true</verbose>
                     <Xlint>ignore</Xlint>
                     <encoding>UTF-8</encoding>
