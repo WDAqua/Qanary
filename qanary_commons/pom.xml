@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.commons</artifactId>
-    <version>3.21.5</version>
+    <version>3.21.6</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -292,7 +292,7 @@
         <dependency>
             <groupId>com.github.therapi</groupId>
             <artifactId>therapi-runtime-javadoc-scribe</artifactId>
-            <version>0.13.0</version>
+            <version>0.15.0</version>
             <scope>provided</scope>
         </dependency>
 
