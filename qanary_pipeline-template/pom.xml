@@ -24,7 +24,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <springdoc.version>1.7.0</springdoc.version>
         <jena.version>4.10.0</jena.version>
-        <bytebuddy.version>1.17.0</bytebuddy.version>
+        <bytebuddy.version>1.18.3</bytebuddy.version>
     </properties>
     <dependencies>
         <dependency>
