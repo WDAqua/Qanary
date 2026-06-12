@@ -336,6 +336,9 @@
                 </dependencies>
                 <configuration>
                     <complianceLevel>${java.version}</complianceLevel>
+                    <additionalCompilerArgs>
+                        <arg>-parameters</arg>
+                    </additionalCompilerArgs>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <showWeaveInfo>false</showWeaveInfo>
