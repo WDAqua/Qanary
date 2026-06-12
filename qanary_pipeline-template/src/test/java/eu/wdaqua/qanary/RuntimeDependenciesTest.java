@@ -11,7 +11,7 @@ class RuntimeDependenciesTest {
 		// this statement ensures that broken dependencies are uncovered
 		@SuppressWarnings("unused")
 		jakarta.xml.bind.DatatypeConverter justForSafety;
-		javax.xml.bind.annotation.XmlRootElement justForSafety2;
+		jakarta.xml.bind.annotation.XmlRootElement justForSafety2;
 	}
 
 	@Test

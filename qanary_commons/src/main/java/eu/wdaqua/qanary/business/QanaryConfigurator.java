@@ -5,7 +5,7 @@ import eu.wdaqua.qanary.commons.QanaryUtils;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,14 +100,15 @@ public class QanaryConfigurator {
                         myURI, HttpMethod.POST, request, QanaryMessage.class);
                 long duration = QanaryUtils.getTime() - startTimeOfComponent;
 
-                result.appendProtocol(component, responseEntity.getStatusCode(), duration);
-                if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                HttpStatus responseStatus = HttpStatus.valueOf(responseEntity.getStatusCode().value());
+                result.appendProtocol(component, responseStatus, duration);
+                if (responseStatus == HttpStatus.OK) {
                     message = responseEntity.getBody();
                     logger.debug("received: {}", message);
                 } else {
-                    logger.error("call to \"{}\" return HTTP {}", component.getName(), responseEntity.getStatusCode());
+                    logger.error("call to \"{}\" return HTTP {}", component.getName(), responseStatus);
                     throw new QanaryExceptionServiceCallNotOk(component.getName(), QanaryUtils.getTime() - start,
-                            responseEntity.getStatusCode());
+                            responseStatus);
                 }
             } catch (QanaryExceptionServiceCallNotOk e) {
                 logger.error("QanaryExceptionServiceCallNotOk: called \"{}\" catched '{}'", component.getName(), e.getMessage());

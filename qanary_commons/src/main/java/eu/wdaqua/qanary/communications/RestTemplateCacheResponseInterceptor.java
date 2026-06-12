@@ -31,7 +31,7 @@ public class RestTemplateCacheResponseInterceptor implements ClientHttpRequestIn
 
 		int hashCode = Objects.hash( //
 				request.getURI().hashCode(), //
-				request.getMethodValue().hashCode(), //
+				request.getMethod().name().hashCode(), //
 				request.getHeaders().toString().hashCode(), //
 				(new String(body, StandardCharsets.UTF_8)).hashCode() //
 		);

@@ -72,6 +72,9 @@ public class AdditionalTriples {
 	}
 
 	public URI getUriFilePath() throws URISyntaxException {
+		if (filePath == null) { // no additional triples were provided, so no file was written
+			return null;
+		}
 		return new URI(filePath);
 	}
 

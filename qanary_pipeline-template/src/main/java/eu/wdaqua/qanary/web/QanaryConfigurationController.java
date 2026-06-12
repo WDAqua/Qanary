@@ -1,9 +1,9 @@
 package eu.wdaqua.qanary.web;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import net.sf.json.JSONObject;
-import net.sf.json.JSONArray;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,13 +38,13 @@ public class QanaryConfigurationController {
 		operationId="getAvailableComponents",
 		description="Returns a list of registered and available components, containing their name and url."
 	)
-	public ResponseEntity<JSONArray> getAvailableComponents() {
-		JSONArray json = new JSONArray();
+	public ResponseEntity<List<Map<String, String>>> getAvailableComponents() {
+		List<Map<String, String>> json = new ArrayList<>();
 		List<String> componentNames = registrationChangeNotifier.getAvailableComponentNames();
-		List<QanaryComponent> components = 
+		List<QanaryComponent> components =
 			registrationChangeNotifier.getAvailableComponentsFromNames(componentNames);
 		for (QanaryComponent component : components) {
-			JSONObject object = new JSONObject();
+			Map<String, String> object = new LinkedHashMap<>();
 			String name = component.getName();
 			String url = "/components/" + name; // create a relative url components/name
 			object.put("name", name);
@@ -52,7 +52,7 @@ public class QanaryConfigurationController {
 			json.add(object);
 		}
 
-		ResponseEntity<JSONArray> response = new ResponseEntity<>(json, HttpStatus.OK);
+		ResponseEntity<List<Map<String, String>>> response = new ResponseEntity<>(json, HttpStatus.OK);
 		return response;
 	}
 }

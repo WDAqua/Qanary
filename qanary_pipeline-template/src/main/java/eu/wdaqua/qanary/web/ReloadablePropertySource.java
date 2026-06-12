@@ -2,7 +2,7 @@ package eu.wdaqua.qanary.web;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.PropertySource;
 
 public class ReloadablePropertySource extends PropertySource {
