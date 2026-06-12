@@ -19,14 +19,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.util.NestedServletException;
+import jakarta.servlet.ServletException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.matches;
@@ -279,7 +279,7 @@ class QanaryQuestionAnsweringControllerTest {
         json.put("language", "en");
         json.put("additionalTriples", "<urn:s <urn:p> <urn:o>  .");
 
-        Assertions.assertThrows(NestedServletException.class, () -> {
+        Assertions.assertThrows(ServletException.class, () -> {
             mvc.perform(MockMvcRequestBuilders.post(url) //
                     .contentType("application/json")
                     .content(json.toString())

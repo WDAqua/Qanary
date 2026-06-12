@@ -1,7 +1,7 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
