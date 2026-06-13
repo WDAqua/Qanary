@@ -13,8 +13,9 @@ import eu.wdaqua.qanary.web.QanaryPipelineConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,17 +146,20 @@ public class QanaryPipeline implements QanaryExplanation {
 
     @Bean
     @ConditionalOnProperty(name = "spring.config.location", matchIfMissing = false)
-    public PropertiesConfiguration propertiesConfiguration(
+    public ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> propertiesConfiguration(
             @Value("${spring.config.location}") String path) throws Exception {
 
         Path localConfigPath = Paths.get(new ClassPathResource(path).getPath());
-        //String filePath = new File(path).getCanonicalPath();
 
         logger.warn("new property source: {}", localConfigPath.toString());
-        PropertiesConfiguration configuration = new PropertiesConfiguration(
-                new File(localConfigPath.toString()));
-        configuration.setReloadingStrategy(new FileChangedReloadingStrategy());
-        return configuration;
+        // commons-configuration2 replaces the removed FileChangedReloadingStrategy
+        // with a reloading builder; callers trigger the reload check via its
+        // ReloadingController before reading a property.
+        ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new ReloadingFileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
+        builder.configure(new Parameters().properties()
+                .setFile(new File(localConfigPath.toString())));
+        return builder;
     }
 
     @Bean
