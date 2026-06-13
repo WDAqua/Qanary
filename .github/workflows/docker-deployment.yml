@@ -13,8 +13,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
-          java-version: "25"
-          distribution: "corretto"
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Docker Login
         uses: docker/login-action@v4
