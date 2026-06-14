@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qanary — Question Answering</title>
+  <link rel="stylesheet" href="/qanary-ui/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">Q</span>
+      <div>
+        <h1>Qanary</h1>
+        <p>Question Answering pipeline</p>
+      </div>
+    </div>
+    <div id="pipeline-status" class="status-pill" title="components registered with this pipeline">loading…</div>
+  </header>
+
+  <main>
+    <!-- Step 1 — question & parameters -->
+    <section class="card">
+      <h2><span class="step">1</span> Question</h2>
+      <textarea id="question" rows="2" placeholder="e.g. Who is the inventor of the Hawaiian Pizza?"></textarea>
+      <details class="advanced">
+        <summary>Advanced parameters</summary>
+        <div class="adv-grid">
+          <label>Language (optional)
+            <input id="language" type="text" placeholder="e.g. en" autocomplete="off">
+          </label>
+          <label>Additional triples (Turtle, optional)
+            <textarea id="additionaltriples" rows="3" placeholder="@prefix … ."></textarea>
+          </label>
+        </div>
+      </details>
+    </section>
+
+    <!-- Step 2 — components -->
+    <section class="card">
+      <h2>
+        <span class="step">2</span> Components
+        <button id="refresh" class="ghost" title="refresh component list">↻ refresh</button>
+      </h2>
+      <p class="hint">Select the components to run, then drag them in the right column to set the execution order
+        (later components can depend on earlier ones). Components that are registered but not reachable are shown
+        greyed out and cannot be selected.</p>
+      <div class="components-grid">
+        <div>
+          <h3>Registered components</h3>
+          <ul id="component-list" class="component-list"><li class="empty">loading…</li></ul>
+        </div>
+        <div>
+          <h3>Pipeline order <span class="hint">drag to reorder</span></h3>
+          <ol id="pipeline-order" class="pipeline-order"><li class="empty">no components selected yet</li></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Run -->
+    <section class="card run-card">
+      <button id="run" class="primary">▶ Run pipeline</button>
+      <span id="run-status" class="run-status"></span>
+    </section>
+
+    <!-- Step 3 — results -->
+    <section id="results" class="card hidden">
+      <h2><span class="step">3</span> Result</h2>
+      <div id="answer-summary"></div>
+
+      <h3>Generated SPARQL query</h3>
+      <pre id="sparql-output" class="code">—</pre>
+
+      <h3>What each component did <span class="hint">read directly from the Qanary triplestore — no SPARQL needed</span></h3>
+      <div id="component-intermediate"></div>
+
+      <p class="meta" id="graph-meta"></p>
+    </section>
+  </main>
+
+  <footer class="foot">Qanary embedded frontend · served by the pipeline</footer>
+
+  <script src="/qanary-ui/app.js"></script>
+</body>
+</html>

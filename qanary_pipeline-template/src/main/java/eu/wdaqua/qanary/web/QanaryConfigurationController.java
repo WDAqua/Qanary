@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
+import de.codecentric.boot.admin.server.domain.entities.Instance;
 import io.swagger.v3.oas.annotations.Operation;
 
 /**
@@ -54,5 +55,35 @@ public class QanaryConfigurationController {
 
 		ResponseEntity<List<Map<String, String>>> response = new ResponseEntity<>(json, HttpStatus.OK);
 		return response;
+	}
+
+	/**
+	 * Returns ALL registered components together with their current availability
+	 * status, so a client (e.g. the embedded web frontend) can also show
+	 * components that are registered but not accessible (and mark them as not
+	 * selectable). Unlike {@link #getAvailableComponents()} this does not filter
+	 * out components that are currently down.
+	 */
+	@RequestMapping(value = "/components/availability", method = RequestMethod.GET, produces = "application/json")
+	@Operation(
+		summary = "get all registered components with their availability status",
+		operationId = "getComponentsWithAvailability",
+		description = "Returns every registered component with its name, description URL, current status (e.g. UP/DOWN/OFFLINE) and an 'accessible' flag. Accessible components can be used in a pipeline run; the others are registered but currently not callable."
+	)
+	public ResponseEntity<List<Map<String, Object>>> getComponentsWithAvailability() {
+		List<Map<String, Object>> json = new ArrayList<>();
+		// getAvailableComponents() actually holds every registered instance,
+		// including the ones that are not UP (see the registration notifier).
+		for (Map.Entry<String, Instance> entry : registrationChangeNotifier.getAvailableComponents().entrySet()) {
+			Instance instance = entry.getValue();
+			String status = instance.getStatusInfo().getStatus();
+			Map<String, Object> object = new LinkedHashMap<>();
+			object.put("name", entry.getKey());
+			object.put("url", "/components/" + entry.getKey());
+			object.put("status", status);
+			object.put("accessible", instance.getStatusInfo().isUp());
+			json.add(object);
+		}
+		return new ResponseEntity<>(json, HttpStatus.OK);
 	}
 }
