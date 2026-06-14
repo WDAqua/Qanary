@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use Qanary, please cite the methodology paper (preferred-citation) below."
+title: "Qanary — Reference Implementation of the Qanary Methodology for Question Answering Systems"
+type: software
+url: "https://github.com/WDAqua/Qanary"
+repository-code: "https://github.com/WDAqua/Qanary"
+authors:
+  - family-names: Both
+    given-names: Andreas
+  - family-names: Diefenbach
+    given-names: Dennis
+  - family-names: Singh
+    given-names: Kuldeep
+  - family-names: Shekarpour
+    given-names: Saeedeh
+  - family-names: Cherix
+    given-names: Didier
+  - family-names: Lange
+    given-names: Christoph
+preferred-citation:
+  type: conference-paper
+  title: "Qanary – A Methodology for Vocabulary-Driven Open Question Answering Systems"
+  authors:
+    - family-names: Both
+      given-names: Andreas
+    - family-names: Diefenbach
+      given-names: Dennis
+    - family-names: Singh
+      given-names: Kuldeep
+    - family-names: Shekarpour
+      given-names: Saeedeh
+    - family-names: Cherix
+      given-names: Didier
+    - family-names: Lange
+      given-names: Christoph
+  collection-title: "The Semantic Web. Latest Advances and New Domains — 13th Extended Semantic Web Conference (ESWC 2016)"
+  conference:
+    name: "13th Extended Semantic Web Conference (ESWC 2016)"
+  publisher:
+    name: "Springer"
+  year: 2016
+  doi: "10.1007/978-3-319-34129-3_38"
