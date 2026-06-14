@@ -6,13 +6,12 @@
     <version>2.0.0</version>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.15</version>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>mvn.reactor</artifactId>
+        <version>4.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    <properties>
-        <java.version>17</java.version>
-    </properties>
+    <!-- java.version inherited from parent (task 2.2) -->
 
     <dependencies>
         <dependency>
@@ -73,7 +72,7 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>apache-jena-libs</artifactId>
             <type>pom</type>
-            <version>3.0.0</version>
+            <version>${jena.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>

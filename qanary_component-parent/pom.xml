@@ -8,18 +8,15 @@
     <version>4.0.0</version>
     <packaging>pom</packaging>
     <parent>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.15</version>
-        <relativePath />
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>mvn.reactor</artifactId>
+        <version>4.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
-        <java.version>17</java.version>
-        <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
-        <qanary.component.version>[4.0.0,5.0.0)</qanary.component.version>
-        <qanary.commons.version>[4.0.0,5.0.0)</qanary.commons.version>
-        <springdoc.version>2.8.17</springdoc.version>
+        <!-- java.version, spring-boot-admin.version, springdoc.version inherited from parent (task 2.2) -->
+        <qanary.component.version>4.0.0</qanary.component.version>
+        <qanary.commons.version>4.0.0</qanary.commons.version>
         <json-path.version>2.9.0</json-path.version>
     </properties>
 
@@ -124,70 +121,27 @@
     <build>
         <plugins>
             <!-- Deployment/Release related plugins -->
+            <!-- release/publishing/signing config inherited from the parent
+                 pluginManagement (task 2.2) -->
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.8.0</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                </configuration>
             </plugin>
-
-            <!-- Signing the artifact -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <gpgArguments>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-
-            <!-- Required for maven repository deployment -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>dev.aspectj</groupId>

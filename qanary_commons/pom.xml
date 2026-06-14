@@ -6,18 +6,14 @@
     <artifactId>qa.commons</artifactId>
     <version>4.0.0</version>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.15</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>mvn.reactor</artifactId>
+        <version>4.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <java.version>17</java.version>
-        <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
-        <jena.version>5.3.0</jena.version>
-        <stardog.version>[8.0.0,9.0.0)</stardog.version>
-    </properties>
+    <!-- java.version, spring-boot-admin.version, jena.version, stardog.version
+         are inherited from the parent (task 2.2) -->
 
     <dependencyManagement>
         <dependencies>
@@ -234,70 +230,27 @@
 
     <build>
         <plugins>
+            <!-- release/publishing/signing config inherited from the parent
+                 pluginManagement (task 2.2) -->
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.8.0</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                </configuration>
             </plugin>
-
-            <!-- Signing the artifact -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <gpgArguments>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-
-            <!-- Required for maven repository deployment -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <!--	For Component Cache Tests	-->
             <plugin>
@@ -324,39 +277,11 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!-- aspectj-maven-plugin version/config/executions inherited from the
+                 parent pluginManagement (task 2.2) -->
             <plugin>
                 <groupId>dev.aspectj</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.14.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.aspectj</groupId>
-                        <artifactId>aspectjtools</artifactId>
-                        <version>1.9.25</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <complianceLevel>${java.version}</complianceLevel>
-                    <additionalCompilerArgs>
-                        <arg>-parameters</arg>
-                    </additionalCompilerArgs>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <showWeaveInfo>false</showWeaveInfo>
-                    <verbose>true</verbose>
-                    <Xlint>ignore</Xlint>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <!-- use this goal to weave all your main classes -->
-                            <goal>compile</goal>
-                            <!-- use this goal to weave all your test classes -->
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

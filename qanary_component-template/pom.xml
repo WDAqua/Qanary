@@ -7,15 +7,12 @@
     <artifactId>qa.component</artifactId>
     <version>4.0.0</version>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.15</version>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>mvn.reactor</artifactId>
+        <version>4.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    <properties>
-        <java.version>17</java.version>
-        <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
-        <jena.version>5.3.0</jena.version>
-    </properties>
+    <!-- java.version, spring-boot-admin.version, jena.version inherited from parent (task 2.2) -->
 
     <dependencies>
         <dependency>
@@ -65,7 +62,6 @@
         <dependency>
             <groupId>eu.wdaqua.qanary</groupId>
             <artifactId>qa.commons</artifactId>
-            <version>[4.0.0,5.0.0)</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
         <dependency>
@@ -162,63 +158,23 @@
                 </configuration>
             </plugin>
 
+            <!-- publishing/signing config inherited from the parent pluginManagement (task 2.2) -->
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.8.0</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                </configuration>
             </plugin>
-
-            <!-- Signing the artifact -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <gpgArguments>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-
-            <!-- Required for maven repository deployment -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <!--	For Component Cache Tests	-->
             <plugin>
