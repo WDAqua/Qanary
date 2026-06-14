@@ -84,7 +84,7 @@ How to build a complete *tiny component-oriented Question Answering System* driv
 
  1. Clone the GitHub repository: `git clone https://github.com/WDAqua/Qanary`
 
- 2. Install Java 17 or higher (see <https://adoptium.net/> for details)
+ 2. Install Java 21 or higher (see <https://adoptium.net/> for details)
 
  3. Install Maven 3.6.3 or higher (see <https://maven.apache.org/install.html> for details)
 

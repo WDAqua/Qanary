@@ -5,8 +5,8 @@ prerequisites, how to run the tests, and the release process.
 
 ## Prerequisites
 
-- **Java 17** (LTS). The whole project targets Java 17 — see `<java.version>` in
-  the module POMs. Install e.g. from <https://adoptium.net/>.
+- **Java 21** (LTS). The whole project targets Java 21 — see `<java.version>` in
+  the parent POM. Install e.g. from <https://adoptium.net/>.
 - **Maven 3.6.3 or higher** (the CI builds on 3.9.x).
 - **Docker** (only needed to build/run the Docker images and the end-to-end
   example).
