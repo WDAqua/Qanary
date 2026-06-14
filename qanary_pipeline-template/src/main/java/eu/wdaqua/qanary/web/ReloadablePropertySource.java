@@ -29,7 +29,10 @@ public class ReloadablePropertySource extends PropertySource {
             builder.getReloadingController().checkForReloading(null);
             return builder.getConfiguration().getProperty(prop);
         } catch (ConfigurationException e) {
-            throw new RuntimeException(e);
+            // the override file is optional and may be absent or temporarily
+            // unreadable; behave like an empty source so other property sources
+            // win (matches commons-configuration 1.x leniency)
+            return null;
         }
     }
 }

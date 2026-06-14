@@ -27,14 +27,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,16 +145,16 @@ public class QanaryPipeline implements QanaryExplanation {
     public ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> propertiesConfiguration(
             @Value("${spring.config.location}") String path) throws Exception {
 
-        Path localConfigPath = Paths.get(new ClassPathResource(path).getPath());
-
-        logger.warn("new property source: {}", localConfigPath.toString());
+        logger.warn("new property source: {}", path);
         // commons-configuration2 replaces the removed FileChangedReloadingStrategy
         // with a reloading builder; callers trigger the reload check via its
-        // ReloadingController before reading a property.
+        // ReloadingController before reading a property. The file is located by
+        // cc2's default strategy (classpath + filesystem) and is OPTIONAL: a
+        // missing file is tolerated in ReloadablePropertySource#getProperty
+        // (matching the lenient behaviour of commons-configuration 1.x).
         ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> builder =
                 new ReloadingFileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
-        builder.configure(new Parameters().properties()
-                .setFile(new File(localConfigPath.toString())));
+        builder.configure(new Parameters().properties().setFileName(path));
         return builder;
     }
 
