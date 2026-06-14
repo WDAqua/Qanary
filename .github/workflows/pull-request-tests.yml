@@ -16,6 +16,7 @@ jobs:
         with: # The environment variables are defined when needed (here, when the package is being published)
           distribution: 'temurin'
           java-version: '17'
+          cache: 'maven'
 
       - name: Build artifacts # To resolve internal, not yet published new versions
         run: mvn clean install -Dgpg.skip -DskipTests -Ddockerfile.skip

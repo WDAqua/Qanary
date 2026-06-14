@@ -20,6 +20,7 @@ jobs:
       with: # The environment variables are defined when needed (here, when the package is being published)
         distribution: 'temurin'
         java-version: '17'
+        cache: 'maven'
         server-id: 'central'
         server-username: MAVEN_TOKEN_USERNAME
         server-password: MAVEN_TOKEN_PASSWORD

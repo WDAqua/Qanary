@@ -15,6 +15,7 @@ jobs:
         with:
           java-version: "17"
           distribution: "temurin"
+          cache: "maven"
 
       - name: Docker Login
         uses: docker/login-action@v4

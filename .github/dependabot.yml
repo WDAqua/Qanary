@@ -5,7 +5,18 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "daily"
+  # Maven reactor (root pom + modules). Replaces the ad-hoc Snyk security PRs.
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+  # Pipeline Docker base image (debian/openjdk).
+  - package-ecosystem: "docker"
+    directory: "/qanary_pipeline-template"
+    schedule:
+      interval: "weekly"
