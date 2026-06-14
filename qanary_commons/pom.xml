@@ -15,7 +15,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
-        <jena.version>4.10.0</jena.version>
+        <jena.version>5.3.0</jena.version>
         <stardog.version>[8.0.0,9.0.0)</stardog.version>
     </properties>
 
@@ -137,11 +137,12 @@
             <artifactId>stardog-jena</artifactId>
             <version>${stardog.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.openlinksw/virt_jena4_4 -->
+        <!-- https://mvnrepository.com/artifact/com.openlinksw/virt_jena_v5_3 -->
+        <!-- Jena-5.3-compatible OpenLink Virtuoso adapter (replaces virt_jena4_4, which targets Jena 4) -->
         <dependency>
             <groupId>com.openlinksw</groupId>
-            <artifactId>virt_jena4_4</artifactId>
-            <version>1.43</version>
+            <artifactId>virt_jena_v5_3</artifactId>
+            <version>1.44</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.openlinksw/virtjdbc4 -->
         <dependency>

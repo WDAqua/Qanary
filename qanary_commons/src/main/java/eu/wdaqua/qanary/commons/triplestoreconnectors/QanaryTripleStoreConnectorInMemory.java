@@ -3,11 +3,11 @@ package eu.wdaqua.qanary.commons.triplestoreconnectors;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
@@ -43,7 +43,10 @@ public class QanaryTripleStoreConnectorInMemory extends QanaryTripleStoreConnect
         if (dataset != null) {
             dataset.close();
         }
-        dataset = TDBFactory.createDataset();
+        // Jena 5 removed TDB1 (org.apache.jena.tdb); use a plain in-memory
+        // dataset, which (unlike TDB2) needs no explicit transactions for the
+        // ask/select/update access pattern used here.
+        dataset = DatasetFactory.create();
     }
 
     @Override

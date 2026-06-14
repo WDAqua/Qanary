@@ -1,12 +1,15 @@
 package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,8 +105,31 @@ class QanaryTripleStoreConnectorInMemoryTest {
 	}
 
 	/**
+	 * SELECT must return the exact resources that were inserted. Guards the
+	 * Jena 5 query engine + in-memory dataset (DatasetFactory.create, replacing
+	 * the removed TDB1 TDBFactory.createDataset) against a regression.
+	 */
+	@Test
+	void testSelectReturnsInsertedValues() throws URISyntaxException, SparqlQueryFailed {
+		URI graph = new URI("urn:test");
+		myQanaryTripleStoreConnectorInMemory.connect();
+
+		myQanaryTripleStoreConnectorInMemory.update(
+				"INSERT DATA { GRAPH <" + graph.toASCIIString() + "> { <urn:s> <urn:p> <urn:o> . } }");
+
+		ResultSet resultSet = myQanaryTripleStoreConnectorInMemory
+				.select("SELECT ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o . } }");
+		assertTrue(resultSet.hasNext(), "expected exactly one result row");
+		QuerySolution solution = resultSet.nextSolution();
+		assertEquals("urn:s", solution.getResource("s").getURI());
+		assertEquals("urn:p", solution.getResource("p").getURI());
+		assertEquals("urn:o", solution.getResource("o").getURI());
+		assertFalse(resultSet.hasNext(), "expected exactly one result row");
+	}
+
+	/**
 	 * checks if triples are available or not depending on given boolean parameter
-	 * 
+	 *
 	 * @param isExpectingTriples
 	 * @throws SparqlQueryFailed
 	 */

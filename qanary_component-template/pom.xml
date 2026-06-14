@@ -14,7 +14,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
-        <jena.version>4.10.0</jena.version>
+        <jena.version>5.3.0</jena.version>
     </properties>
 
     <dependencies>
@@ -84,6 +84,13 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>${jena.version}</version>
+        </dependency>
+        <!-- used directly by QanaryComponentConfiguration; previously came in
+             transitively via Jena 4 (Jena 5 no longer pulls commons-cli) -->
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
