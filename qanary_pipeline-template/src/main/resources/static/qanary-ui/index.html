@@ -1,28 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Qanary — Question Answering</title>
+  <link rel="icon" type="image/png" href="/qanary-ui/icon-qanary.png">
   <link rel="stylesheet" href="/qanary-ui/styles.css">
+  <!-- Embedded YASGUI (loaded from CDN; the UI degrades gracefully if offline) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@triply/yasgui/build/yasgui.min.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="logo">Q</span>
+      <img class="logo" src="/qanary-ui/icon-qanary.png" alt="Qanary logo">
       <div>
         <h1>Qanary</h1>
         <p>Question Answering pipeline</p>
       </div>
     </div>
-    <div id="pipeline-status" class="status-pill" title="components registered with this pipeline">loading…</div>
+    <div class="topbar-right">
+      <div class="theme-switch" role="group" aria-label="Color theme">
+        <button data-theme-btn="light"    title="Light theme">☀︎<span>Light</span></button>
+        <button data-theme-btn="dark"     title="Dark theme">☾<span>Dark</span></button>
+        <button data-theme-btn="contrast" title="High-contrast theme">◑<span>Contrast</span></button>
+      </div>
+      <div id="pipeline-status" class="status-pill" title="components registered with this pipeline">loading…</div>
+    </div>
   </header>
 
   <main>
     <!-- Step 1 — question & parameters -->
     <section class="card">
       <h2><span class="step">1</span> Question</h2>
-      <textarea id="question" rows="2" placeholder="e.g. Who is the inventor of the Hawaiian Pizza?"></textarea>
+      <input type="text" id="question" name="question" list="question-history" autocomplete="on"
+             placeholder="e.g. Who is the inventor of the Hawaiian Pizza?">
+      <datalist id="question-history"></datalist>
       <details class="advanced">
         <summary>Advanced parameters</summary>
         <div class="adv-grid">
@@ -36,50 +48,84 @@
       </details>
     </section>
 
-    <!-- Step 2 — components -->
-    <section class="card">
+    <!-- Step 2 — system configuration -->
+    <section class="card" id="components-card">
       <h2>
-        <span class="step">2</span> Components
-        <button id="refresh" class="ghost" title="refresh component list">↻ refresh</button>
+        <span class="step">2</span> System configuration
+        <button id="refresh" class="ghost" title="reload the live component list from the pipeline">↻ refresh component list</button>
       </h2>
-      <p class="hint">Select the components to run, then drag them in the right column to set the execution order
-        (later components can depend on earlier ones). Components that are registered but not reachable are shown
+      <p class="hint">Drag the components into the pipeline order on the left to express their dependencies
+        (later components can depend on earlier ones). Pick them from the registered components on the right;
+        use the ⓘ button for a component's details. Components that are registered but not reachable are shown
         greyed out and cannot be selected.</p>
       <div class="components-grid">
-        <div>
-          <h3>Registered components</h3>
-          <ul id="component-list" class="component-list"><li class="empty">loading…</li></ul>
-        </div>
         <div>
           <h3>Pipeline order <span class="hint">drag to reorder</span></h3>
           <ol id="pipeline-order" class="pipeline-order"><li class="empty">no components selected yet</li></ol>
         </div>
+        <div>
+          <h3>Registered components</h3>
+          <ul id="component-list" class="component-list"><li class="empty">loading…</li></ul>
+        </div>
       </div>
-    </section>
-
-    <!-- Run -->
-    <section class="card run-card">
-      <button id="run" class="primary">▶ Run pipeline</button>
-      <span id="run-status" class="run-status"></span>
+      <div class="run-row">
+        <button id="run" class="primary">▶ Process question</button>
+        <span id="run-status" class="run-status"></span>
+      </div>
     </section>
 
     <!-- Step 3 — results -->
     <section id="results" class="card hidden">
       <h2><span class="step">3</span> Result</h2>
-      <div id="answer-summary"></div>
+
+      <h3>Pipeline response <span class="hint">returned by the pipeline (endpoint, inGraph, outGraph, question) — for integration into other applications</span></h3>
+      <div id="pipeline-response"></div>
 
       <h3>Generated SPARQL query</h3>
-      <pre id="sparql-output" class="code">—</pre>
+      <div class="code-wrap">
+        <button class="copy-btn" data-copy-target="#sparql-output" title="copy to clipboard">⧉ Copy</button>
+        <pre id="sparql-output" class="code">—</pre>
+      </div>
 
-      <h3>What each component did <span class="hint">read directly from the Qanary triplestore — no SPARQL needed</span></h3>
+      <h3>Answer <span class="hint">the backend's JSON answer as a table — use ⧉ to copy any value</span></h3>
+      <div id="answer-table"></div>
+
+      <h3>What each component did <span class="hint">read directly from the Qanary triplestore — no SPARQL, no LLM · click a box to expand</span></h3>
       <div id="component-intermediate"></div>
 
       <p class="meta" id="graph-meta"></p>
+    </section>
+
+    <!-- SPARQL editor — not a numbered step; usable at any time of the process -->
+    <section class="card" id="yasgui-card">
+      <h2><span class="tool" title="available at any time of the process" aria-hidden="true">✎</span> SPARQL editor <span class="hint">query the Qanary triplestore yourself (YASGUI)</span></h2>
+      <div id="yasgui"></div>
+      <p id="yasgui-fallback" class="hint hidden">
+        The YASGUI editor could not be loaded (no internet access?). You can still query the endpoint directly at
+        <code>/sparql</code>.
+      </p>
     </section>
   </main>
 
   <footer class="foot">Qanary embedded frontend · served by the pipeline</footer>
 
+  <!-- component information overlay -->
+  <div id="component-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-box">
+      <header class="modal-head">
+        <h3 id="modal-title">Component</h3>
+        <button class="modal-close" data-modal-close title="close" aria-label="close">×</button>
+      </header>
+      <div id="modal-info" class="modal-info"></div>
+      <p class="modal-iframe-note hint">Service page (served by the component itself):</p>
+      <iframe id="modal-iframe" class="modal-iframe" title="component service page"
+              referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    </div>
+  </div>
+
+  <!-- YASGUI library (CDN). app.js initialises it if present. -->
+  <script src="https://cdn.jsdelivr.net/npm/@triply/yasgui/build/yasgui.min.js"></script>
   <script src="/qanary-ui/app.js"></script>
 </body>
 </html>

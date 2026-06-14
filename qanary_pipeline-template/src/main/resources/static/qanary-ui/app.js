@@ -2,20 +2,101 @@
 
 // ---------------------------------------------------------------------------
 // Qanary embedded frontend — talks to the pipeline's own REST endpoints.
-// No build step, no external dependencies.
+// No build step. Only optional runtime dependency: YASGUI (loaded from CDN).
 // ---------------------------------------------------------------------------
 
 const QA = "http://www.wdaqua.eu/qa#";
 const state = {
-  components: [],   // [{name, status, accessible, url}]
+  components: [],   // [{name, status, accessible, url, serviceUrl, host, port, ...}]
   order: [],        // selected component names, in execution order
 };
 
 const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => [...document.querySelectorAll(sel)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const shortUri = (u) => String(u ?? "").replace(/^.*[#/:]/, "");
-const looksLikeSparql = (s) => /\b(SELECT|ASK|CONSTRUCT|DESCRIBE|PREFIX|INSERT)\b/i.test(String(s ?? ""));
+const stringify = (v) => (typeof v === "string" ? v : JSON.stringify(v));
+const isUrl = (v) => typeof v === "string" && /^https?:\/\//i.test(v);
+
+// ---------------------------------------------------------------------------
+// Theme switching: light / dark / high contrast (persisted in localStorage)
+// ---------------------------------------------------------------------------
+const THEME_KEY = "qanary-theme";
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  $$("[data-theme-btn]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.themeBtn === theme)));
+  try { localStorage.setItem(THEME_KEY, theme); } catch (_) { /* ignore */ }
+}
+function initTheme() {
+  let theme = null;
+  try { theme = localStorage.getItem(THEME_KEY); } catch (_) { /* ignore */ }
+  if (!theme) {
+    theme = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  }
+  applyTheme(theme);
+  $$("[data-theme-btn]").forEach((b) =>
+    b.addEventListener("click", () => applyTheme(b.dataset.themeBtn)));
+}
+
+// ---------------------------------------------------------------------------
+// Question history → <datalist> (auto-completion from earlier user inputs)
+// ---------------------------------------------------------------------------
+const HISTORY_KEY = "qanary-question-history";
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (_) { return []; }
+}
+function renderHistory() {
+  $("#question-history").innerHTML = loadHistory().map((q) => `<option value="${esc(q)}"></option>`).join("");
+}
+function rememberQuestion(q) {
+  if (!q) return;
+  let h = loadHistory().filter((x) => x !== q);
+  h.unshift(q);
+  h = h.slice(0, 25);
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (_) { /* ignore */ }
+  renderHistory();
+}
+
+// ---------------------------------------------------------------------------
+// Copy to clipboard (with a fallback for non-secure contexts)
+// ---------------------------------------------------------------------------
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) { /* fall through to legacy path */ }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch (_) { return false; }
+}
+
+// delegated handler for every ⧉ copy button (SPARQL output + table cells)
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".copy-btn");
+  if (!btn) return;
+  let text = btn.dataset.copyText;
+  if (text == null && btn.dataset.copyTarget) {
+    const tgt = document.querySelector(btn.dataset.copyTarget);
+    text = tgt ? tgt.innerText : "";
+  }
+  const ok = await copyText(text ?? "");
+  const label = btn.textContent;
+  btn.classList.toggle("copied", ok);
+  btn.textContent = ok ? "✓ Copied" : "copy failed";
+  setTimeout(() => { btn.textContent = label; btn.classList.remove("copied"); }, 1400);
+});
 
 // ---------------------------------------------------------------------------
 // Backend access
@@ -73,9 +154,14 @@ function renderComponents() {
       `<span class="name">${esc(c.name)}</span>` +
       (c.accessible
         ? `<span class="badge up">up</span><span class="add">${selected ? "✓ added" : "+ add"}</span>`
-        : `<span class="badge down">${esc(c.status || "offline")}</span>`);
+        : `<span class="badge down">${esc(c.status || "offline")}</span>`) +
+      `<button class="info-btn" title="component information" aria-label="component information">ⓘ</button>`;
     if (c.accessible) li.addEventListener("click", () => toggleComponent(c.name));
     else li.title = "registered but not reachable — cannot be selected";
+    li.querySelector(".info-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openComponentModal(c);
+    });
     ul.appendChild(li);
   }
 }
@@ -87,6 +173,49 @@ function toggleComponent(name) {
   renderComponents();
   renderOrder();
 }
+
+// ---------------------------------------------------------------------------
+// Component information overlay (IP / port / service URL + embedded iframe)
+// ---------------------------------------------------------------------------
+function openComponentModal(c) {
+  $("#modal-title").textContent = c.name;
+  const rows = [
+    ["Status", (c.status || "?") + (c.accessible ? " · selectable" : " · not selectable")],
+    ["Host / IP", c.host],
+    ["Port", c.port != null ? String(c.port) : null],
+    ["Service URL", c.serviceUrl],
+    ["Health URL", c.healthUrl],
+    ["Management URL", c.managementUrl],
+    ["Pipeline proxy", c.url],
+  ].filter(([, v]) => v != null && v !== "");
+  $("#modal-info").innerHTML = rows.map(([k, v]) =>
+    `<div class="kv"><span class="k">${esc(k)}</span><span class="v">` +
+    (isUrl(v) ? `<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>` : esc(v)) +
+    `</span></div>`).join("");
+
+  const iframe = $("#modal-iframe");
+  const note = document.querySelector(".modal-iframe-note");
+  if (c.serviceUrl) {
+    iframe.src = c.serviceUrl;
+    iframe.classList.remove("hidden");
+    note.classList.remove("hidden");
+  } else {
+    iframe.removeAttribute("src");
+    iframe.classList.add("hidden");
+    note.classList.add("hidden");
+  }
+  $("#component-modal").classList.remove("hidden");
+}
+function closeComponentModal() {
+  $("#component-modal").classList.add("hidden");
+  $("#modal-iframe").removeAttribute("src"); // stop loading the embedded page
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-modal-close]")) closeComponentModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !$("#component-modal").classList.contains("hidden")) closeComponentModal();
+});
 
 // ---------------------------------------------------------------------------
 // Pipeline order (drag & drop)
@@ -144,9 +273,11 @@ async function run() {
   if (!question) { runStatus.textContent = "Please enter a question."; return; }
   if (!state.order.length) { runStatus.textContent = "Please select at least one component."; return; }
 
+  rememberQuestion(question); // make it available for auto-completion next time
+
   const btn = $("#run");
   btn.disabled = true;
-  runStatus.textContent = "running the pipeline… this can take a moment.";
+  runStatus.textContent = "processing the question… this can take a moment.";
 
   try {
     const body = new URLSearchParams();
@@ -168,7 +299,7 @@ async function run() {
     if (!graph) throw new Error("no result graph returned by the pipeline");
 
     runStatus.textContent = "done — reading the results from the triplestore…";
-    await showResults(graph);
+    await showResults(graph, result);
     runStatus.textContent = "";
   } catch (e) {
     runStatus.className = "run-status error";
@@ -179,56 +310,144 @@ async function run() {
 }
 
 // ---------------------------------------------------------------------------
-// Results: answer, generated SPARQL, per-component intermediate info
+// SPARQL pretty-printer (whitespace-only; safe — never alters token content).
+// Returns { ok, text }: ok=false → input is not valid SPARQL, show as text.
 // ---------------------------------------------------------------------------
-async function showResults(graph) {
+function tokenizeSparql(s) {
+  const tokens = [];
+  const n = s.length;
+  let i = 0;
+  while (i < n) {
+    const c = s[i];
+    if (c === " " || c === "\t" || c === "\r" || c === "\n") { i++; continue; }
+    if (c === "#") { // comment to end of line
+      let j = i; while (j < n && s[j] !== "\n") j++;
+      tokens.push({ t: "comment", v: s.slice(i, j) }); i = j; continue;
+    }
+    if (c === "<") { // IRI (no whitespace inside) — otherwise a '<' operator
+      const m = /^<[^<>"{}|^`\\\s]*>/.exec(s.slice(i));
+      if (m) { tokens.push({ t: "iri", v: m[0] }); i += m[0].length; continue; }
+      tokens.push({ t: "word", v: c }); i++; continue;
+    }
+    if (c === '"' || c === "'") { // string literal (single or triple quoted)
+      const triple = s.substr(i, 3);
+      let len;
+      if (triple === '"""' || triple === "'''") {
+        let j = i + 3;
+        while (j < n && s.substr(j, 3) !== triple) { if (s[j] === "\\") j++; j++; }
+        len = Math.min(j + 3, n) - i;
+      } else {
+        let j = i + 1;
+        while (j < n && s[j] !== c) { if (s[j] === "\\") j++; j++; }
+        len = Math.min(j + 1, n) - i;
+      }
+      tokens.push({ t: "string", v: s.substr(i, len) }); i += len; continue;
+    }
+    if ("{}()[].;,".includes(c)) { tokens.push({ t: "punc", v: c }); i++; continue; }
+    const m = /^[^\s{}()\[\].;,"'#<]+/.exec(s.slice(i));
+    if (m) { tokens.push({ t: "word", v: m[0] }); i += m[0].length; continue; }
+    tokens.push({ t: "word", v: c }); i++;
+  }
+  return tokens;
+}
+
+function bracketsBalanced(tokens) {
+  const stack = [];
+  const close = { ")": "(", "]": "[", "}": "{" };
+  for (const tk of tokens) {
+    if (tk.t !== "punc") continue;
+    if (tk.v === "(" || tk.v === "[" || tk.v === "{") stack.push(tk.v);
+    else if (close[tk.v] && stack.pop() !== close[tk.v]) return false;
+  }
+  return stack.length === 0;
+}
+
+function renderSparql(tokens) {
+  const IND = "  ";
+  const noSpaceBefore = new Set([")", "]", ",", ";", ".", "("]);
+  const noSpaceAfter = new Set(["(", "["]);
+  const forms = /^(PREFIX|BASE|SELECT|ASK|CONSTRUCT|DESCRIBE|WITH|INSERT|DELETE|CLEAR|LOAD|CREATE|DROP)$/i;
+  let out = "";
+  let depth = 0;
+  let prev = null;
+  const atLineStart = () => out === "" || /\n[ \t]*$/.test(out);
+  const newline = () => { out = out.replace(/[ \t]+$/, ""); out += "\n" + IND.repeat(Math.max(depth, 0)); };
+
+  for (const tk of tokens) {
+    if (tk.t === "comment") {
+      if (!atLineStart()) newline();
+      out += tk.v; newline(); prev = tk; continue;
+    }
+    if (tk.t === "punc" && tk.v === "{") {
+      if (!atLineStart() && !out.endsWith(" ")) out += " ";
+      out += "{"; depth++; newline(); prev = tk; continue;
+    }
+    if (tk.t === "punc" && tk.v === "}") {
+      depth = Math.max(depth - 1, 0);
+      out = out.replace(/[ \t]*$/, ""); out += "\n" + IND.repeat(depth);
+      out += "}"; newline(); prev = tk; continue;
+    }
+    if (tk.t === "punc" && (tk.v === "." || tk.v === ";")) {
+      out = out.replace(/[ \t]+$/, ""); out += " " + tk.v; newline(); prev = tk; continue;
+    }
+    if (tk.t === "word" && forms.test(tk.v) && !atLineStart()) newline();
+
+    let sep = "";
+    if (!atLineStart()) {
+      if (prev && prev.t === "punc" && noSpaceAfter.has(prev.v)) sep = "";
+      else if (tk.t === "punc" && noSpaceBefore.has(tk.v)) sep = "";
+      else sep = " ";
+    }
+    out += sep + tk.v;
+    prev = tk;
+  }
+  return out.split("\n").map((l) => l.replace(/[ \t]+$/, "")).join("\n")
+    .replace(/\n{3,}/g, "\n\n").replace(/^\n+/, "").replace(/\n+$/, "");
+}
+
+function formatSparql(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) return { ok: false, text: "" };
+  let tokens;
+  try { tokens = tokenizeSparql(text); } catch (_) { return { ok: false, text }; }
+  const hasForm = tokens.some((t) => t.t === "word" &&
+    /^(SELECT|ASK|CONSTRUCT|DESCRIBE|INSERT|DELETE|LOAD|CLEAR|CREATE|DROP|WITH)$/i.test(t.v));
+  if (!hasForm || !bracketsBalanced(tokens)) return { ok: false, text };
+  try { return { ok: true, text: renderSparql(tokens) }; }
+  catch (_) { return { ok: false, text }; }
+}
+
+// ---------------------------------------------------------------------------
+// Results: generated SPARQL, JSON answer table, per-component intermediate info
+// ---------------------------------------------------------------------------
+async function showResults(graph, result) {
   $("#results").classList.remove("hidden");
+  showPipelineResponse(result);
   $("#graph-meta").textContent = "result graph: " + graph;
   $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+  loadGraphIntoYasgui(graph);
 
   await Promise.all([
-    showAnswer(graph),
     showGeneratedSparql(graph),
+    showAnswerTable(graph),
     showComponentFacts(graph),
   ]);
 }
 
-async function showAnswer(graph) {
-  const el = $("#answer-summary");
-  try {
-    const rows = await sparql(`PREFIX qa: <${QA}>
-PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-SELECT ?value ?component FROM <${graph}> WHERE {
-  ?a a qa:AnnotationOfAnswerJson ; oa:hasBody ?b ; oa:annotatedBy ?component .
-  ?b rdf:value ?value .
-} LIMIT 5`);
-    if (!rows.length) {
-      el.innerHTML = `<div class="answer none"><span class="lbl">Answer</span><br>No answer was stored for this run.</div>`;
-      return;
-    }
-    const r = rows[0];
-    el.innerHTML = `<div class="answer"><span class="lbl">Answer · by ${esc(shortUri(cell(r, "component")))}</span>` +
-      `<div>${renderAnswerValue(cell(r, "value"))}</div></div>`;
-  } catch (e) {
-    el.innerHTML = `<div class="answer none"><span class="lbl">Answer</span><br>could not read the answer (${esc(e.message)})</div>`;
-  }
-}
-
-// Render a stored answer in a readable way: SPARQL-results JSON → "subject — predicate — object" lines
-function renderAnswerValue(value) {
-  try {
-    const obj = JSON.parse(value);
-    const b = obj && obj.results && obj.results.bindings;
-    if (Array.isArray(b) && b.length) {
-      const items = b.slice(0, 25).map((row) => {
-        const vals = Object.keys(row).map((k) => `<code>${esc(row[k].value)}</code>`);
-        return `<li>${vals.join(" — ")}</li>`;
-      });
-      return `<ul class="answer-rows">${items.join("")}</ul>`;
-    }
-  } catch (_) { /* not JSON — show as-is */ }
-  return esc(value);
+// The raw JSON the pipeline returns (endpoint, inGraph, outGraph, question) —
+// shown as a key/value table (copy each value) plus the raw JSON (copy all),
+// so other applications can integrate against this pipeline run.
+function showPipelineResponse(result) {
+  const el = $("#pipeline-response");
+  if (!result || typeof result !== "object") { el.innerHTML = ""; return; }
+  const rows = Object.entries(result).map(([k, v]) => [k, stringify(v)]);
+  const raw = JSON.stringify(result, null, 2);
+  el.innerHTML =
+    tableHTML(["field", "value"], rows, [false, true]) +
+    `<div class="code-wrap pipeline-raw">` +
+      `<button class="copy-btn" data-copy-target="#pipeline-response-raw" title="copy JSON">⧉ Copy JSON</button>` +
+      `<pre id="pipeline-response-raw" class="code">${esc(raw)}</pre>` +
+    `</div>`;
 }
 
 async function showGeneratedSparql(graph) {
@@ -241,17 +460,96 @@ SELECT ?sparql ?component ?time FROM <${graph}> WHERE {
   OPTIONAL { ?a oa:annotatedAt ?time }
 } ORDER BY DESC(?time)`);
     if (!rows.length) { el.textContent = "— no SPARQL query was generated for this run —"; return; }
-    el.textContent = rows.map((r) =>
-      `# generated by ${shortUri(cell(r, "component"))}\n${cell(r, "sparql")}`).join("\n\n");
+    el.textContent = rows.map((r) => {
+      const f = formatSparql(cell(r, "sparql"));
+      const header = `# generated by ${shortUri(cell(r, "component"))}` +
+        (f.ok ? "" : "  (not valid SPARQL — shown as text)");
+      return `${header}\n${f.text}`;
+    }).join("\n\n");
   } catch (e) {
     el.textContent = "could not read the generated SPARQL query (" + e.message + ")";
   }
+}
+
+// Show the backend's JSON answer as a table; every value cell gets a copy button.
+async function showAnswerTable(graph) {
+  const el = $("#answer-table");
+  let rows;
+  try {
+    rows = await sparql(`PREFIX qa: <${QA}>
+PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?value ?component ?time FROM <${graph}> WHERE {
+  ?a a qa:AnnotationOfAnswerJson ; oa:hasBody ?b ; oa:annotatedBy ?component .
+  ?b rdf:value ?value .
+  OPTIONAL { ?a oa:annotatedAt ?time }
+} ORDER BY DESC(?time)`);
+  } catch (e) {
+    el.innerHTML = `<div class="answer-none">could not read the answer (${esc(e.message)})</div>`;
+    return;
+  }
+  if (!rows.length) {
+    el.innerHTML = `<div class="answer-none">No JSON answer was stored for this run.</div>`;
+    return;
+  }
+  const r = rows[0];
+  el.innerHTML = `<p class="answer-by">provided by <strong>${esc(shortUri(cell(r, "component")))}</strong></p>` +
+    jsonToTable(cell(r, "value"));
+}
+
+// Turn a JSON answer string into an HTML table (handles SPARQL-results JSON,
+// arrays of objects, arrays of scalars, plain objects and scalars).
+function jsonToTable(raw) {
+  let data;
+  try { data = JSON.parse(raw); } catch (_) { return singleValueTable(raw); }
+
+  if (data && data.results && Array.isArray(data.results.bindings)) {
+    const b = data.results.bindings;
+    if (!b.length) return `<div class="answer-none">The query returned no bindings.</div>`;
+    const vars = (data.head && data.head.vars) || [...new Set(b.flatMap((x) => Object.keys(x)))];
+    const rows = b.map((row) => vars.map((v) => (row[v] ? row[v].value : "")));
+    return tableHTML(vars, rows);
+  }
+  if (Array.isArray(data)) {
+    if (!data.length) return `<div class="answer-none">Answer is an empty list.</div>`;
+    if (data[0] !== null && typeof data[0] === "object") {
+      const cols = [...new Set(data.flatMap((o) => Object.keys(o)))];
+      return tableHTML(cols, data.map((o) => cols.map((c) => stringify(o[c] ?? ""))));
+    }
+    return tableHTML(["#", "value"], data.map((v, i) => [String(i + 1), stringify(v)]), [false, true]);
+  }
+  if (data && typeof data === "object") {
+    const entries = Object.entries(data);
+    if (!entries.length) return `<div class="answer-none">Answer is an empty object.</div>`;
+    return tableHTML(["field", "value"], entries.map(([k, v]) => [k, stringify(v)]), [false, true]);
+  }
+  return singleValueTable(stringify(data));
+}
+
+function tableHTML(cols, rows, copyable) {
+  const can = (i) => (copyable ? !!copyable[i] : true);
+  const head = `<thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>`;
+  const body = rows.map((cells) =>
+    `<tr>${cells.map((v, i) => valueCell(v, can(i))).join("")}</tr>`).join("");
+  return `<table class="answer-table">${head}<tbody>${body}</tbody></table>`;
+}
+
+function valueCell(text, copyable) {
+  const t = stringify(text ?? "");
+  const btn = (copyable && t !== "")
+    ? `<button class="copy-btn" data-copy-text="${esc(t)}" title="copy value">⧉</button>` : "";
+  return `<td><div class="val"><span>${esc(t)}</span>${btn}</div></td>`;
+}
+
+function singleValueTable(text) {
+  return tableHTML(["value"], [[stringify(text)]]);
 }
 
 async function showComponentFacts(graph) {
   const el = $("#component-intermediate");
   let rows;
   try {
+    // exclude AnnotationOfLogMethod (internal method-call log noise)
     rows = await sparql(`PREFIX qa: <${QA}>
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -262,6 +560,7 @@ SELECT ?type ?component ?target ?body ?value ?time FROM <${graph}> WHERE {
   OPTIONAL { ?annotation oa:hasBody ?body }
   OPTIONAL { ?annotation oa:hasBody ?bn . ?bn rdf:value ?value }
   FILTER(STRSTARTS(STR(?type), "${QA}"))
+  FILTER(?type != qa:AnnotationOfLogMethod)
 } ORDER BY ?component ?time`);
   } catch (e) {
     el.innerHTML = `<p class="hint">could not read the component information (${esc(e.message)})</p>`;
@@ -278,10 +577,13 @@ SELECT ?type ?component ?target ?body ?value ?time FROM <${graph}> WHERE {
   }
   el.innerHTML = "";
   for (const [comp, facts] of byComp) {
-    const card = document.createElement("div");
+    // collapsible box (collapsed by default; click the summary to open/close)
+    const card = document.createElement("details");
     card.className = "comp-card";
-    card.innerHTML = `<h4>${esc(comp)} <span class="count">${facts.length} annotation${facts.length === 1 ? "" : "s"}</span></h4>` +
-      facts.map(describeFact).join("");
+    card.innerHTML =
+      `<summary><span class="h4">${esc(comp)} ` +
+      `<span class="count">${facts.length} annotation${facts.length === 1 ? "" : "s"}</span></span></summary>` +
+      `<div class="facts-body">${facts.map(describeFact).join("")}</div>`;
     el.appendChild(card);
   }
 }
@@ -316,16 +618,17 @@ function describeFact(r) {
       return tag("Identified a class/type:", fmt(content));
     case "AnnotationOfAnswerDataType":
       return tag("Determined the answer data type:", fmt(content));
-    case "AnnotationOfAnswerSPARQL":
-      return tag("Generated a SPARQL query:",
-        `<code class="miniquery">${esc((content || "").slice(0, 600))}</code>`);
+    case "AnnotationOfAnswerSPARQL": {
+      const f = formatSparql(content);
+      return tag(f.ok ? "Generated a SPARQL query:" : "Generated a query (not valid SPARQL — shown as text):",
+        `<code class="miniquery">${esc((f.text || "").slice(0, 1200))}</code>`);
+    }
     case "AnnotationOfAnswerJson":
     case "AnnotationOfTextAnswerJson":
       return tag("Produced the answer.", "");
     case "AnnotationOfAnswerInGraph":
       return tag("Stored the answer in the result graph.", "");
     case "AnnotationOfLogQuery":
-    case "AnnotationOfLogMethod":
     case "AnnotationOfLog":
       return tag("Recorded a processing-log entry.", "");
     default:
@@ -334,8 +637,49 @@ function describeFact(r) {
 }
 
 // ---------------------------------------------------------------------------
+// Embedded YASGUI (optional — only if the library loaded from the CDN)
+// ---------------------------------------------------------------------------
+let yasgui = null;
+function initYasgui() {
+  const host = $("#yasgui");
+  if (typeof Yasgui === "undefined") {
+    host.classList.add("hidden");
+    $("#yasgui-fallback").classList.remove("hidden");
+    return;
+  }
+  try {
+    yasgui = new Yasgui(host, {
+      requestConfig: { endpoint: location.origin + "/sparql", method: "POST" },
+      copyEndpointOnNewTab: false,
+    });
+    setYasguiQuery(`# Explore the Qanary triplestore. Each question-answering run is stored in its own graph.
+SELECT ?graph (COUNT(*) AS ?triples) WHERE {
+  GRAPH ?graph { ?s ?p ?o }
+} GROUP BY ?graph ORDER BY DESC(?triples) LIMIT 25`);
+  } catch (e) {
+    host.classList.add("hidden");
+    $("#yasgui-fallback").classList.remove("hidden");
+  }
+}
+
+function setYasguiQuery(q) {
+  try { if (yasgui && yasgui.getTab()) yasgui.getTab().setQuery(q); } catch (_) { /* ignore */ }
+}
+
+// After a run, pre-load the result graph into the YASGUI editor for convenience.
+function loadGraphIntoYasgui(graph) {
+  setYasguiQuery(`# Everything stored for this question-answering run
+SELECT ?subject ?predicate ?object FROM <${graph}> WHERE {
+  ?subject ?predicate ?object
+} LIMIT 200`);
+}
+
+// ---------------------------------------------------------------------------
 // wire up + live refresh
 // ---------------------------------------------------------------------------
+initTheme();
+initYasgui();
+renderHistory();
 $("#run").addEventListener("click", run);
 $("#refresh").addEventListener("click", loadComponents);
 loadComponents();

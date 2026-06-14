@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryComponent;
 import de.codecentric.boot.admin.server.domain.entities.Instance;
+import de.codecentric.boot.admin.server.domain.values.Registration;
 import io.swagger.v3.oas.annotations.Operation;
 
 /**
@@ -82,6 +85,25 @@ public class QanaryConfigurationController {
 			object.put("url", "/components/" + entry.getKey());
 			object.put("status", status);
 			object.put("accessible", instance.getStatusInfo().isUp());
+
+			// expose the component's own registration so the frontend can show its
+			// service URL (for an embedded iframe), host/IP and port in an info overlay
+			Registration registration = instance.getRegistration();
+			if (registration != null) {
+				String serviceUrl = registration.getServiceUrl();
+				object.put("serviceUrl", serviceUrl);
+				object.put("healthUrl", registration.getHealthUrl());
+				object.put("managementUrl", registration.getManagementUrl());
+				if (serviceUrl != null && !serviceUrl.isEmpty()) {
+					try {
+						URI uri = URI.create(serviceUrl);
+						object.put("host", uri.getHost());
+						object.put("port", uri.getPort() == -1 ? null : uri.getPort());
+					} catch (IllegalArgumentException e) {
+						// leave host/port unset if the service URL is not parseable
+					}
+				}
+			}
 			json.add(object);
 		}
 		return new ResponseEntity<>(json, HttpStatus.OK);
