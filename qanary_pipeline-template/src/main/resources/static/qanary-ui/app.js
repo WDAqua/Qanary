@@ -1110,6 +1110,14 @@ function init() {
   toggleScrollTop();
   scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
+  // header info button: open the about / developer overlay
+  $("#open-info").addEventListener("click", () => $("#info-modal").classList.remove("hidden"));
+  // the "… components available" pill jumps to the System configuration card
+  $("#pipeline-status").addEventListener("click", () => {
+    const el = $("#components-card");
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: "smooth" });
+  });
+
   $("#tabs").addEventListener("click", (e) => {
     const tab = e.target.closest(".tab");
     if (!tab) return;

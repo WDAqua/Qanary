@@ -17,13 +17,14 @@
       <span class="brand-tagline">Question Answering pipeline</span>
     </div>
     <div class="topbar-right">
+      <button id="pipeline-status" class="status-pill" type="button" title="components registered with this pipeline — click to jump to the system configuration">loading…</button>
       <button id="open-history" class="config-btn" title="previously used configurations, stored in your browser">🕘 Saved configurations</button>
       <div class="theme-switch" role="group" aria-label="Color theme">
         <button data-theme-btn="light"    title="Light theme">☀︎<span>Light</span></button>
         <button data-theme-btn="dark"     title="Dark theme">☾<span>Dark</span></button>
         <button data-theme-btn="contrast" title="High-contrast theme">◑<span>Contrast</span></button>
       </div>
-      <div id="pipeline-status" class="status-pill" title="components registered with this pipeline">loading…</div>
+      <button id="open-info" class="info-button" type="button" title="About this frontend — features &amp; developer guide" aria-label="About this frontend">ⓘ</button>
     </div>
   </header>
 
@@ -170,6 +171,44 @@
       <div class="code-wrap code-modal-body">
         <button class="copy-btn" data-copy-target="#code-output" title="copy to clipboard">⧉ Copy</button>
         <pre id="code-output" class="code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- info / about overlay: what the frontend does + how it is built (for developers) -->
+  <div id="info-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="info-title">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-box">
+      <header class="modal-head">
+        <h3 id="info-title">About this Qanary frontend</h3>
+        <button class="modal-close" data-modal-close title="close" aria-label="close">×</button>
+      </header>
+      <div class="info-body">
+        <h4>What you can do</h4>
+        <ul>
+          <li><strong>Question tabs</strong> — work on several questions at once; each tab keeps its own question, parameters, component selection and result.</li>
+          <li><strong>System configuration</strong> — pick from the live list of registered components (offline ones are shown but not selectable) and <strong>drag</strong> them into the pipeline order; the ⓘ on a component shows its host/port/URLs and service page.</li>
+          <li><strong>Process question</strong> — runs the pipeline; a spinner and a live timer show progress, then the result appears.</li>
+          <li><strong>Results</strong> — the generated SPARQL query, the answer rendered as a <strong>table</strong> (copy any value), and a plain-language summary of what each component did (read from the triplestore, no SPARQL needed).</li>
+          <li><strong>Run from code</strong> — get a ready-to-run <code>curl</code> or Python snippet for the current configuration.</li>
+          <li><strong>Saved configurations</strong> — every run is stored in your browser and can be reopened in a new tab.</li>
+          <li><strong>SPARQL editor</strong> — query the Qanary triplestore yourself (embedded YASGUI).</li>
+          <li><strong>Themes &amp; errors</strong> — light, dark and high-contrast themes; on a pipeline error (e.g. HTTP 500) an error card explains the cause.</li>
+        </ul>
+        <h4>For developers</h4>
+        <p>The frontend is a dependency-free static app served by the pipeline at <code>/qa</code>. Its sources live in the
+          pipeline module under <code>src/main/resources/static/qanary-ui/</code>: <code>index.html</code> (structure),
+          <code>app.js</code> (logic — plain JavaScript, no framework or build step) and <code>styles.css</code>
+          (theme tokens as CSS variables derived from the Qanary logo colours).</p>
+        <p>It talks only to the pipeline's own REST endpoints: <code>GET /components/availability</code> (the live
+          component list), <code>POST /startquestionansweringwithtextquestion</code> (run a question),
+          <code>GET /sparql</code> (read results and power YASGUI) and <code>GET /questionanswering/errors</code>
+          (per-question errors). YASGUI is the only optional runtime dependency (loaded from a CDN; the UI degrades
+          gracefully if it is unavailable).</p>
+        <p><strong>To change it:</strong> edit the three files above, rebuild the pipeline jar and image, and recreate
+          the pipeline container — the updated <code>/qa</code> is then served. Re-theme by editing the CSS variables at
+          the top of <code>styles.css</code>; saved configurations live in the browser's IndexedDB (database
+          <code>qanary-frontend</code>).</p>
       </div>
     </div>
   </div>
