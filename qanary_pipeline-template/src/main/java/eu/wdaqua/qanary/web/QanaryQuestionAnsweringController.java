@@ -20,6 +20,7 @@ import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
+import eu.wdaqua.qanary.web.messages.QanaryQuestionAnsweringError;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.commons.io.IOUtils;
@@ -67,6 +68,10 @@ public class QanaryQuestionAnsweringController {
     private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionAnsweringController.class);
     // LinkedHashMap keeps the order of the elements, s.t., the oldest elements can be removed
     private static Map<URI, QanaryQuestionAnsweringFinished> lastQanaryQuestionAnsweringProcesses = new LinkedHashMap<>();
+    // the last errors observed per question URI (see GET QUESTIONANSWERING + "/errors")
+    private static final Map<URI, List<QanaryQuestionAnsweringError>> lastQuestionAnsweringErrors =
+            Collections.synchronizedMap(new LinkedHashMap<>());
+    private final int maxQuestionAnsweringErrorEntries = 1000;
     private final QanaryConfigurator qanaryConfigurator;
     private final QanaryQuestionController qanaryQuestionController;
     // TODO include QanaryPipelineConfigurationController
@@ -388,6 +393,39 @@ public class QanaryQuestionAnsweringController {
     )
     public ResponseEntity<Map<URI, QanaryQuestionAnsweringFinished>> getLastQanaryQuestionAnsweringProcesses() {
         return (new ResponseEntity<Map<URI, QanaryQuestionAnsweringFinished>>(QanaryQuestionAnsweringController.lastQanaryQuestionAnsweringProcesses, HttpStatus.OK));
+    }
+
+    /**
+     * returns the errors the pipeline observed while answering questions: which component failed,
+     * whether the triplestore was not accessible, or whether the pipeline failed. If a
+     * {@code questionuri} is given, only the errors for that question are returned; otherwise the
+     * errors for all recently failed questions are returned (keyed by question URI).
+     *
+     * @param questionuri optional URI of a specific question
+     */
+    @GetMapping(value = QUESTIONANSWERING + "/errors", produces = "application/json")
+    @ResponseBody
+    @Operation(summary = "Return the last errors observed per question", //
+            operationId = "getQuestionAnsweringErrors", //
+            description = "Errors recorded while answering questions (component not available, component " //
+                    + "execution failed, triplestore not accessible, pipeline failure). Pass questionuri to " //
+                    + "get the errors for one specific question's URL; omit it to get all recent errors." //
+    )
+    public ResponseEntity<?> getQuestionAnsweringErrors(
+            @RequestParam(value = "questionuri", required = false) final URI questionuri) {
+        if (questionuri != null) {
+            List<QanaryQuestionAnsweringError> errors;
+            synchronized (lastQuestionAnsweringErrors) {
+                errors = new LinkedList<>(lastQuestionAnsweringErrors.getOrDefault(questionuri, Collections.emptyList()));
+            }
+            logger.info("{}/errors for question {}: {} error(s)", QUESTIONANSWERING, questionuri, errors.size());
+            return new ResponseEntity<>(errors, HttpStatus.OK);
+        }
+        Map<URI, List<QanaryQuestionAnsweringError>> snapshot;
+        synchronized (lastQuestionAnsweringErrors) {
+            snapshot = new LinkedHashMap<>(lastQuestionAnsweringErrors);
+        }
+        return new ResponseEntity<>(snapshot, HttpStatus.OK);
     }
 
 
@@ -754,8 +792,30 @@ public class QanaryQuestionAnsweringController {
         if (componentsToBeCalled.isEmpty() == false) {
             List<QanaryComponent> components = this.myComponentNotifier
                     .getAvailableComponentsFromNames(componentsToBeCalled);
-            QanaryQuestionAnsweringFinished process = qanaryConfigurator.callServices(components, myQanaryMessage);
-            this.removeElementsFromProcessLogIfTooManyExist(process);
+            // a requested component that is not registered or is offline is silently skipped by
+            // getAvailableComponentsFromNames -> record it so the missing component is visible
+            Set<String> resolvedComponentNames = new HashSet<>();
+            for (QanaryComponent component : components) {
+                resolvedComponentNames.add(component.getName());
+            }
+            for (String requestedComponent : componentsToBeCalled) {
+                if (!resolvedComponentNames.contains(requestedComponent)) {
+                    recordQuestionAnsweringError(question,
+                            QanaryQuestionAnsweringError.ErrorType.COMPONENT_NOT_AVAILABLE, requestedComponent,
+                            "requested component is not registered with the pipeline or not reachable; it was skipped");
+                }
+            }
+            try {
+                QanaryQuestionAnsweringFinished process = qanaryConfigurator.callServices(components, myQanaryMessage);
+                this.removeElementsFromProcessLogIfTooManyExist(process);
+            } catch (QanaryExceptionServiceCallNotOk e) {
+                recordQuestionAnsweringError(question,
+                        QanaryQuestionAnsweringError.ErrorType.COMPONENT_EXECUTION_FAILED, e.getComponentName(), e.getMessage());
+                throw e;
+            } catch (RuntimeException e) {
+                recordQuestionAnsweringError(question, classifyRuntimeError(e), null, e.getMessage());
+                throw e;
+            }
         } else {
             logger.warn("Executing components is not done, as the componentlist parameter was empty.");
         }
@@ -764,6 +824,42 @@ public class QanaryQuestionAnsweringController {
                 myQanaryMessage.getInGraph(), myQanaryMessage.getOutGraph(), qanaryConfigurator);
 
         return myRun;
+    }
+
+    /**
+     * Remember an error observed while answering the question identified by the given URI, so a
+     * developer can later retrieve it via {@link #getQuestionAnsweringErrors(URI)}. The map is kept
+     * bounded (oldest questions dropped first).
+     */
+    private void recordQuestionAnsweringError(URI question, QanaryQuestionAnsweringError.ErrorType type,
+                                              String component, String message) {
+        if (question == null) {
+            return;
+        }
+        QanaryQuestionAnsweringError error = new QanaryQuestionAnsweringError(question, type, component, message);
+        logger.warn("recorded {} error for question {}{}: {}", type, question,
+                component == null ? "" : " (component " + component + ")", message);
+        synchronized (lastQuestionAnsweringErrors) {
+            lastQuestionAnsweringErrors.computeIfAbsent(question, q -> new LinkedList<>()).add(error);
+            // keep the map bounded: drop the oldest questions first (LinkedHashMap is insertion-ordered)
+            while (lastQuestionAnsweringErrors.size() > maxQuestionAnsweringErrorEntries) {
+                URI oldest = lastQuestionAnsweringErrors.keySet().iterator().next();
+                lastQuestionAnsweringErrors.remove(oldest);
+            }
+        }
+    }
+
+    /**
+     * Best-effort classification of an unexpected runtime error into a triplestore vs. generic
+     * pipeline failure, based on the error text (the pipeline cannot always tell them apart).
+     */
+    private QanaryQuestionAnsweringError.ErrorType classifyRuntimeError(Throwable e) {
+        String text = (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()).toLowerCase();
+        if (text.contains("sparql") || text.contains("triplestore") || text.contains("virtuoso")
+                || text.contains("jdbc") || text.contains("endpoint") || text.contains("connection refused")) {
+            return QanaryQuestionAnsweringError.ErrorType.TRIPLESTORE_NOT_ACCESSIBLE;
+        }
+        return QanaryQuestionAnsweringError.ErrorType.PIPELINE_FAILURE;
     }
 
     private void removeElementsFromProcessLogIfTooManyExist(QanaryQuestionAnsweringFinished process) {
