@@ -341,7 +341,8 @@ html[data-theme="contrast"] .cfg-use { background: var(--accent); color: #000; }
 /* a status dot makes each tab read as a discrete, switchable tab */
 .tab::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--off); flex: none; transition: background .12s; }
 .tab .tab-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tab:hover { margin-bottom: 1px; background: var(--card); color: var(--accent); }
+/* hover gives colour/background feedback only — keep margin-bottom unchanged so the tab does not shift vertically */
+.tab:hover { background: var(--card); color: var(--accent); }
 .tab:hover::before { background: var(--accent); }
 .tab.active {
   margin-bottom: 0; background: var(--card); color: var(--ink); font-weight: 700;
@@ -353,13 +354,14 @@ html[data-theme="contrast"] .cfg-use { background: var(--accent); color: #000; }
 .tab .tab-close { color: var(--muted); border-radius: 5px; padding: 0 4px; line-height: 1; font-size: 1.05rem; }
 .tab .tab-close:hover { color: var(--danger); background: var(--off-bg); }
 .tab-add { align-self: flex-end; border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 8px 8px 0 0; width: 34px; height: 34px; font-size: 1.2rem; line-height: 1; cursor: pointer; flex: none; margin-bottom: 3px; transition: margin-bottom .12s, color .12s, border-color .12s; }
-.tab-add:hover { border-color: var(--accent); color: var(--accent); background: var(--card); margin-bottom: 1px; }
+.tab-add:hover { border-color: var(--accent); color: var(--accent); background: var(--card); }
 /* the Question box connects to the tab strip above it: square its top corners */
 #question-card { border-top-left-radius: 0; border-top-right-radius: 0; }
 
-/* ---- scroll-to-top button (fixed lower-right; shown once scrolled down) ---- */
+/* ---- scroll-to-top button (fixed lower-left; shown once scrolled down — the
+       lower-right corner is reserved for the "Fork me on GitHub" ribbon) ---- */
 .scroll-top {
-  position: fixed; right: 24px; bottom: 24px; z-index: 50;
+  position: fixed; left: 24px; bottom: 24px; z-index: 50;
   width: 46px; height: 46px; border-radius: 50%; border: none;
   background: var(--brand); color: #fff; font-size: 1.4rem; line-height: 1; cursor: pointer;
   display: grid; place-items: center; box-shadow: 0 6px 20px rgba(15,34,43,.28);
@@ -370,6 +372,24 @@ html[data-theme="contrast"] .cfg-use { background: var(--accent); color: #000; }
 .scroll-top:hover { filter: brightness(1.08); }
 html[data-theme="contrast"] .scroll-top { background: var(--accent); color: #000; border: 2px solid #fff; }
 @media (prefers-reduced-motion: reduce) { .scroll-top { transition: opacity .18s ease; transform: none; } }
+
+/* ---- "Fork me on GitHub" ribbon (pure CSS; diagonal banner in the lower-right corner) ---- */
+.github-ribbon {
+  position: fixed; right: -52px; bottom: 42px; z-index: 40;
+  display: block; padding: 9px 56px; transform: rotate(-45deg); transform-origin: center;
+  background: var(--brand); color: #fff; white-space: nowrap; text-align: center; text-decoration: none;
+  font: 700 .8rem/1 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; letter-spacing: .02em;
+  box-shadow: 0 2px 12px rgba(15,34,43,.35); transition: filter .15s ease;
+}
+/* stitched inner border — the classic ribbon look */
+.github-ribbon::before {
+  content: ""; position: absolute; inset: 3px 0; pointer-events: none;
+  border-top: 1px dashed rgba(255,255,255,.7); border-bottom: 1px dashed rgba(255,255,255,.7);
+}
+.github-ribbon:hover { filter: brightness(1.08); }
+.github-ribbon:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+html[data-theme="contrast"] .github-ribbon { background: var(--accent); color: #000; }
+html[data-theme="contrast"] .github-ribbon::before { border-color: #000; }
 
 /* ---- about / info overlay content ---- */
 .info-body { padding: 6px 18px 18px; overflow-y: auto; }
