@@ -104,14 +104,14 @@ a { color: var(--accent); }
   padding: 14px 24px; background: var(--card); border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 10;
 }
-.brand { display: flex; align-items: center; gap: 13px; }
-.brand .logo { display: block; height: 46px; width: auto; } /* keep the logo's original aspect ratio */
-.brand h1 {
-  font-size: 1.5rem; margin: 0; letter-spacing: .2px; line-height: 1;
-  background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-html[data-theme="contrast"] .brand h1 { background: none; color: var(--accent); -webkit-text-fill-color: var(--accent); }
-.brand p { margin: 2px 0 0; color: var(--muted); font-size: .8rem; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-logo { margin: 0; line-height: 0; font-size: 0; }
+.brand-logo img { display: block; height: 40px; width: auto; } /* full Qanary wordmark logo; keep aspect ratio */
+/* the logo gradient is on a transparent ground — give it a light chip on dark/contrast themes */
+html[data-theme="dark"] .brand-logo img,
+html[data-theme="contrast"] .brand-logo img { background: #fff; border-radius: 8px; padding: 4px 9px; height: 32px; }
+.brand-tagline { color: var(--muted); font-size: .82rem; padding-left: 14px; border-left: 1px solid var(--line); align-self: center; }
+@media (max-width: 560px) { .brand-tagline { display: none; } }
 .topbar-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
 .theme-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--field); }
@@ -196,10 +196,36 @@ html[data-theme="contrast"] .primary { background: var(--accent); color: #000; }
 .primary:disabled { opacity: .55; cursor: progress; }
 .ghost { margin-left: auto; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; color: var(--muted); font-size: .78rem; }
 .ghost:hover { border-color: var(--accent); color: var(--accent); }
+.secondary { background: var(--field); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 11px 16px; font-weight: 600; font-size: .9rem; display: inline-flex; align-items: center; gap: 7px; }
+.secondary:hover { border-color: var(--accent); color: var(--accent); }
 .run-card { display: flex; align-items: center; gap: 16px; }
-.run-row { display: flex; align-items: center; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
-.run-status { color: var(--muted); font-size: .88rem; }
+.run-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); flex-wrap: wrap; padding-right: 170px; }
+/* "Run from code" is pinned to the lower-right corner of the System-configuration box */
+#components-card { position: relative; }
+#components-card #show-code { position: absolute; right: 22px; bottom: 20px; margin: 0; }
+@media (max-width: 560px) {
+  #components-card #show-code { position: static; margin-top: 12px; }
+  .run-row { padding-right: 0; }
+}
+
+/* ---- run status: spinner + live processing time ---- */
+.run-status { color: var(--muted); font-size: .88rem; display: inline-flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .run-status.error { color: var(--danger); }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.run-timer { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); background: var(--ok-bg); border: 1px solid transparent; border-radius: 999px; padding: 2px 9px; font-size: .82rem; }
+.run-status.error .run-timer { color: var(--danger); background: var(--off-bg); }
+.run-done { color: var(--ok); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.run-done strong { font-variant-numeric: tabular-nums; }
+html[data-theme="contrast"] .run-timer { border-color: #fff; }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
+/* ---- pipeline error card (HTTP 500 etc.) ---- */
+#run-error-card { border-left: 4px solid var(--danger); }
+.step.error-step { background: var(--danger); }
+html[data-theme="contrast"] .step.error-step { background: var(--danger); color: #000; }
+#run-error .answer-table { margin-top: 10px; }
+#run-error h3 { margin-top: 14px; }
 
 .hidden { display: none; }
 
@@ -272,3 +298,64 @@ html[data-theme="contrast"] .modal-box { border-width: 2px; }
 .modal-iframe-note { margin: 0 18px; }
 .modal-iframe { flex: 1; min-height: 360px; width: calc(100% - 36px); margin: 6px 18px 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
 .modal-iframe.hidden { display: none; }
+
+/* ---- saved-configurations button + overlay ---- */
+.config-btn { background: var(--field); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; color: var(--muted); font-size: .8rem; font-weight: 600; }
+.config-btn:hover { border-color: var(--accent); color: var(--accent); }
+.history-hint { margin: 0 18px 6px; }
+.history-list { padding: 8px 18px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.cfg { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; background: var(--field); }
+.cfg.disabled { opacity: .6; }
+.cfg-main { min-width: 0; flex: 1; }
+.cfg-q { font-weight: 600; font-size: .95rem; word-break: break-word; }
+.cfg-comps { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cfg-comp { font-size: .74rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--ok-bg); color: var(--ok); border: 1px solid transparent; }
+.cfg-comp.missing { background: var(--off-bg); color: var(--off); text-decoration: line-through; }
+.cfg-arrow { color: var(--muted); font-size: .8rem; }
+.cfg-params { margin-top: 6px; color: var(--muted); font-size: .78rem; word-break: break-word; }
+.cfg-missing { margin-top: 6px; color: var(--warn); font-size: .78rem; }
+.cfg-meta { margin-top: 6px; color: var(--muted); font-size: .72rem; }
+.cfg-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; flex: none; }
+.cfg-use { background: var(--brand); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-weight: 700; font-size: .82rem; }
+html[data-theme="contrast"] .cfg-use { background: var(--accent); color: #000; }
+.cfg-use:hover { filter: brightness(1.06); }
+.cfg-use:disabled { background: var(--off-bg); color: var(--off); cursor: not-allowed; filter: none; }
+.cfg-del { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 5px 9px; font-size: .82rem; cursor: pointer; }
+.cfg-del:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ---- question tabs (browser-style strip: the active tab merges into the panel below) ---- */
+.tabbar { display: flex; align-items: flex-end; gap: 5px; padding: 0 2px; border-bottom: 2px solid var(--line); margin-bottom: -20px; position: relative; z-index: 2; }
+.tabs { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.tab {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; max-width: 240px;
+  border: 1px solid var(--line); border-bottom: none; background: var(--field); color: var(--muted);
+  border-radius: 10px 10px 0 0; padding: 8px 14px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  margin-bottom: 3px; transition: margin-bottom .12s, background .12s, color .12s, box-shadow .12s;
+}
+/* a status dot makes each tab read as a discrete, switchable tab */
+.tab::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--off); flex: none; transition: background .12s; }
+.tab .tab-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab:hover { margin-bottom: 1px; background: var(--card); color: var(--accent); }
+.tab:hover::before { background: var(--accent); }
+.tab.active {
+  margin-bottom: 0; background: var(--card); color: var(--ink); font-weight: 700;
+  border-top: 3px solid var(--accent); padding-top: 6px; box-shadow: 0 -3px 10px rgba(15,34,43,.07);
+}
+.tab.active::before { background: var(--accent); }
+/* cover the strip baseline (and the panel's top border) so the active tab flows into the content */
+.tab.active::after { content: ""; position: absolute; left: -1px; right: -1px; bottom: -3px; height: 3px; background: var(--card); }
+.tab .tab-close { color: var(--muted); border-radius: 5px; padding: 0 4px; line-height: 1; font-size: 1.05rem; }
+.tab .tab-close:hover { color: var(--danger); background: var(--off-bg); }
+.tab-add { align-self: flex-end; border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 8px 8px 0 0; width: 34px; height: 34px; font-size: 1.2rem; line-height: 1; cursor: pointer; flex: none; margin-bottom: 3px; transition: margin-bottom .12s, color .12s, border-color .12s; }
+.tab-add:hover { border-color: var(--accent); color: var(--accent); background: var(--card); margin-bottom: 1px; }
+
+/* ---- run-from-code overlay (curl / Python) ---- */
+.code-modal-hint { margin: 14px 18px 4px; }
+.code-empty { color: var(--warn); font-weight: 600; }
+.code-lang-switch { display: inline-flex; margin: 6px 18px 0; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--field); }
+.code-lang-switch button { border: none; background: transparent; color: var(--muted); cursor: pointer; padding: 7px 18px; font-size: .82rem; font-weight: 700; }
+.code-lang-switch button:hover { color: var(--accent); }
+.code-lang-switch button.active { background: var(--brand); color: #fff; }
+html[data-theme="contrast"] .code-lang-switch button.active { background: var(--accent); color: #000; }
+.code-modal-body { margin: 12px 18px 18px; }
+.code-modal-body .code { max-height: 52vh; overflow: auto; white-space: pre; }

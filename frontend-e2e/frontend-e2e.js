@@ -43,6 +43,7 @@ const CHROME_PATH = process.env.CHROME_PATH || "/usr/bin/google-chrome";
 const OUT = process.env.OUT || path.join(__dirname, "screenshots");
 const RUN_TIMEOUT = parseInt(process.env.RUN_TIMEOUT || "180000", 10);
 const COMPONENTS = (process.env.COMPONENTS || "").split(",").map((s) => s.trim()).filter(Boolean);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let stepNo = 0;
 // Capture a focused, readable viewport screenshot. If `sel` is given, scroll
@@ -163,6 +164,57 @@ function fail(msg) {
 
     // --- Step: embedded YASGUI ---------------------------------------------
     await snap(page, "yasgui-editor", "#yasgui-card");
+
+    // --- Step: pipeline response (integration JSON: 4 key/value pairs) ------
+    console.log("→ checking the pipeline response block");
+    const respKeys = await page.$$eval("#pipeline-response .answer-table tbody tr",
+      (trs) => trs.map((tr) => (tr.querySelector("td") ? tr.querySelector("td").innerText.trim() : "")));
+    console.log("  pipeline response fields: " + respKeys.join(", "));
+    for (const f of ["endpoint", "inGraph", "outGraph", "question"]) {
+      if (!respKeys.includes(f)) fail(`pipeline response is missing the '${f}' field`);
+    }
+    await snap(page, "pipeline-response", "#pipeline-response");
+
+    // --- Step: multiple tabs ----------------------------------------------
+    console.log("→ creating a second question tab");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.click("#tab-add");
+    await sleep(300);
+    const tabCount = await page.$$eval("#tabs .tab", (t) => t.length);
+    console.log("  tab count: " + tabCount);
+    if (tabCount < 2) fail("a second tab was not created");
+    const q2 = await page.$eval("#question", (e) => e.value);
+    if (q2 !== "") fail("the new tab did not start with an empty question (got: '" + q2 + "')");
+    await page.type("#question", "What is the capital of France?");
+    await sleep(200);
+    await snap(page, "multiple-tabs");
+
+    // --- Step: saved-configurations overlay --------------------------------
+    console.log("→ opening the saved-configurations overlay");
+    await page.click("#open-history");
+    await page.waitForSelector("#history-modal:not(.hidden)", { timeout: 5000 });
+    await sleep(400);
+    const cfgCount = await page.$$eval("#history-list .cfg", (c) => c.length);
+    console.log("  saved configurations: " + cfgCount);
+    if (cfgCount < 1) fail("no configuration was stored after processing a question");
+    const usableCount = await page.$$eval("#history-list .cfg-use:not([disabled])", (b) => b.length);
+    if (usableCount < 1) fail("the saved configuration is not usable although its components are available");
+    await snap(page, "saved-configurations");
+
+    // --- Step: reuse a saved configuration (opens it in a new tab) ----------
+    console.log("→ reusing a saved configuration");
+    const tabsBefore = await page.$$eval("#tabs .tab", (t) => t.length);
+    await page.click("#history-list .cfg-use:not([disabled])");
+    await sleep(600);
+    const tabsAfter = await page.$$eval("#tabs .tab", (t) => t.length);
+    if (tabsAfter <= tabsBefore) fail("reusing a configuration did not open a new tab");
+    const restoredQ = await page.$eval("#question", (e) => e.value);
+    const restoredOrder = await page.$$eval("#pipeline-order li.item .name", (n) => n.map((x) => x.textContent.trim()));
+    console.log("  restored question: " + restoredQ);
+    console.log("  restored pipeline order: " + restoredOrder.join(" → "));
+    if (restoredQ !== QUESTION) fail("reused configuration did not restore the original question");
+    if (!restoredOrder.length) fail("reused configuration did not restore the components");
+    await snap(page, "reused-configuration", "#components-card");
 
     // --- Step: theme switching (dark + high contrast) ----------------------
     console.log("→ switching themes");

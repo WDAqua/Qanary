@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Qanary — Question Answering</title>
-  <link rel="icon" type="image/png" href="/qanary-ui/icon-qanary.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
   <link rel="stylesheet" href="/qanary-ui/styles.css">
   <!-- Embedded YASGUI (loaded from CDN; the UI degrades gracefully if offline) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@triply/yasgui/build/yasgui.min.css">
@@ -12,13 +13,11 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <img class="logo" src="/qanary-ui/icon-qanary.png" alt="Qanary logo">
-      <div>
-        <h1>Qanary</h1>
-        <p>Question Answering pipeline</p>
-      </div>
+      <h1 class="brand-logo"><img src="/qanary-ui/logo-qanary.svg" alt="Qanary"></h1>
+      <span class="brand-tagline">Question Answering pipeline</span>
     </div>
     <div class="topbar-right">
+      <button id="open-history" class="config-btn" title="previously used configurations, stored in your browser">🕘 Saved configurations</button>
       <div class="theme-switch" role="group" aria-label="Color theme">
         <button data-theme-btn="light"    title="Light theme">☀︎<span>Light</span></button>
         <button data-theme-btn="dark"     title="Dark theme">☾<span>Dark</span></button>
@@ -29,6 +28,12 @@
   </header>
 
   <main>
+    <!-- question tabs: each tab is an independent question + configuration -->
+    <div class="tabbar">
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <button id="tab-add" class="tab-add" title="new question tab" aria-label="new question tab">+</button>
+    </div>
+
     <!-- Step 1 — question & parameters -->
     <section class="card">
       <h2><span class="step">1</span> Question</h2>
@@ -72,6 +77,13 @@
         <button id="run" class="primary">▶ Process question</button>
         <span id="run-status" class="run-status"></span>
       </div>
+      <button id="show-code" class="secondary" title="show how to run this exact configuration with curl or Python">&lt;/&gt; Run from code</button>
+    </section>
+
+    <!-- shown only when the pipeline returns an error (esp. HTTP 500) -->
+    <section id="run-error-card" class="card hidden">
+      <h2><span class="step error-step" aria-hidden="true">!</span> Pipeline error</h2>
+      <div id="run-error"></div>
     </section>
 
     <!-- Step 3 — results -->
@@ -121,6 +133,44 @@
       <p class="modal-iframe-note hint">Service page (served by the component itself):</p>
       <iframe id="modal-iframe" class="modal-iframe" title="component service page"
               referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    </div>
+  </div>
+
+  <!-- saved-configurations overlay -->
+  <div id="history-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="history-title">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-box">
+      <header class="modal-head">
+        <h3 id="history-title">Saved configurations</h3>
+        <button class="modal-close" data-modal-close title="close" aria-label="close">×</button>
+      </header>
+      <p class="hint history-hint">Your previously used configurations (question, parameters, ordered components),
+        stored in your browser. A configuration can be reused only while all of its components are available;
+        the others are shown but greyed out. Picking one opens it in a new tab.</p>
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
+
+  <!-- run-from-code overlay (curl / Python) for the current configuration -->
+  <div id="code-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="code-title">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-box">
+      <header class="modal-head">
+        <h3 id="code-title">Run this configuration from code</h3>
+        <button class="modal-close" data-modal-close title="close" aria-label="close">×</button>
+      </header>
+      <p class="hint code-modal-hint">Send the current question and component pipeline straight to
+        <code>POST /startquestionansweringwithtextquestion</code> — no UI needed.
+        <span id="code-empty" class="code-empty hidden">Enter a question and select at least one component for a runnable example.</span>
+      </p>
+      <div class="code-lang-switch" role="group" aria-label="Code language">
+        <button data-code-lang="curl">cURL</button>
+        <button data-code-lang="python">Python</button>
+      </div>
+      <div class="code-wrap code-modal-body">
+        <button class="copy-btn" data-copy-target="#code-output" title="copy to clipboard">⧉ Copy</button>
+        <pre id="code-output" class="code"></pre>
+      </div>
     </div>
   </div>
 

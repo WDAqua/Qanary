@@ -22,6 +22,11 @@ public class QanaryWebConfiguration implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/qanary-ui/**")
                 .addResourceLocations("classpath:/static/qanary-ui/");
+        // Serve the Qanary favicon for the whole server (the Spring Boot Admin
+        // server shadows the default classpath:/static/ serving, so /favicon.ico
+        // and /favicon.png need an explicit handler).
+        registry.addResourceHandler("/favicon.ico", "/favicon.png")
+                .addResourceLocations("classpath:/static/");
     }
 
 }

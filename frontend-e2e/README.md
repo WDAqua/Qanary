@@ -58,6 +58,18 @@ With all components selected (the default), the JSON **answer table** is also
 populated — but only when Wikidata serves `QE-SparqlExecuter` (i.e. when it is
 not throttling this host).
 
+## What the test asserts
+
+Besides retrieving the generated SPARQL query, `npm test` also asserts:
+
+- the **pipeline response** block contains the integration fields `endpoint`,
+  `inGraph`, `outGraph`, `question`;
+- a **second tab** can be created and starts with an empty question;
+- the processed run is **stored as a configuration** in the browser database and
+  appears (usable) in the saved-configurations overlay;
+- **reusing** that configuration opens a new tab with the question and ordered
+  components restored.
+
 ## Documented steps
 
 `npm test` captures, in order:
@@ -70,17 +82,21 @@ not throttling this host).
    collapsed "what each component did" boxes
 6. `answer-table` – the backend JSON answer rendered as a table (with copy buttons)
 7. `yasgui-editor` – the embedded YASGUI SPARQL editor
-8. `theme-dark` – dark theme
-9. `theme-contrast` – high-contrast theme
+8. `pipeline-response` – the pipeline's JSON response (4 integration fields)
+9. `multiple-tabs` – a second, independent question tab
+10. `saved-configurations` – the saved-configurations overlay (IndexedDB)
+11. `reused-configuration` – a configuration reopened in a new tab
+12. `theme-dark` – dark theme
+13. `theme-contrast` – high-contrast theme
 
 ### Feature screenshots
 
 `node capture-feature-shots.js` documents the features the pass/fail test does
 not exercise on its own:
 
-10. `component-info-modal` – the ⓘ overlay (host/IP, port, service URL + iframe of
+14. `component-info-modal` – the ⓘ overlay (host/IP, port, service URL + iframe of
     the component's own service page)
-11. `component-facts-expanded` – a collapsed/expanded component box showing the
+15. `component-facts-expanded` – a collapsed/expanded component box showing the
     pretty-printed `AnnotationOfAnswerSPARQL`
 
 It also re-renders `06-answer-table.png` populated with the real Wikidata answer

@@ -3,13 +3,23 @@
 // ---------------------------------------------------------------------------
 // Qanary embedded frontend — talks to the pipeline's own REST endpoints.
 // No build step. Only optional runtime dependency: YASGUI (loaded from CDN).
+//
+// Supports multiple question tabs (each an independent question + configuration)
+// and stores every used configuration in the browser's database (IndexedDB) so
+// it can be replayed later.
 // ---------------------------------------------------------------------------
 
 const QA = "http://www.wdaqua.eu/qa#";
+
+// global state shared by all tabs
 const state = {
   components: [],   // [{name, status, accessible, url, serviceUrl, host, port, ...}]
-  order: [],        // selected component names, in execution order
 };
+
+// per-tab state
+let tabs = [];
+let activeTabId = null;
+let tabSeq = 0;
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
@@ -18,6 +28,116 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 const shortUri = (u) => String(u ?? "").replace(/^.*[#/:]/, "");
 const stringify = (v) => (typeof v === "string" ? v : JSON.stringify(v));
 const isUrl = (v) => typeof v === "string" && /^https?:\/\//i.test(v);
+const formatWhen = (ts) => { try { return ts ? new Date(ts).toLocaleString() : ""; } catch (_) { return ""; } };
+
+// ---------------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------------
+function newTab(config) {
+  const id = "t" + (++tabSeq);
+  const tab = {
+    id,
+    question: (config && config.question) || "",
+    language: (config && config.language) || "",
+    additionaltriples: (config && config.additionaltriples) || "",
+    order: ((config && config.components) || []).slice(),
+    results: null,      // { graph, result }
+    status: "",
+    statusError: false,
+    running: false,
+    runStartedAt: null, // performance.now() when the current run began
+    runElapsedMs: null, // frozen processing time once a run has finished
+    error: null,        // { status, statusText, body } of a failed pipeline call
+  };
+  tabs.push(tab);
+  return tab;
+}
+function activeTab() { return tabs.find((t) => t.id === activeTabId); }
+
+function tabTitle(t) {
+  const q = (t.question || "").trim();
+  const title = q || "New question";
+  return title.length > 28 ? title.slice(0, 28) + "…" : title;
+}
+
+function renderTabs() {
+  const wrap = $("#tabs");
+  wrap.innerHTML = "";
+  tabs.forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "tab" + (t.id === activeTabId ? " active" : "");
+    b.dataset.tabId = t.id;
+    b.setAttribute("role", "tab");
+    b.innerHTML = `<span class="tab-title">${esc(tabTitle(t))}</span>` +
+      (tabs.length > 1 ? `<span class="tab-close" title="close tab" aria-label="close tab">×</span>` : "");
+    wrap.appendChild(b);
+  });
+}
+
+function saveActiveTabInputs() {
+  const t = activeTab();
+  if (!t) return;
+  t.question = $("#question").value;
+  t.language = $("#language").value;
+  t.additionaltriples = $("#additionaltriples").value;
+}
+
+function loadTabIntoDom() {
+  const t = activeTab();
+  if (!t) return;
+  $("#question").value = t.question || "";
+  $("#language").value = t.language || "";
+  $("#additionaltriples").value = t.additionaltriples || "";
+  renderComponents();
+  renderOrder();
+  $("#run").disabled = !!t.running;
+  renderRunStatus(t);
+  renderRunError(t);
+  if (t.running) ensureRunTimer();
+  if (t.results) {
+    showResults(t.results.graph, t.results.result, { scroll: false });
+  } else {
+    $("#results").classList.add("hidden");
+    clearResultsDom();
+  }
+}
+
+function clearResultsDom() {
+  $("#pipeline-response").innerHTML = "";
+  $("#sparql-output").textContent = "—";
+  $("#answer-table").innerHTML = "";
+  $("#component-intermediate").innerHTML = "";
+  $("#graph-meta").textContent = "";
+}
+
+function switchTab(id) {
+  if (id === activeTabId) return;
+  saveActiveTabInputs();
+  activeTabId = id;
+  renderTabs();
+  loadTabIntoDom();
+}
+
+function addTab(config) {
+  saveActiveTabInputs();
+  const t = newTab(config);
+  activeTabId = t.id;
+  renderTabs();
+  loadTabIntoDom();
+  $("#question").focus();
+  return t;
+}
+
+function closeTab(id) {
+  const idx = tabs.findIndex((t) => t.id === id);
+  if (idx < 0) return;
+  const wasActive = id === activeTabId;
+  tabs.splice(idx, 1);
+  if (!tabs.length) { const t = newTab(); activeTabId = t.id; }
+  else if (wasActive) { activeTabId = tabs[Math.max(0, idx - 1)].id; }
+  renderTabs();
+  if (wasActive) loadTabIntoDom();
+}
 
 // ---------------------------------------------------------------------------
 // Theme switching: light / dark / high contrast (persisted in localStorage)
@@ -60,6 +180,179 @@ function rememberQuestion(q) {
 }
 
 // ---------------------------------------------------------------------------
+// Saved configurations — browser database (IndexedDB)
+// ---------------------------------------------------------------------------
+const DB_NAME = "qanary-frontend";
+const DB_VERSION = 1;
+const STORE = "configurations";
+
+function idb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        const os = db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+        os.createIndex("savedAt", "savedAt");
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAllConfigurations() {
+  const db = await idb();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, "readonly").objectStore(STORE).getAll();
+    req.onsuccess = () => resolve((req.result || []).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0)));
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// store a used configuration; identical configs are de-duplicated (savedAt updated)
+async function saveConfiguration(cfg) {
+  const all = await getAllConfigurations().catch(() => []);
+  const key = (c) => JSON.stringify([c.question || "", c.components || [], c.language || "", c.additionaltriples || ""]);
+  const existing = all.find((c) => key(c) === key(cfg));
+  const db = await idb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    const os = tx.objectStore(STORE);
+    if (existing) { existing.savedAt = cfg.savedAt; os.put(existing); }
+    else os.add(cfg);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteConfiguration(id) {
+  const db = await idb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function openHistory() {
+  $("#history-modal").classList.remove("hidden");
+  await renderHistoryList();
+}
+
+async function renderHistoryList() {
+  const el = $("#history-list");
+  let configs;
+  try { configs = await getAllConfigurations(); }
+  catch (e) { el.innerHTML = `<p class="hint">could not read saved configurations (${esc(e.message)})</p>`; return; }
+  if (!configs.length) {
+    el.innerHTML = `<p class="hint">No saved configurations yet — process a question and it will be stored here.</p>`;
+    return;
+  }
+  const avail = new Set(state.components.filter((c) => c.accessible).map((c) => c.name));
+  el.innerHTML = configs.map((cfg) => {
+    const comps = cfg.components || [];
+    const missing = comps.filter((n) => !avail.has(n));
+    const usable = comps.length > 0 && missing.length === 0;
+    const chips = comps.length
+      ? comps.map((n) => `<span class="cfg-comp${avail.has(n) ? "" : " missing"}">${esc(n)}</span>`)
+        .join(`<span class="cfg-arrow">→</span>`)
+      : `<span class="hint">no components</span>`;
+    const params = [];
+    if (cfg.language) params.push("language: " + esc(cfg.language));
+    if (cfg.additionaltriples) params.push("additional triples");
+    return `<div class="cfg${usable ? "" : " disabled"}">
+      <div class="cfg-main">
+        <div class="cfg-q">${esc(cfg.question || "(no question)")}</div>
+        <div class="cfg-comps">${chips}</div>
+        ${params.length ? `<div class="cfg-params">${params.join(" · ")}</div>` : ""}
+        ${missing.length ? `<div class="cfg-missing">unavailable: ${missing.map(esc).join(", ")}</div>` : ""}
+        <div class="cfg-meta">${esc(formatWhen(cfg.savedAt))}</div>
+      </div>
+      <div class="cfg-actions">
+        <button class="cfg-use" data-use="${cfg.id}" ${usable ? "" : "disabled"}
+          title="${usable ? "open this configuration in a new tab" : "some required components are unavailable"}">Use</button>
+        <button class="cfg-del" data-del="${cfg.id}" title="delete this configuration">🗑</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function useConfiguration(cfg) {
+  addTab({
+    question: cfg.question,
+    language: cfg.language,
+    additionaltriples: cfg.additionaltriples,
+    components: (cfg.components || []).slice(),
+  });
+  closeModal($("#history-modal"));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---------------------------------------------------------------------------
+// "Run from code" overlay — curl / Python for the current configuration
+// ---------------------------------------------------------------------------
+let codeLang = "curl";
+
+function currentConfig() {
+  const t = activeTab();
+  return {
+    question: $("#question").value.trim(),
+    language: $("#language").value.trim(),
+    additionaltriples: $("#additionaltriples").value.trim(),
+    components: t ? t.order.slice() : [],
+  };
+}
+
+const shQuote = (s) => "'" + String(s).replace(/'/g, "'\\''") + "'";
+const pyStr = (s) => '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n") + '"';
+
+function buildCurl(cfg, endpoint) {
+  const args = [`-X POST ${shQuote(endpoint)}`];
+  args.push(`--data-urlencode ${shQuote("question=" + cfg.question)}`);
+  if (cfg.language) args.push(`--data-urlencode ${shQuote("language=" + cfg.language)}`);
+  if (cfg.additionaltriples) args.push(`--data-urlencode ${shQuote("additionaltriples=" + cfg.additionaltriples)}`);
+  for (const c of cfg.components) args.push(`--data-urlencode ${shQuote("componentlist[]=" + c)}`);
+  return "curl " + args.join(" \\\n     ");
+}
+
+function buildPython(cfg, endpoint) {
+  const data = [`    ("question", ${pyStr(cfg.question)}),`];
+  if (cfg.language) data.push(`    ("language", ${pyStr(cfg.language)}),`);
+  if (cfg.additionaltriples) data.push(`    ("additionaltriples", ${pyStr(cfg.additionaltriples)}),`);
+  for (const c of cfg.components) data.push(`    ("componentlist[]", ${pyStr(c)}),`);
+  return [
+    "import requests",
+    "",
+    `url = ${pyStr(endpoint)}`,
+    "# form-encoded; componentlist[] repeats once per component, in pipeline order",
+    "data = [",
+    ...data,
+    "]",
+    "",
+    "response = requests.post(url, data=data)",
+    "response.raise_for_status()",
+    "print(response.json())",
+  ].join("\n");
+}
+
+function renderCodeModal() {
+  const cfg = currentConfig();
+  const endpoint = location.origin + "/startquestionansweringwithtextquestion";
+  $("#code-empty").classList.toggle("hidden", !!(cfg.question && cfg.components.length));
+  $("#code-output").textContent =
+    codeLang === "python" ? buildPython(cfg, endpoint) : buildCurl(cfg, endpoint);
+  $$("[data-code-lang]").forEach((b) => b.classList.toggle("active", b.dataset.codeLang === codeLang));
+}
+
+function openCodeModal() {
+  saveActiveTabInputs();
+  renderCodeModal();
+  $("#code-modal").classList.remove("hidden");
+}
+
+// ---------------------------------------------------------------------------
 // Copy to clipboard (with a fallback for non-secure contexts)
 // ---------------------------------------------------------------------------
 async function copyText(text) {
@@ -82,7 +375,6 @@ async function copyText(text) {
   } catch (_) { return false; }
 }
 
-// delegated handler for every ⧉ copy button (SPARQL output + table cells)
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".copy-btn");
   if (!btn) return;
@@ -99,6 +391,23 @@ document.addEventListener("click", async (e) => {
 });
 
 // ---------------------------------------------------------------------------
+// Modals (component info + saved configurations)
+// ---------------------------------------------------------------------------
+function closeModal(modal) {
+  if (!modal) return;
+  modal.classList.add("hidden");
+  if (modal.id === "component-modal") $("#modal-iframe").removeAttribute("src");
+}
+document.addEventListener("click", (e) => {
+  const c = e.target.closest("[data-modal-close]");
+  if (!c) return;
+  closeModal(c.closest(".modal"));
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") $$(".modal:not(.hidden)").forEach(closeModal);
+});
+
+// ---------------------------------------------------------------------------
 // Backend access
 // ---------------------------------------------------------------------------
 async function getJSON(url) {
@@ -107,7 +416,6 @@ async function getJSON(url) {
   return r.json();
 }
 
-// run a SELECT against the pipeline's triplestore proxy; returns the binding rows
 async function sparql(query) {
   const r = await fetch("/sparql?query=" + encodeURIComponent(query),
     { headers: { Accept: "application/sparql-results+json" } });
@@ -130,13 +438,14 @@ async function loadComponents() {
   }
   list.sort((a, b) => a.name.localeCompare(b.name));
   state.components = list;
-  // drop selections that are no longer accessible / no longer registered
+  // drop selections that are no longer accessible / no longer registered (all tabs)
   const usable = new Set(list.filter((c) => c.accessible).map((c) => c.name));
-  state.order = state.order.filter((n) => usable.has(n));
+  tabs.forEach((t) => { t.order = t.order.filter((n) => usable.has(n)); });
   renderComponents();
   renderOrder();
   const up = list.filter((c) => c.accessible).length;
   $("#pipeline-status").textContent = `${up}/${list.length} components available`;
+  if (!$("#history-modal").classList.contains("hidden")) renderHistoryList();
 }
 
 function renderComponents() {
@@ -145,10 +454,11 @@ function renderComponents() {
     ul.innerHTML = `<li class="empty">no components registered with this pipeline</li>`;
     return;
   }
+  const order = activeTab() ? activeTab().order : [];
   ul.innerHTML = "";
   for (const c of state.components) {
     const li = document.createElement("li");
-    const selected = state.order.includes(c.name);
+    const selected = order.includes(c.name);
     li.className = "comp" + (c.accessible ? "" : " offline") + (selected ? " selected" : "");
     li.innerHTML =
       `<span class="name">${esc(c.name)}</span>` +
@@ -167,9 +477,11 @@ function renderComponents() {
 }
 
 function toggleComponent(name) {
-  const i = state.order.indexOf(name);
-  if (i >= 0) state.order.splice(i, 1);
-  else state.order.push(name);
+  const t = activeTab();
+  if (!t) return;
+  const i = t.order.indexOf(name);
+  if (i >= 0) t.order.splice(i, 1);
+  else t.order.push(name);
   renderComponents();
   renderOrder();
 }
@@ -206,28 +518,19 @@ function openComponentModal(c) {
   }
   $("#component-modal").classList.remove("hidden");
 }
-function closeComponentModal() {
-  $("#component-modal").classList.add("hidden");
-  $("#modal-iframe").removeAttribute("src"); // stop loading the embedded page
-}
-document.addEventListener("click", (e) => {
-  if (e.target.closest("[data-modal-close]")) closeComponentModal();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !$("#component-modal").classList.contains("hidden")) closeComponentModal();
-});
 
 // ---------------------------------------------------------------------------
 // Pipeline order (drag & drop)
 // ---------------------------------------------------------------------------
 function renderOrder() {
   const ol = $("#pipeline-order");
-  if (!state.order.length) {
+  const order = activeTab() ? activeTab().order : [];
+  if (!order.length) {
     ol.innerHTML = `<li class="empty">no components selected yet</li>`;
     return;
   }
   ol.innerHTML = "";
-  state.order.forEach((name, idx) => {
+  order.forEach((name, idx) => {
     const li = document.createElement("li");
     li.className = "item";
     li.draggable = true;
@@ -246,8 +549,8 @@ function renderOrder() {
 
 function onDragEnd(e) {
   e.target.classList.remove("dragging");
-  // read the new DOM order back into state, then renumber
-  state.order = [...$("#pipeline-order").querySelectorAll("li.item")].map((li) => li.dataset.name);
+  const t = activeTab();
+  if (t) t.order = [...$("#pipeline-order").querySelectorAll("li.item")].map((li) => li.dataset.name);
   renderOrder();
 }
 
@@ -266,46 +569,162 @@ $("#pipeline-order").addEventListener("dragover", (e) => {
 // ---------------------------------------------------------------------------
 // Run the pipeline
 // ---------------------------------------------------------------------------
+function setStatus(t, text, isError) {
+  t.status = text;
+  t.statusError = !!isError;
+  renderRunStatus(t);
+}
+function setRunning(t, running) {
+  t.running = running;
+  if (activeTab() === t) $("#run").disabled = running;
+  renderRunStatus(t);
+}
+
+// elapsed processing time — live while running, frozen afterwards
+function elapsedOf(t) {
+  if (t.running && t.runStartedAt != null) return performance.now() - t.runStartedAt;
+  return t.runElapsedMs || 0;
+}
+function fmtElapsed(ms) {
+  const s = (ms || 0) / 1000;
+  if (s < 60) return s.toFixed(1) + " s";
+  const m = Math.floor(s / 60);
+  return `${m}:${(s % 60).toFixed(1).padStart(4, "0")} min`;
+}
+
+// a single low-frequency ticker drives the live timer of the active running tab
+let runTimer = null;
+function ensureRunTimer() { if (runTimer == null) runTimer = setInterval(tickRunTimer, 100); }
+function tickRunTimer() {
+  const t = activeTab();
+  if (t && t.running) {
+    const el = document.getElementById("run-timer");
+    if (el) el.textContent = fmtElapsed(elapsedOf(t));
+  }
+  if (!tabs.some((x) => x.running) && runTimer != null) { clearInterval(runTimer); runTimer = null; }
+}
+
+// the run-status line: spinner + message + live timer while running;
+// a frozen "completed in X" (or the error) once processing has finished.
+function renderRunStatus(t) {
+  if (activeTab() !== t) return;
+  const el = $("#run-status");
+  if (t.running) {
+    el.className = "run-status running";
+    el.innerHTML =
+      `<span class="spinner" aria-hidden="true"></span>` +
+      `<span class="run-msg">${esc(t.status || "Processing the question…")}</span>` +
+      `<span class="run-timer" id="run-timer">${esc(fmtElapsed(elapsedOf(t)))}</span>`;
+    return;
+  }
+  if (t.statusError) {
+    el.className = "run-status error";
+    const took = t.runElapsedMs != null ? ` <span class="run-timer">after ${esc(fmtElapsed(t.runElapsedMs))}</span>` : "";
+    el.innerHTML = `<span class="run-msg">${esc(t.status)}</span>${took}`;
+    return;
+  }
+  el.className = "run-status";
+  if (!t.status && t.runElapsedMs != null) {
+    el.innerHTML = `<span class="run-done">✓ completed in <strong>${esc(fmtElapsed(t.runElapsedMs))}</strong></span>`;
+  } else {
+    el.innerHTML = t.status ? `<span class="run-msg">${esc(t.status)}</span>` : "";
+  }
+}
+
+// Detailed error panel — gives the user more than "HTTP 500" when the pipeline
+// fails (parses the Spring error body: status/error/message/exception/path + raw).
+function renderRunError(t) {
+  if (activeTab() !== t) return;
+  const card = $("#run-error-card");
+  const el = $("#run-error");
+  if (!t || !t.error) { card.classList.add("hidden"); el.innerHTML = ""; return; }
+  const { status, statusText, body } = t.error;
+  let parsed = null;
+  try { parsed = JSON.parse(body); } catch (_) { /* body is not JSON */ }
+  const fields = [];
+  const add = (k, v) => { if (v != null && v !== "") fields.push([k, String(v)]); };
+  add("HTTP status", [status, statusText].filter(Boolean).join(" "));
+  if (parsed && typeof parsed === "object") {
+    add("error", parsed.error);
+    add("message", parsed.message);
+    add("exception", parsed.exception);
+    add("path", parsed.path);
+    add("timestamp", parsed.timestamp);
+  }
+  const hint = Number(status) >= 500
+    ? "The pipeline failed internally. Common causes: a component raised an error, the triplestore was not reachable, or an upstream service (e.g. the internet / a public SPARQL endpoint) was unavailable. The server's response is shown below."
+    : Number(status) > 0
+      ? "The pipeline rejected the request. The server's response is shown below."
+      : "The request to the pipeline could not be completed (network error or the pipeline is unreachable).";
+  const table = fields.length ? tableHTML(["field", "value"], fields, [false, true]) : "";
+  const raw = body
+    ? `<h3>Raw response</h3><div class="code-wrap">` +
+      `<button class="copy-btn" data-copy-target="#run-error-raw" title="copy to clipboard">⧉ Copy</button>` +
+      `<pre id="run-error-raw" class="code">${esc(body)}</pre></div>`
+    : "";
+  el.innerHTML = `<p class="hint">${esc(hint)}</p>${table}${raw}`;
+  card.classList.remove("hidden");
+}
+
 async function run() {
+  const t = activeTab();
+  if (!t) return;
   const question = $("#question").value.trim();
-  const runStatus = $("#run-status");
-  runStatus.className = "run-status";
-  if (!question) { runStatus.textContent = "Please enter a question."; return; }
-  if (!state.order.length) { runStatus.textContent = "Please select at least one component."; return; }
+  saveActiveTabInputs();
+  setStatus(t, "");
+  if (!question) { setStatus(t, "Please enter a question."); return; }
+  if (!t.order.length) { setStatus(t, "Please select at least one component."); return; }
 
-  rememberQuestion(question); // make it available for auto-completion next time
+  rememberQuestion(question);
+  const lang = $("#language").value.trim();
+  const triples = $("#additionaltriples").value.trim();
+  // store the used configuration in the browser database
+  saveConfiguration({
+    question, language: lang, additionaltriples: triples,
+    components: t.order.slice(), savedAt: Date.now(),
+  }).catch(() => { /* ignore storage errors */ });
 
-  const btn = $("#run");
-  btn.disabled = true;
-  runStatus.textContent = "processing the question… this can take a moment.";
+  t.runStartedAt = performance.now();
+  t.runElapsedMs = null;
+  t.error = null;
+  renderRunError(t);
+  ensureRunTimer();
+  setRunning(t, true);
+  setStatus(t, "Processing the question… this can take a moment.");
 
   try {
     const body = new URLSearchParams();
     body.append("question", question);
-    const lang = $("#language").value.trim();
     if (lang) body.append("language", lang);
-    const triples = $("#additionaltriples").value.trim();
     if (triples) body.append("additionaltriples", triples);
-    for (const name of state.order) body.append("componentlist[]", name);
+    for (const name of t.order) body.append("componentlist[]", name);
 
     const resp = await fetch("/startquestionansweringwithtextquestion", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
       body: body.toString(),
     });
-    if (!resp.ok) throw new Error(`pipeline returned HTTP ${resp.status}`);
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      t.error = { status: resp.status, statusText: resp.statusText, body };
+      throw new Error(`pipeline returned HTTP ${resp.status}`);
+    }
     const result = await resp.json();
     const graph = result.outGraph || result.inGraph;
     if (!graph) throw new Error("no result graph returned by the pipeline");
 
-    runStatus.textContent = "done — reading the results from the triplestore…";
-    await showResults(graph, result);
-    runStatus.textContent = "";
+    t.results = { graph, result };
+    setStatus(t, "Reading the results from the triplestore…");
+    if (activeTab() === t) await showResults(graph, result, { scroll: true });
+    t.runElapsedMs = performance.now() - t.runStartedAt;
+    setStatus(t, "");
   } catch (e) {
-    runStatus.className = "run-status error";
-    runStatus.textContent = "Error: " + e.message;
+    t.results = null;
+    if (t.runStartedAt != null) t.runElapsedMs = performance.now() - t.runStartedAt;
+    setStatus(t, "Error: " + e.message, true);
   } finally {
-    btn.disabled = false;
+    setRunning(t, false);
+    renderRunError(t);
   }
 }
 
@@ -320,16 +739,13 @@ function tokenizeSparql(s) {
   while (i < n) {
     const c = s[i];
     if (c === " " || c === "\t" || c === "\r" || c === "\n") { i++; continue; }
-    if (c === "#") { // comment to end of line
-      let j = i; while (j < n && s[j] !== "\n") j++;
-      tokens.push({ t: "comment", v: s.slice(i, j) }); i = j; continue;
-    }
-    if (c === "<") { // IRI (no whitespace inside) — otherwise a '<' operator
+    if (c === "#") { let j = i; while (j < n && s[j] !== "\n") j++; tokens.push({ t: "comment", v: s.slice(i, j) }); i = j; continue; }
+    if (c === "<") {
       const m = /^<[^<>"{}|^`\\\s]*>/.exec(s.slice(i));
       if (m) { tokens.push({ t: "iri", v: m[0] }); i += m[0].length; continue; }
       tokens.push({ t: "word", v: c }); i++; continue;
     }
-    if (c === '"' || c === "'") { // string literal (single or triple quoted)
+    if (c === '"' || c === "'") {
       const triple = s.substr(i, 3);
       let len;
       if (triple === '"""' || triple === "'''") {
@@ -374,10 +790,7 @@ function renderSparql(tokens) {
   const newline = () => { out = out.replace(/[ \t]+$/, ""); out += "\n" + IND.repeat(Math.max(depth, 0)); };
 
   for (const tk of tokens) {
-    if (tk.t === "comment") {
-      if (!atLineStart()) newline();
-      out += tk.v; newline(); prev = tk; continue;
-    }
+    if (tk.t === "comment") { if (!atLineStart()) newline(); out += tk.v; newline(); prev = tk; continue; }
     if (tk.t === "punc" && tk.v === "{") {
       if (!atLineStart() && !out.endsWith(" ")) out += " ";
       out += "{"; depth++; newline(); prev = tk; continue;
@@ -418,13 +831,14 @@ function formatSparql(raw) {
 }
 
 // ---------------------------------------------------------------------------
-// Results: generated SPARQL, JSON answer table, per-component intermediate info
+// Results: pipeline response, generated SPARQL, JSON answer table, facts
 // ---------------------------------------------------------------------------
-async function showResults(graph, result) {
+async function showResults(graph, result, opts) {
+  const scroll = !opts || opts.scroll !== false;
   $("#results").classList.remove("hidden");
   showPipelineResponse(result);
   $("#graph-meta").textContent = "result graph: " + graph;
-  $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+  if (scroll) $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
   loadGraphIntoYasgui(graph);
 
   await Promise.all([
@@ -434,9 +848,6 @@ async function showResults(graph, result) {
   ]);
 }
 
-// The raw JSON the pipeline returns (endpoint, inGraph, outGraph, question) —
-// shown as a key/value table (copy each value) plus the raw JSON (copy all),
-// so other applications can integrate against this pipeline run.
 function showPipelineResponse(result) {
   const el = $("#pipeline-response");
   if (!result || typeof result !== "object") { el.innerHTML = ""; return; }
@@ -471,7 +882,6 @@ SELECT ?sparql ?component ?time FROM <${graph}> WHERE {
   }
 }
 
-// Show the backend's JSON answer as a table; every value cell gets a copy button.
 async function showAnswerTable(graph) {
   const el = $("#answer-table");
   let rows;
@@ -497,8 +907,6 @@ SELECT ?value ?component ?time FROM <${graph}> WHERE {
     jsonToTable(cell(r, "value"));
 }
 
-// Turn a JSON answer string into an HTML table (handles SPARQL-results JSON,
-// arrays of objects, arrays of scalars, plain objects and scalars).
 function jsonToTable(raw) {
   let data;
   try { data = JSON.parse(raw); } catch (_) { return singleValueTable(raw); }
@@ -549,7 +957,6 @@ async function showComponentFacts(graph) {
   const el = $("#component-intermediate");
   let rows;
   try {
-    // exclude AnnotationOfLogMethod (internal method-call log noise)
     rows = await sparql(`PREFIX qa: <${QA}>
 PREFIX oa: <http://www.w3.org/ns/openannotation/core/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -568,7 +975,6 @@ SELECT ?type ?component ?target ?body ?value ?time FROM <${graph}> WHERE {
   }
   if (!rows.length) { el.innerHTML = `<p class="hint">no component annotations were stored.</p>`; return; }
 
-  // group by component
   const byComp = new Map();
   for (const r of rows) {
     const comp = shortUri(cell(r, "component")) || "(unknown)";
@@ -577,7 +983,6 @@ SELECT ?type ?component ?target ?body ?value ?time FROM <${graph}> WHERE {
   }
   el.innerHTML = "";
   for (const [comp, facts] of byComp) {
-    // collapsible box (collapsed by default; click the summary to open/close)
     const card = document.createElement("details");
     card.className = "comp-card";
     card.innerHTML =
@@ -588,7 +993,6 @@ SELECT ?type ?component ?target ?body ?value ?time FROM <${graph}> WHERE {
   }
 }
 
-// Turn one annotation row into a human-readable sentence (no LLM, just templates)
 function describeFact(r) {
   const type = shortUri(cell(r, "type"));
   const body = cell(r, "body");
@@ -666,7 +1070,6 @@ function setYasguiQuery(q) {
   try { if (yasgui && yasgui.getTab()) yasgui.getTab().setQuery(q); } catch (_) { /* ignore */ }
 }
 
-// After a run, pre-load the result graph into the YASGUI editor for convenience.
 function loadGraphIntoYasgui(graph) {
   setYasguiQuery(`# Everything stored for this question-answering run
 SELECT ?subject ?predicate ?object FROM <${graph}> WHERE {
@@ -677,10 +1080,60 @@ SELECT ?subject ?predicate ?object FROM <${graph}> WHERE {
 // ---------------------------------------------------------------------------
 // wire up + live refresh
 // ---------------------------------------------------------------------------
-initTheme();
-initYasgui();
-renderHistory();
-$("#run").addEventListener("click", run);
-$("#refresh").addEventListener("click", loadComponents);
-loadComponents();
-setInterval(loadComponents, 12000); // keep the component list up to date
+function init() {
+  initTheme();
+  initYasgui();
+  renderHistory();
+
+  // start with one tab
+  const t = newTab();
+  activeTabId = t.id;
+  renderTabs();
+  loadTabIntoDom();
+
+  $("#run").addEventListener("click", run);
+  $("#refresh").addEventListener("click", loadComponents);
+  $("#open-history").addEventListener("click", openHistory);
+  $("#show-code").addEventListener("click", openCodeModal);
+  $(".code-lang-switch").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-code-lang]");
+    if (!b) return;
+    codeLang = b.dataset.codeLang;
+    renderCodeModal();
+  });
+  $("#tab-add").addEventListener("click", () => addTab());
+
+  $("#tabs").addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (!tab) return;
+    const id = tab.dataset.tabId;
+    if (e.target.closest(".tab-close")) { e.stopPropagation(); closeTab(id); return; }
+    switchTab(id);
+  });
+
+  $("#question").addEventListener("input", () => {
+    const tab = activeTab();
+    if (!tab) return;
+    tab.question = $("#question").value;
+    const span = document.querySelector("#tabs .tab.active .tab-title");
+    if (span) span.textContent = tabTitle(tab);
+  });
+
+  $("#history-list").addEventListener("click", async (e) => {
+    const use = e.target.closest("[data-use]");
+    const del = e.target.closest("[data-del]");
+    if (use && !use.disabled) {
+      const id = Number(use.dataset.use);
+      const cfg = (await getAllConfigurations()).find((c) => c.id === id);
+      if (cfg) useConfiguration(cfg);
+    } else if (del) {
+      await deleteConfiguration(Number(del.dataset.del));
+      renderHistoryList();
+    }
+  });
+
+  loadComponents();
+  setInterval(loadComponents, 12000); // keep the component list up to date
+}
+
+init();

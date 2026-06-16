@@ -4,9 +4,9 @@
  * Documentation helper for the frontend features that the pass/fail E2E
  * (frontend-e2e.js) does not capture on its own:
  *
- *   10-component-info-modal.png   the ⓘ component-information overlay
+ *   14-component-info-modal.png   the ⓘ component-information overlay
  *                                 (host/IP, port, service URL + embedded iframe)
- *   11-component-facts-expanded.png  a collapsed/expanded "what each component did"
+ *   15-component-facts-expanded.png  a collapsed/expanded "what each component did"
  *                                 box, showing the pretty-printed AnnotationOfAnswerSPARQL
  *   06-answer-table.png           the JSON answer rendered as a table (with per-value
  *                                 copy buttons) using the frontend's own jsonToTable().
@@ -58,8 +58,8 @@ SELECT ?label ?pLabel ?oLabel WHERE {
   });
   await page.waitForSelector("#component-modal:not(.hidden)", { timeout: 5000 });
   await sleep(2500); // let the embedded service page load in the iframe
-  await page.screenshot({ path: path.join(OUT, "10-component-info-modal.png") });
-  console.log("saved 10-component-info-modal.png");
+  await page.screenshot({ path: path.join(OUT, "14-component-info-modal.png") });
+  console.log("saved 14-component-info-modal.png");
   await page.evaluate(() => document.querySelector(".modal-close").click());
   await sleep(300);
 
@@ -97,8 +97,8 @@ SELECT ?label ?pLabel ?oLabel WHERE {
     if (h) { h.scrollIntoView({ block: "start" }); window.scrollBy(0, -90); }
   });
   await sleep(300);
-  await page.screenshot({ path: path.join(OUT, "11-component-facts-expanded.png") });
-  console.log("saved 11-component-facts-expanded.png");
+  await page.screenshot({ path: path.join(OUT, "15-component-facts-expanded.png") });
+  console.log("saved 15-component-facts-expanded.png");
 
   // --- answer table: real Wikidata answer through the frontend's own jsonToTable() ---
   const answer = await page.evaluate(async (endpoint, query) => {
