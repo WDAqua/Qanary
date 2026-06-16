@@ -14,8 +14,8 @@ the frontend process.
    cd ../../Qanary_minimal_Python_example   # or wherever the example lives
    docker compose up -d
    ```
-   Wait until the three components are registered (the frontend's status pill
-   shows `3/3 components available`).
+   Wait until the components are registered (the frontend's status pill shows
+   e.g. `3/3 components available`, or `4/4` for the Java+Python example).
 2. A local Chrome/Chromium browser.
 3. Node.js 18+.
 
@@ -39,24 +39,27 @@ Configuration via environment variables:
 The process exits `0` when a SPARQL query was retrieved and looks valid, and
 non-zero otherwise (the failing screenshot is saved too).
 
-### Deterministic runs and the Wikidata rate limit
+### Deterministic runs
 
-The **generated SPARQL query** is produced by the query builder (`QB-Wikidata`)
-from the entity found by `NEL-WikidataLookup`; it does **not** require the query
-executer. `QE-SparqlExecuter` only *runs* that query against the public Wikidata
-endpoint (`query.wikidata.org`), which is aggressively rate-limited (HTTP 429)
-and, on a 429, can block the synchronous pipeline for a long time.
+The example answers **offline and deterministically**: `QE-SparqlExecuter` is
+pointed at a **local Wikidata-subset Virtuoso** (shipped with the example as the
+`wikidata-dataset` service), so a full run — all components selected, the default —
+produces both the generated SPARQL query and the populated JSON **answer table**
+without touching the public Wikidata Query Service.
 
-For a deterministic, repeatable test of "retrieve the generated SPARQL query",
-pin the query-generating components:
+The **generated SPARQL query** itself is produced by the query builder
+(`QB-Wikidata`) from the entity found by `NEL-WikidataLookup` and does **not**
+require the query executer; to assert only that query you can pin the
+query-generating components:
 
 ```bash
 COMPONENTS=NEL-WikidataLookup,QB-Wikidata npm test
 ```
 
-With all components selected (the default), the JSON **answer table** is also
-populated — but only when Wikidata serves `QE-SparqlExecuter` (i.e. when it is
-not throttling this host).
+If you reconfigure `QE-SparqlExecuter` to use the **public** endpoint
+(`query.wikidata.org`) instead of the local dataset, beware it is aggressively
+rate-limited (HTTP 429): on a 429 the answer table may stay empty and a
+synchronous run can be slow.
 
 ## What the test asserts
 
