@@ -1103,6 +1103,13 @@ function init() {
   });
   $("#tab-add").addEventListener("click", () => addTab());
 
+  // scroll-to-top button: visible once the start of the page is scrolled out of view
+  const scrollTopBtn = $("#scroll-top");
+  const toggleScrollTop = () => scrollTopBtn.classList.toggle("visible", window.scrollY > 300);
+  window.addEventListener("scroll", toggleScrollTop, { passive: true });
+  toggleScrollTop();
+  scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
   $("#tabs").addEventListener("click", (e) => {
     const tab = e.target.closest(".tab");
     if (!tab) return;

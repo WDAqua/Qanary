@@ -348,6 +348,22 @@ html[data-theme="contrast"] .cfg-use { background: var(--accent); color: #000; }
 .tab .tab-close:hover { color: var(--danger); background: var(--off-bg); }
 .tab-add { align-self: flex-end; border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 8px 8px 0 0; width: 34px; height: 34px; font-size: 1.2rem; line-height: 1; cursor: pointer; flex: none; margin-bottom: 3px; transition: margin-bottom .12s, color .12s, border-color .12s; }
 .tab-add:hover { border-color: var(--accent); color: var(--accent); background: var(--card); margin-bottom: 1px; }
+/* the Question box connects to the tab strip above it: square its top corners */
+#question-card { border-top-left-radius: 0; border-top-right-radius: 0; }
+
+/* ---- scroll-to-top button (fixed lower-right; shown once scrolled down) ---- */
+.scroll-top {
+  position: fixed; right: 24px; bottom: 24px; z-index: 50;
+  width: 46px; height: 46px; border-radius: 50%; border: none;
+  background: var(--brand); color: #fff; font-size: 1.4rem; line-height: 1; cursor: pointer;
+  display: grid; place-items: center; box-shadow: 0 6px 20px rgba(15,34,43,.28);
+  opacity: 0; visibility: hidden; transform: translateY(12px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; transform: none; }
+.scroll-top:hover { filter: brightness(1.08); }
+html[data-theme="contrast"] .scroll-top { background: var(--accent); color: #000; border: 2px solid #fff; }
+@media (prefers-reduced-motion: reduce) { .scroll-top { transition: opacity .18s ease; transform: none; } }
 
 /* ---- run-from-code overlay (curl / Python) ---- */
 .code-modal-hint { margin: 14px 18px 4px; }

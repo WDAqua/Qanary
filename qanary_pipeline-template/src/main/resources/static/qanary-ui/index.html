@@ -35,7 +35,7 @@
     </div>
 
     <!-- Step 1 — question & parameters -->
-    <section class="card">
+    <section class="card" id="question-card">
       <h2><span class="step">1</span> Question</h2>
       <input type="text" id="question" name="question" list="question-history" autocomplete="on"
              placeholder="e.g. Who is the inventor of the Hawaiian Pizza?">
@@ -173,6 +173,9 @@
       </div>
     </div>
   </div>
+
+  <!-- scroll-to-top button: fixed in the lower-right of the screen, shown once the page top is scrolled out of view -->
+  <button id="scroll-top" class="scroll-top" title="Scroll to the top of the page" aria-label="Scroll to the top of the page">↑</button>
 
   <!-- YASGUI library (CDN). app.js initialises it if present. -->
   <script src="https://cdn.jsdelivr.net/npm/@triply/yasgui/build/yasgui.min.js"></script>
