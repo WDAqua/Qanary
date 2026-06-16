@@ -14,6 +14,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 /**
  * Configure access to specific URLs of the application, using application.properties.
@@ -55,7 +56,16 @@ public class ApplicationWebSecurityConfig {
 
 	@Bean
 	public SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.ignoringRequestMatchers(publicUrls));
+		// Spring Security 6 loads the CSRF token lazily (deferred). The Spring Boot Admin
+		// UI template sba-settings.js reads ${_csrf.parameterName} eagerly while rendering,
+		// which makes the deferred supplier throw and truncates the response (blank SBA
+		// dashboard). Opting out of deferred loading (request-attribute name = null) makes
+		// the token available at render time, restoring the dashboard.
+		XorCsrfTokenRequestAttributeHandler csrfRequestHandler = new XorCsrfTokenRequestAttributeHandler();
+		csrfRequestHandler.setCsrfRequestAttributeName(null);
+		http.csrf(csrf -> csrf
+				.csrfTokenRequestHandler(csrfRequestHandler)
+				.ignoringRequestMatchers(publicUrls));
 
 		switch(access) {
 			case QanaryConfigurationAccessParameters.DISALLOWACCESS:
