@@ -1,0 +1,20 @@
+# gitleaks allowlist — KNOWN HISTORICAL findings only.
+# These secrets live in OLD commits (removed components: Babelfy/Alchemy/TextRazor
+# API keys, and the legacy Virtuoso credential in service_config/files/pipeline).
+# They are NOT in the current tree. Remediation (rotation / optional history scrub)
+# is tracked in SECURITY.md (task 1.6). Allowlisting keeps the secret-scan gate
+# green on known history while still failing on any NEW secret introduced in a PR.
+12fed12e03fd9ba995dda4d7566f3f6c478fedac:service_config/files/pipeline:generic-api-key:5
+c04cb95f6c7bd36df9b32c3241c203e275dc7308:qanary_component-NER-Babelfy/src/main/java/eu/wdaqua/qanary/mypackage/Babelfy.java:generic-api-key:64
+c04cb95f6c7bd36df9b32c3241c203e275dc7308:qanary_component-NED-Babelfy/src/main/java/eu/wdaqua/qanary/mypackage/BabelfyNED.java:generic-api-key:61
+c04cb95f6c7bd36df9b32c3241c203e275dc7308:qanary_component-NER-TextRazor/src/main/java/eu/wdaqua/qanary/mypackage/TextRazor.java:generic-api-key:59
+c04cb95f6c7bd36df9b32c3241c203e275dc7308:.metadata/.plugins/org.eclipse.e4.workbench/workbench.xmi:generic-api-key:470
+191902116780e8cfbdd110fac23588856626d494:qanary_component-Alchemy-NERD/src/main/java/eu/wdaqua/qanary/alchemy/Alchemy.java:generic-api-key:36
+b50fb90e13c3ef290080cd142e6c5cfd36d65d70:qanary_component-Alchemy-NERD/src/main/java/eu/wdaqua/qanary/alchemy/Alchemy.java:generic-api-key:37
+c4d241fc7bd4dc8f7053c8fbb698a2c02e3ee29c:qanary_component-Alchemy-NERD/src/main/java/eu/wdaqua/qanary/alchemy/Alchemy.java:generic-api-key:39
+e60c3e2b33370ff4252cfc8fc4adff0d3822b7b1:qanary_component-alchemy/src/main/java/eu/wdaqua/qanary/alchemy/Alchemy.java:generic-api-key:52
+abfa9136c9aa70130e49ebb0b639afc21c6b9ff4:qanary_component-alchemy/src/main/java/eu/wdaqua/qanary/alchemy/Alchemy.java:generic-api-key:52
+072529f809c5bca74ff74c0386d18f723297c26b:qanary_component-alchemy2/src/main/java/eu/wdaqua/qanary/component/Alchemy2.java:generic-api-key:54
+bbaedf09b4213e2f83e0685a5fcf122db4ea6eaf:qanary_component-alchemy2/src/main/java/eu/wdaqua/qanary/component/Alchemy2.java:generic-api-key:54
+94180923f0d75a7377fea275914d5cf2a555d65e:qanary_component-alchemy/src/main/java/eu/wdaqua/qanary/Alchemy/AlchemyComponent.java:generic-api-key:54
+28acb99fbf6f5819e6f0cb4b07fcb3421a6f27bf:qanary_component-alchemy/src/main/java/eu/wdaqua/qanary/Alchemy/AlchemyComponent.java:generic-api-key:54
