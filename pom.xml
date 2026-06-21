@@ -20,6 +20,32 @@
   <version>4.0.0</version>
   <packaging>pom</packaging>
 
+  <!-- Metadata required by Maven Central (the released modules use this as their
+       parent, so it must itself be published with complete metadata). -->
+  <name>Qanary reactor (parent POM)</name>
+  <description>Shared parent POM and dependency/plugin management for the Qanary
+    question answering framework modules.</description>
+  <url>https://github.com/WDAqua/Qanary</url>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Andreas Both</name>
+      <email>andreas.both@htwk-leipzig.de</email>
+      <organization>WDAqua</organization>
+      <organizationUrl>http://wdaqua.eu/</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/WDAqua/Qanary.git</connection>
+    <developerConnection>scm:git:ssh://github.com/WDAqua/Qanary.git</developerConnection>
+    <url>https://github.com/WDAqua/Qanary</url>
+  </scm>
+
   <modules>
     <module>qanary_component-archetype</module>
     <module>qanary_commons</module>
