@@ -1,0 +1,13 @@
+{
+  "name": "qanary-frontend-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end test for the embedded Qanary frontend: drives the example question of Qanary_minimal_Python_example through the UI and verifies the generated SPARQL query is retrieved. Captures a screenshot of every step.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node frontend-e2e.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^22.0.0"
+  }
+}

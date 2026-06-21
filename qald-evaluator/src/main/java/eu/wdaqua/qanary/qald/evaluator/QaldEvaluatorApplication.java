@@ -4,6 +4,7 @@ import eu.wdaqua.qanary.qald.evaluator.evaluation.Metrics;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.FileReader;
 import eu.wdaqua.qanary.qald.evaluator.qaldreader.QaldQuestion;
 import org.apache.jena.query.*;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,8 @@ public class QaldEvaluatorApplication {
         Query query = QueryFactory.create(sparqlQuery);
 
         if (this.stadog5) endpoint += "/query";
-        QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query);
+        // Jena 5 removed QueryExecutionFactory.sparqlService; use the HTTP builder
+        QueryExecution qExe = QueryExecutionHTTP.service(endpoint).query(query).build();
         return qExe.execSelect();
     }
 

@@ -4,14 +4,12 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +20,6 @@ import java.util.Objects;
 
 import static org.mockito.Mockito.doNothing;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class QanaryPipelineComponentTest {
 
@@ -36,7 +33,7 @@ public class QanaryPipelineComponentTest {
     public QanaryPipelineComponentTest() throws URISyntaxException {
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         doNothing().when(qanaryTripleStoreConnectorVirtuoso).connect();
     }
@@ -54,7 +51,7 @@ public class QanaryPipelineComponentTest {
 
         Assertions.assertNotEquals(expectedResult, query);
     }
-    
+
     private String readFileFromTestResources(String path) throws IOException {
         File file = new File(Objects.requireNonNull(classLoader.getResource(path)).getFile());
         return new String(Files.readAllBytes(file.toPath()));

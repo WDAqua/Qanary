@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +36,7 @@ public class QanaryServiceController {
 
     private QanaryComponent qanaryComponent;
 
-    @Inject
+    @Autowired
     public QanaryServiceController(QanaryComponent qanaryComponent) {
         this.qanaryComponent = qanaryComponent;
         logger.info("qanaryComponent: {}", this.qanaryComponent);

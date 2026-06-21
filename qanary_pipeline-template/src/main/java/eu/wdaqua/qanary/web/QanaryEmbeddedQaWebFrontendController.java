@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -70,7 +70,9 @@ public class QanaryEmbeddedQaWebFrontendController {
 	 */
 	@RequestMapping(value = "/qa", method = RequestMethod.GET)
 	public String qa() {
-		return "qa_input";
+		// serve the modern static single-page frontend (replaces the old qa_input
+		// Thymeleaf page); it is bundled in the pipeline so it starts with it
+		return "forward:/qanary-ui/index.html";
 	}
 
 	/**

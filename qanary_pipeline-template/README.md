@@ -50,3 +50,33 @@ Triplestore is accessible and returns triples.
 Otherwise, a warning will be displayed that the Qanary pipeline cannot access the configured Qanary triplestore, i.e., the knowledge base where process information (all state information about each given task) is stored. 
 The warning is shown three times.
 If the triplestore is still not accessible, the Qanary pipeline will stop, and the Java application will consequently terminate.
+
+## Web frontend (`/qa`)
+
+A running pipeline serves a dependency-free web frontend at
+[`http://localhost:40111/qa`](http://localhost:40111/qa) (adjust host/port to your
+configuration) for using and inspecting the pipeline from a browser — no separate
+build or deployment step. Its sources live in
+`src/main/resources/static/qanary-ui/` (`index.html`, `app.js`, `styles.css`).
+
+It lets you:
+
+* enter a question and **configure the pipeline** by dragging the live, registered
+  components into their processing order (offline components are shown but not
+  selectable; the ⓘ button shows a component's host/port/URLs and service page);
+* work on several questions at once in independent **question tabs**;
+* **process** the question and inspect the generated SPARQL query, the JSON answer
+  rendered as a copyable **table**, and a plain-language summary of what each
+  component did (read directly from the triplestore);
+* get a ready-to-run **cURL / Python snippet** ("Run from code") for the current
+  configuration, and reopen earlier runs from **saved configurations** (stored in
+  the browser);
+* query the triplestore yourself with the embedded **YASGUI** SPARQL editor;
+* switch between **light, dark and high-contrast themes**; on a pipeline error
+  (e.g. HTTP 500) an error card explains the cause.
+
+A **scroll-to-top** button (lower-left) and a **"Fork me on GitHub"** ribbon
+(lower-right) are always available.
+
+The frontend has an end-to-end test with step-by-step screenshots; see
+[`frontend-e2e/`](https://github.com/WDAqua/Qanary/tree/master/frontend-e2e).

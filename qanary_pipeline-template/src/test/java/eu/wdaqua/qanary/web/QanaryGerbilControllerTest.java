@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class QanaryGerbilControllerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(QanaryGerbilControllerTest.class);
-    @Inject
+    @Autowired
     QanaryGerbilController controller;
     private MockMvc mockMvc;
     @MockBean

@@ -5,10 +5,11 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.apache.jena.update.UpdateFactory;
 
 import java.util.Stack;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -144,6 +145,36 @@ public class LoggingAspectTest {
         assertEquals(1, this.qanaryAspect.getMethodList().size());
         this.qanaryAspect.implementationStoreMethodExecutionInComponentAfter(this.joinPoint, null);
         assertEquals(0, this.qanaryAspect.getMethodList().size());
+    }
+
+    // METHOD-DATA REPRESENTATION TESTS (Jena 5 regression guard)
+
+    /**
+     * Method output whose toString contains a double quote (and a SPARQL keyword)
+     * must still produce a parseable SPARQL UPDATE. Jena 5 parses updates
+     * client-side, so an unescaped quote in the generated rdf:value literal
+     * previously raised QueryParseException -> HTTP 500 during question answering.
+     */
+    @Test
+    public void generateOutputRepresentationProducesParseableSparql() {
+        Object output = "some result with a \" quote and the VALUES keyword";
+        String representation = this.qanaryAspect.generateOutputDataRepresentation(output);
+        String update = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+                + "INSERT DATA { GRAPH <urn:g> { <urn:s> <urn:p> " + representation + " . } }";
+        // throws QueryParseException (a RuntimeException) if the literal is not escaped
+        UpdateFactory.create(update);
+    }
+
+    /**
+     * Same guard for the input representation (array of arguments).
+     */
+    @Test
+    public void generateInputRepresentationProducesParseableSparql() {
+        Object[] input = new Object[] { "arg with a \" quote", "second VALUES arg" };
+        String representation = this.qanaryAspect.generateInputDataRepresentation(input);
+        String update = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+                + "INSERT DATA { GRAPH <urn:g> { <urn:s> <urn:p> " + representation + " . } }";
+        UpdateFactory.create(update);
     }
 
 }

@@ -7,7 +7,6 @@ import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import io.swagger.v3.oas.annotations.Operation;
-import net.sf.json.JSONObject;
 import org.apache.jena.query.QuerySolutionMap;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -91,9 +90,6 @@ public class QanaryComponentsManagementController {
      * @return
      */
     public ResponseEntity<String> getServiceDescriptionOfComponent(String componentName, String format) {
-        JSONObject response = new JSONObject();
-        response.put("name", componentName);
-
         Map<String, Instance> availableComponents = myQanaryComponentRegistrationChangeNotifier
                 .getAvailableComponents();
         if (availableComponents.containsKey(componentName)) {

@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <!-- Shared parent for all Qanary modules: inherits Spring Boot's dependency &
+       plugin management, and adds Qanary-wide properties, dependencyManagement
+       (pinned versions, task 2.1) and pluginManagement (publishing/signing/
+       aspectj config, task 2.2). -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.15</version>
+    <relativePath/>
+  </parent>
+
   <groupId>eu.wdaqua.qanary</groupId>
   <artifactId>mvn.reactor</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <!-- Release version (not SNAPSHOT): this parent is published to Maven Central
+       so the released modules can resolve it as their parent. -->
+  <version>4.0.0</version>
   <packaging>pom</packaging>
+
   <modules>
     <module>qanary_component-archetype</module>
     <module>qanary_commons</module>
@@ -13,4 +28,230 @@
     <module>qanary_component-parent</module>
     <module>qald-evaluator</module>
   </modules>
+
+  <properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Qanary artifact versions (pinned; task 2.1) -->
+    <qanary.version>4.0.0</qanary.version>
+    <qanary.components.version>4.0.0</qanary.components.version>
+
+    <!-- shared library versions -->
+    <jena.version>5.3.0</jena.version>
+    <spring-boot-admin.version>3.5.9</spring-boot-admin.version>
+    <springdoc.version>2.8.17</springdoc.version>
+    <stardog.version>8.2.2</stardog.version>
+    <virtuoso-jena.version>1.44</virtuoso-jena.version>
+    <virtuoso-jdbc.version>3.123</virtuoso-jdbc.version>
+    <commons-cli.version>1.9.0</commons-cli.version>
+    <commons-configuration2.version>2.11.0</commons-configuration2.version>
+    <gson.version>2.13.2</gson.version>
+    <jakarta-xml-bind.version>4.0.4</jakarta-xml-bind.version>
+
+    <!-- build tooling versions -->
+    <aspectj-maven-plugin.version>1.14.1</aspectj-maven-plugin.version>
+    <aspectjtools.version>1.9.25</aspectjtools.version>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+    <central-publishing-plugin.version>0.8.0</central-publishing-plugin.version>
+    <maven-gpg-plugin.version>3.2.0</maven-gpg-plugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- internal Qanary artifacts -->
+      <dependency>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>qa.commons</artifactId>
+        <version>${qanary.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.wdaqua.qanary</groupId>
+        <artifactId>qa.component</artifactId>
+        <version>${qanary.components.version}</version>
+      </dependency>
+
+      <!-- Apache Jena -->
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-arq</artifactId>
+        <version>${jena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-core</artifactId>
+        <version>${jena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-rdfconnection</artifactId>
+        <version>${jena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>apache-jena-libs</artifactId>
+        <type>pom</type>
+        <version>${jena.version}</version>
+      </dependency>
+
+      <!-- triplestore clients -->
+      <dependency>
+        <groupId>com.complexible.stardog</groupId>
+        <artifactId>client-http</artifactId>
+        <version>${stardog.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.complexible.stardog.jena</groupId>
+        <artifactId>stardog-jena</artifactId>
+        <version>${stardog.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.openlinksw</groupId>
+        <artifactId>virt_jena_v5_3</artifactId>
+        <version>${virtuoso-jena.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.openlinksw</groupId>
+        <artifactId>virtjdbc4_3</artifactId>
+        <version>${virtuoso-jdbc.version}</version>
+      </dependency>
+
+      <!-- misc -->
+      <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>${commons-cli.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-configuration2</artifactId>
+        <version>${commons-configuration2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta-xml-bind.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>${central-publishing-plugin.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <publishingServerId>central</publishingServerId>
+            <autoPublish>true</autoPublish>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+          <configuration>
+            <gpgArguments>
+              <arg>--pinentry-mode</arg>
+              <arg>loopback</arg>
+            </gpgArguments>
+          </configuration>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>dev.aspectj</groupId>
+          <artifactId>aspectj-maven-plugin</artifactId>
+          <version>${aspectj-maven-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.aspectj</groupId>
+              <artifactId>aspectjtools</artifactId>
+              <version>${aspectjtools.version}</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <complianceLevel>${java.version}</complianceLevel>
+            <additionalCompilerArgs>
+              <arg>-parameters</arg>
+            </additionalCompilerArgs>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <showWeaveInfo>false</showWeaveInfo>
+            <verbose>true</verbose>
+            <Xlint>ignore</Xlint>
+            <encoding>UTF-8</encoding>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>compile</goal>
+                <goal>test-compile</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <!-- The parent itself is signed & published to Maven Central (release
+         process) so released modules can resolve it. Skipped on local installs
+         via -Dgpg.skip / non-deploy phases. -->
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

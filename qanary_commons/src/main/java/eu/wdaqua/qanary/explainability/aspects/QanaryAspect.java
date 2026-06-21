@@ -13,7 +13,7 @@ import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -348,7 +348,7 @@ public class QanaryAspect {
         return "[ rdf:type \"" +
                 ResourceFactory.createPlainLiteral(outputData.getClass().toString()) +
                 "\" ; rdf:value \""
-                + ResourceFactory.createPlainLiteral(outputData.toString().replace("\n", " ").replace("\\", "'")) +
+                + ResourceFactory.createPlainLiteral(outputData.toString().replace("\n", " ").replace("\\", "'").replace("\"", "'")) +
                 "\"]";
     }
 
@@ -418,7 +418,11 @@ public class QanaryAspect {
             methodMap.forEach((k, v) -> {
                 try {
                     logMethodData(k, v);
-                } catch (IOException | SparqlQueryFailed | NullPointerException e) {
+                } catch (Exception e) {
+                    // logging is best-effort explainability data and must never break
+                    // the QA request. Jena 5 parses SPARQL updates client-side and can
+                    // throw QueryParseException (a RuntimeException); the previous narrow
+                    // multi-catch let it escape, turning a logging glitch into an HTTP 500.
                     logger.error("Method with uuid {} was not logged due to an exception with the error message: {}", k,
                             e.getMessage());
                 }
