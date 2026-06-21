@@ -1,7 +1,9 @@
 package qa.commons;
 
+import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.commons.QanaryUtils;
+import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import org.apache.jena.query.ResultSet;
@@ -15,11 +17,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class QanaryUtilsTest {
     private QanaryUtils utils;
@@ -174,6 +184,68 @@ class QanaryUtilsTest {
         assertThrows(Exception.class, () -> QanaryUtils.compareAsSelect(select0b, select1b));
         assertThrows(Exception.class, () -> QanaryUtils.compareSparqlQueries(select0a, select1a));
         assertThrows(Exception.class, () -> QanaryUtils.compareSparqlQueries(select0b, select1b));
+    }
+
+    @Test
+    void exposesGraphsEndpointAndConnectorFromMessage() {
+        assertEquals(URI.create("http://example.org/endpoint"), this.utils.getEndpoint());
+        assertEquals(URI.create("http://example.org/inGraph"), this.utils.getInGraph());
+        assertEquals(URI.create("http://example.org/outGraph"), this.utils.getOutGraph());
+        assertNotNull(this.utils.getQanaryTripleStoreConnector());
+    }
+
+    @Test
+    void constructsFromQuestionAnsweringRun() throws URISyntaxException {
+        eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun run =
+                new eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun(
+                        URI.create("http://example.org/question"),
+                        URI.create("http://example.org/endpoint"),
+                        URI.create("http://example.org/inGraph"),
+                        URI.create("http://example.org/outGraph"),
+                        null);
+        QanaryUtils fromRun = new QanaryUtils(run, new NoOpTripleStoreConnector());
+        assertEquals(URI.create("http://example.org/endpoint"), fromRun.getEndpoint());
+        assertEquals(URI.create("http://example.org/outGraph"), fromRun.getOutGraph());
+    }
+
+    @Test
+    void getTimeReturnsCurrentMillis() {
+        long before = System.currentTimeMillis();
+        long t = QanaryUtils.getTime();
+        assertTrue(t >= before);
+    }
+
+    @Test
+    void deprecatedTripleStoreWrappersDelegateToConnector() throws Exception {
+        // NoOp connector: select -> null, ask -> false, update -> no-op
+        assertNull(this.utils.selectFromTripleStore("SELECT * WHERE {}", "ignored-endpoint"));
+        assertFalse(this.utils.askTripleStore("ASK {}", "ignored-endpoint"));
+        assertDoesNotThrow(() -> this.utils.updateTripleStore("INSERT DATA {}", "http://example.org/endpoint"));
+        assertDoesNotThrow(() -> this.utils.updateTripleStore("INSERT DATA {}",
+                URI.create("http://example.org/endpoint")));
+        assertDoesNotThrow(() -> this.utils.updateTripleStore("INSERT DATA {}",
+                new URL("http://example.org/endpoint")));
+    }
+
+    @Test
+    void updateTripleStoreViaConfiguratorUsesItsEndpoint() throws Exception {
+        QanaryConfigurator configurator = mock(QanaryConfigurator.class);
+        when(configurator.getEndpoint()).thenReturn(URI.create("http://example.org/endpoint"));
+        assertDoesNotThrow(() -> this.utils.updateTripleStore("INSERT DATA {}", configurator));
+    }
+
+    @Test
+    void componentAndHostUriReadFromGlobalConfiguration() {
+        QanaryConfiguration.setServiceUri(URI.create("http://localhost:8080/service"));
+        QanaryConfiguration.setHostUri(URI.create("http://localhost:8080"));
+        assertEquals("http://localhost:8080/service", this.utils.getComponentUri());
+        assertEquals("http://localhost:8080", this.utils.getHostUri());
+    }
+
+    @Test
+    void assertSameConnectorInstanceIsReturned() {
+        QanaryTripleStoreConnector connector = this.utils.getQanaryTripleStoreConnector();
+        assertSame(connector, this.utils.getQanaryTripleStoreConnector());
     }
 
     /**

@@ -88,7 +88,7 @@ public class QanaryMessage {
 			return this.values.get(new URI(key));
 		} catch (URISyntaxException e) {
 			// should never ever happen or the whole Qanary pipeline is broken
-			e.printStackTrace();
+			logger.error("could not resolve the URI for key '{}'", key, e);
 			return null;
 		}
 	}

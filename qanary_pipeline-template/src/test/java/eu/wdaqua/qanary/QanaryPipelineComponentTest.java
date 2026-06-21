@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.doNothing;
 public class QanaryPipelineComponentTest {
 
     protected ClassLoader classLoader = this.getClass().getClassLoader();
-    @MockBean
+    @MockitoBean
     QanaryTripleStoreConnectorVirtuoso qanaryTripleStoreConnectorVirtuoso;
     @InjectMocks
     QanaryPipelineComponent qanaryPipelineComponent;

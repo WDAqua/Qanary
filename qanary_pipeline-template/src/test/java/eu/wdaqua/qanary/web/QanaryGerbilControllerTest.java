@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,7 +46,7 @@ class QanaryGerbilControllerTest {
     @Autowired
     QanaryGerbilController controller;
     private MockMvc mockMvc;
-    @MockBean
+    @MockitoBean
     private QanaryTripleStoreProxy mockedQanaryTripleStoreConnector;
 
     /**

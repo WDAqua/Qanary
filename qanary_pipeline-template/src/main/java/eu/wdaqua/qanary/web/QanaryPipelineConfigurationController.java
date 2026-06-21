@@ -73,7 +73,7 @@ public class QanaryPipelineConfigurationController {
             String jsonString = objectMapper.writeValueAsString(configurationMap);
             return new ResponseEntity<>(jsonString, HttpStatus.OK);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error("error while accessing the pipeline configuration", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -105,7 +105,7 @@ public class QanaryPipelineConfigurationController {
             }
         } catch (IOException e) {
             logger.error("An error occurred creating application.local.properties!");
-            e.printStackTrace();
+            logger.error("error while accessing the pipeline configuration", e);
         }
 
         try {
@@ -124,7 +124,7 @@ public class QanaryPipelineConfigurationController {
 
         } catch (IOException e) {
             logger.error("An error occurred writing changes to application.local.properties!");
-            e.printStackTrace();
+            logger.error("error while accessing the pipeline configuration", e);
         }
     }
 }

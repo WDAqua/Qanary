@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs *enforced* gate (quality task A1).
+
+  Used as an includeFilter for `spotbugs:check -Dspotbugs.failOnError=true` in CI:
+  only the high-severity correctness and security patterns listed here fail the
+  build. They are all currently at ZERO across the project (the correctness ones
+  were just fixed), so the gate is green today and fails only on a regression /
+  newly introduced instance.
+
+  The full SpotBugs report (`spotbugs:spotbugs`, report-only) still surfaces every
+  finding for gradual triage; widen this list as more categories are driven to zero.
+-->
+<FindBugsFilter>
+  <!-- correctness bugs fixed in task A1 -->
+  <Match><Bug pattern="IL_INFINITE_RECURSIVE_LOOP"/></Match>
+  <Match><Bug pattern="ES_COMPARING_PARAMETER_STRING_WITH_EQ"/></Match>
+  <Match><Bug pattern="ES_COMPARING_STRINGS_WITH_EQ"/></Match>
+  <Match><Bug pattern="OS_OPEN_STREAM"/></Match>
+  <Match><Bug pattern="OS_OPEN_STREAM_EXCEPTION_PATH"/></Match>
+
+  <!-- classically severe correctness patterns (currently absent; keep absent) -->
+  <Match><Bug pattern="RpC_REPEATED_CONDITIONAL_TEST"/></Match>
+  <Match><Bug pattern="NP_ALWAYS_NULL"/></Match>
+  <Match><Bug pattern="NP_GUARANTEED_DEREF"/></Match>
+  <Match><Bug pattern="DMI_INVOKING_TOSTRING_ON_ARRAY"/></Match>
+
+  <!-- severe security patterns (FindSecBugs); currently absent, fail if introduced -->
+  <Match><Bug pattern="SQL_INJECTION_JDBC"/></Match>
+  <Match><Bug pattern="SQL_INJECTION_SPRING_JDBC"/></Match>
+  <Match><Bug pattern="SQL_INJECTION_JPA"/></Match>
+  <Match><Bug pattern="SQL_INJECTION_HIBERNATE"/></Match>
+  <Match><Bug pattern="COMMAND_INJECTION"/></Match>
+  <Match><Bug pattern="XXE_SAXPARSER"/></Match>
+  <Match><Bug pattern="XXE_XMLREADER"/></Match>
+  <Match><Bug pattern="XXE_DOCUMENT"/></Match>
+  <Match><Bug pattern="HARD_CODE_PASSWORD"/></Match>
+  <Match><Bug pattern="DMI_CONSTANT_DB_PASSWORD"/></Match>
+</FindBugsFilter>

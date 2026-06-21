@@ -84,3 +84,10 @@ stored-question*
 
 **/.factorypath
 
+
+# test-generated additional-triples (redirected to target/ in tests)
+qanary_pipeline-template/additional-triples/
+additional-triples/
+
+# AspectJ weaver crash dumps
+ajcore.*.txt

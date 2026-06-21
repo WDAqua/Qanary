@@ -198,6 +198,52 @@
 
     <build>
         <plugins>
+            <!-- Keep tests from polluting the source tree: redirect the
+                 additional-triples output under target/ (cleaned by 'mvn clean',
+                 gitignored) instead of the default CWD-relative 'additional-triples'. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <qanary.process.additional-triples-directory>${project.build.directory}/additional-triples</qanary.process.additional-triples-directory>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <!-- JaCoCo scope override: AspectJ weaves the qa.commons dependency
+                 into this module's target/classes, so those commons classes
+                 would otherwise be (double-)counted here. Restrict coverage
+                 measurement/gating to the classes this module actually owns. -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <configuration>
+                            <includes>
+                                <include>eu/wdaqua/qanary/web/**</include>
+                                <include>eu/wdaqua/qanary/QanaryPipeline*.class</include>
+                                <include>eu/wdaqua/qanary/QanaryComponentRegistrationChangeNotifier*.class</include>
+                                <include>eu/wdaqua/qanary/PipelineExplanationHelper*.class</include>
+                                <include>eu/wdaqua/qanary/exceptions/AdditionalTriplesCouldNotBeAdded*.class</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <configuration>
+                            <includes>
+                                <include>eu/wdaqua/qanary/web/**</include>
+                                <include>eu/wdaqua/qanary/QanaryPipeline*.class</include>
+                                <include>eu/wdaqua/qanary/QanaryComponentRegistrationChangeNotifier*.class</include>
+                                <include>eu/wdaqua/qanary/PipelineExplanationHelper*.class</include>
+                                <include>eu/wdaqua/qanary/exceptions/AdditionalTriplesCouldNotBeAdded*.class</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

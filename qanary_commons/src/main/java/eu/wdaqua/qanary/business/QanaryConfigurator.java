@@ -83,7 +83,7 @@ public class QanaryConfigurator {
             try {
                 myURI = new URI((component.getUrl() + "/annotatequestion").replace("//annotatequestion", "/annotatequestion"));
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                logger.error("invalid component URL '{}', aborting process", component.getUrl(), e);
                 return result;
             }
 

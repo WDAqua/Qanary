@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 public abstract class QanaryTripleStoreConnector {
@@ -46,8 +47,10 @@ public abstract class QanaryTripleStoreConnector {
 
         if (in == null) {
             return null;
-        } else {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        }
+        // try-with-resources so the reader (and the underlying stream) is always
+        // closed -- the previous code leaked the stream on every template load.
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
     }
