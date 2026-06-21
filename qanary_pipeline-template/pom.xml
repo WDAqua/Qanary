@@ -387,16 +387,13 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
+                    <!-- No test-compile weave: the parent's shared execution now
+                         weaves MAIN classes only (test-compile re-wove the already
+                         woven qa.commons and hit AspectJ's "key not found in
+                         wovenClassFile" flake). The earlier skip=true execution here
+                         was ineffective because the parent's default execution merged
+                         the test-compile goal back in; removed now that the parent no
+                         longer declares it. -->
                 </executions>
             </plugin>
         </plugins>
