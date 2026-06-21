@@ -6,6 +6,20 @@ GROUP_PATH=$(echo "$GROUP_ID" | tr '.' '/')
 artifacts=(qanary_commons qanary_pipeline-template qanary_component-template qanary_component-parent)
 artifacts_to_be_released=()
 
+# The shared parent POM (mvn.reactor) must also be published to Maven Central so the
+# released modules can resolve it as their parent. Check the reactor root pom and
+# release it (as ".") when it is missing — deploy it first so it is in the bundle.
+ROOT_ARTIFACT_ID=$(xmllint --xpath "/*[local-name()='project']/*[local-name()='artifactId']/text()" pom.xml)
+ROOT_VERSION=$(xmllint --xpath "/*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+ROOT_URL="https://repo1.maven.org/maven2/$GROUP_PATH/$ROOT_ARTIFACT_ID/$ROOT_VERSION/$ROOT_ARTIFACT_ID-$ROOT_VERSION.pom"
+ROOT_HTTP_STATUS=$(curl --head --silent --output /dev/null --write-out "%{http_code}" "$ROOT_URL")
+if [ "$ROOT_HTTP_STATUS" -eq 200 ]; then
+    echo "Parent $ROOT_ARTIFACT_ID version $ROOT_VERSION exists in Maven Central."
+else
+    echo "Parent $ROOT_ARTIFACT_ID version $ROOT_VERSION does not exist in Maven Central; releasing the reactor root."
+    artifacts_to_be_released+=(".")
+fi
+
 for artifact in "${artifacts[@]}"; do
     echo "Checking version in: $artifact"
     while read -r file; do
