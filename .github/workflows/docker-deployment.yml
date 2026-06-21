@@ -24,7 +24,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Clone local Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Build the Docker images and Push to Dockerhub
         run: bash -c ./service_config/build_images.sh
