@@ -104,7 +104,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
                 return;
             } catch (Exception e) {
                 getLogger().warn("Tried to establish connection ({}), but failed: {}", numberOfReconnectingTries, e.getMessage());
-                e.printStackTrace();
+                getLogger().debug("stack trace of the handled exception", e);
                 numberOfReconnectingTries++;
 
                 if (this.maxTriesConnectionTimeout <= numberOfReconnectingTries) {
@@ -116,7 +116,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
                     TimeUnit.SECONDS.sleep(5);
                 } catch (Exception e2) {
                     getLogger().warn("Failed to wait for 5 seconds: {}", e2.getMessage());
-                    e2.printStackTrace();
+                    getLogger().debug("stack trace of the handled exception", e2);
                 }
             }
         }
@@ -131,7 +131,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
                 return this.select(sparql, numberOfTries);
             } catch (Exception e) {
                 getLogger().error("Error while executing a SELECT query: {}", e.getMessage());
-                e.printStackTrace();
+                getLogger().debug("stack trace of the handled exception", e);
 
                 if (e.getMessage().contains(VIRTUOSO_PROBLEM_STRING)) { // not nice
                     getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);
@@ -165,7 +165,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
                 return this.ask(sparql, numberOfTries);
             } catch (Exception e) {
                 getLogger().error("Error while executing a ASK query: {}", e.getMessage());
-                e.printStackTrace();
+                getLogger().debug("stack trace of the handled exception", e);
 
                 if (e.getMessage().contains(VIRTUOSO_PROBLEM_STRING)) { // not nice
                     getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);
@@ -199,7 +199,7 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
                 return;
             } catch (Exception e) {
                 getLogger().error("Error while executing a UPDATE query: {}", e.getMessage());
-                e.printStackTrace();
+                getLogger().debug("stack trace of the handled exception", e);
 
                 if (e.getMessage().contains(VIRTUOSO_PROBLEM_STRING)) { // not nice
                     getLogger().error("Connection was a timeout. Possible retry ({} tries already).", numberOfTries);

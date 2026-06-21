@@ -84,11 +84,11 @@ public class QanaryQuestionController {
 			responseMessage = this.storeQuestion(questionstring);
 		} catch (IOException e) {
 			// will be caused by problems with file writing
-			e.printStackTrace();
+			logger.error("error while handling the question request", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (URISyntaxException e) {
 			// should be caused by a bad URI
-			e.printStackTrace();
+			logger.error("error while handling the question request", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
@@ -145,11 +145,11 @@ public class QanaryQuestionController {
 			responseMessage = this.storeAudioQuestion(file);
 		} catch (IOException e) {
 			// will be caused by problems with file writing
-			e.printStackTrace();
+			logger.error("error while handling the question request", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (URISyntaxException e) {
 			// should be caused by a bad URI
-			e.printStackTrace();
+			logger.error("error while handling the question request", e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 

@@ -1,1 +1,0 @@
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX xyz: <urn:xyz:> <urn:s0> xyz:p0 <urn:o0> .<urn:s1>   <urn:p1> <urn:o1> .     <urn:s2> <urn:p2> "1"^^xsd:integer    . <urn:s3> <urn:p3>    "string" . <urn:s4> <urn:p4> "explicit string"^^xsd:string . <urn:s5>   <urn:p5> <urn:o5>,"string" . 

@@ -152,6 +152,31 @@
 
     <build>
         <plugins>
+            <!-- JaCoCo scope override: AspectJ weaves the qa.commons dependency
+                 into this module's target/classes; restrict coverage to the
+                 classes this module actually owns (eu.wdaqua.qanary.component.*). -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <configuration>
+                            <includes>
+                                <include>eu/wdaqua/qanary/component/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <configuration>
+                            <includes>
+                                <include>eu/wdaqua/qanary/component/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

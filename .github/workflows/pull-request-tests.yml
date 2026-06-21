@@ -21,6 +21,72 @@ jobs:
       - name: Build artifacts # To resolve internal, not yet published new versions
         run: mvn clean install -Dgpg.skip -DskipTests -Ddockerfile.skip
 
-      - name: Execute tests
+      - name: Execute tests with coverage
+        # 'mvn test' runs the JaCoCo agent (prepare-agent), writes the coverage
+        # report (jacoco:report -> target/site/jacoco) and evaluates the per-class
+        # 80% line-coverage gate (jacoco:check). The gate is report-only by default;
+        # set -Djacoco.haltOnFailure=true to make it fail the build.
         run: mvn test
 
+      - name: Test coverage summary + regression gate
+        if: always() # also summarise coverage when tests/gate fail
+        # Prints the per-module/overall summary and the list of classes below the
+        # advisory 80% per-class threshold (report-only). FAILS the job if overall
+        # or any module line coverage drops below the enforced floors below — a
+        # ratchet so coverage cannot silently regress. Raise the floors as coverage
+        # improves.
+        run: python3 service_config/jacoco-coverage-summary.py
+        env:
+          COVERAGE_THRESHOLD: '80'
+          COVERAGE_ENFORCE: 'false' # advisory per-class rule stays report-only
+          COVERAGE_MIN_OVERALL: '55'
+          COVERAGE_MIN_MODULE: 'qanary_commons=55,qanary_pipeline-template=48,qanary_component-template=65,qald-evaluator=90'
+
+      - name: Upload JaCoCo coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-reports
+          path: '**/target/site/jacoco/'
+          if-no-files-found: warn
+
+      - name: JaCoCo PR coverage comment (diff)
+        if: always()
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: JaCoCo coverage report
+          update-comment: true
+          min-coverage-overall: 55
+          min-coverage-changed-files: 0 # comment-only on changed files; the script is the gate
+
+      - name: Static analysis report (SpotBugs + FindSecBugs, report-only)
+        if: always()
+        # Full report for gradual triage (reuses the compiled classes). SpotBugs
+        # reads bytecode, so AspectJ weaving doesn't affect it. Full plugin
+        # coordinates because the 'spotbugs' prefix isn't in Maven's default groups.
+        run: mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs
+
+      - name: Upload SpotBugs reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spotbugs-reports
+          path: '**/target/spotbugsXml.xml'
+          if-no-files-found: warn
+
+      - name: Static analysis gate (high-severity patterns)
+        # Fails the build only on the curated high-severity correctness/security
+        # patterns in service_config/spotbugs-enforced.xml (all currently zero).
+        run: >
+          mvn com.github.spotbugs:spotbugs-maven-plugin:check
+          -Dspotbugs.includeFilterFile=$GITHUB_WORKSPACE/service_config/spotbugs-enforced.xml
+          -Dspotbugs.failOnError=true
+
+      - name: Formatting drift report (Spotless, non-blocking)
+        if: always()
+        continue-on-error: true # report-only until the team adopts `mvn spotless:apply`
+        run: >
+          mvn -pl qanary_commons,qanary_pipeline-template,qanary_component-template,qald-evaluator
+          com.diffplug.spotless:spotless-maven-plugin:check

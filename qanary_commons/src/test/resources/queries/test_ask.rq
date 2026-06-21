@@ -1,0 +1,5 @@
+ASK {
+  GRAPH ?graph {
+    ?s ?p ?o .
+  }
+}

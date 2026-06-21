@@ -1,0 +1,49 @@
+name: Dependency vulnerability scan (OWASP)
+
+# Software Composition Analysis: scans the project's dependencies against the
+# National Vulnerability Database. Kept off the per-PR path because the NVD data
+# download is slow; runs weekly and on demand. Report-only (does not fail the
+# build) -- review the uploaded report.
+#
+# Requires an NVD API key (free: https://nvd.nist.gov/developers/request-an-api-key)
+# stored as the repository secret NVD_API_KEY, otherwise the NVD download is
+# heavily throttled.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1' # Mondays 04:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build & install artifacts (resolve internal versions)
+        run: mvn clean install -Dgpg.skip -DskipTests -Ddockerfile.skip
+
+      - name: OWASP dependency-check (aggregate, report-only)
+        # failBuildOnCVSS defaults to 11 (never fails); this only produces a report.
+        run: >
+          mvn org.owasp:dependency-check-maven:10.0.4:aggregate
+          -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+          -Dformats=HTML,JSON
+          -Dgpg.skip
+
+      - name: Upload dependency-check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: '**/target/dependency-check-report.*'
+          if-no-files-found: warn

@@ -90,7 +90,9 @@ public class QanaryTripleStoreProxy extends QanaryTripleStoreConnector {
 
     @Override
     public void update(String sparql, URI graph) throws SparqlQueryFailed {
-        this.update(sparql, null);
+        // delegate to the external connector (as select/ask/update(sparql) do);
+        // the previous 'this.update(sparql, null)' recursed into itself forever.
+        externalConnector.update(sparql, graph);
     }
 
     @Override

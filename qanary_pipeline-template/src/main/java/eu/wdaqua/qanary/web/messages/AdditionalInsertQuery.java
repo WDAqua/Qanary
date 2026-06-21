@@ -91,21 +91,28 @@ public class AdditionalInsertQuery {
 	 */
 	private List<String> findAdditionalVaraibles(String insertQuery) {
 		int lastIdx = 0;
-		String varString;
 		List<String> variables = new ArrayList<String>();
 
 		while (lastIdx != -1) {
 			lastIdx = insertQuery.indexOf("?", lastIdx);
-			int end = insertQuery.indexOf(" ", lastIdx);
-
-			if (lastIdx != -1) {
-				varString = insertQuery.substring(lastIdx, end);
-				if (!variables.contains(varString)) {
-					logger.info("found new var {} at ({},{})", varString, lastIdx, end);
-					variables.add(varString);
-				}
-				lastIdx += varString.length();
+			if (lastIdx == -1) {
+				break;
 			}
+			// a SPARQL variable name is '?' followed by [A-Za-z0-9_]; scan to the
+			// first character that is not part of the name (previously the code
+			// looked only for a space and did substring(lastIdx, -1) -> exception
+			// when the variable was not followed by a space, e.g. "?o}" or EOL).
+			int end = lastIdx + 1;
+			while (end < insertQuery.length()
+					&& (Character.isLetterOrDigit(insertQuery.charAt(end)) || insertQuery.charAt(end) == '_')) {
+				end++;
+			}
+			String varString = insertQuery.substring(lastIdx, end);
+			if (!variables.contains(varString)) {
+				logger.info("found new var {} at ({},{})", varString, lastIdx, end);
+				variables.add(varString);
+			}
+			lastIdx = end;
 		}
 		return variables;
 	}

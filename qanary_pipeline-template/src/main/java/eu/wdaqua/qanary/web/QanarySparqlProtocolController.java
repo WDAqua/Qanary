@@ -65,7 +65,7 @@ public class QanarySparqlProtocolController {
         try {
             result = this.getQanaryTripleStoreConnector().select(sparqlQuery);
         } catch (SparqlQueryFailed e) {
-            e.printStackTrace();
+            logger.error("error while serving the SPARQL protocol request", e);
             String message = "SPARQL query for connection check failed";
             logger.error("{}: {}", message, e.toString());
             return ResponseEntity.internalServerError().body(message + ": " + e.toString());
@@ -106,7 +106,7 @@ public class QanarySparqlProtocolController {
             query = QueryFactory.create(sparqlQuery);
         } catch (Exception e) {
             logger.error("SPARQL query could not be processed because of the error: {}\nfailed query:\n{}", e, sparqlQuery);
-            e.printStackTrace();
+            logger.error("error while serving the SPARQL protocol request", e);
             throw new SparqlQueryFailed(sparqlQuery, this.getQanaryTripleStoreConnector().getFullEndpointDescription(), e);
         }
 
