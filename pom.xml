@@ -55,6 +55,11 @@
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <central-publishing-plugin.version>0.8.0</central-publishing-plugin.version>
     <maven-gpg-plugin.version>3.2.0</maven-gpg-plugin.version>
+    <!-- GPG signing (sign-artifacts execution) is bound to the verify phase, so it
+         would fire on every `mvn install` and fail in CI/local builds that have no
+         signing key. Default it OFF; the release workflow (maven.yml) re-enables it
+         with -Dgpg.skip=false alongside the key from secrets. -->
+    <gpg.skip>true</gpg.skip>
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
     <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
