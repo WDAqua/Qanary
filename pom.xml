@@ -55,6 +55,27 @@
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <central-publishing-plugin.version>0.8.0</central-publishing-plugin.version>
     <maven-gpg-plugin.version>3.2.0</maven-gpg-plugin.version>
+    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
+    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
+    <pitest-maven.version>1.19.1</pitest-maven.version>
+    <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
+    <testcontainers.version>1.20.4</testcontainers.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+
+    <!-- Static analysis (SpotBugs, bytecode-based so it works alongside the
+         AspectJ weaving). Report-only by default; enable enforcement in CI with
+         -Dspotbugs.failOnError=true once the existing findings are triaged. -->
+    <spotbugs.failOnError>false</spotbugs.failOnError>
+
+    <!-- Test-coverage gate (JaCoCo). Per-class minimum line coverage enforced by
+         the "jacoco-check" execution; raise this over time. Classes that can only
+         be exercised by integration infrastructure (full Spring context, live
+         triplestore, Spring Boot bootstrap) are excluded via jacoco.excludes. -->
+    <jacoco.minimum.class.line.coverage>0.80</jacoco.minimum.class.line.coverage>
+    <!-- Coverage gate is reporting-only by default; CI sets this to true. -->
+    <jacoco.haltOnFailure>false</jacoco.haltOnFailure>
   </properties>
 
   <dependencyManagement>
@@ -236,6 +257,162 @@
             </execution>
           </executions>
         </plugin>
+        <!-- Test-coverage measurement and per-class gate (added: task "test
+             coverage"). prepare-agent instruments tests on-the-fly (independent
+             of AspectJ compile-time weaving); report writes target/site/jacoco;
+             jacoco-check enforces the per-class line-coverage minimum. -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <configuration>
+            <excludes>
+              <!-- Spring Boot bootstrap / @SpringBootApplication entry points
+                   whose sole purpose is launching the Spring context (main()),
+                   which cannot be meaningfully unit-tested. -->
+              <exclude>**/*Application.class</exclude>
+              <exclude>**/QanaryService.class</exclude>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>jacoco-prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>jacoco-report</id>
+              <phase>test</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>jacoco-check</id>
+              <phase>test</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <!-- Do not fail the build by default; CI opts in with
+                     -Djacoco.haltOnFailure=true. Lets coverage be reported even
+                     while individual classes are still being brought up to par. -->
+                <haltOnFailure>${jacoco.haltOnFailure}</haltOnFailure>
+                <rules>
+                  <rule>
+                    <element>CLASS</element>
+                    <limits>
+                      <limit>
+                        <counter>LINE</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>${jacoco.minimum.class.line.coverage}</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Static analysis (added: quality task #1). SpotBugs works on the
+             compiled bytecode, so it is unaffected by the AspectJ weaving. The
+             FindSecBugs plugin adds security detectors. Report-only by default
+             (spotbugs.failOnError=false); invoke via `mvn spotbugs:check` (gate)
+             or `mvn spotbugs:spotbugs` (report -> target/spotbugsXml.xml). -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>${spotbugs-maven-plugin.version}</version>
+          <configuration>
+            <effort>Max</effort>
+            <threshold>Medium</threshold>
+            <failOnError>${spotbugs.failOnError}</failOnError>
+            <includeTests>false</includeTests>
+            <plugins>
+              <plugin>
+                <groupId>com.h3xstream.findsecbugs</groupId>
+                <artifactId>findsecbugs-plugin</artifactId>
+                <version>${findsecbugs-plugin.version}</version>
+              </plugin>
+            </plugins>
+          </configuration>
+        </plugin>
+        <!-- Mutation testing (added: quality task #1). On-demand only (slow); not
+             bound to a lifecycle phase. Run per module, e.g.:
+               mvn -pl qanary_commons org.pitest:pitest-maven:mutationCoverage
+             Reports -> target/pit-reports. Verifies tests actually detect
+             injected faults, not just execute the lines. -->
+        <plugin>
+          <groupId>org.pitest</groupId>
+          <artifactId>pitest-maven</artifactId>
+          <version>${pitest-maven.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.pitest</groupId>
+              <artifactId>pitest-junit5-plugin</artifactId>
+              <version>${pitest-junit5-plugin.version}</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <targetClasses>
+              <param>eu.wdaqua.qanary.*</param>
+            </targetClasses>
+            <outputFormats>
+              <param>XML</param>
+              <param>HTML</param>
+            </outputFormats>
+            <timestampedReports>false</timestampedReports>
+            <failWhenNoMutations>false</failWhenNoMutations>
+          </configuration>
+        </plugin>
+        <!-- Build environment guard (quality task C7): require JDK 21+ and a
+             recent Maven, so a build on JDK 17 fails early and clearly instead of
+             producing confusing AspectJ/compile errors. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>enforce-build-environment</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <requireJavaVersion>
+                    <version>[21,)</version>
+                    <message>This project requires JDK 21 or newer (the modules compile to Java 21).</message>
+                  </requireJavaVersion>
+                  <requireMavenVersion>
+                    <version>[3.6.3,)</version>
+                  </requireMavenVersion>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Formatting (quality task C8). Lightweight, engine-free rules (import
+             order, trailing whitespace, final newline) so there is no mass
+             re-indentation. Run `mvn com.diffplug.spotless:spotless-maven-plugin:check`
+             to report drift (CI does this, non-blocking) or `:apply` to adopt it. -->
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless-maven-plugin.version}</version>
+          <configuration>
+            <java>
+              <includes>
+                <include>src/main/java/**/*.java</include>
+                <include>src/test/java/**/*.java</include>
+              </includes>
+              <importOrder/>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+            </java>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -251,6 +428,30 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
+      </plugin>
+      <!-- Activate JaCoCo for every module (config inherited from
+           pluginManagement above). Generates coverage and enforces the gate. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <!-- SpotBugs available for every module (config from pluginManagement).
+           Not bound to a lifecycle phase, so normal builds are unaffected; run
+           explicitly with `mvn spotbugs:check` (CI static-analysis step). -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+      </plugin>
+      <!-- Enforce the build environment (JDK 21+, Maven) for every module. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <!-- Spotless present (config + version from pluginManagement) so the
+           check/apply goals work; not phase-bound, so normal builds are unaffected. -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

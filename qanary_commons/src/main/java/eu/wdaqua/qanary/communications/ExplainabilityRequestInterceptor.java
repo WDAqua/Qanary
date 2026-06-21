@@ -9,6 +9,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
+import java.util.Stack;
 
 public class ExplainabilityRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -16,11 +17,15 @@ public class ExplainabilityRequestInterceptor implements ClientHttpRequestInterc
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        String processId = QanaryAspect.getCallStack().peek().toString();
-        if (processId == null) {
+        // the call stack can be empty (e.g. no surrounding Qanary process): guard
+        // against that instead of letting peek() throw EmptyStackException. The
+        // previous "processId == null" check after peek().toString() was unreachable.
+        Stack<String> callStack = QanaryAspect.getCallStack();
+        if (callStack.isEmpty() || callStack.peek() == null) {
             logger.error("Couldn't get processId from stack, skip logging");
             return execution.execute(request, body);
         }
+        String processId = callStack.peek();
         logger.debug("ExplainabilityRequestInterceptor: processId: " + processId);
         request.getHeaders().add("processId", processId);
         return execution.execute(request, body);

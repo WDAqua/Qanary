@@ -1,0 +1,47 @@
+name: Integration tests (Testcontainers)
+
+# Docker-dependent integration tests (Testcontainers spins up the project's real
+# Virtuoso image). Kept separate from the fast per-PR unit tests: the *IT classes
+# are not picked up by the normal `mvn test`, so they only run here.
+on:
+  pull_request:
+  push:
+    branches: [ master ]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest # provides a Docker daemon for Testcontainers
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build & install artifacts (resolve internal versions)
+        run: mvn clean install -Dgpg.skip -DskipTests -Ddockerfile.skip
+
+      - name: Run all tests incl. Testcontainers (aggregate coverage)
+        # Runs the unit + Spring + Testcontainers (*IT) tests together so the
+        # JaCoCo report reflects ALL tests (e.g. the live-Virtuoso connector,
+        # which is 0% in the unit-only PR run). Docker is available on the runner.
+        run: >
+          mvn clean test
+          -Dtest='*Test,*IT' -Dsurefire.failIfNoSpecifiedTests=false -Dgpg.skip
+
+      - name: Aggregate coverage summary (unit + integration)
+        if: always()
+        run: python3 service_config/jacoco-coverage-summary.py
+        env:
+          COVERAGE_THRESHOLD: '80'
+
+      - name: Upload aggregate coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-reports-aggregate
+          path: '**/target/site/jacoco/'
+          if-no-files-found: warn

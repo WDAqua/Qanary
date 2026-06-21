@@ -46,7 +46,7 @@ public class CacheConfig {
 	@Bean
 	public CacheManager cacheManager(Caffeine caffeine,
 			@Value("${qanary.webservicecalls.cache.specs:}") String caffeineSpec) {
-		if (caffeineSpec == null || caffeineSpec == "") {
+		if (caffeineSpec == null || caffeineSpec.isBlank()) {
 			caffeineSpec = "maximumSize=1,expireAfterAccess=0s"; // default value
 		}
 		logger.info("cacheManager configuration: {}", caffeineSpec);

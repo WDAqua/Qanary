@@ -20,7 +20,7 @@ import eu.wdaqua.qanary.commons.QanaryMessage;
  */
 public class QanaryQuestionAnsweringFinished {
 	
-	private class ComponentExecutionLog {
+	public static class ComponentExecutionLog {
 		private String componentName;
 		private String componentUri;
 		private long time;

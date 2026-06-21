@@ -17,7 +17,7 @@ public class QanaryExceptionServiceCallNotOk extends Exception {
 
 	public QanaryExceptionServiceCallNotOk(String componentName, long duration, HttpStatus myHttpStatus) {
 		super(String.format(
-				"Call to Qanary component {} was not performed correctly (duration: {} ms); it returned {}. |\n{}", //
+				"Call to Qanary component %s was not performed correctly (duration: %d ms); it returned %s. |%n%d", //
 				componentName, //
 				duration, //
 				myHttpStatus.name(), //
@@ -30,7 +30,7 @@ public class QanaryExceptionServiceCallNotOk extends Exception {
 
 	public QanaryExceptionServiceCallNotOk(String componentName, long duration, String message, String stackTrace) {
 		super(String.format(
-				"Call to Qanary component {} was not performed correctly (duration: {} ms); it returned {}. |\n{}", //
+				"Call to Qanary component %s was not performed correctly (duration: %d ms); it returned %s. |%n%s", //
 				componentName, //
 				duration, //
 				message, //

@@ -98,7 +98,7 @@ public class QanaryPipeline implements QanaryExplanation {
 				logger.info("Test query to triplestore {} worked.", myQanaryTripleStoreConnector.getFullEndpointDescription());
 				return;
 			} catch (SparqlQueryFailed e) {
-				e.printStackTrace();
+				logger.warn("triplestore test query failed; will retry if attempts remain", e);
 			}
 			numberOfTests--;
 		}
