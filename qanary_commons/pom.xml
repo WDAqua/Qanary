@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.commons</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <!-- java.version, spring-boot-admin.version, jena.version inherited from parent (task 2.2) -->
@@ -217,6 +217,20 @@
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
+                        <configuration>
+                            <!-- Components depend on this test-jar for
+                                 AbstractSwaggerUiAvailabilityTest, but it must NOT
+                                 ship QanaryComponentIntegrationTest: that class
+                                 declares a nested @SpringBootApplication and a
+                                 'testQanaryComponent' @Bean, which leak into
+                                 downstream component-scans and cause
+                                 NoUniqueBeanDefinitionException(QanaryComponent).
+                                 The test still runs in this module's own build;
+                                 it is only excluded from the published artifact. -->
+                            <excludes>
+                                <exclude>**/QanaryComponentIntegrationTest*.class</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
