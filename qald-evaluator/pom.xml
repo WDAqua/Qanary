@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <!-- java.version inherited from parent (task 2.2) -->
