@@ -1,0 +1,217 @@
+    body { 
+        font-family:Open Sans; 
+        font-size:12pt; 
+        background-color: #f1f1f1; 
+        font-color: #333; 
+        margin: 0; 
+        padding: 0;
+    }
+    h1 { 
+	    /* TODO: Github is used here, should be replaced by SVG */
+        background-size: 100px auto;
+        background: url(https://raw.githubusercontent.com/WDAqua/Qanary/master/doc/logo-qanary_s.png) no-repeat left/120px;
+        background-position-x: 1ex;
+        padding-top: 1ex;
+	    padding-bottom: 1.1ex;
+	    padding-left: 16ex;
+	    font-size: 14pt; 
+	    font-weight: 600; 
+    }
+    h2 {
+    	font-size: 12pt;
+	    font-weight: 600; 
+	    margin-top: 2ex;
+    	margin-bottom: 1ex;
+    }
+    .applicationheader h2 {
+	    width: 75%;
+	    float: left;
+	    margin-block: 0;
+	    margin-inline-start: 0;
+	    margin-inline-end: 0;    
+    }
+    h3 {
+    	font-size: 11pt;
+	    font-weight: 600; 
+	    margin-top: 2ex;
+    	margin-bottom: 1ex;
+    }
+    .applicationheader { 
+        background-color: #34302D; 
+        color:#f1f1f1; 
+        padding:0.25ex; 
+        height: 2.75ex;
+    }
+    header { background-color: #34302D; }
+    form, #SPARQLqueryeditorblock { 
+    	margin-left: 1ex; 
+    }
+    input[type=text] { 
+                width:50%;
+                display:block; 
+                margin-bottom:2ex; 
+                max-width:500px;
+                font-size: 13pt; 
+                padding:5px;
+                border: 1px solid #999;
+        }
+    input[type=text].isempty {
+        background-color:#FFC; 
+    }
+    #sortable {  
+        list-style-type: none; 
+        margin: 0; 
+        padding: 0; 
+        border: 1px solid #34302D;
+    } 
+    #sortable.missingcomponentselection {
+    	border-color: #FFC;
+    }  
+    
+    div.selection {
+        margin: 0; 
+        min-width: 800px;
+        width: 50%; 
+        padding:0;
+        border: 2px solid #34302D;
+    }
+    #sortable li {
+        margin:0.25ex; 
+        padding: 0.25ex; 
+        border: 1px solid #34302D; 
+        font-size:13pt; 
+        background-color: #f1f1f1; 
+        color: #34302D; 
+        cursor:ns-resize;
+    }
+    #sortable li.selected {
+        background-color:#FFF;
+        color:#000;
+    }
+    #sortable li:hover {
+        background-color:#FFFFF0;
+    }
+    #sortable li.selected:hover {
+        background-color:#FFFFF9;
+    }
+    
+    .annotationCount{
+		font-size:80%;
+    }
+    
+    .annotationCount[data-count]{
+    	background-color:#CFC;
+    	color:#000;
+    }
+
+    .annotationCount[data-count="0"]{
+    	background-color:transparent;
+    	color:#999;
+    }
+    
+    button { 
+        font: normal normal normal 14px/1 FontAwesome; 
+        margin-top: 1ex; 
+        padding:1ex 1ex; 
+        transition: background-position .1s linear;
+        color: #FFF;
+        border-radius: 4px;
+        border: 1px solid #999; 
+        background-color: #00bc7c; 
+        cursor: pointer;
+    } 
+    
+    #showadditionaltripleinput {
+        padding: 0.5ex;
+        margin: 0;
+        background-color: #999;
+    }
+    
+    button:hover { 
+        border: 1px solid #333; 
+        filter: opacity(0.9);
+    }
+    button:disabled, button[disabled] {
+  		background-color: #005173;
+  		cursor:not-allowed;
+	}
+    button:disabled.inprogress, button[disabled].inprogress {
+		cursor:progress;
+	}
+	button.helpers { 
+        font: normal normal normal 12px/1 FontAwesome; 
+        color: #000;
+        border: 1px solid #999; 
+        background-color: #CCC; 
+		margin: 0.1ex;
+		padding: 0.5ex;	
+    }   
+    #componentfilterbox {
+	    width: 25%;
+	    text-align: right;
+	    float: right;
+	    padding: 0;    	
+    }
+    #componentfilterinput {
+	    width: 100%;
+	    max-width: 20ex;
+	    margin: 0;
+	    padding: 0ex;
+	    padding-left:0.5ex;
+    }
+    footer {
+    	border-top: 1px solid #999;
+    	margin-top: 7ex;
+    	padding-left: 1ex;
+    	padding-top: 4ex;
+    	font-size:80%;
+    }
+    footer a {
+    	color:#00F;
+    }
+    footer a:visited {
+    	color:#00F;
+    }
+    footer a:hover {
+    	color:#66F;
+    }
+    footer h3 {
+    	font-size:90%;
+    }
+    #results, #SPARQLqueryeditorblock {
+    	border-top: 1px dashed #00bc7c;
+    	margin: 1ex;
+    	margin-top: 2ex;
+    }
+    #results table {
+    	font-size: 90%;
+    	border: 1px solid #333;
+    	margin-top: 1ex;
+    }
+    #results th {
+    	font-weight: bold;
+    	color: #FFFFFF;
+    }
+    #results tr:nth-child(even) {
+    	background-color: #f2f2f2;
+    }
+    #results tr:nth-child(odd) {
+    	background-color: #FFFFFF;
+    }
+    #results tr.header {
+    	background-color: #000000;
+    }
+    .yasqe .yasqe_buttons .yasqe_queryButton .queryIcon svg {
+    	fill: #00bc7c
+    }
+    #errormessage {
+        margin-top: 1ex;
+    	display:none;
+        background-color: #FF0;
+    	border: 2px solid #F00;
+    	padding: 1ex;
+    	padding-top:
+    }
+    .coreMessage {
+    	font-family: monospace;
+    }
