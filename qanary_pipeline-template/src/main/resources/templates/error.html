@@ -13,9 +13,9 @@
     (function () {
       try {
         var t = localStorage.getItem("qanary-theme");
-        if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
-        document.documentElement.setAttribute("data-theme", t);
-      } catch (e) { /* keep the default light theme */ }
+        if (!t) t = (globalThis.matchMedia && globalThis.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      } catch { /* keep the default light theme */ }
     })();
   </script>
   <style>
@@ -35,7 +35,7 @@
     .error-status .reason { color: var(--muted); font-size: 1.05rem; font-weight: 600; }
     .error-msg { margin: 14px 0 0; padding: 11px 13px; background: var(--field);
       background: color-mix(in srgb, var(--field) 45%, transparent); border: 1px solid var(--line);
-      border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; word-break: break-word; }
+      border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; overflow-wrap: anywhere; }
     .error-links { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .error-links a { display: block; padding: 12px 14px; text-decoration: none; color: var(--accent);
@@ -46,7 +46,7 @@
   </style>
 </head>
 <body>
-  <canvas id="error-bg" aria-hidden="true"></canvas>
+  <canvas id="error-bg"></canvas>
 
   <header class="topbar">
     <div class="brand">
@@ -89,11 +89,11 @@
       var KEY = "qanary-theme";
       var btns = document.querySelectorAll("[data-theme-btn]");
       function apply(t) {
-        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.dataset.theme = t;
         btns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.themeBtn === t)); });
-        try { localStorage.setItem(KEY, t); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(KEY, t); } catch { /* ignore */ }
       }
-      apply(document.documentElement.getAttribute("data-theme") || "light");
+      apply(document.documentElement.dataset.theme || "light");
       btns.forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.themeBtn); }); });
     })();
   </script>
