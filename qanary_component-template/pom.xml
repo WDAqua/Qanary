@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>4.0.1</version>
+    <version>5.0.0</version>
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>4.0.1</version>
+        <version>5.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <!-- java.version, spring-boot-admin.version, jena.version inherited from parent (task 2.2) -->
@@ -32,11 +32,18 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Spring Boot 4 split the web test-slices into separate modules that
-             spring-boot-starter-test no longer pulls in transitively:
-             - spring-boot-webmvc-test  -> @AutoConfigureMockMvc (QanaryComponentIntegrationTest)
+        <!-- Spring Boot 4 moved RestClient/RestTemplate auto-configuration into the separate
+             spring-boot-restclient module. Components need it at RUNTIME (HTTP calls + the SBA
+             registration client), so it is a compile dependency here and thus transitive to every
+             Qanary component (otherwise startup fails: ClassNotFoundException RestClientAutoConfiguration). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+        </dependency>
+        <!-- Boot 4 also split the web test-slices out of spring-boot-starter-test:
+             - spring-boot-webmvc-test   -> @AutoConfigureMockMvc (QanaryComponentIntegrationTest)
              - spring-boot-resttestclient -> TestRestTemplate + @AutoConfigureTestRestTemplate
-               (AbstractSwaggerUiAvailabilityTest); needs spring-boot-restclient at runtime. -->
+               (AbstractSwaggerUiAvailabilityTest). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-webmvc-test</artifactId>
@@ -45,11 +52,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-resttestclient</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-restclient</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
