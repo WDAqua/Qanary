@@ -70,7 +70,7 @@
     <stardog.version>8.2.2</stardog.version>
     <virtuoso-jena.version>1.44</virtuoso-jena.version>
     <virtuoso-jdbc.version>3.123</virtuoso-jdbc.version>
-    <commons-cli.version>1.9.0</commons-cli.version>
+    <commons-cli.version>1.11.0</commons-cli.version>
     <commons-configuration2.version>2.15.1</commons-configuration2.version>
     <!-- commons-configuration2 2.15.x calls commons-lang3 ObjectUtils.getIfNull(Object,Object),
          which only exists in commons-lang3 >= 3.18.0. Spring Boot 3.5 pins an older 3.17.0,
