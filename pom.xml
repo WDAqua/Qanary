@@ -82,7 +82,7 @@
     <!-- build tooling versions -->
     <aspectj-maven-plugin.version>1.14.1</aspectj-maven-plugin.version>
     <aspectjtools.version>1.9.25</aspectjtools.version>
-    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <central-publishing-plugin.version>0.8.0</central-publishing-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <!-- GPG signing (sign-artifacts execution) is bound to the verify phase, so it
