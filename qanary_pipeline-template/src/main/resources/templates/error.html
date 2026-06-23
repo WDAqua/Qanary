@@ -5,59 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Qanary — Error</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <!-- reuse the /qa frontend look & feel (issue #407) -->
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+  <!-- Reuse the /qa frontend design system so the error pages look consistent (issue #407). -->
   <link rel="stylesheet" href="/qanary-ui/styles.css">
+  <!-- Apply the same persisted theme as /qa before first paint, to avoid a flash. -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("qanary-theme");
+        if (!t) t = (globalThis.matchMedia && globalThis.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      } catch { /* keep the default light theme */ }
+    })();
+  </script>
   <style>
-    /* self-contained layout so the page renders even if styles.css is unavailable;
-       colours fall back to the Qanary palette defined in styles.css :root */
-    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-           background: var(--bg, #f3f7f8); color: var(--ink, #15202b); }
-    .topbar { display: flex; align-items: center; gap: 14px; padding: 16px 24px;
-              background: var(--brand, linear-gradient(135deg, #16a87a, #1d6f9c)); }
-    .topbar img { height: 34px; }
-    .topbar .tagline { color: #fff; opacity: .9; font-size: .95rem; }
-    .wrap { max-width: 760px; margin: 40px auto; padding: 0 20px; }
-    .card { background: var(--card, #fff); border: 1px solid var(--line, #dde6ea);
-            border-radius: var(--radius, 14px); padding: 28px 30px;
-            box-shadow: 0 6px 24px rgba(0,0,0,.06); }
-    .code { font-size: 3rem; font-weight: 700; margin: 0;
-            background: var(--brand, linear-gradient(135deg, #16a87a, #1d6f9c));
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-    .reason { color: var(--muted, #5c6b78); margin: 4px 0 0; }
-    .msg { margin: 16px 0 0; padding: 12px 14px; background: var(--field, #f3f7f8);
-           border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-           font-size: .9rem; word-break: break-word; }
-    h2 { margin: 28px 0 10px; font-size: 1.05rem; }
-    .links { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px;
-             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .links a { display: block; padding: 12px 14px; text-decoration: none;
-               color: var(--accent, #0f8a7a); background: var(--field, #f3f7f8);
-               border: 1px solid var(--line, #dde6ea); border-radius: 10px; font-weight: 600; }
-    .links a:hover { border-color: var(--accent, #0f8a7a); }
-    .links small { display: block; color: var(--muted, #5c6b78); font-weight: 400; margin-top: 2px; }
+    /* Animated canvas backdrop (error-backdrop.js): a fixed, full-viewport
+       canvas behind the chrome. Purely decorative; never intercepts clicks. */
+    #error-bg { position: fixed; inset: 0; z-index: 0; display: block; pointer-events: none; background: #0b1620; }
+    main { position: relative; z-index: 1; }
+    .error-main { max-width: 760px; }
+    /* Half-transparent box (every theme) so the backdrop stays visible behind it.
+       color-mix tints the theme's own --card/--field; falls back to the opaque
+       /qa colour where color-mix is unsupported. */
+    .error-card { background: var(--card); background: color-mix(in srgb, var(--card) 55%, transparent); }
+    .error-status { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 2px; }
+    .error-status .code { font-size: 2.6rem; font-weight: 800; line-height: 1;
+      background: var(--brand); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    html[data-theme="contrast"] .error-status .code { background: none; -webkit-text-fill-color: var(--accent); color: var(--accent); }
+    .error-status .reason { color: var(--muted); font-size: 1.05rem; font-weight: 600; }
+    .error-msg { margin: 14px 0 0; padding: 11px 13px; background: var(--field);
+      background: color-mix(in srgb, var(--field) 45%, transparent); border: 1px solid var(--line);
+      border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; overflow-wrap: anywhere; }
+    .error-links { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .error-links a { display: block; padding: 12px 14px; text-decoration: none; color: var(--accent);
+      background: var(--field); background: color-mix(in srgb, var(--field) 45%, transparent);
+      border: 1px solid var(--line); border-radius: 10px; font-weight: 700; font-size: .9rem; }
+    .error-links a:hover { border-color: var(--accent); }
+    .error-links small { display: block; color: var(--muted); font-weight: 400; margin-top: 3px; font-size: .8rem; }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <img src="/qanary-ui/logo-qanary.svg" alt="Qanary">
-    <span class="tagline">Question Answering pipeline</span>
-  </header>
-  <main class="wrap">
-    <div class="card">
-      <p class="code" th:text="${status} ?: 'Error'">500</p>
-      <p class="reason" th:text="${error} ?: 'Something went wrong'">Internal Server Error</p>
-      <p class="msg" th:if="${message != null and message != ''}" th:text="${message}">details</p>
-      <p class="msg" th:if="${path != null}">at <span th:text="${path}">/path</span></p>
+  <canvas id="error-bg"></canvas>
 
-      <h2>Where to go next</h2>
-      <ul class="links">
+  <header class="topbar">
+    <div class="brand">
+      <h1 class="brand-logo"><img src="/qanary-ui/logo-qanary.svg" alt="Qanary"></h1>
+      <span class="brand-tagline">Question Answering pipeline</span>
+    </div>
+    <div class="topbar-right">
+      <div class="theme-switch" role="group" aria-label="Color theme">
+        <button data-theme-btn="light"    title="Light theme">☀︎<span>Light</span></button>
+        <button data-theme-btn="dark"     title="Dark theme">☾<span>Dark</span></button>
+        <button data-theme-btn="contrast" title="High-contrast theme">◑<span>Contrast</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="error-main">
+    <section class="card error-card">
+      <h2><span class="step error-step" aria-hidden="true">!</span> Something went wrong</h2>
+      <p class="error-status">
+        <span class="code" th:text="${status} ?: 'Error'">500</span>
+        <span class="reason" th:text="${error} ?: 'Unexpected error'">Internal Server Error</span>
+      </p>
+      <p class="error-msg" th:if="${message != null and message != ''}" th:text="${message}">details</p>
+      <p class="error-msg" th:if="${path != null}">at <span th:text="${path}">/path</span></p>
+
+      <h3>Where to go next</h3>
+      <ul class="error-links">
         <li><a href="/qa">Qanary frontend <small>ask a question (/qa)</small></a></li>
         <li><a href="/health">Health <small>system status (/health)</small></a></li>
         <li><a href="/swagger-ui">API / Swagger UI <small>REST API docs</small></a></li>
         <li><a href="/applications">Components overview <small>Spring Boot Admin</small></a></li>
         <li><a href="https://github.com/WDAqua/Qanary">GitHub <small>WDAqua/Qanary</small></a></li>
       </ul>
-    </div>
+    </section>
   </main>
+
+  <!-- Theme switch — same behaviour and storage key as the /qa frontend. -->
+  <script>
+    (function () {
+      var KEY = "qanary-theme";
+      var btns = document.querySelectorAll("[data-theme-btn]");
+      function apply(t) {
+        document.documentElement.dataset.theme = t;
+        btns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.themeBtn === t)); });
+        try { localStorage.setItem(KEY, t); } catch { /* ignore */ }
+      }
+      apply(document.documentElement.dataset.theme || "light");
+      btns.forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.themeBtn); }); });
+    })();
+  </script>
+  <!-- Decorative animated backdrop (optional progressive enhancement). -->
+  <script defer src="/qanary-ui/error-backdrop.js"></script>
 </body>
 </html>
