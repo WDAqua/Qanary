@@ -7,7 +7,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -26,8 +25,10 @@ public class QanaryPipelineComponentTest {
     protected ClassLoader classLoader = this.getClass().getClassLoader();
     @MockitoBean
     QanaryTripleStoreConnectorVirtuoso qanaryTripleStoreConnectorVirtuoso;
-    @InjectMocks
-    QanaryPipelineComponent qanaryPipelineComponent;
+    // QanaryPipelineComponent is @ConditionalOnProperty("pipeline.as.component") so it is not a
+    // bean in this context; instantiate it directly (as the former @InjectMocks did) to test the
+    // self-contained query construction.
+    QanaryPipelineComponent qanaryPipelineComponent = new QanaryPipelineComponent();
     URI testUri = new URI("testUri");
 
     public QanaryPipelineComponentTest() throws URISyntaxException {

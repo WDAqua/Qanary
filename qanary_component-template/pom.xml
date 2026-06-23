@@ -32,6 +32,26 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Boot 4 split the web test-slices into separate modules that
+             spring-boot-starter-test no longer pulls in transitively:
+             - spring-boot-webmvc-test  -> @AutoConfigureMockMvc (QanaryComponentIntegrationTest)
+             - spring-boot-resttestclient -> TestRestTemplate + @AutoConfigureTestRestTemplate
+               (AbstractSwaggerUiAvailabilityTest); needs spring-boot-restclient at runtime. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

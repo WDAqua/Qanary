@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,7 +24,8 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan("eu.wdaqua.qanary")
-@AutoConfigureWebClient
+// @AutoConfigureWebClient was removed in Spring Boot 4; the full @SpringBootTest
+// context already auto-configures the RestClient/RestTemplate builders.
 class QanaryComponentRegistrationChangeNotifierTest {
 
     final static String COMPONENTNAME = "myMockedInstance";
