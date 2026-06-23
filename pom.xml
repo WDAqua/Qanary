@@ -92,7 +92,7 @@
     <gpg.skip>true</gpg.skip>
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
-    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
+    <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
     <pitest-maven.version>1.19.1</pitest-maven.version>
     <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
     <testcontainers.version>1.20.4</testcontainers.version>
