@@ -72,12 +72,11 @@
     <virtuoso-jdbc.version>3.123</virtuoso-jdbc.version>
     <commons-cli.version>1.9.0</commons-cli.version>
     <commons-configuration2.version>2.15.1</commons-configuration2.version>
-    <!-- commons-lang3 override dropped: Spring Boot 4 already manages 3.19.0, which satisfies
-         commons-configuration2 2.15.x (needs >= 3.18.0). gson (2.13.2) and jakarta-xml-bind (4.0.4)
-         match the Boot 4 BOM exactly and are kept only because explicit dependencyManagement
-         entries reference these properties. -->
-    <gson.version>2.13.2</gson.version>
-    <jakarta-xml-bind.version>4.0.4</jakarta-xml-bind.version>
+    <!-- Only commons-cli and commons-configuration2 are pinned here; the Spring Boot 4 BOM does
+         not manage them. The commons-lang3, gson and jakarta-xml-bind overrides were dropped:
+         Boot 4.0.5 already manages commons-lang3 3.19.0 (satisfies commons-configuration2 2.15.x,
+         which needs >= 3.18.0), gson 2.13.2 and jakarta.xml.bind-api 4.0.4 — exactly the versions
+         we require — so those dependencies inherit their versions from the Boot BOM. -->
 
     <!-- build tooling versions -->
     <aspectj-maven-plugin.version>1.14.1</aspectj-maven-plugin.version>
@@ -182,16 +181,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-configuration2</artifactId>
         <version>${commons-configuration2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>${gson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>${jakarta-xml-bind.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
