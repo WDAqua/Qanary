@@ -10,11 +10,11 @@
 	<parent>
 		<groupId>eu.wdaqua.qanary</groupId>
 		<artifactId>qa.qanarycomponent-parent</artifactId>
-		<version>[4.0.0,5.0.0)</version>
+		<version>[5.0.0,6.0.0)</version>
 	</parent>
 	<properties>
 		<java.version>21</java.version>
-		<qanary.version>[4.0.0,5.0.0)</qanary.version>
+		<qanary.version>[5.0.0,6.0.0)</qanary.version>
 		<docker.image.prefix>qanary</docker.image.prefix>
 		<!-- Replace the name of the docker image to be generated -->
 		<!-- if there is an error demanding a lower-case name, then you picked 

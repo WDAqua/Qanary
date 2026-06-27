@@ -65,7 +65,7 @@ public class QaldEvaluatorApplication {
 
             // Send the question
             RestTemplate restTemplate = new RestTemplate();
-            UriComponentsBuilder service = UriComponentsBuilder.fromHttpUrl(this.uriServer);
+            UriComponentsBuilder service = UriComponentsBuilder.fromUriString(this.uriServer);
 
             MultiValueMap<String, String> bodyMap = new LinkedMultiValueMap<String, String>();
             bodyMap.add("question", question.getQuestion());

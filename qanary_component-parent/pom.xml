@@ -5,18 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.qanarycomponent-parent</artifactId>
-    <version>4.0.1</version>
+    <version>5.0.0</version>
     <packaging>pom</packaging>
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>4.0.1</version>
+        <version>5.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <properties>
         <!-- java.version, spring-boot-admin.version, springdoc.version inherited from parent (task 2.2) -->
-        <qanary.component.version>4.0.1</qanary.component.version>
-        <qanary.commons.version>4.0.1</qanary.commons.version>
+        <qanary.component.version>5.0.0</qanary.component.version>
+        <qanary.commons.version>5.0.0</qanary.commons.version>
         <json-path.version>3.0.0</json-path.version>
     </properties>
 
@@ -44,6 +44,19 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spring Boot 4 moved the web test-slices out of spring-boot-starter-test. Provide them
+             to every component centrally so the inherited AbstractSwaggerUiAvailabilityTest
+             (TestRestTemplate + @AutoConfigureTestRestTemplate) and @AutoConfigureMockMvc compile/run. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -151,7 +164,7 @@
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjtools</artifactId>
-                        <version>1.9.25</version>
+                        <version>${aspectjtools.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>

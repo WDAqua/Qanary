@@ -3,7 +3,7 @@ package eu.wdaqua.qanary.web;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -39,7 +39,8 @@ class QanaryPipelineConfigurationAccessTest {
                         MockMvcRequestBuilders.get("/configuration").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(302))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("http://localhost/login"));
+                // Spring Security 7 issues a relative redirect to the login page
+                .andExpect(redirectedUrl("/login"));
 
         mvc.perform(
                         MockMvcRequestBuilders.post("/login")

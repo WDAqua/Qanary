@@ -119,7 +119,7 @@ public class QanaryCacheTest {
                 this.myCacheOfResponse.getNumberOfExecutedRequests(), //
                 cacheStatus, //
                 responseEntity.getStatusCode(), //
-                responseEntity.getStatusCodeValue());
+                responseEntity.getStatusCode().value());
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
