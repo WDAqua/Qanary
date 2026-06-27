@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.wdaqua.qanary</groupId>
     <artifactId>qa.component</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
     <parent>
         <groupId>eu.wdaqua.qanary</groupId>
         <artifactId>mvn.reactor</artifactId>
-        <version>5.0.0</version>
+        <version>5.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <!-- java.version, spring-boot-admin.version, jena.version inherited from parent (task 2.2) -->
