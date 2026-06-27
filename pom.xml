@@ -65,12 +65,12 @@
 
     <!-- shared library versions -->
     <jena.version>5.3.0</jena.version>
-    <spring-boot-admin.version>4.0.4</spring-boot-admin.version>
+    <spring-boot-admin.version>4.1.1</spring-boot-admin.version>
     <springdoc.version>3.0.3</springdoc.version>
     <stardog.version>8.2.2</stardog.version>
     <virtuoso-jena.version>1.44</virtuoso-jena.version>
     <virtuoso-jdbc.version>3.123</virtuoso-jdbc.version>
-    <commons-cli.version>1.9.0</commons-cli.version>
+    <commons-cli.version>1.11.0</commons-cli.version>
     <commons-configuration2.version>2.15.1</commons-configuration2.version>
     <!-- Only commons-cli and commons-configuration2 are pinned here; the Spring Boot 4 BOM does
          not manage them. The commons-lang3, gson and jakarta-xml-bind overrides were dropped:
@@ -80,9 +80,9 @@
 
     <!-- build tooling versions -->
     <aspectj-maven-plugin.version>1.14.1</aspectj-maven-plugin.version>
-    <aspectjtools.version>1.9.25</aspectjtools.version>
-    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-    <central-publishing-plugin.version>0.8.0</central-publishing-plugin.version>
+    <aspectjtools.version>1.9.25.1</aspectjtools.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+    <central-publishing-plugin.version>0.11.0</central-publishing-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <!-- GPG signing (sign-artifacts execution) is bound to the verify phase, so it
          would fire on every `mvn install` and fail in CI/local builds that have no
@@ -91,10 +91,10 @@
     <gpg.skip>true</gpg.skip>
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
-    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
+    <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
     <pitest-maven.version>1.19.1</pitest-maven.version>
-    <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
-    <testcontainers.version>1.20.4</testcontainers.version>
+    <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
 
