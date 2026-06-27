@@ -1,7 +1,7 @@
 package eu.wdaqua.qanary.health;
 
-import org.springframework.boot.actuate.health.HealthComponent;
-import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.health.actuate.endpoint.HealthDescriptor;
+import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +21,7 @@ public class QanaryHealthWebController {
     }
 
     @GetMapping("/health")
-    public HealthComponent health() {
+    public HealthDescriptor health() {
         return healthEndpoint.health();
     }
 }
