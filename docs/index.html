@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qanary — A Methodology for Knowledge-Driven Question Answering Systems</title>
+<meta name="description" content="Qanary is a methodology and reference implementation for building Question Answering systems from reusable, RDF/vocabulary-driven components that keep AI-driven computations controllable and transparent.">
+<link rel="icon" href="assets/img/favicon-qanary.png">
+<meta property="og:title" content="Qanary — Knowledge-Driven Question Answering Systems">
+<meta property="og:description" content="A best-of-breed methodology for integrating Question Answering components via a shared RDF knowledge base and the standard qa vocabulary.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="assets/css/style.css?v=7">
+</head>
+<body>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top" aria-label="Qanary — home">
+      <img class="brand__logo" src="assets/img/logo-qanary_s.png" alt="Qanary">
+    </a>
+    <button class="nav__burger" aria-label="Toggle menu">☰</button>
+    <nav class="nav__links">
+      <a href="#methodology">Methodology</a>
+      <a href="#components">Components</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#references">References</a>
+      <a class="nav__cta" href="https://github.com/WDAqua/Qanary" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <svg class="hero__bg" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="hg" cx="62%" cy="6%" r="85%">
+        <stop offset="0%" stop-color="#0d7d8a" stop-opacity=".14"/>
+        <stop offset="100%" stop-color="#0d7d8a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="520" fill="url(#hg)"/>
+    <g stroke="#0d7d8a" stroke-opacity=".16" stroke-width="1">
+      <line x1="423" y1="109" x2="546" y2="72"/>
+      <line x1="423" y1="109" x2="529" y2="210"/>
+      <line x1="165" y1="308" x2="126" y2="300"/>
+      <line x1="165" y1="308" x2="201" y2="435"/>
+      <line x1="546" y1="72" x2="529" y2="210"/>
+      <line x1="126" y1="300" x2="120" y2="454"/>
+      <line x1="1121" y1="305" x2="1118" y2="258"/>
+      <line x1="1121" y1="305" x2="981" y2="171"/>
+      <line x1="529" y1="289" x2="563" y2="320"/>
+      <line x1="529" y1="289" x2="529" y2="210"/>
+      <line x1="974" y1="123" x2="991" y2="124"/>
+      <line x1="974" y1="123" x2="981" y2="171"/>
+      <line x1="270" y1="85" x2="423" y2="109"/>
+      <line x1="412" y1="309" x2="452" y2="268"/>
+      <line x1="412" y1="309" x2="529" y2="289"/>
+      <line x1="563" y1="320" x2="528" y2="388"/>
+      <line x1="528" y1="388" x2="532" y2="483"/>
+      <line x1="532" y1="483" x2="563" y2="320"/>
+      <line x1="702" y1="443" x2="676" y2="365"/>
+      <line x1="702" y1="443" x2="532" y2="483"/>
+      <line x1="452" y1="268" x2="529" y2="289"/>
+      <line x1="1118" y1="258" x2="981" y2="171"/>
+      <line x1="879" y1="182" x2="981" y2="171"/>
+      <line x1="879" y1="182" x2="974" y2="123"/>
+      <line x1="981" y1="171" x2="991" y2="124"/>
+      <line x1="744" y1="267" x2="686" y2="223"/>
+      <line x1="744" y1="267" x2="676" y2="365"/>
+      <line x1="1036" y1="77" x2="991" y2="124"/>
+      <line x1="1036" y1="77" x2="974" y2="123"/>
+      <line x1="529" y1="210" x2="452" y2="268"/>
+      <line x1="201" y1="435" x2="120" y2="454"/>
+      <line x1="120" y1="454" x2="165" y2="308"/>
+      <line x1="686" y1="223" x2="676" y2="365"/>
+    </g>
+    <g fill="#0d7d8a">
+      <circle cx="423" cy="109" r="3" fill-opacity="0.30"/>
+      <circle cx="165" cy="308" r="3" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="546" cy="72" r="3" fill-opacity="0.30"/>
+      <circle cx="126" cy="300" r="6" fill-opacity="0.51"/>
+      <circle cx="1121" cy="305" r="4" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="529" cy="289" r="5" fill-opacity="0.44"/>
+      <circle cx="974" cy="123" r="5" fill-opacity="0.44"/>
+      <circle cx="270" cy="85" r="5" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="412" cy="309" r="4" fill-opacity="0.37"/>
+      <circle cx="563" cy="320" r="3" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="528" cy="388" r="3" fill-opacity="0.30"/>
+      <circle cx="532" cy="483" r="3" fill-opacity="0.30"/>
+      <circle cx="702" cy="443" r="4" fill-opacity="0.37"/>
+      <circle cx="452" cy="268" r="3" fill-opacity="0.30"/>
+      <circle cx="1118" cy="258" r="6" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="879" cy="182" r="5" fill-opacity="0.44"/>
+      <circle cx="981" cy="171" r="4" fill-opacity="0.37"/>
+      <circle cx="744" cy="267" r="3" fill-opacity="0.30"/>
+      <circle cx="1036" cy="77" r="4" fill-opacity="0.37"/>
+      <circle cx="676" cy="365" r="4" fill-opacity="0.37"/>
+      <circle cx="991" cy="124" r="4" fill="#e0712a" fill-opacity="0.6"/>
+      <circle cx="529" cy="210" r="5" fill-opacity="0.44"/>
+      <circle cx="201" cy="435" r="6" fill-opacity="0.51"/>
+      <circle cx="120" cy="454" r="7" fill-opacity="0.58"/>
+      <circle cx="686" cy="223" r="4" fill="#e0712a" fill-opacity="0.6"/>
+    </g>
+  </svg>
+  <div class="wrap hero__in">
+    <p class="eyebrow">Vocabulary-driven open question answering</p>
+    <h1>Build Question Answering systems from <span class="accent">reusable components</span>.</h1>
+    <p class="hero__tag">Qanary is a methodology — and a reference implementation — for assembling Question Answering (QA) systems out of independent, knowledge-driven components.</p>
+    <div class="tldr">
+      <b>In a nutshell.</b> Qanary takes a <b>best-of-breed</b> approach to integrating QA components. Components never call each other directly: they read from and write to a <b>shared RDF knowledge base</b> described by the standard <span class="vocab">qa</span> vocabulary. The result is QA systems that are flexible, extensible, reusable — and measurable.
+    </div>
+    <div class="cta-row">
+      <a class="btn btn--primary" href="https://github.com/WDAqua/Qanary" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+        View on GitHub
+      </a>
+      <a class="btn btn--ghost" href="https://github.com/WDAqua/Qanary/wiki" target="_blank" rel="noopener">Read the Wiki</a>
+      <a class="btn btn--ghost" href="https://github.com/WDAqua/Qanary-question-answering-components" target="_blank" rel="noopener">Component library</a>
+    </div>
+    <div class="badges">
+      <span class="badge">Standard <b>qa</b> RDF vocabulary</span>
+      <span class="badge">Components in <b>Java</b> · <b>Python</b> · <b>TypeScript</b></span>
+      <span class="badge">Controllable &amp; transparent</span>
+      <span class="badge">Apache-2.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 1. METHODOLOGY ===================== -->
+<section class="section" id="methodology">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">01 — The idea</p>
+      <h2>The Qanary methodology</h2>
+      <p>A knowledge-driven way to design Question Answering systems, where the data flowing through the pipeline — not hard-wired code — connects the parts.</p>
+    </div>
+
+    <div class="prose prose--full reveal">
+      <p>Most Question Answering systems chain together several specialised tasks: recognising named entities, disambiguating them against a knowledge graph, detecting relations, building a formal query, executing it, and selecting an answer. Traditionally each step is wired directly to the next, which makes components hard to swap, compare, or reuse.</p>
+      <p>Qanary breaks that coupling. Every component reads from and writes to a <strong>shared, process-independent knowledge base</strong> expressed in RDF and described by a standard vocabulary named <span class="vocab">qa</span> (the <a href="https://github.com/WDAqua/QAOntology" target="_blank" rel="noopener">QA ontology</a>). Instead of passing messages to one another, components <strong>annotate the question and the evolving QA process</strong> in that knowledge graph.</p>
+      <p>Because every component reads and writes the same published vocabulary rather than a private API, the shared knowledge base — the <strong>Qanary triplestore</strong> — acts as a <strong>global process memory</strong>: one place that holds the question, every intermediate result, and the final answer. This is exactly what enables <strong>plug-and-play</strong> — a component can be added, removed or swapped without rewiring anything, as long as it speaks the <span class="vocab">qa</span> vocabulary — and it is what makes the process <strong>explainable</strong>, because the complete reasoning trace stays queryable and you can see precisely what each component contributed.</p>
+      <p>Many of the available Question Answering components also provide <strong>validated, ready-made functionality</strong>. Assembling a system from such trusted building blocks makes <strong>quality assurance of the overall process much easier</strong>: each component is tested on its own, and the shared process memory lets you measure quality at every stage.</p>
+      <p class="prose__callout"><strong>This matters most for AI-driven systems.</strong> A Question Answering system <em>is</em> an AI system — and as AI takes over ever more of the computation, its building blocks must stay <strong>controllable</strong> rather than disappear into an opaque black box. With Qanary a system is assembled from components that the user explicitly <strong>chooses, orders, replaces or removes</strong>, and because every component records what it did in the shared knowledge base, each AI-driven step stays <strong>transparent and auditable</strong>. People remain <strong>in charge</strong> — able to understand <em>how</em> an answer was computed, and to intervene when they want to.</p>
+      <p>This repository is the <strong>reference implementation</strong> of the methodology, contributing reusable resources on top of the <span class="vocab">qa</span> vocabulary for the Question Answering community.</p>
+    </div>
+
+    <div class="flowwrap reveal" aria-label="Qanary process overview">
+      <div class="flowwrap__head">
+        <h4>One question, many annotations</h4>
+        <p class="cap">Each component enriches a shared knowledge graph, step by step — and you decide which components take part.</p>
+      </div>
+      <div class="flow flow--h">
+        <div class="node"><span class="node__n">Q</span><span class="node__t">Question in<span>text or audio</span></span></div>
+        <div class="node node--kb"><span class="node__n">KB</span><span class="node__t">Shared RDF base<span>the <b>qa</b> vocabulary</span></span></div>
+        <div class="node"><span class="node__n">1</span><span class="node__t">Entity linking<span>spans → entities</span></span></div>
+        <div class="node"><span class="node__n">2</span><span class="node__t">Query building<span>annotates SPARQL</span></span></div>
+        <div class="node"><span class="node__n">3</span><span class="node__t">Query execution<span>annotates the answer</span></span></div>
+        <div class="node node--kb"><span class="node__n">A</span><span class="node__t">Answer out<span>read from the base</span></span></div>
+      </div>
+    </div>
+
+    <div class="grid grid--3" style="margin-top:32px">
+      <div class="card reveal">
+        <div class="card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4.5v9L12 21 4 16.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></div>
+        <h3>Vocabulary-driven</h3>
+        <p>The standard <span class="vocab">qa</span> ontology is the contract between components. Data — not code — defines how the parts connect, so anything that speaks the vocabulary fits in.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <h3>Best-of-breed integration</h3>
+        <p>Wrap existing tools or write new approaches as components, then mix and match them. Swap a single step without touching the rest of the pipeline.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16M8 16l3-4 3 2 4-6"/></svg></div>
+        <h3>Measurable quality</h3>
+        <p>Every contribution is recorded in the knowledge base, so the QA process is fully traceable and its quality can be benchmarked stage by stage.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. COMPONENTS ===================== -->
+<section class="section section--alt" id="components">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">02 — Under the hood</p>
+      <h2>How a Qanary component works</h2>
+      <p>A component is an independent microservice that does one job and communicates only through the shared knowledge graph.</p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>It’s a self-contained microservice</h3><p>Each component is a small, self-contained service that exposes the <em>same</em> REST interface and communicates only through the shared knowledge graph. Components can be implemented in <strong>different languages</strong> — there are Qanary components written in <strong>Java</strong>, <strong>Python</strong> and <strong>TypeScript</strong> — and ready-made <a href="https://github.com/WDAqua/Qanary/tree/master/qanary_component-template" target="_blank" rel="noopener">templates</a> help you scaffold a new one quickly.</p></div>
+        </div>
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>The pipeline hands it a graph, not data</h3><p>When the pipeline runs, it calls the component with the location of the current QA process: the <strong>triplestore endpoint</strong> and the <strong>graph URI</strong> for this question — nothing more.</p></div>
+        </div>
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>It reads what it needs with SPARQL</h3><p>The component issues a <code>SPARQL SELECT</code> against the shared knowledge base to fetch its inputs — the question text, or annotations produced by earlier components.</p></div>
+        </div>
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>It does its one job</h3><p>It performs its specific task — entity linking, relation detection, query building, query execution, … — often by <strong>wrapping an existing tool or web service</strong>.</p></div>
+        </div>
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>It writes results back as annotations</h3><p>Results are stored with a <code>SPARQL INSERT</code> using the <span class="vocab">qa</span> vocabulary — e.g. <code>qa:AnnotationOfInstance</code> or <code>qa:AnnotationOfAnswerSPARQL</code> — so they live in the same graph.</p></div>
+        </div>
+        <div class="step">
+          <div class="step__n"></div>
+          <div><h3>The next component just sees them</h3><p>Subsequent components read those annotations and build on them. Components <strong>compose without knowing about each other</strong> — that is the whole point of the message-driven design.</p></div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <p class="prose" style="margin-top:0">A component’s entire conversation with the rest of the system is SPARQL over the shared graph. A linking component, for example, records which entity a span of the question refers to:</p>
+        <div class="codeblock">
+          <div class="codeblock__bar"><i></i><i></i><i></i><span>annotate-entity.rq — illustrative</span></div>
+          <pre><code><span class="k">PREFIX</span> qa:  <span class="s">&lt;http://www.wdaqua.eu/qa#&gt;</span>
+<span class="k">PREFIX</span> oa:  <span class="s">&lt;http://www.w3.org/ns/openannotation/core/&gt;</span>
+<span class="k">PREFIX</span> xsd: <span class="s">&lt;http://www.w3.org/2001/XMLSchema#&gt;</span>
+
+<span class="k">INSERT</span> {
+  <span class="k">GRAPH</span> <span class="s">&lt;urn:graph:THIS-QA-PROCESS&gt;</span> {
+    ?a <span class="p">a</span> qa:AnnotationOfInstance ;
+       oa:hasTarget [ oa:hasSource <span class="s">&lt;urn:question&gt;</span> ;
+                      oa:hasSelector [ <span class="p">a</span> oa:TextPositionSelector ;
+                                       oa:start <span class="s">"0"</span>^^xsd:int ;
+                                       oa:end   <span class="s">"5"</span>^^xsd:int ] ] ;
+       oa:hasBody <span class="s">&lt;http://www.wikidata.org/entity/Q1&gt;</span> ;   <span class="c"># linked entity</span>
+       qa:score  <span class="s">"0.91"</span>^^xsd:double .
+  }
+} <span class="k">WHERE</span> { <span class="k">BIND</span>(<span class="k">IRI</span>(<span class="k">CONCAT</span>(<span class="s">"urn:ann:"</span>, <span class="k">STRUUID</span>())) <span class="k">AS</span> ?a) }</code></pre>
+        </div>
+        <p class="prose" style="font-size:.9rem;color:var(--muted)">The central <a href="https://github.com/WDAqua/Qanary/tree/master/qanary_pipeline-template" target="_blank" rel="noopener">Qanary Pipeline</a> registers available components, lets you pick and order them through a web UI, runs them, and reads the final answer back out of the graph. Ready-made components live in the <a href="https://github.com/WDAqua/Qanary-question-answering-components" target="_blank" rel="noopener">Qanary components repository</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. SCREENSHOTS ===================== -->
+<section class="section" id="screenshots">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">03 — The interface</p>
+      <h2>The Qanary user interface</h2>
+      <p>Although a Qanary pipeline is typically the backend of a chatbot (for example, one implemented with LangGraph), the pipeline also ships with a web frontend for composing a pipeline, running a question, and inspecting exactly what every component did — letting users <strong>validate the behaviour</strong> of a configured pipeline. Click any image to enlarge.</p>
+    </div>
+
+    <div class="gallery">
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">01</span><img loading="lazy" src="assets/img/screenshots/01-frontend-loaded.png" data-full="assets/img/screenshots/01-frontend-loaded.png" alt="Qanary frontend on load with the live component list"></div><figcaption><b>System configuration</b><span>The frontend on load, showing the live list of available components.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">02</span><img loading="lazy" src="assets/img/screenshots/02-question-entered.png" data-full="assets/img/screenshots/02-question-entered.png" alt="Entering a natural language question"></div><figcaption><b>Ask a question</b><span>Entering a natural-language question to be answered.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">03</span><img loading="lazy" src="assets/img/screenshots/03-components-selected.png" data-full="assets/img/screenshots/03-components-selected.png" alt="Selecting and ordering pipeline components"></div><figcaption><b>Compose the pipeline</b><span>Selecting and ordering the components that form the pipeline.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">04</span><img loading="lazy" src="assets/img/screenshots/04-pipeline-running.png" data-full="assets/img/screenshots/04-pipeline-running.png" alt="Pipeline running with live progress"></div><figcaption><b>Run it</b><span>Live progress as each selected component executes in turn.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">05</span><img loading="lazy" src="assets/img/screenshots/05-result-sparql.png" data-full="assets/img/screenshots/05-result-sparql.png" alt="Generated SPARQL query result"></div><figcaption><b>Generated SPARQL</b><span>The formal SPARQL query the pipeline built for the question.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">06</span><img loading="lazy" src="assets/img/screenshots/06-answer-table.png" data-full="assets/img/screenshots/06-answer-table.png" alt="Answer rendered as a table"></div><figcaption><b>Answer table</b><span>The backend JSON answer rendered as a table with copy buttons.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">07</span><img loading="lazy" src="assets/img/screenshots/07-yasgui-editor.png" data-full="assets/img/screenshots/07-yasgui-editor.png" alt="Embedded YASGUI SPARQL editor"></div><figcaption><b>YASGUI editor</b><span>The embedded SPARQL editor for exploring the knowledge graph.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">08</span><img loading="lazy" src="assets/img/screenshots/08-pipeline-response.png" data-full="assets/img/screenshots/08-pipeline-response.png" alt="Raw pipeline response"></div><figcaption><b>Pipeline response</b><span>The full raw response describing the QA process result.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">14</span><img loading="lazy" src="assets/img/screenshots/14-component-info-modal.png" data-full="assets/img/screenshots/14-component-info-modal.png" alt="Component information overlay"></div><figcaption><b>Component info</b><span>Host, port and service URL — with the component’s own service page.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">15</span><img loading="lazy" src="assets/img/screenshots/15-component-facts-expanded.png" data-full="assets/img/screenshots/15-component-facts-expanded.png" alt="Expanded component facts"></div><figcaption><b>What each component did</b><span>An expanded box showing the annotations a component contributed.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">09</span><img loading="lazy" src="assets/img/screenshots/09-multiple-tabs.png" data-full="assets/img/screenshots/09-multiple-tabs.png" alt="Multiple result tabs"></div><figcaption><b>Compare runs</b><span>Multiple result tabs for comparing several runs side by side.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">10</span><img loading="lazy" src="assets/img/screenshots/10-saved-configurations.png" data-full="assets/img/screenshots/10-saved-configurations.png" alt="Saved pipeline configurations"></div><figcaption><b>Saved configurations</b><span>Store pipeline configurations for quick reuse.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">11</span><img loading="lazy" src="assets/img/screenshots/11-reused-configuration.png" data-full="assets/img/screenshots/11-reused-configuration.png" alt="Reusing a saved configuration"></div><figcaption><b>Reuse a configuration</b><span>Re-running a previously saved pipeline configuration.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">12</span><img loading="lazy" src="assets/img/screenshots/12-theme-dark.png" data-full="assets/img/screenshots/12-theme-dark.png" alt="Dark theme"></div><figcaption><b>Dark theme</b><span>The interface in its dark colour theme.</span></figcaption></figure>
+      <figure class="shot reveal"><div class="shot__frame"><span class="shot__tag">13</span><img loading="lazy" src="assets/img/screenshots/13-theme-contrast.png" data-full="assets/img/screenshots/13-theme-contrast.png" alt="High contrast theme"></div><figcaption><b>High-contrast theme</b><span>An accessibility-focused high-contrast theme.</span></figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4. REFERENCES ===================== -->
+<section class="section section--cool" id="references">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">04 — Read the research</p>
+      <h2>Publications &amp; references</h2>
+      <p>Qanary grew out of peer-reviewed research. Each entry links to its publication page — with abstract and BibTeX — at wse-research.org.</p>
+    </div>
+
+    <div class="refs">
+      <a class="ref ref--primary reveal" href="https://wse-research.org/publications/2016_10.1007_978-3-319-34129-3_38-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2016</span>
+        <span class="ref__body">
+          <span class="ref__star">★ Primary citation</span>
+          <h3>Qanary — A Methodology for Vocabulary-Driven Open Question Answering Systems</h3>
+          <p>Both, Diefenbach, Singh, Shekarpour, Cherix &amp; Lange · <span class="venue">13th Extended Semantic Web Conference (ESWC 2016)</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2016_10.1007_978-3-319-47602-5_36-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2016</span>
+        <span class="ref__body">
+          <h3>Qanary — The Fast Track to Creating a Question Answering System with Linked Data Technology</h3>
+          <p>Singh, Both, Diefenbach, Shekarpour, Cherix &amp; Lange · <span class="venue">ESWC 2016, Satellite Events</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2016_9.13.0.18.57" target="_blank" rel="noopener">
+        <span class="ref__yr">2016</span>
+        <span class="ref__body">
+          <h3>Towards a Message-Driven Vocabulary for Promoting the Interoperability of Question Answering Systems</h3>
+          <p>Singh, Both, Diefenbach &amp; Shekarpour · <span class="venue">IEEE 10th Int. Conf. on Semantic Computing (ICSC 2016)</span></p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2017_10.1007_978-3-319-60131-1_10-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2017</span>
+        <span class="ref__body">
+          <h3>The Qanary Ecosystem: Getting New Insights by Composing Question Answering Pipelines</h3>
+          <p>Diefenbach, Singh, Both, Cherix, Lange &amp; Auer · <span class="venue">17th Int. Conf. on Web Engineering (ICWE 2017)</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2017_10.1007_978-3-319-60131-1_40-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2017</span>
+        <span class="ref__body">
+          <h3>Rapid Engineering of QA Systems Using the Light-Weight Qanary Architecture</h3>
+          <p>Both, Singh, Diefenbach &amp; Lytra · <span class="venue">17th Int. Conf. on Web Engineering (ICWE 2017)</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2017_10.1007_978-3-319-70407-4_10-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2017</span>
+        <span class="ref__body">
+          <h3>Trill: A Reusable Front-End for QA Systems</h3>
+          <p>Diefenbach, Amjad, Both, Singh &amp; Maret · <span class="venue">ESWC 2017, Satellite Events</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2017_10.1007_978-3-319-70407-4_16-citation" target="_blank" rel="noopener">
+        <span class="ref__yr">2017</span>
+        <span class="ref__body">
+          <h3>Introducing Feedback in Qanary: How Users Can Interact with QA Systems</h3>
+          <p>Diefenbach, Hormozi, Amjad &amp; Both · <span class="venue">ESWC 2017, Satellite Events</span>, Springer</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2023_Qanary-builder_ISWC2023" target="_blank" rel="noopener">
+        <span class="ref__yr">2023</span>
+        <span class="ref__body">
+          <h3>Qanary Builder: Addressing the Reproducibility Crisis in Question Answering over Knowledge Graphs</h3>
+          <p>Perevalov, Both, Gudat, Bräuning <em>et al.</em> · <span class="venue">Int. Semantic Web Conference (ISWC 2023), Posters &amp; Demos</span></p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+
+      <a class="ref reveal" href="https://wse-research.org/publications/2023_QALD-10_The_10th_Challenge_on_Question_Answering_over_Linked_Data--Semantic-Web-Journal-SWJ" target="_blank" rel="noopener">
+        <span class="ref__yr">2023</span>
+        <span class="ref__body">
+          <h3>QALD-10 — The 10th Challenge on Question Answering over Linked Data</h3>
+          <p>Usbeck, Yan, Perevalov, Jiang <em>et al.</em>, with Both · <span class="venue">Semantic Web Journal</span>, IOS Press</p>
+        </span>
+        <span class="ref__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+      </a>
+    </div>
+
+    <p class="refnote">A broader, continuously updated list is maintained at the <a href="https://wse-research.org/publications" target="_blank" rel="noopener">WSE Research publications page</a>, and a wider survey of citing work can be found via <a href="https://scholar.google.de/scholar?q=%22qanary%22+question+%22answering%22" target="_blank" rel="noopener">Google Scholar</a>.</p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="#top" aria-label="Qanary — home"><img class="brand__logo" src="assets/img/logo-qanary_s.png" alt="Qanary"></a>
+        <p>A methodology and reference implementation for vocabulary-driven, component-based Question Answering systems — built to keep AI-driven computations controllable and transparent.</p>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="https://github.com/WDAqua/Qanary" target="_blank" rel="noopener">Qanary framework</a></li>
+          <li><a href="https://github.com/WDAqua/Qanary-question-answering-components" target="_blank" rel="noopener">Component library</a></li>
+          <li><a href="https://github.com/WDAqua/Qanary/wiki" target="_blank" rel="noopener">Wiki &amp; how-tos</a></li>
+          <li><a href="https://github.com/WDAqua/QAOntology" target="_blank" rel="noopener">The qa ontology</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>More</h4>
+        <ul>
+          <li><a href="https://wse-research.org/publications" target="_blank" rel="noopener">Publications</a></li>
+          <li><a href="https://github.com/WDAqua/Qanary/blob/master/LICENSE" target="_blank" rel="noopener">Apache-2.0 License</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>© <span id="year">2026</span> The Qanary contributors. Licensed under Apache-2.0.</span>
+      <span class="footer__maint">
+        <img class="footer__maint-logo" src="assets/img/wse-logo.png" alt="WSE Research logo" width="22" height="22">
+        Maintained by <a href="https://wse-research.org/?utm_source=qanary&amp;utm_medium=footer&amp;utm_campaign=qanary-project-page" target="_blank" rel="noopener">WSE Research</a> @ <a href="https://htwk-leipzig.de/?utm_source=qanary&amp;utm_medium=footer&amp;utm_campaign=qanary-project-page" target="_blank" rel="noopener">Leipzig University of Applied Sciences</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+  <div class="lb__count" aria-live="polite"></div>
+  <button class="lb__x" aria-label="Close">✕</button>
+  <button class="lb__nav lb__prev" aria-label="Previous">‹</button>
+  <img class="lb__img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
+  <button class="lb__nav lb__next" aria-label="Next">›</button>
+  <div class="lb__cap"></div>
+</div>
+
+<script src="assets/js/main.js?v=7"></script>
+</body>
+</html>
