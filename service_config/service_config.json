@@ -8,9 +8,17 @@
       "files": {
         ".env": "pipeline"
       }
+    },
+    {
+      "mode": "dockerfile",
+      "port": "40121:40121",
+      "image": "qanary/qanary-webpage",
+      "tag": "latest"
     }
+    
   ],
   "ids": {
-    "0": "qanary-qanary-pipeline"
+    "0": "qanary-qanary-pipeline",
+    "1": "qanary-qanary-webpage"
   }
 }
