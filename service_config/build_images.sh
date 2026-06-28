@@ -35,3 +35,8 @@ sed -i "s/SECRETS_VIRTUOSO_PASSWORD/${VIRTUOSO_PASSWORD}/g" "$ENV_FILE"
 
 # build and push Docker Images (set -e fails the script if Maven fails)
 mvn -B --settings ./service_config/settings.xml clean install docker:build docker:push -DskipTests -Dgpg.skip=true
+
+# build and push the static project-page image (qanary/qanary-webpage). The same
+# builder powers the standalone webpage deployment workflow
+# (.github/workflows/docker-deployment-webpage.yml).
+bash ./service_config/build_webpage_image.sh
