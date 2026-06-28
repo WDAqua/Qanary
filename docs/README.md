@@ -31,10 +31,15 @@ python3 -m http.server 8000
 
 Repo **Settings → Pages → Build and deployment**:
 - **Source:** *Deploy from a branch*
-- **Branch:** `master` (or `main`) and folder **`/docs`** → *Save*
+- **Branch:** `master` and folder **`/docs`** → *Save*
+- **Custom domain:** `qanary.wse-research.org`
 
-The site will be served at `https://wdaqua.github.io/Qanary/`.
-The `.nojekyll` file disables Jekyll processing so all assets are served as-is.
+The site is served at **https://qanary.wse-research.org/**. The custom domain is
+pinned by the `CNAME` file in this folder; a DNS `CNAME` record for
+`qanary.wse-research.org` must point to `wdaqua.github.io`. Giving this repo its
+own custom domain also overrides the WDAqua org-level domain, so the site is not
+served under `wdaqua.eu`. The `.nojekyll` file disables Jekyll processing so all
+assets are served as-is.
 
 ## Files
 
