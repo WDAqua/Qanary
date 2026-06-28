@@ -11,7 +11,7 @@
     },
     {
       "mode": "dockerfile",
-      "port": "40121:40121",
+      "port": "40121:80",
       "image": "qanary/qanary-webpage",
       "tag": "latest"
     }
