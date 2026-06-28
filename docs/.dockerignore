@@ -1,0 +1,6 @@
+# Keep the nginx image to just the served static site.
+Dockerfile
+.dockerignore
+README.md
+.nojekyll
+CNAME
