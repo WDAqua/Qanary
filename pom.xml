@@ -64,7 +64,7 @@
     <qanary.components.version>5.0.1</qanary.components.version>
 
     <!-- shared library versions -->
-    <jena.version>5.3.0</jena.version>
+    <jena.version>6.1.0</jena.version>
     <spring-boot-admin.version>4.1.1</spring-boot-admin.version>
     <springdoc.version>3.0.3</springdoc.version>
     <stardog.version>8.2.2</stardog.version>
