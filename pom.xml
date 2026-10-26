@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.5</version>
+    <version>4.1.0</version>
     <relativePath/>
   </parent>
 
@@ -65,7 +65,7 @@
 
     <!-- shared library versions -->
     <jena.version>5.3.0</jena.version>
-    <spring-boot-admin.version>4.1.1</spring-boot-admin.version>
+    <spring-boot-admin.version>4.1.2</spring-boot-admin.version>
     <springdoc.version>3.0.3</springdoc.version>
     <stardog.version>8.2.2</stardog.version>
     <virtuoso-jena.version>1.44</virtuoso-jena.version>
@@ -89,14 +89,14 @@
          signing key. Default it OFF; the release workflow (maven.yml) re-enables it
          with -Dgpg.skip=false alongside the key from secrets. -->
     <gpg.skip>true</gpg.skip>
-    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
-    <spotbugs-maven-plugin.version>4.8.6.6</spotbugs-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+    <spotbugs-maven-plugin.version>4.10.3.0</spotbugs-maven-plugin.version>
     <findsecbugs-plugin.version>1.14.0</findsecbugs-plugin.version>
-    <pitest-maven.version>1.19.1</pitest-maven.version>
+    <pitest-maven.version>1.25.7</pitest-maven.version>
     <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
     <testcontainers.version>1.21.4</testcontainers.version>
-    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-    <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
 
     <!-- Static analysis (SpotBugs, bytecode-based so it works alongside the
          AspectJ weaving). Report-only by default; enable enforcement in CI with
