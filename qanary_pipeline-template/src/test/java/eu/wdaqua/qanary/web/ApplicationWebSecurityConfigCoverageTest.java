@@ -3,7 +3,9 @@ package eu.wdaqua.qanary.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Map;
@@ -43,6 +45,20 @@ class ApplicationWebSecurityConfigCoverageTest {
             mvc.perform(get("/applications")).andExpect(status().isForbidden());
             // everything else passes security (no handler exists in this test context)
             mvc.perform(get("/qa")).andExpect(status().isNotFound());
+        }
+    }
+
+    @Test
+    void componentsMayRegisterAndDeregisterWithoutCsrfToken() throws Exception {
+        try (AnnotationConfigWebApplicationContext context = securityContext("disallow")) {
+            context.refresh();
+            MockMvc mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+
+            // no handler exists in this test context: 404 means that security let the request pass
+            mvc.perform(post("/instances")).andExpect(status().isNotFound());
+            mvc.perform(delete("/instances/4711abcd")).andExpect(status().isNotFound());
+            // deeper paths (e.g., the actuator proxy of an instance) still need the token
+            mvc.perform(delete("/instances/4711abcd/actuator/caches")).andExpect(status().isForbidden());
         }
     }
 
