@@ -23,6 +23,7 @@ import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
 import eu.wdaqua.qanary.web.messages.QanaryQuestionAnsweringError;
 import eu.wdaqua.qanary.web.messages.RequestQuestionAnsweringProcess;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -169,6 +170,7 @@ public class QanaryQuestionAnsweringController {
      * @throws InstantiationException
      */
     // @Deprecated // removed as it shows /startquestionansweringwithtextquestion as deprecated
+    @ApiResponse(responseCode = "201", description = "Created: the question answering process was run; the response describes it (question URI, graph, endpoint)")
     @RequestMapping(value = "/startquestionansweringwithtextquestion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Operation(summary = "(deprecated) Start a process directly with a textual question", //
@@ -222,6 +224,7 @@ public class QanaryQuestionAnsweringController {
      * @return
      * @throws Exception
      */
+    @ApiResponse(responseCode = "201", description = "Created: the question answering process was run; the response describes it (question URI, graph, endpoint)")
     @PostMapping(value = "/startquestionansweringwithtextquestion", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestion(
             @RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
@@ -257,6 +260,7 @@ public class QanaryQuestionAnsweringController {
      * @return
      * @throws Exception
      */
+    @ApiResponse(responseCode = "201", description = "Created: the question answering process was run; the response describes it (question URI, graph, endpoint)")
     @PostMapping(value = "/startquestionansweringwithtextquestionThroughJson", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Start a process directly with a textual question", //
             operationId = "startquestionansweringwithtextquestionJson", //
@@ -336,6 +340,7 @@ public class QanaryQuestionAnsweringController {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
+    @ApiResponse(responseCode = "201", description = "Created: the question answering process was run; the response describes it (question URI, graph, endpoint)")
     @RequestMapping(value = "/startquestionansweringwithaudioquestion", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Operation(summary = "Start a process directly with an audio question", //
@@ -499,6 +504,7 @@ public class QanaryQuestionAnsweringController {
      * @return
      * @throws Exception
      */
+    @ApiResponse(responseCode = "201", description = "Created: the question answering process was run; the response describes it (question URI, graph, endpoint)")
     @RequestMapping(value = QUESTIONANSWERING, method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     @Operation(summary = "Create a new Question Answering Process", //

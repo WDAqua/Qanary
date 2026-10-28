@@ -18,18 +18,18 @@ import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
  * Subclasses supply a concrete connector via {@link #connector()} and the same
  * tests run against each implementation, pinning a single, consistent behaviour.
  * <p>
- * The contract deliberately covers only the operations that behave identically
- * across all connectors: {@code update(String)} (insert) and {@code select(String)}
- * (including a count query). It does NOT include {@code ask(...)} absence,
- * named-graph isolation, {@code construct(...)} or delete, because those diverge
- * between implementations (e.g. the in-memory connector does not implement
- * {@code construct}; the Virtuoso/VirtGraph driver's ASK and named-graph semantics
- * are non-standard — see this package's README.adoc). Each test uses a unique
- * subject IRI so the assertions are independent of residual store state.
+ * The contract covers the operations that behave identically across all
+ * connectors: {@code update(String)} (insert), {@code select(String)} (including a
+ * count query and the isolation of named graphs) and {@code ask(String)}. It does
+ * NOT include {@code construct(...)} or delete, because those diverge between
+ * implementations (e.g. the in-memory connector does not implement
+ * {@code construct}). Each test uses a unique subject IRI so the assertions are
+ * independent of residual store state.
  */
 abstract class AbstractQanaryTripleStoreConnectorContract {
 
     protected static final URI GRAPH = URI.create("urn:qanary:contract:graph");
+    protected static final URI OTHER_GRAPH = URI.create("urn:qanary:contract:other-graph");
 
     /** the connector under test (subclasses provide an initialised instance) */
     protected abstract QanaryTripleStoreConnector connector();
@@ -73,6 +73,26 @@ abstract class AbstractQanaryTripleStoreConnectorContract {
                     "SELECT ?o WHERE { GRAPH <" + GRAPH + "> { <" + s + "> <urn:p> ?o } }");
             assertTrue(rs.hasNext(), "each inserted triple must be selectable: " + s);
         }
+    }
+
+    @Test
+    void graphClauseSeesOnlyItsOwnGraph() throws SparqlQueryFailed {
+        insert(subject);
+        ResultSet rs = connector().select(
+                "SELECT ?o WHERE { GRAPH <" + OTHER_GRAPH + "> { <" + subject + "> <urn:p> ?o } }");
+        assertFalse(rs.hasNext(), "a triple of one named graph must not be found in another one");
+    }
+
+    @Test
+    void askFindsAnInsertedTriple() throws SparqlQueryFailed {
+        insert(subject);
+        assertTrue(connector().ask("ASK { GRAPH <" + GRAPH + "> { <" + subject + "> <urn:p> <urn:o> } }"));
+    }
+
+    @Test
+    void askIsFalseForAnAbsentTriple() throws SparqlQueryFailed {
+        assertFalse(connector().ask("ASK { GRAPH <" + GRAPH + "> { <" + subject + "> <urn:p> <urn:o> } }"),
+                "ASK must be false for a never-inserted triple");
     }
 
     @Test

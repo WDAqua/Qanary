@@ -92,33 +92,8 @@ virtuoso.username=dba
 virtuoso.password=mysecret
 ```
 
-==== Known behaviour / quirks
+==== Graphs in queries
 
-[WARNING]
-====
-The Virtuoso connector (`QanaryTripleStoreConnectorVirtuoso`) talks to Virtuoso
-through the `virtuoso-jena` JDBC driver (`VirtGraph`), which does *not* always
-follow standard SPARQL 1.1 semantics. Behaviours observed via integration tests
-against the Virtuoso image:
+The connector evaluates queries like Virtuoso's own SPARQL endpoint does: a query without `FROM` or `GRAPH` reads the union of all graphs, while `FROM <g>` and `GRAPH <g> { ... }` restrict it to the graph `<g>`. This also applies to the components, because the pipeline's SPARQL endpoint (`/sparql`) forwards their queries to this connector.
 
-* *`ASK` is unreliable for absence.* An `ASK { GRAPH <g> { <s> <p> <o> } }` can
-  return `true` even for a triple that was never inserted, so do not use `ask(...)`
-  to prove that something is *not* present.
-* *Named graphs are not strictly isolated for reads.* A query scoped to one named
-  graph may see triples written to a different graph, so do not rely on the
-  `GRAPH <g>` clause to partition data when reading.
-* *Writes may not be immediately visible to a `SELECT` on the same connection.*
-  A triple written with `update(...)` can be missing from an immediately following
-  `select(...)` (though `construct(...)` sees it) — i.e. read-your-write is not
-  guaranteed without a short delay / re-read.
-
-These are tolerated by the Qanary pipeline because its question-answering flow is
-eventually consistent (each component writes, later components read), and the
-end-to-end process works correctly. But when writing code or tests directly
-against this connector: prefer positive `SELECT`/`CONSTRUCT` assertions, never
-assert absence via `ASK` or rely on cross-graph isolation, and re-read instead of
-assuming a write is immediately visible. The in-memory connector
-(`QanaryTripleStoreConnectorInMemory`) and the SPARQL-over-HTTP connector
-(`QanaryTripleStoreConnectorQanaryInternal`) follow standard Jena/SPARQL semantics
-and are better suited for deterministic unit/integration tests.
-====
+Up to Qanary 5.0.2, the `virtuoso-jena` driver prefixed every query with `define input:default-graph-uri <virt:DEFAULT>`. With this definition, Virtuoso returns no rows for a `SELECT` with `GRAPH <g> { ... }`, answers `true` to every `ASK { GRAPH <g> { ... } }`, and finds nothing for a query without `FROM` or `GRAPH`; only `FROM <g>` and `GRAPH ?g { ... } FILTER (?g = <g>)` worked. This README described the effects as quirks of Virtuoso (unreliable `ASK`, writes not visible to a following `SELECT`). Since the connection reads from all graphs (`VirtGraph.setReadFromAllGraphs(true)`), the connector passes the same contract tests as the in-memory connector (`VirtuosoConnectorContractIT`).

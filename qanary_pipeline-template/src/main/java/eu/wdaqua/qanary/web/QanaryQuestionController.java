@@ -8,10 +8,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import com.google.common.net.InetAddresses;
 
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.message.QanaryAvailableQuestions;
@@ -33,6 +36,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 /**
  * controller for all service call w.r.t. questions
@@ -42,6 +46,8 @@ import io.swagger.v3.oas.annotations.Operation;
 @Controller
 public class QanaryQuestionController {
 	private String directoryForStoringQuestionRawData;
+	private final String configuredHost;
+	private final Integer configuredPort;
 	private final String storedQuestionPrefix = "stored-question_";
 
 	private static final Logger logger = LoggerFactory.getLogger(QanaryQuestionController.class);
@@ -59,12 +65,17 @@ public class QanaryQuestionController {
 	public QanaryQuestionController(final QanaryConfigurator qanaryConfigurator,
 			final QanaryPipelineConfiguration myQanaryPipelineConfiguration) {
 		this.directoryForStoringQuestionRawData = myQanaryPipelineConfiguration.getQuestionsDirectory();
+		this.configuredHost = myQanaryPipelineConfiguration.hasProperty("server.host")
+				? myQanaryPipelineConfiguration.getHost()
+				: null;
+		this.configuredPort = myQanaryPipelineConfiguration.getPort();
 	}
 
 	/**
 	 * synchronous call to start the QA process (POST), return the URL of the
 	 * created question
 	 */
+	@ApiResponse(responseCode = "201", description = "Created: the question was stored; the response contains its URI")
 	@PostMapping(value = "/question", produces = "application/json")
 	@ResponseBody
 	@Operation(
@@ -116,7 +127,7 @@ public class QanaryQuestionController {
 			stream.write(questionstring.getBytes(StandardCharsets.UTF_8));
 		}
 
-		final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
+		final URI uriOfQuestion = new URI(this.getBaseUrlOfStoredQuestions() + "/question/" + filename);
 		logger.info("uriOfQuestion: {}", uriOfQuestion);
 
 		return new QanaryQuestionCreated(filename, uriOfQuestion);
@@ -127,6 +138,7 @@ public class QanaryQuestionController {
 	 * the URL of the created question
 	 * @param file // TODO: why is the file parameter not shown in swagger-ui?
 	 */
+	@ApiResponse(responseCode = "201", description = "Created: the question was stored; the response contains its URI")
 	@PostMapping(value = "/question_audio", produces = "application/json")
 	@ResponseBody
 	@Operation(
@@ -180,7 +192,7 @@ public class QanaryQuestionController {
 			throw new IOException("Failed to store file " + file.getOriginalFilename(), e);
 		}
 
-		final URI uriOfQuestion = new URI(this.getHost() + "/question/" + filename);
+		final URI uriOfQuestion = new URI(this.getBaseUrlOfStoredQuestions() + "/question/" + filename);
 		logger.info("uriOfQuestion: {}", uriOfQuestion);
 
 		return new QanaryQuestionCreated(filename, uriOfQuestion);
@@ -210,6 +222,53 @@ public class QanaryQuestionController {
 		}
         assert false;
 		return null;
+	}
+
+	/**
+	 * returns the base URL (scheme and authority) of the URIs of stored questions
+	 * <p>
+	 * The URI of a question is stored in the graph of the question answering
+	 * process, and the components fetch the question from there. Hence, the host of
+	 * the current request is used (see {@link #getHost()}), unless it is a loopback
+	 * address (e.g., localhost or 127.0.0.1) that other machines or containers
+	 * cannot reach, e.g., if the pipeline was called through a port published by
+	 * Docker. Then, server.host and server.port are used, i.e., the address the
+	 * components also use for the SPARQL endpoint of the pipeline, if this is not a
+	 * loopback address as well.
+	 */
+	private String getBaseUrlOfStoredQuestions() {
+		String requestHost = this.getHost();
+		if (this.configuredHost == null || this.configuredPort == null || isLoopback(this.configuredHost)) {
+			return requestHost;
+		} else if (requestHost == null || isLoopback(requestHost)) {
+			String configuredBaseUrl = this.configuredHost + ":" + this.configuredPort;
+			logger.info("question was requested through {}, its URI uses the configured {} instead", requestHost,
+					configuredBaseUrl);
+			return configuredBaseUrl;
+		} else {
+			return requestHost;
+		}
+	}
+
+	/**
+	 * true if the host of the given URL is a loopback address (localhost, 127.0.0.0/8
+	 * or ::1); no name is resolved
+	 */
+	static boolean isLoopback(String url) {
+		String host;
+		try {
+			host = new URI(url).getHost();
+		} catch (URISyntaxException e) {
+			return false;
+		}
+		if (host == null) {
+			return false;
+		}
+		String name = host.toLowerCase(Locale.ROOT);
+		if (name.equals("localhost") || name.endsWith(".localhost")) {
+			return true;
+		}
+		return InetAddresses.isUriInetAddress(host) && InetAddresses.forUriString(host).isLoopbackAddress();
 	}
 
 	private URI getUriOfCurrentReqest() throws URISyntaxException {
