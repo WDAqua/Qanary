@@ -33,6 +33,12 @@ import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 
 
 @SpringBootTest(classes = QanaryPipeline.class, webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -263,6 +269,62 @@ class QanaryQuestionAnsweringControllerTest {
         ).andExpect(status().is2xxSuccessful());
         ;
 
+    }
+
+    /**
+     * the componentlist of a JSON request is read by the Jackson configuration of Spring Boot, may contain parallel
+     * blocks, and the streams are named in the error reports
+     */
+    @Test
+    void testParallelComponentlistNamesTheStreamsOfUnavailableComponents() throws Exception {
+        doNothing().when(mockedQanaryTripleStoreConnector).update(anyString());
+        String json = "{\"question\": \"Who invented the Hawaiian pizza?\", \"componentlist\": "
+                + "[\"UnknownA\", {\"p1\": [\"UnknownB\"], \"x\": [\"UnknownC\", \"UnknownD\"]}, \"UnknownE\"]}";
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String question = new JSONObject(result.getResponse().getContentAsString()).getString("question");
+
+        mvc.perform(MockMvcRequestBuilders.get("/questionanswering/errors").param("questionuri", question))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5))
+                .andExpect(jsonPath("$[*].component").value(contains("UnknownA", "UnknownB", "UnknownC", "UnknownD", "UnknownE")))
+                .andExpect(jsonPath("$[*].stream").value(contains(nullValue(), is("p1"), is("x"), is("x"), nullValue())))
+                .andExpect(jsonPath("$[0].type").value("COMPONENT_NOT_AVAILABLE"));
+    }
+
+    @Test
+    void testInvalidComponentlistIsABadRequest() throws Exception {
+        String json = "{\"question\": \"Who invented the Hawaiian pizza?\", \"componentlist\": "
+                + "[{\"p1\": [\"a\"], \"p1\": [\"b\"]}]}";
+
+        mvc.perform(MockMvcRequestBuilders.post("/startquestionansweringwithtextquestionThroughJson")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.detail").value(startsWith("the stream name \"p1\" is used more than once")));
+    }
+
+    @Test
+    void testOpenApiDescribesTheComponentlist() throws Exception {
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get(System.getProperty("springdoc.api-docs.path")))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONObject componentlist = new JSONObject(result.getResponse().getContentAsString())
+                .getJSONObject("components").getJSONObject("schemas")
+                .getJSONObject("RequestQuestionAnsweringProcess").getJSONObject("properties")
+                .getJSONObject("componentlist");
+        // an array of component names and parallel blocks (not the Java structure of the process definition)
+        assertEquals("array", componentlist.getString("type"), componentlist.toString());
+        assertEquals(0, componentlist.getJSONArray("default").length(), componentlist.toString());
+        Assertions.assertTrue(componentlist.getJSONArray("example").getJSONObject(1).has("p1"), componentlist.toString());
+        Assertions.assertTrue(componentlist.getString("description").contains("parallel block"), componentlist.toString());
     }
 
     @Test

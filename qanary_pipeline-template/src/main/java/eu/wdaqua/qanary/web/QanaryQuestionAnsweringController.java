@@ -1,7 +1,6 @@
 package eu.wdaqua.qanary.web;
 
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
-import eu.wdaqua.qanary.business.QanaryComponent;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.commons.QanaryMessage;
@@ -11,6 +10,8 @@ import eu.wdaqua.qanary.commons.config.QanaryConfiguration;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreConnector;
 import eu.wdaqua.qanary.commons.triplestoreconnectors.QanaryTripleStoreProxy;
 import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
+import eu.wdaqua.qanary.exceptions.InvalidProcessDefinitionException;
+import eu.wdaqua.qanary.exceptions.ParallelStreamsFailedException;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
@@ -18,6 +19,8 @@ import eu.wdaqua.qanary.message.QanaryComponentNotAvailableException;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
+import eu.wdaqua.qanary.process.QanaryProcessDefinition;
+import eu.wdaqua.qanary.process.QanaryProcessExecutor;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
 import eu.wdaqua.qanary.web.messages.QanaryQuestionAnsweringError;
@@ -40,7 +43,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -217,6 +222,10 @@ public class QanaryQuestionAnsweringController {
      * "additionalTriples": &lt;urn:s1&gt; &lt;urn:p1&gt; &lt;urn:o1&gt; . &lt;urn:s2&gt; &lt;urn:p2&gt; &lt;urn:o2&gt; ."
      * }'
      * </pre>
+     * <p>
+     * The componentlist might contain parallel blocks (see {@link QanaryProcessDefinition}), e.g.,
+     * {@code ["a", {"p1": ["b"], "x": ["c", "d"]}, "e"]} executes a, then b parallel to c and d (d after c),
+     * then e. An invalid componentlist is rejected with HTTP 400.
      *
      * @param myRequestQuestionAnsweringProcess
      * @return
@@ -227,7 +236,7 @@ public class QanaryQuestionAnsweringController {
             @RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
         logger.info("\n\n\n\n\nstartquestionansweringwithtextquestion (JSON request): {}", myRequestQuestionAnsweringProcess);
         logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
-        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getProcessDefinition());
         logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
 
         QanaryQuestionAnsweringRun myRun = this
@@ -267,12 +276,16 @@ public class QanaryQuestionAnsweringController {
                     + "		        &nbsp;&nbsp;\"BirthDataQueryBuilderWikidata\",\n"
                     + "		        &nbsp;&nbsp;\"SparqlExecuter\"\n"
                     + "		    ], \n\"additionalTriples\": \"&lt;urn:s1&gt; &lt;urn:p1&gt; &lt;urn:o1&gt; . &lt;urn:s2&gt; &lt;urn:p2&gt; &lt;urn:o2&gt; .\"\n}</pre>" //
+                    + "The components of the componentlist are executed one after another. An element of the componentlist might also be a parallel block: an object whose properties are named streams (lists like the componentlist itself), which are executed at the same time. The element after a parallel block starts when all its streams have finished. " //
+                    + "The stream names are chosen freely and have to be unique; they identify the streams if anything goes wrong (see GET " + QUESTIONANSWERING + "/errors). " //
+                    + "Example: <pre>\"componentlist\": [\"a\", {\"p1\": [\"b\"], \"x\": [\"c\", \"d\"]}, \"e\"]</pre> executes a, then b parallel to c and d (d starts after c has finished), then e. " //
+                    + "An invalid componentlist is rejected with HTTP 400." //
     )
     public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestionThroughJson(
             @RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
         logger.info("\n\n\n\n\nstartquestionansweringwithtextquestionThroughJson (JSON request): {}", myRequestQuestionAnsweringProcess);
         logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
-        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getcomponentlist());
+        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getProcessDefinition());
         logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
 
         QanaryQuestionAnsweringRun myRun = this
@@ -409,7 +422,8 @@ public class QanaryQuestionAnsweringController {
             operationId = "getQuestionAnsweringErrors", //
             description = "Errors recorded while answering questions (component not available, component " //
                     + "execution failed, triplestore not accessible, pipeline failure). Pass questionuri to " //
-                    + "get the errors for one specific question's URL; omit it to get all recent errors." //
+                    + "get the errors for one specific question's URL; omit it to get all recent errors. " //
+                    + "An error in a parallel stream of the componentlist names the stream (property stream)." //
     )
     public ResponseEntity<?> getQuestionAnsweringErrors(
             @RequestParam(value = "questionuri", required = false) final URI questionuri) {
@@ -426,6 +440,32 @@ public class QanaryQuestionAnsweringController {
             snapshot = new LinkedHashMap<>(lastQuestionAnsweringErrors);
         }
         return new ResponseEntity<>(snapshot, HttpStatus.OK);
+    }
+
+    /**
+     * an invalid componentlist (process definition) is a bad request; the response explains what is wrong
+     */
+    @ExceptionHandler(InvalidProcessDefinitionException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidProcessDefinition(InvalidProcessDefinitionException e) {
+        logger.warn("rejected request with an invalid componentlist: {}", e.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problem.setTitle("Invalid componentlist");
+        return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_PROBLEM_JSON).body(problem);
+    }
+
+    /**
+     * the componentlist is checked while the JSON request is read, so its problems arrive wrapped as unreadable
+     * requests; all other unreadable requests are left to the default handling (HTTP 400)
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleUnreadableRequest(HttpMessageNotReadableException e)
+            throws HttpMessageNotReadableException {
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof InvalidProcessDefinitionException invalidProcessDefinition) {
+                return this.handleInvalidProcessDefinition(invalidProcessDefinition);
+            }
+        }
+        throw e;
     }
 
 
@@ -601,6 +641,18 @@ public class QanaryQuestionAnsweringController {
     public QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(URI graph, String question,
                                                                                         MultipartFile questionaudio, List<String> componentsToBeCalled, String language, List<String> targetdata,
                                                                                         URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
+        return this.createOrUpdateAndRunQuestionAnsweringProcess(graph, question, questionaudio,
+                QanaryProcessDefinition.sequential(componentsToBeCalled), language, targetdata, priorConversation,
+                additionalTriples);
+    }
+
+    /**
+     * helper for creating or updating a Question Answering system for a given textual or audio question that
+     * executes the components as defined by the process definition (which might contain parallel blocks)
+     */
+    private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringProcess(URI graph, String question,
+                                                                                   MultipartFile questionaudio, QanaryProcessDefinition componentsToBeCalled, String language, List<String> targetdata,
+                                                                                   URI priorConversation, AdditionalTriples additionalTriples) throws Exception {
 
         // create a QanaryQuestion from given question and graph
         logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
@@ -761,10 +813,10 @@ public class QanaryQuestionAnsweringController {
     private QanaryQuestionAnsweringRun createOrUpdateAndRunQuestionAnsweringSystemHelper(
             RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
         URI newGraph = null;
-        return this.createOrUpdateAndRunQuestionAnsweringSystemHelper(newGraph, //
+        return this.createOrUpdateAndRunQuestionAnsweringProcess(newGraph, //
                 myRequestQuestionAnsweringProcess.getQuestion(), //
                 null, //
-                myRequestQuestionAnsweringProcess.getcomponentlist(), //
+                myRequestQuestionAnsweringProcess.getProcessDefinition(), //
                 myRequestQuestionAnsweringProcess.getLanguage(), //
                 myRequestQuestionAnsweringProcess.getTargetdata(), //
                 myRequestQuestionAnsweringProcess.getPriorConversation(), //
@@ -786,28 +838,50 @@ public class QanaryQuestionAnsweringController {
     public QanaryQuestionAnsweringRun executeComponentList(URI question, List<String> componentsToBeCalled,
                                                            QanaryMessage myQanaryMessage)
             throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
+        return this.executeComponentList(question, QanaryProcessDefinition.sequential(componentsToBeCalled),
+                myQanaryMessage);
+    }
+
+    /**
+     * execute the components as defined by the process definition: one after another, the streams of parallel
+     * blocks at the same time
+     *
+     * @param question
+     * @param componentsToBeCalled
+     * @param myQanaryMessage
+     * @return
+     * @throws URISyntaxException
+     * @throws QanaryComponentNotAvailableException
+     * @throws QanaryExceptionServiceCallNotOk      if a component failed, a {@link ParallelStreamsFailedException}
+     *                                              if parallel streams failed
+     */
+    public QanaryQuestionAnsweringRun executeComponentList(URI question, QanaryProcessDefinition componentsToBeCalled,
+                                                           QanaryMessage myQanaryMessage)
+            throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
         logger.info("executeComponentList on \"{}\": {}", question, componentsToBeCalled);
         // execute synchronous calls to all components with the same message
         // if no component is passed nothing is happening
         if (componentsToBeCalled.isEmpty() == false) {
-            List<QanaryComponent> components = this.myComponentNotifier
-                    .getAvailableComponentsFromNames(componentsToBeCalled);
-            // a requested component that is not registered or is offline is silently skipped by
-            // getAvailableComponentsFromNames -> record it so the missing component is visible
-            Set<String> resolvedComponentNames = new HashSet<>();
-            for (QanaryComponent component : components) {
-                resolvedComponentNames.add(component.getName());
-            }
-            for (String requestedComponent : componentsToBeCalled) {
-                if (!resolvedComponentNames.contains(requestedComponent)) {
-                    recordQuestionAnsweringError(question,
-                            QanaryQuestionAnsweringError.ErrorType.COMPONENT_NOT_AVAILABLE, requestedComponent,
-                            "requested component is not registered with the pipeline or not reachable; it was skipped");
-                }
-            }
+            // a requested component that is not registered or is offline is skipped -> record it so the missing
+            // component is visible
+            QanaryProcessExecutor executor = new QanaryProcessExecutor(this.qanaryConfigurator,
+                    this.myComponentNotifier::getAvailableComponentsFromNames,
+                    (requestedComponent, stream) -> recordQuestionAnsweringError(question,
+                            QanaryQuestionAnsweringError.ErrorType.COMPONENT_NOT_AVAILABLE, requestedComponent, stream,
+                            "requested component is not registered with the pipeline or not reachable; it was skipped"));
             try {
-                QanaryQuestionAnsweringFinished process = qanaryConfigurator.callServices(components, myQanaryMessage);
+                QanaryQuestionAnsweringFinished process = executor.execute(componentsToBeCalled, myQanaryMessage);
                 this.removeElementsFromProcessLogIfTooManyExist(process);
+            } catch (ParallelStreamsFailedException e) {
+                for (ParallelStreamsFailedException.StreamFailure failure : e.getFailures()) {
+                    Throwable cause = failure.cause();
+                    recordQuestionAnsweringError(question,
+                            cause instanceof QanaryExceptionServiceCallNotOk
+                                    ? QanaryQuestionAnsweringError.ErrorType.COMPONENT_EXECUTION_FAILED
+                                    : classifyRuntimeError(cause),
+                            failure.component(), failure.stream(), cause.getMessage());
+                }
+                throw e;
             } catch (QanaryExceptionServiceCallNotOk e) {
                 recordQuestionAnsweringError(question,
                         QanaryQuestionAnsweringError.ErrorType.COMPONENT_EXECUTION_FAILED, e.getComponentName(), e.getMessage());
@@ -833,12 +907,22 @@ public class QanaryQuestionAnsweringController {
      */
     private void recordQuestionAnsweringError(URI question, QanaryQuestionAnsweringError.ErrorType type,
                                               String component, String message) {
+        recordQuestionAnsweringError(question, type, component, null, message);
+    }
+
+    /**
+     * @param stream the parallel stream the error occurred in, null if it did not occur in a parallel stream
+     */
+    private void recordQuestionAnsweringError(URI question, QanaryQuestionAnsweringError.ErrorType type,
+                                              String component, String stream, String message) {
         if (question == null) {
             return;
         }
-        QanaryQuestionAnsweringError error = new QanaryQuestionAnsweringError(question, type, component, message);
-        logger.warn("recorded {} error for question {}{}: {}", type, question,
-                component == null ? "" : " (component " + component + ")", message);
+        QanaryQuestionAnsweringError error = new QanaryQuestionAnsweringError(question, type, component, stream,
+                message);
+        logger.warn("recorded {} error for question {}{}{}: {}", type, question,
+                component == null ? "" : " (component " + component + ")",
+                stream == null ? "" : " in parallel stream \"" + stream + "\"", message);
         synchronized (lastQuestionAnsweringErrors) {
             lastQuestionAnsweringErrors.computeIfAbsent(question, q -> new LinkedList<>()).add(error);
             // keep the map bounded: drop the oldest questions first (LinkedHashMap is insertion-ordered)

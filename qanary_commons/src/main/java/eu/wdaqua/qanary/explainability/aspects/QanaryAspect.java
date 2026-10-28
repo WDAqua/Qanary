@@ -31,6 +31,9 @@ public class QanaryAspect {
     private URI processGraph = null;
     private Map<String, MethodObject> methodList = new HashMap<>();
     private boolean activeTracing = false;
+    // the thread that started the traced pipeline process; the call stack and method list are shared, so
+    // methods executed by other threads (e.g., the parallel streams of a process) are not traced
+    private volatile Thread tracedPipelineThread = null;
     private String crossComponentProcessId;
     private String applicationName = null;
 
@@ -174,7 +177,7 @@ public class QanaryAspect {
 
     @Before(value = "anyQanaryAndPipelineExecution()")
     public void implementationStoreMethodExecutionInComponentBeforeForPipeline(JoinPoint joinPoint) {
-        if (this.activeTracing)
+        if (this.activeTracing && isTracedThread())
             addMethodFromJoinPointToList(joinPoint);
     }
 
@@ -196,6 +199,7 @@ public class QanaryAspect {
         logger.info("Starting process for pipeline");
         callStack.clear();
         methodList.clear();
+        tracedPipelineThread = Thread.currentThread();
         activeTracing = true;
         implementationStoreMethodExecutionInComponentBeforeForPipeline(joinPoint);
     }
@@ -234,7 +238,7 @@ public class QanaryAspect {
 
     @AfterReturning(value = "componentAspect() || anyQanaryAndPipelineExecution() || processExecution()", returning = "result")
     public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
-        if (isActiveTracing()) {
+        if (isActiveTracing() && isTracedThread()) {
             updateMethodWithReturnedValue(result, false);
             getLogger().debug("Logging method '{}' completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
             // Log all stack items
@@ -285,6 +289,16 @@ public class QanaryAspect {
         logMethods(getMethodList());
         setProcessGraph(null);
         getMethodList().clear();
+        tracedPipelineThread = null;
+    }
+
+    /**
+     * Whether a method executed by the current thread is traced: in a component every thread is, in the pipeline
+     * only the thread that started the traced process.
+     */
+    private boolean isTracedThread() {
+        Thread tracedThread = tracedPipelineThread;
+        return tracedThread == null || tracedThread == Thread.currentThread();
     }
 
     /**

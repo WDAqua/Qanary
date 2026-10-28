@@ -80,3 +80,30 @@ A **scroll-to-top** button (lower-left) and a **"Fork me on GitHub"** ribbon
 
 The frontend has an end-to-end test with step-by-step screenshots; see
 [`frontend-e2e/`](https://github.com/WDAqua/Qanary/tree/master/frontend-e2e).
+
+## Starting a question answering process via JSON
+
+A process is started with `POST /startquestionansweringwithtextquestion` (or `/startquestionansweringwithtextquestionThroughJson`, which is the same endpoint for Swagger UI) and a JSON body. Only `question` is required. The `componentlist` defines which components are called, and in which order:
+
+```json
+{
+  "question": "Who invented the Hawaiian pizza?",
+  "componentlist": ["NED-DBpediaSpotlight", "QueryBuilder", "SparqlExecuter"]
+}
+```
+
+The components of the `componentlist` are called one after another. An element of the `componentlist` can also be a *parallel block*: an object whose properties are named streams. Each stream is a list like the `componentlist` itself. All streams of a parallel block run at the same time; the components within a stream run one after another; the element after the parallel block starts when all its streams have finished.
+
+```json
+"componentlist": ["a", { "p1": ["b"], "x": ["c", "d"] }, "e"]
+```
+
+This calls `a`, then `b` in parallel to `c` and `d` (`d` starts after `c` has finished), and `e` after `b` and `d` have finished. A stream can contain parallel blocks itself.
+
+The stream names (`p1`, `x`) are chosen freely. They identify the streams if anything goes wrong, so they have to be unique within the `componentlist`:
+
+* If a component of a stream fails, the stream stops; the other streams of the parallel block are completed, then the process stops with HTTP 500. `GET /questionanswering/errors?questionuri=<question URI>` lists each failed stream with its `stream` name and the failed `component`.
+* A component that is not available is skipped, as in a list without parallel blocks; its error entry names the `stream` as well.
+* An invalid `componentlist` (e.g., an empty stream, a stream name used twice, a number instead of a component name) is rejected with HTTP 400 before anything is executed; the [problem details](https://www.rfc-editor.org/rfc/rfc9457) of the response explain what is wrong.
+
+Every stream starts with the same Qanary message (the graph of the process), so all components write to the same graph. Components that run in parallel must not depend on each other's annotations; put them into the same stream if they do.
