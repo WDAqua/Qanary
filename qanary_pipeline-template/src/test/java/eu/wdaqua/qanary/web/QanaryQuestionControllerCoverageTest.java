@@ -17,6 +17,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -31,7 +34,8 @@ import eu.wdaqua.qanary.message.QanaryQuestionInformation;
 
 /**
  * Questions are stored as files in the configured questions directory and
- * addressed by URLs built from the current request.
+ * addressed by URLs built from the current request (or from the configured host,
+ * if the request came through a loopback address).
  */
 class QanaryQuestionControllerCoverageTest {
 
@@ -39,18 +43,37 @@ class QanaryQuestionControllerCoverageTest {
     Path temp;
 
     private static QanaryQuestionController controller(Path questionsDirectory) {
+        return controller(questionsDirectory, QanaryPipelineConfigurationCoverageTest.required());
+    }
+
+    private static QanaryQuestionController controller(Path questionsDirectory, String serverHost, String serverPort) {
         Map<String, Object> properties = QanaryPipelineConfigurationCoverageTest.required();
+        properties.put("server.host", serverHost);
+        properties.put("server.port", serverPort);
+        return controller(questionsDirectory, properties);
+    }
+
+    private static QanaryQuestionController controller(Path questionsDirectory, Map<String, Object> properties) {
         properties.put("qanary.questions.directory", questionsDirectory.toString());
         return new QanaryQuestionController(null,
                 new QanaryPipelineConfiguration(QanaryPipelineConfigurationCoverageTest.environment(properties)));
     }
 
+    private static void requestThrough(String serverName, int serverPort) {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/question");
+        request.setServerName(serverName);
+        request.setServerPort(serverPort);
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    }
+
+    private static String uriOfCreatedQuestion(QanaryQuestionController controller) {
+        QanaryQuestionCreated created = (QanaryQuestionCreated) controller.createQuestion("Wo liegt Leipzig?").getBody();
+        return created.getQuestionURI().toString().replace(created.getQuestionID(), "<id>");
+    }
+
     @BeforeEach
     void inRequest() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/question");
-        request.setServerName("qanary.local");
-        request.setServerPort(8080);
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        requestThrough("qanary.local", 8080);
     }
 
     @AfterEach
@@ -136,6 +159,59 @@ class QanaryQuestionControllerCoverageTest {
         assertThrows(HttpRequestMethodNotSupportedException.class,
                 () -> controller.deleteQuestion("stored-question__text_1"));
         assertNull(controller.getStatusOfQuestion(new URL("http://qanary.local:8080/question/1")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"localhost", "127.0.0.1", "[::1]"})
+    void questionRequestedThroughALoopbackAddressGetsAnUriWithTheConfiguredHost(String loopback) {
+        requestThrough(loopback, 40800);
+
+        assertEquals("http://qanary-pipeline:40800/question/<id>",
+                uriOfCreatedQuestion(controller(temp, "http://qanary-pipeline", "40800")));
+    }
+
+    @Test
+    void questionRequestedThroughAnotherAddressGetsAnUriWithTheRequestedHost() {
+        assertEquals("http://qanary.local:8080/question/<id>",
+                uriOfCreatedQuestion(controller(temp, "http://qanary-pipeline", "40800")));
+    }
+
+    @Test
+    void questionRequestedThroughALoopbackAddressKeepsItIfTheConfiguredHostIsALoopbackAddressAsWell() {
+        requestThrough("127.0.0.1", 40800);
+
+        assertEquals("http://127.0.0.1:40800/question/<id>",
+                uriOfCreatedQuestion(controller(temp, "http://localhost", "8080")));
+    }
+
+    @Test
+    void audioQuestionRequestedThroughALoopbackAddressGetsAnUriWithTheConfiguredHost() {
+        requestThrough("localhost", 40800);
+
+        ResponseEntity<?> response = controller(temp, "https://qanary.example.org", "443")
+                .createAudioQuestion(new MockMultipartFile("question", "q.mp3", "audio/mpeg", new byte[] {1}));
+
+        QanaryQuestionCreated created = (QanaryQuestionCreated) response.getBody();
+        assertEquals("https://qanary.example.org:443/question/" + created.getQuestionID(),
+                created.getQuestionURI().toString());
+    }
+
+    @ParameterizedTest
+    @CsvSource({ //
+            "http://localhost, true", //
+            "http://LOCALHOST:8080, true", //
+            "http://app.localhost, true", //
+            "http://127.0.0.1, true", //
+            "http://127.1.2.3:80, true", //
+            "http://[::1]:8080, true", //
+            "http://qanary-pipeline, false", //
+            "http://10.0.0.1:8080, false", //
+            "http://[2001:db8::1], false", //
+            "http://localhost.example.org, false", //
+            "not a URL, false" //
+    })
+    void loopbackAddressesAreRecognizedWithoutResolvingNames(String url, boolean loopback) {
+        assertEquals(loopback, QanaryQuestionController.isLoopback(url));
     }
 
     @Test

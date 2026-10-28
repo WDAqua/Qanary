@@ -113,9 +113,10 @@ class QanaryTripleStoreConnectorVirtuosoTest {
     }
 
     @Test
-    void connectsWithTheConfiguredCredentialsAndQueryTimeout() {
+    void connectsWithTheConfiguredCredentialsAndQueryTimeoutAndReadsAllGraphs() {
         assertEquals(List.of(List.of(URL, "dba", "secret")), connectionArguments);
         verify(connections.constructed().get(0)).setQueryTimeout(30);
+        verify(connections.constructed().get(0)).setReadFromAllGraphs(true);
         assertEquals(URL, connector.getVirtuosoUrl());
         String description = connector.getFullEndpointDescription(); // production text has a typo ("tiplestore")
         assertTrue(description.startsWith("Virtuoso ") && description.endsWith(" connected on the endpoint " + URL), description);
