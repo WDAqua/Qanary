@@ -292,6 +292,56 @@ class QanaryAspectTracingTest {
     }
 
     @Test
+    void aProcessStartedWhileAnotherIsTracedStaysUntraced() throws Throwable {
+        aspect.setProcessGraph(GRAPH);
+        aspect.setQanaryTripleStoreConnector(store);
+        JoinPoint start = joinPoint("eu.wdaqua.qanary.web.QanaryQuestionAnsweringController", "start");
+        aspect.startProcessForPipelineBefore(start);
+
+        // a second message at the same time: its process must neither reset nor join the trace of the first
+        Thread second = new Thread(() -> {
+            JoinPoint otherStart = joinPoint("eu.wdaqua.qanary.web.QanaryQuestionAnsweringController", "start");
+            aspect.startProcessForPipelineBefore(otherStart);
+            JoinPoint call = joinPoint("eu.wdaqua.qanary.business.QanaryConfigurator", "callServices");
+            aspect.implementationStoreMethodExecutionInComponentBeforeForPipeline(call);
+            aspect.implementationStoreMethodExecutionInComponentAfter(call, "done");
+            assertDoesNotThrow(() -> aspect.endProcessForPipeline(otherStart, "finished"));
+        });
+        second.start();
+        second.join();
+
+        assertEquals(1, aspect.getMethodList().size());
+        assertEquals(GRAPH, aspect.getProcessGraph());
+        assertTrue(aspect.isActiveTracing());
+        aspect.endProcessForPipeline(start, "finished");
+        assertEquals(1, countLoggedMethods());
+        assertFalse(aspect.isActiveTracing());
+    }
+
+    @Test
+    void aProcessEndingWithAnExceptionReleasesTheTrace() throws Throwable {
+        aspect.setProcessGraph(GRAPH);
+        aspect.setQanaryTripleStoreConnector(store);
+        JoinPoint start = joinPoint("eu.wdaqua.qanary.web.QanaryQuestionAnsweringController", "start");
+        aspect.startProcessForPipelineBefore(start);
+        aspect.implementationStoreMethodExecutionInComponentBeforeForPipeline(
+                joinPoint("eu.wdaqua.qanary.business.QanaryConfigurator", "callServices"));
+        aspect.endProcessForPipelineWithException(start);
+
+        assertFalse(aspect.isActiveTracing());
+        assertTrue(aspect.getMethodList().isEmpty());
+        assertTrue(QanaryAspect.getCallStack().isEmpty());
+        assertEquals(0, countLoggedMethods());
+
+        // the next process, also in another thread, is traced again
+        Thread next = new Thread(() -> aspect.startProcessForPipelineBefore(
+                joinPoint("eu.wdaqua.qanary.web.QanaryQuestionAnsweringController", "start")));
+        next.start();
+        next.join();
+        assertEquals(1, aspect.getMethodList().size());
+    }
+
+    @Test
     void endOfAPipelineProcessWritesTheTrace() throws Throwable {
         aspect.setProcessGraph(GRAPH);
         aspect.setQanaryTripleStoreConnector(store);
