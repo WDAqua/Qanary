@@ -15,6 +15,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    ignore:
+      # virt_jena_v5_3 calls ModelUtils.tripleToStatement, which Jena 6 removed
+      - dependency-name: "org.apache.jena:*"
+        update-types: ["version-update:semver-major"]
   # Pipeline Docker base image (debian/openjdk).
   - package-ecosystem: "docker"
     directory: "/qanary_pipeline-template"
