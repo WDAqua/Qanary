@@ -121,6 +121,7 @@ public class QanaryAspect {
                     "!execution(* eu.wdaqua.component..* (..)) &&" +
                     "!execution(* eu.wdaqua.qanary.explainability..*(..)) &&" +
                     "!execution(* process(eu.wdaqua.qanary.commons.QanaryMessage)) &&" +
+                    "!execution(* eu.wdaqua.qanary.web.LogSanitizer.*(..)) &&" +
                     "!execution(* eu.wdaqua.qanary.communications..* (..))")
     // TODO: For both interceptors
     public void anyQanaryAndPipelineExecution() {

@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.web;
 
+import static eu.wdaqua.qanary.web.LogSanitizer.sanitize;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -89,7 +91,7 @@ public class QanaryQuestionController {
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true)
 			final String questionstring) {
 
-		logger.info("add received question: {}", questionstring);
+		logger.info("add received question: {}", sanitize(questionstring));
 		QanaryQuestionCreated responseMessage;
 		try {
 			responseMessage = this.storeQuestion(questionstring);
@@ -151,7 +153,7 @@ public class QanaryQuestionController {
 	public ResponseEntity<?> createAudioQuestion(
 			@RequestParam(value = QanaryStandardWebParameters.QUESTION, required = true) final MultipartFile file) {
 
-		logger.info("new audio file received: {}", file.getName());
+		logger.info("new audio file received: {}", sanitize(file.getName()));
 		QanaryQuestionCreated responseMessage;
 		try {
 			responseMessage = this.storeAudioQuestion(file);

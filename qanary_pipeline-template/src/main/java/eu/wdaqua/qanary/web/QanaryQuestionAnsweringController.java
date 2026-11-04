@@ -1,5 +1,7 @@
 package eu.wdaqua.qanary.web;
 
+import static eu.wdaqua.qanary.web.LogSanitizer.sanitize;
+
 import eu.wdaqua.qanary.QanaryComponentRegistrationChangeNotifier;
 import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
@@ -199,7 +201,7 @@ public class QanaryQuestionAnsweringController {
             @RequestParam(value = QanaryStandardWebParameters.ADDITIONALTRIPLES, defaultValue = "", required = false) final AdditionalTriples additionalTriples //
     ) throws Exception {
 
-        logger.info("startquestionansweringwithtextquestion: {} with {}", question, componentsToBeCalled);
+        logger.info("startquestionansweringwithtextquestion: {} with {}", sanitize(question), sanitize(componentsToBeCalled));
         logger.warn(
                 "mapping \"/startquestionansweringwithtextquestion\" for form-based requests is DEPRECATED in favour of requests using JSON");
         QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, question, null,
@@ -237,10 +239,10 @@ public class QanaryQuestionAnsweringController {
     @PostMapping(value = "/startquestionansweringwithtextquestion", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestion(
             @RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
-        logger.info("\n\n\n\n\nstartquestionansweringwithtextquestion (JSON request): {}", myRequestQuestionAnsweringProcess);
-        logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
-        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getProcessDefinition());
-        logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+        logger.info("\n\n\n\n\nstartquestionansweringwithtextquestion (JSON request): {}", sanitize(myRequestQuestionAnsweringProcess));
+        logger.info("question: {}", sanitize(myRequestQuestionAnsweringProcess.getQuestion()));
+        logger.info("componentlist: {}", sanitize(myRequestQuestionAnsweringProcess.getProcessDefinition()));
+        logger.info("additionalTriples: {}", sanitize(myRequestQuestionAnsweringProcess.getAdditionalTriples()));
 
         QanaryQuestionAnsweringRun myRun = this
                 .createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
@@ -287,10 +289,10 @@ public class QanaryQuestionAnsweringController {
     )
     public ResponseEntity<QanaryQuestionAnsweringRun> startquestionansweringwithtextquestionThroughJson(
             @RequestBody RequestQuestionAnsweringProcess myRequestQuestionAnsweringProcess) throws Exception {
-        logger.info("\n\n\n\n\nstartquestionansweringwithtextquestionThroughJson (JSON request): {}", myRequestQuestionAnsweringProcess);
-        logger.info("question: {}", myRequestQuestionAnsweringProcess.getQuestion());
-        logger.info("componentlist: {}", myRequestQuestionAnsweringProcess.getProcessDefinition());
-        logger.info("additionalTriples: {}", myRequestQuestionAnsweringProcess.getAdditionalTriples());
+        logger.info("\n\n\n\n\nstartquestionansweringwithtextquestionThroughJson (JSON request): {}", sanitize(myRequestQuestionAnsweringProcess));
+        logger.info("question: {}", sanitize(myRequestQuestionAnsweringProcess.getQuestion()));
+        logger.info("componentlist: {}", sanitize(myRequestQuestionAnsweringProcess.getProcessDefinition()));
+        logger.info("additionalTriples: {}", sanitize(myRequestQuestionAnsweringProcess.getAdditionalTriples()));
 
         QanaryQuestionAnsweringRun myRun = this
                 .createOrUpdateAndRunQuestionAnsweringSystemHelper(myRequestQuestionAnsweringProcess);
@@ -370,7 +372,7 @@ public class QanaryQuestionAnsweringController {
             @RequestParam(value = QanaryStandardWebParameters.PRIORCONVERSATION, defaultValue = "", required = false) final URI priorConversation//
     ) throws Exception {
 
-        logger.info("startquestionansweringwithaudioquestion: {} with {}", question, componentsToBeCalled);
+        logger.info("startquestionansweringwithaudioquestion: {} with {}", sanitize(question), sanitize(componentsToBeCalled));
         QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(null, null, question,
                 componentsToBeCalled, language, targetdata, priorConversation, null);
 
@@ -564,7 +566,7 @@ public class QanaryQuestionAnsweringController {
         // create a new question answering system
         logger.info(
                 "create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
-                textquestion, componentsToBeCalled, language, targetdata);
+                sanitize(textquestion), sanitize(componentsToBeCalled), sanitize(language), sanitize(targetdata));
 
         QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
                 audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
@@ -603,7 +605,7 @@ public class QanaryQuestionAnsweringController {
         // create a new question answering system
         logger.info(
                 "create and start a new question answering system for question={}, componentlist={}, language={}, targetdata={}",
-                textquestion, componentsToBeCalled, language, targetdata);
+                sanitize(textquestion), sanitize(componentsToBeCalled), sanitize(language), sanitize(targetdata));
 
         QanaryQuestionAnsweringRun myRun = this.createOrUpdateAndRunQuestionAnsweringSystemHelper(graph, textquestion,
                 audioquestion, componentsToBeCalled, language, targetdata, priorConversation, null);
@@ -662,7 +664,7 @@ public class QanaryQuestionAnsweringController {
 
         // create a QanaryQuestion from given question and graph
         logger.info("createOrUpdateAndRunQuestionAnsweringSystemHelper: \"{}\" with {} (priorConversation: {})", //
-                question, componentsToBeCalled, priorConversation);
+                sanitize(question), sanitize(componentsToBeCalled), sanitize(priorConversation));
 
         // no question string was given, so it is tried to fetch it from the
         // triplestore
@@ -703,20 +705,20 @@ public class QanaryQuestionAnsweringController {
         if (language != null && language.isEmpty() == false) {
             qanaryQuestion.setLanguageText(language);
         } else {
-            logger.info("no language was given, no change for question \"{}\"", question);
+            logger.info("no language was given, no change for question \"{}\"", sanitize(question));
         }
 
         // store targetdata for the current question
         if (targetdata != null && targetdata.isEmpty() == false) {
             qanaryQuestion.setTargetData(targetdata);
         } else {
-            logger.info("no targetdata was given, no change for question \"{}\"", question);
+            logger.info("no targetdata was given, no change for question \"{}\"", sanitize(question));
         }
 
         QanaryMessage myQanaryMessage = new QanaryMessage(this.qanaryConfigurator.getEndpoint(),
                 qanaryQuestion.getNamedGraph());
 
-        logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
+        logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", sanitize(componentsToBeCalled),
                 myQanaryMessage.getInGraph(), myQanaryMessage.getEndpoint());
 
 //		TODO: re-enable additional insert queries 
@@ -726,7 +728,7 @@ public class QanaryQuestionAnsweringController {
 
         if (myQanaryPipelineConfiguration.getAdditionalTriplesAllowed() && additionalTriples != null
                 && additionalTriples.getTriples() != null) {
-            logger.info("loadAdditionalTriples: {}", additionalTriples.getTriples());
+            logger.info("loadAdditionalTriples: {}", sanitize(additionalTriples.getTriples()));
             loadAdditionalTriples(additionalTriples, myQanaryMessage);
         }
 
@@ -752,11 +754,11 @@ public class QanaryQuestionAnsweringController {
                     .read(IOUtils.toInputStream(additionalTriples.getTriples(), "UTF-8"), null, "Turtle");
 
             String formattedTriples = this.modelToFormattedStringWithReplacedPrefixes(model);
-            logger.debug("formatted triples: {}", formattedTriples);
+            logger.debug("formatted triples: {}", sanitize(formattedTriples));
 
             sparqlquery = "INSERT DATA { GRAPH <" + myQanaryMessage.getInGraph().toString() + "> {\n"
                     + formattedTriples + "\n}}";
-            logger.info("add additional triples through SPARQL query: {}", sparqlquery);
+            logger.info("add additional triples through SPARQL query: {}", sanitize(sparqlquery));
 
             this.myQanaryTripleStoreConnector.update(sparqlquery);
         } catch (SparqlQueryFailed e) {
@@ -787,7 +789,7 @@ public class QanaryQuestionAnsweringController {
                         qs.get("s"), qs.get("p"), qs.get("o").asLiteral().getValue(), qs.get("o").asLiteral().getDatatypeURI());
             }
         }
-        logger.info("formatted triples:\n{}", formattedTriples);
+        logger.info("formatted triples: {}", sanitize(formattedTriples));
         return formattedTriples;
     }
 
@@ -864,7 +866,7 @@ public class QanaryQuestionAnsweringController {
     public QanaryQuestionAnsweringRun executeComponentList(URI question, QanaryProcessDefinition componentsToBeCalled,
                                                            QanaryMessage myQanaryMessage)
             throws URISyntaxException, QanaryComponentNotAvailableException, QanaryExceptionServiceCallNotOk {
-        logger.info("executeComponentList on \"{}\": {}", question, componentsToBeCalled);
+        logger.info("executeComponentList on \"{}\": {}", sanitize(question), sanitize(componentsToBeCalled));
         // execute synchronous calls to all components with the same message
         // if no component is passed nothing is happening
         if (componentsToBeCalled.isEmpty() == false) {
@@ -926,9 +928,9 @@ public class QanaryQuestionAnsweringController {
         }
         QanaryQuestionAnsweringError error = new QanaryQuestionAnsweringError(question, type, component, stream,
                 message);
-        logger.warn("recorded {} error for question {}{}{}: {}", type, question,
-                component == null ? "" : " (component " + component + ")",
-                stream == null ? "" : " in parallel stream \"" + stream + "\"", message);
+        logger.warn("recorded {} error for question {}{}{}: {}", type, sanitize(question),
+                component == null ? "" : " (component " + sanitize(component) + ")",
+                stream == null ? "" : " in parallel stream \"" + sanitize(stream) + "\"", sanitize(message));
         synchronized (lastQuestionAnsweringErrors) {
             lastQuestionAnsweringErrors.computeIfAbsent(question, q -> new LinkedList<>()).add(error);
             // keep the map bounded: drop the oldest questions first (LinkedHashMap is insertion-ordered)
@@ -1000,7 +1002,7 @@ public class QanaryQuestionAnsweringController {
                 + "		FILTER REGEX (STR(?componentname), \".*:" + component + "$\") . " //
                 + "}";
 
-        logger.info("fetching number of annotations with query: {}", sparqlGet);
+        logger.info("fetching number of annotations with query: {}", sanitize(sparqlGet));
 
         ResultSet annotations = myQanaryTripleStoreConnector.select(sparqlGet);
         QuerySolution annotation = annotations.next();
@@ -1011,9 +1013,9 @@ public class QanaryQuestionAnsweringController {
         try {
             annotationCount = annotation.get("NumberOfAnnotations").asLiteral().getInt();
             componentUrl = annotation.get("ComponentName").asLiteral().getString();
-            logger.info("found {} annotations for component {} on graph {}", annotationCount, component, graph);
+            logger.info("found {} annotations for component {} on graph {}", annotationCount, sanitize(component), sanitize(graph));
         } catch (NullPointerException nullPointer) {
-            logger.info("No annotations were found for component {} on graph {}", component, graph);
+            logger.info("No annotations were found for component {} on graph {}", sanitize(component), sanitize(graph));
         }
 
         return new ResponseEntity<>(new NumberOfAnnotationsResponse(componentUrl, annotationCount, graph, sparqlGet),
@@ -1037,7 +1039,7 @@ public class QanaryQuestionAnsweringController {
         QanaryQuestion<?> myQanaryQuestion = new QanaryQuestion(myQanaryMessage, this.qanaryConfigurator);
         URI question = myQanaryQuestion.getUri();
 
-        logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", componentsToBeCalled,
+        logger.info("calling components \"{}\" on named graph \"{}\" and endpoint \"{}\"", sanitize(componentsToBeCalled),
                 myQanaryMessage.getEndpoint(), myQanaryMessage.getInGraph());
 
         QanaryQuestionAnsweringRun myRun = this.executeComponentList(question, componentsToBeCalled, myQanaryMessage);
