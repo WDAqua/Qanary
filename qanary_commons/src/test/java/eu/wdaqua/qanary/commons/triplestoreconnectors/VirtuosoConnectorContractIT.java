@@ -2,6 +2,7 @@ package eu.wdaqua.qanary.commons.triplestoreconnectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.time.Duration;
@@ -9,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -56,31 +56,22 @@ class VirtuosoConnectorContractIT extends AbstractQanaryTripleStoreConnectorCont
         return connector;
     }
 
-    // ---- documented deviations from the contract -----------------------------
-    // The VirtGraph (virtuoso-jena) driver does not make a just-inserted triple
-    // visible to an immediate SELECT for a specific subject on the same connection
-    // (CONSTRUCT and the count query do see it). This is a known quirk -- see this
-    // package's README.adoc -- so these contract methods are explicitly disabled
-    // for Virtuoso rather than silently weakened for every connector.
-
-    @Override
-    @Disabled("VirtGraph: a just-inserted triple is not visible to an immediate SELECT on the same connection (see README.adoc)")
-    @Test
-    void insertedTripleIsSelectable() {
-    }
-
-    @Override
-    @Disabled("VirtGraph: a just-inserted triple is not visible to an immediate SELECT on the same connection (see README.adoc)")
-    @Test
-    void multipleInsertsAreAllSelectable() {
-    }
-
     // ---- Virtuoso-specific (not part of the cross-connector contract) --------
 
     @Test
     void exposesEndpointDescription() {
         assertNotNull(connector.getVirtuosoUrl());
         assertNotNull(connector.getFullEndpointDescription());
+    }
+
+    @Test
+    void queryWithoutGraphReadsAllGraphsAsOnVirtuososSparqlEndpoint() throws SparqlQueryFailed {
+        String s = "urn:qanary:contract:default-graph:" + UUID.randomUUID();
+        connector.update("INSERT DATA { GRAPH <" + GRAPH + "> { <" + s + "> <urn:p> <urn:o> . } }");
+        assertTrue(connector.select("SELECT ?o WHERE { <" + s + "> <urn:p> ?o }").hasNext(),
+                "without FROM or GRAPH, the default graph is the union of all graphs");
+        assertTrue(connector.select("SELECT ?o FROM <" + GRAPH + "> WHERE { <" + s + "> <urn:p> ?o }").hasNext());
+        assertFalse(connector.select("SELECT ?o FROM <" + OTHER_GRAPH + "> WHERE { <" + s + "> <urn:p> ?o }").hasNext());
     }
 
     @Test

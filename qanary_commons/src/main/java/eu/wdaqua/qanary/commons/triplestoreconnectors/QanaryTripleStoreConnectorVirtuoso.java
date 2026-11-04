@@ -100,6 +100,10 @@ public class QanaryTripleStoreConnectorVirtuoso extends QanaryTripleStoreConnect
             try {
                 connection = new VirtGraph(this.getVirtuosoUrl(), this.getUsername(), this.getPassword());
                 connection.setQueryTimeout(getTimeout());
+                // otherwise, every query is prefixed with "define input:default-graph-uri <virt:DEFAULT>",
+                // with which Virtuoso evaluates "GRAPH <iri> { ... }" wrongly (no rows in SELECT, true in ASK);
+                // the queries are now evaluated like on Virtuoso's SPARQL endpoint
+                connection.setReadFromAllGraphs(true);
                 getLogger().info("Virtuoso server connected at {}", this.getVirtuosoUrl());
                 return;
             } catch (Exception e) {
