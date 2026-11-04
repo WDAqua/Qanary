@@ -5,6 +5,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,9 @@ public class QanaryTripleStoreConnectorQanaryInternal extends QanaryTripleStoreC
 
     @Override
     public void connect() {
-        org.apache.jena.query.ARQ.init();  // maybe it helps to prevent problems?
+        // JenaSystem first: as the first use of Jena, ARQ.init() fails in the static initializers of Jena
+        JenaSystem.init();
+        org.apache.jena.query.ARQ.init();
         this.connection = RDFConnection.connect(this.getEndpoint().toASCIIString());
     }
 
