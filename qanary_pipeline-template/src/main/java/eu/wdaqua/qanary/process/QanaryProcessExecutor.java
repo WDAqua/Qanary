@@ -13,12 +13,14 @@ import eu.wdaqua.qanary.process.QanaryProcessDefinition.ParallelStep;
 import eu.wdaqua.qanary.process.QanaryProcessDefinition.Step;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +165,11 @@ public class QanaryProcessExecutor {
 				parallel.streams().stream().map(NamedStream::name).toList());
 
 		List<Future<QanaryQuestionAnsweringFinished>> results = new ArrayList<>();
-		try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+		// the thread name shows the stream in the log messages
+		Iterator<NamedStream> streamOfNextThread = parallel.streams().iterator();
+		ThreadFactory threadOfStream = task -> Thread.ofVirtual()
+				.name("qanary-stream-" + streamOfNextThread.next().name()).unstarted(task);
+		try (ExecutorService executor = Executors.newThreadPerTaskExecutor(threadOfStream)) {
 			for (NamedStream stream : parallel.streams()) {
 				results.add(executor.submit(() -> runStream(stream, message, availableComponents)));
 			}
@@ -190,8 +196,6 @@ public class QanaryProcessExecutor {
 
 	private QanaryQuestionAnsweringFinished runStream(NamedStream stream, QanaryMessage message,
 			Map<String, QanaryComponent> availableComponents) throws QanaryExceptionServiceCallNotOk {
-		// the thread name shows the stream in the log messages
-		Thread.currentThread().setName("qanary-stream-" + stream.name());
 		logger.info("parallel stream \"{}\" starts: {}", stream.name(), stream.steps());
 		QanaryQuestionAnsweringFinished protocol = new QanaryQuestionAnsweringFinished(message);
 		protocol.startQuestionAnswering();
