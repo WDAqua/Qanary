@@ -48,6 +48,18 @@ class QanaryExceptionsTest {
     }
 
     @Test
+    void subclassesDescribeFailedCallsWithTheirOwnMessage() {
+        // e.g., the failure of several parallel streams of a process
+        QanaryExceptionServiceCallNotOk ex = new QanaryExceptionServiceCallNotOk("2 parallel stream(s) failed", "comp", 9L) {
+            private static final long serialVersionUID = 1L;
+        };
+        assertEquals("2 parallel stream(s) failed", ex.getMessage());
+        assertEquals("2 parallel stream(s) failed", ex.getErrormessageHttpStatus());
+        assertEquals("comp", ex.getComponentName());
+        assertEquals(9L, ex.getDuration());
+    }
+
+    @Test
     void sparqlQueryFailedKeepsQueryTriplestoreAndCause() {
         Exception cause = new IllegalStateException("syntax error");
         SparqlQueryFailed ex = new SparqlQueryFailed("SELECT * WHERE {}", "http://localhost/sparql", cause);

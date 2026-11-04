@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
+import de.codecentric.boot.admin.server.domain.events.InstanceDeregisteredEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceRegisteredEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceStatusChangedEvent;
 import de.codecentric.boot.admin.server.domain.values.InstanceId;
@@ -89,6 +90,26 @@ class QanaryComponentRegistrationChangeNotifierCoverageTest {
                 .block();
 
         assertTrue(notifier.getAvailableComponents().isEmpty());
+    }
+
+    @Test
+    void deregisteredComponentIsNoLongerCalled() {
+        Instance up = instance("NED-Leaving", "http://127.0.0.1:9007/", StatusInfo.ofUp());
+        statusChanged(up);
+        Instance deregistered = up.deregister();
+        notifier.doNotify(new InstanceDeregisteredEvent(up.getId(), 3L), deregistered).block();
+
+        assertTrue(notifier.getAvailableComponents().isEmpty());
+        assertTrue(notifier.getAvailableComponentsFromNames(List.of("NED-Leaving")).isEmpty());
+    }
+
+    @Test
+    void deregistrationOfAnotherInstanceKeepsTheComponent() {
+        statusChanged(instance("NED-Staying", "http://127.0.0.1:9008/", StatusInfo.ofUp()));
+        Instance other = instance("NED-Other", "http://127.0.0.1:9009/", StatusInfo.ofUp());
+        notifier.doNotify(new InstanceDeregisteredEvent(other.getId(), 3L), other.deregister()).block();
+
+        assertEquals(List.of("NED-Staying"), notifier.getAvailableComponentNames());
     }
 
     @Test

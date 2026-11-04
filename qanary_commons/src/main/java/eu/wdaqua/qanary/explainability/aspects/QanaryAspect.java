@@ -31,6 +31,9 @@ public class QanaryAspect {
     private URI processGraph = null;
     private Map<String, MethodObject> methodList = new HashMap<>();
     private boolean activeTracing = false;
+    // the thread that started the traced pipeline process; the call stack and method list are shared, so
+    // methods executed by other threads (e.g., the parallel streams of a process) are not traced
+    private volatile Thread tracedPipelineThread = null;
     private String crossComponentProcessId;
     private String applicationName = null;
 
@@ -175,7 +178,7 @@ public class QanaryAspect {
 
     @Before(value = "anyQanaryAndPipelineExecution()")
     public void implementationStoreMethodExecutionInComponentBeforeForPipeline(JoinPoint joinPoint) {
-        if (this.activeTracing)
+        if (this.activeTracing && isTracedThread())
             addMethodFromJoinPointToList(joinPoint);
     }
 
@@ -194,10 +197,20 @@ public class QanaryAspect {
 
     @Before(value = "startProcessForPipeline()")
     public void startProcessForPipelineBefore(JoinPoint joinPoint) {
-        logger.info("Starting process for pipeline");
-        callStack.clear();
-        methodList.clear();
-        activeTracing = true;
+        synchronized (this) {
+            Thread traced = tracedPipelineThread;
+            if (traced != null && traced != Thread.currentThread()) {
+                // another process is traced right now; as call stack, method list and process graph are shared,
+                // this process stays untraced instead of mixing its methods into the other process's graph
+                logger.info("Starting process for pipeline without trace (another process is traced)");
+                return;
+            }
+            logger.info("Starting process for pipeline");
+            callStack.clear();
+            methodList.clear();
+            tracedPipelineThread = Thread.currentThread();
+            activeTracing = true;
+        }
         implementationStoreMethodExecutionInComponentBeforeForPipeline(joinPoint);
     }
 
@@ -205,6 +218,11 @@ public class QanaryAspect {
     public void setTriplestoreAndGraphForPipeline(JoinPoint joinPoint) throws URISyntaxException {
         // Skip aspect execution if we're in a test
         if (isTestEnvironment()) {
+            return;
+        }
+
+        // an untraced process (see startProcessForPipelineBefore) must not change the graph of the traced one
+        if (!isTracedThread()) {
             return;
         }
 
@@ -235,7 +253,7 @@ public class QanaryAspect {
 
     @AfterReturning(value = "componentAspect() || anyQanaryAndPipelineExecution() || processExecution()", returning = "result")
     public void implementationStoreMethodExecutionInComponentAfter(JoinPoint joinPoint, Object result) {
-        if (isActiveTracing()) {
+        if (isActiveTracing() && isTracedThread()) {
             updateMethodWithReturnedValue(result, false);
             getLogger().debug("Logging method '{}' completed, callstack: {}", joinPoint.getSignature().getName(), getCallStack());
             // Log all stack items
@@ -275,6 +293,25 @@ public class QanaryAspect {
         implementationStoreMethodExecutionInComponentAfter(joinPoint, result);
     }
 
+    /**
+     * A process that ends with an exception leaves calls without results on the stack: its trace is discarded, so
+     * that the next process is traced again.
+     */
+    @AfterThrowing(value = "startProcessForPipeline()")
+    public void endProcessForPipelineWithException(JoinPoint joinPoint) {
+        synchronized (this) {
+            if (tracedPipelineThread != Thread.currentThread()) {
+                return;
+            }
+            logger.warn("Pipeline process ended with an exception; its trace is discarded");
+            getCallStack().clear();
+            getMethodList().clear();
+            setProcessGraph(null);
+            setActiveTracing(false);
+            tracedPipelineThread = null;
+        }
+    }
+
 
     // Helper methods //
 
@@ -286,6 +323,16 @@ public class QanaryAspect {
         logMethods(getMethodList());
         setProcessGraph(null);
         getMethodList().clear();
+        tracedPipelineThread = null;
+    }
+
+    /**
+     * Whether a method executed by the current thread is traced: in a component every thread is, in the pipeline
+     * only the thread that started the traced process.
+     */
+    private boolean isTracedThread() {
+        Thread tracedThread = tracedPipelineThread;
+        return tracedThread == null || tracedThread == Thread.currentThread();
     }
 
     /**

@@ -125,4 +125,19 @@ public class QanaryQuestionAnsweringFinished {
 	public List<ComponentExecutionLog> getExtendedProtocol() {
 		return this.extendedProtocol;
 	}
+
+	/**
+	 * append the protocol of a part of this process (e.g., the components of a
+	 * parallel stream) to the protocol of this process
+	 *
+	 * @param part a process part whose question answering was started
+	 */
+	public void appendProtocol(QanaryQuestionAnsweringFinished part) {
+		if (part.protocol != null) {
+			this.protocol.addAll(part.protocol);
+		}
+		if (part.extendedProtocol != null) {
+			this.extendedProtocol.addAll(part.extendedProtocol);
+		}
+	}
 }

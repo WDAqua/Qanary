@@ -4,10 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,9 +24,23 @@ public class RestTemplateWithCaching extends RestTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestTemplateWithCaching.class);
 
     public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, String restTemplateSetting) {
+        this(myCacheResponse, restTemplateSetting, Duration.ZERO, Duration.ZERO);
+    }
+
+    /**
+     * @param myCacheResponse     the cache, used if restTemplateSetting is "caching" or "both"
+     * @param restTemplateSetting "caching", "logging", "both" or anything else for neither
+     * @param connectTimeout      time to wait for a connection; zero waits without limit
+     * @param readTimeout         time to wait for data of an answer (e.g., of a Qanary component); zero waits
+     *                            without limit
+     */
+    public RestTemplateWithCaching(CacheOfRestTemplateResponse myCacheResponse, String restTemplateSetting,
+                                   Duration connectTimeout, Duration readTimeout) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeout);
+        requestFactory.setReadTimeout(readTimeout);
         // buffer responses so they can be read multiple times (needed when caching)
-        ClientHttpRequestFactory currentFactory = this.getRequestFactory();
-        this.setRequestFactory(new BufferingClientHttpRequestFactory(currentFactory));
+        this.setRequestFactory(new BufferingClientHttpRequestFactory(requestFactory));
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {

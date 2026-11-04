@@ -63,12 +63,14 @@ import eu.wdaqua.qanary.business.QanaryConfigurator;
 import eu.wdaqua.qanary.business.TriplestoreEndpointIdentifier;
 import eu.wdaqua.qanary.commons.QanaryMessage;
 import eu.wdaqua.qanary.exceptions.AdditionalTriplesCouldNotBeAdded;
+import eu.wdaqua.qanary.exceptions.ParallelStreamsFailedException;
 import eu.wdaqua.qanary.exceptions.QanaryExceptionServiceCallNotOk;
 import eu.wdaqua.qanary.exceptions.SparqlQueryFailed;
 import eu.wdaqua.qanary.exceptions.TripleStoreNotProvided;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringFinished;
 import eu.wdaqua.qanary.message.QanaryQuestionAnsweringRun;
 import eu.wdaqua.qanary.message.QanaryQuestionCreated;
+import eu.wdaqua.qanary.process.QanaryProcessDefinition;
 import eu.wdaqua.qanary.web.messages.AdditionalTriples;
 import eu.wdaqua.qanary.web.messages.NumberOfAnnotationsResponse;
 import eu.wdaqua.qanary.web.messages.QanaryQuestionAnsweringError;
@@ -592,5 +594,195 @@ class QanaryQuestionAnsweringControllerUnitTest {
         try (Stream<Path> files = Files.list(additionalTriplesDirectory)) {
             assertEquals(0, files.count());
         }
+    }
+
+    // ---- process definitions with parallel streams (JSON requests) -----------------------------------
+
+    /**
+     * registers the given components and records the component names of every callServices call; a component
+     * that is assigned a failure in {@code componentFailures} throws it
+     */
+    private List<List<String>> registerComponentsAndRecordCalls(Map<String, Exception> componentFailures,
+                                                                String... names) throws Exception {
+        for (String name : names) {
+            registeredComponents.put(name, new QanaryComponent(name, "http://127.0.0.1:1/" + name, true));
+        }
+        List<List<String>> calls = java.util.Collections.synchronizedList(new ArrayList<>());
+        when(configurator.callServices(anyList(), any())).thenAnswer(invocation -> {
+            List<QanaryComponent> components = invocation.getArgument(0);
+            List<String> componentNames = components.stream().map(QanaryComponent::getName).toList();
+            calls.add(componentNames);
+            for (String name : componentNames) {
+                if (componentFailures.containsKey(name)) {
+                    throw componentFailures.get(name);
+                }
+            }
+            QanaryQuestionAnsweringFinished finished = new QanaryQuestionAnsweringFinished(invocation.getArgument(1));
+            finished.startQuestionAnswering();
+            finished.endQuestionAnswering();
+            return finished;
+        });
+        return calls;
+    }
+
+    private static String jsonRequest(String componentlist) {
+        return "{\"question\": \"Who invented the Hawaiian pizza?\", \"componentlist\": " + componentlist + "}";
+    }
+
+    private static QanaryProcessDefinition definition(String componentlist) {
+        return tools.jackson.databind.json.JsonMapper.builder().build()
+                .readValue(componentlist, QanaryProcessDefinition.class);
+    }
+
+    @Test
+    void theComponentlistOfAJsonRequestIsExecuted() throws Exception {
+        List<List<String>> calls = registerComponentsAndRecordCalls(Map.of());
+
+        mvc.perform(post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest("[\"NED-DBpediaSpotlight\", \"QB-Simple\"]")))
+                .andExpect(status().isCreated());
+
+        // as before: one sequence of components
+        assertEquals(List.of(List.of("NED-DBpediaSpotlight", "QB-Simple")), calls);
+    }
+
+    @Test
+    void parallelStreamsAreExecutedThroughBothJsonEndpoints() throws Exception {
+        for (String endpoint : List.of("/startquestionansweringwithtextquestion",
+                "/startquestionansweringwithtextquestionThroughJson")) {
+            List<List<String>> calls = registerComponentsAndRecordCalls(Map.of(), "a", "b", "c", "d", "e");
+
+            MvcResult result = mvc.perform(post(endpoint)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonRequest("[\"a\", {\"p1\": [\"b\"], \"x\": [\"c\", \"d\"]}, \"e\"]")))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            assertEquals(4, calls.size(), endpoint + ": " + calls);
+            assertEquals(List.of("a"), calls.get(0));
+            assertEquals(java.util.Set.of(List.of("b"), List.of("c", "d")), java.util.Set.copyOf(calls.subList(1, 3)));
+            assertEquals(List.of("e"), calls.get(3));
+            // the finished process is listed
+            URI graph = URI.create(json(result).getString("inGraph"));
+            assertNotNull(controller.getLastQanaryQuestionAnsweringProcesses().getBody().get(graph));
+        }
+    }
+
+    @Test
+    void anInvalidComponentlistIsRejectedWithAnExplanation() throws Exception {
+        mvc.perform(post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest("[\"a\", {\"p1\": []}]")))
+                .andExpect(status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Invalid componentlist"))
+                .andExpect(jsonPath("$.detail").value("the parallel stream \"p1\" contains no component"));
+
+        mvc.perform(post("/startquestionansweringwithtextquestionThroughJson")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest("[{\"p1\": [\"a\"], \"p1\": [\"b\"]}]")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.startsWith(
+                        "the stream name \"p1\" is used more than once")));
+
+        // nothing was started
+        verify(questionController, never()).storeQuestion(anyString());
+        verify(configurator, never()).callServices(anyList(), any());
+    }
+
+    @Test
+    void otherUnreadableRequestsAreStillBadRequests() throws Exception {
+        MvcResult syntaxError = mvc.perform(post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"question\": "))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertEquals("", syntaxError.getResponse().getContentAsString());
+
+        mvc.perform(post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"question\": \"Who?\", \"targetdata\": {\"a\": 1}}"))
+                .andExpect(status().isBadRequest());
+
+        // an invalid process definition that does not come from a request is not a bad request
+        assertThrows(org.springframework.http.converter.HttpMessageNotReadableException.class,
+                () -> controller.handleUnreadableRequest(
+                        new org.springframework.http.converter.HttpMessageNotReadableException("broken",
+                                new org.springframework.mock.http.MockHttpInputMessage(new byte[0]))));
+    }
+
+    @Test
+    void failuresOfParallelStreamsAreRecordedWithTheStreamName() throws Exception {
+        registerComponentsAndRecordCalls(Map.of( //
+                "c", new QanaryExceptionServiceCallNotOk("c", 3, "HTTP 500 from component", "stacktrace"), //
+                "b", new IllegalStateException("SPARQL endpoint: Connection refused")), //
+                "a", "b", "c", "d", "e");
+        URI question = URI.create("urn:qanary:question:" + UUID.randomUUID());
+        URI graph = URI.create("urn:graph:" + UUID.randomUUID());
+
+        ParallelStreamsFailedException e = assertThrows(ParallelStreamsFailedException.class,
+                () -> controller.executeComponentList(question,
+                        definition("[\"a\", {\"p1\": [\"b\"], \"x\": [\"c\", \"d\"]}, \"e\"]"),
+                        new QanaryMessage(ENDPOINT, graph)));
+
+        assertEquals(2, e.getFailures().size());
+        List<QanaryQuestionAnsweringError> errors = errorsFor(question);
+        assertEquals(2, errors.size());
+        assertEquals("p1", errors.get(0).getStream());
+        assertNull(errors.get(0).getComponent());
+        assertEquals(ErrorType.TRIPLESTORE_NOT_ACCESSIBLE, errors.get(0).getType());
+        assertEquals("x", errors.get(1).getStream());
+        assertEquals("c", errors.get(1).getComponent());
+        assertEquals(ErrorType.COMPONENT_EXECUTION_FAILED, errors.get(1).getType());
+        assertTrue(errors.get(1).getMessage().contains("HTTP 500 from component"), errors.get(1).getMessage());
+        // the failed process is not listed as finished
+        assertNull(controller.getLastQanaryQuestionAnsweringProcesses().getBody().get(graph));
+
+        // the stream is part of the error report
+        mvc.perform(get(QanaryQuestionAnsweringController.QUESTIONANSWERING + "/errors")
+                        .param("questionuri", question.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].stream").value("p1"))
+                .andExpect(jsonPath("$[1].stream").value("x"))
+                .andExpect(jsonPath("$[1].component").value("c"));
+    }
+
+    @Test
+    void aFailingParallelStreamEndsTheJsonRequest() throws Exception {
+        registerComponentsAndRecordCalls(
+                Map.of("c", new QanaryExceptionServiceCallNotOk("c", 3, "HTTP 500 from component", "stacktrace")),
+                "a", "b", "c", "d", "e");
+
+        ServletException e = assertThrows(ServletException.class,
+                () -> mvc.perform(post("/startquestionansweringwithtextquestion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest("[\"a\", {\"p1\": [\"b\"], \"x\": [\"c\", \"d\"]}, \"e\"]"))));
+
+        ParallelStreamsFailedException failure = assertInstanceOf(ParallelStreamsFailedException.class, e.getCause());
+        assertEquals("x", failure.getFailures().get(0).stream());
+        assertEquals("c", failure.getComponentName());
+    }
+
+    @Test
+    void unavailableComponentsAreRecordedWithTheirStream() throws Exception {
+        List<List<String>> calls = registerComponentsAndRecordCalls(Map.of(), "a", "c");
+        URI question = URI.create("urn:qanary:question:" + UUID.randomUUID());
+        URI graph = URI.create("urn:graph:" + UUID.randomUUID());
+
+        controller.executeComponentList(question, definition("[\"missing1\", \"a\", {\"p1\": [\"missing2\"], \"x\": [\"c\"]}]"),
+                new QanaryMessage(ENDPOINT, graph));
+
+        List<QanaryQuestionAnsweringError> errors = errorsFor(question);
+        assertEquals(2, errors.size());
+        assertEquals(List.of("missing1", "missing2"), errors.stream().map(QanaryQuestionAnsweringError::getComponent).toList());
+        assertNull(errors.get(0).getStream());
+        assertEquals("p1", errors.get(1).getStream());
+        assertTrue(errors.stream().allMatch(error -> error.getType() == ErrorType.COMPONENT_NOT_AVAILABLE));
+        // the process continued with the available components
+        assertEquals(List.of(List.of("a"), List.of("c")), calls);
+        assertNotNull(controller.getLastQanaryQuestionAnsweringProcesses().getBody().get(graph));
     }
 }

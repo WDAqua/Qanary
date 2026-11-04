@@ -3,6 +3,7 @@ package eu.wdaqua.qanary.communications;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,12 @@ import java.util.List;
 public class RestTemplateWithProcessId extends RestTemplateWithCaching {
 
     public RestTemplateWithProcessId(String restTemplateSetting, CacheOfRestTemplateResponse cacheOfRestTemplateResponse) {
-        super(cacheOfRestTemplateResponse, restTemplateSetting);
+        this(restTemplateSetting, cacheOfRestTemplateResponse, Duration.ZERO, Duration.ZERO);
+    }
+
+    public RestTemplateWithProcessId(String restTemplateSetting, CacheOfRestTemplateResponse cacheOfRestTemplateResponse,
+                                     Duration connectTimeout, Duration readTimeout) {
+        super(cacheOfRestTemplateResponse, restTemplateSetting, connectTimeout, readTimeout);
 
         List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
         if (CollectionUtils.isEmpty(interceptors)) {

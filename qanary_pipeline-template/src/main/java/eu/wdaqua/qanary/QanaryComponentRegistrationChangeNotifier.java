@@ -1,7 +1,7 @@
 package eu.wdaqua.qanary;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
+import de.codecentric.boot.admin.server.domain.events.InstanceDeregisteredEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceStatusChangedEvent;
 import de.codecentric.boot.admin.server.notify.AbstractEventNotifier;
@@ -22,7 +23,8 @@ import reactor.core.publisher.Mono;
 public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNotifier {
 	private static final Logger logger = LoggerFactory.getLogger(QanaryComponentRegistrationChangeNotifier.class);
 
-	private Map<String, Instance> availableComponents = new HashMap<>();
+	// written by the notifications of Spring Boot Admin, read by the question answering processes
+	private Map<String, Instance> availableComponents = new ConcurrentHashMap<>();
 
 	public QanaryComponentRegistrationChangeNotifier(InstanceRepository repository) {
 		super(repository);
@@ -31,6 +33,15 @@ public class QanaryComponentRegistrationChangeNotifier extends AbstractEventNoti
 
 	@Override
 	protected Mono<Void> doNotify(InstanceEvent event, Instance instance) {
+		if (event instanceof InstanceDeregisteredEvent) {
+			// a component deregisters (e.g., when it stops): it is no longer called; a deregistered instance has
+			// no registration (and no name) anymore, so it is found by its id
+			return Mono.fromRunnable(() -> {
+				if (availableComponents.values().removeIf(known -> known.getId().equals(event.getInstance()))) {
+					logger.info("Instance {} deregistered; it is no longer available", event.getInstance());
+				}
+			});
+		}
 		String instanceName = instance.getRegistration().getName();
 		return Mono.fromRunnable(() -> {
 			if (event instanceof InstanceStatusChangedEvent) {

@@ -40,6 +40,16 @@ public class QanaryExceptionServiceCallNotOk extends Exception {
 		this.errormessage = message + "\n" + stackTrace;
 	}
 
+	/**
+	 * for subclasses that describe the failed call(s) with their own message
+	 */
+	protected QanaryExceptionServiceCallNotOk(String message, String componentName, long duration) {
+		super(message);
+		this.componentName = componentName;
+		this.duration = duration;
+		this.errormessage = message;
+	}
+
 	public long getDuration() {
 		return duration;
 	}

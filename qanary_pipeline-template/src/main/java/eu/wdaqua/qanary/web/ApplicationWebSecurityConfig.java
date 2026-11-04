@@ -33,6 +33,7 @@ public class ApplicationWebSecurityConfig {
 		"/gerbil*/**",
 		"/login",
 		"/instances",
+		"/instances/*", // DELETE /instances/{id}: a component deregisters (Spring Boot Admin client)
 		"/applications/**",
 		"/sparql",
 		"/explain"

@@ -54,4 +54,25 @@ class QanaryQuestionAnsweringFinishedTest {
         assertEquals(19, finished.getEndOfQuestionAnswering().length());
         assertTrue(finished.toString().contains("question answering"));
     }
+
+    @Test
+    void theProtocolsOfProcessPartsAreAppendedInOrder() throws URISyntaxException {
+        QanaryQuestionAnsweringFinished process = new QanaryQuestionAnsweringFinished(message());
+        process.startQuestionAnswering();
+        process.appendProtocol(new QanaryComponent("a", "http://localhost:1", true), HttpStatus.OK, 1L);
+        QanaryQuestionAnsweringFinished stream = new QanaryQuestionAnsweringFinished(message());
+        stream.startQuestionAnswering();
+        stream.appendProtocol(new QanaryComponent("b", "http://localhost:2", true), HttpStatus.OK, 2L);
+        stream.appendProtocol(new QanaryComponent("c", "http://localhost:3", true), HttpStatus.OK, 3L);
+
+        process.appendProtocol(stream);
+        // a part that was never started has no protocol
+        process.appendProtocol(new QanaryQuestionAnsweringFinished(message()));
+
+        assertEquals(3, process.getCompactProtocol().size());
+        assertTrue(process.getCompactProtocol().get(1).startsWith("b "));
+        assertEquals(java.util.List.of("a", "b", "c"), process.getExtendedProtocol().stream()
+                .map(QanaryQuestionAnsweringFinished.ComponentExecutionLog::getComponentName).toList());
+        assertEquals(2, stream.getCompactProtocol().size()); // the part is not changed
+    }
 }
