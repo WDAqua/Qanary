@@ -17,7 +17,7 @@
   <artifactId>mvn.reactor</artifactId>
   <!-- Release version (not SNAPSHOT): this parent is published to Maven Central
        so the released modules can resolve it as their parent. -->
-  <version>5.1.1</version>
+  <version>5.1.2</version>
   <packaging>pom</packaging>
 
   <!-- Metadata required by Maven Central (the released modules use this as their
@@ -60,12 +60,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Qanary artifact versions (pinned; task 2.1) -->
-    <qanary.version>5.1.1</qanary.version>
-    <qanary.components.version>5.1.1</qanary.components.version>
+    <qanary.version>5.1.2</qanary.version>
+    <qanary.components.version>5.1.2</qanary.components.version>
 
     <!-- shared library versions -->
-    <jena.version>5.3.0</jena.version>
-    <spring-boot-admin.version>4.1.4</spring-boot-admin.version>
+    <jena.version>5.6.0</jena.version>
+    <spring-boot-admin.version>4.1.5</spring-boot-admin.version>
     <springdoc.version>3.0.3</springdoc.version>
     <stardog.version>8.2.2</stardog.version>
     <virtuoso-jena.version>1.44</virtuoso-jena.version>
