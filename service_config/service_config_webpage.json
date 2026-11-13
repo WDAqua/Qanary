@@ -1,0 +1,13 @@
+{
+  "services": [
+    {
+      "mode": "dockerfile",
+      "port": "40121:80",
+      "image": "qanary/qanary-webpage",
+      "tag": "latest"
+    }
+  ],
+  "ids": {
+    "0": "qanary-qanary-webpage"
+  }
+}
