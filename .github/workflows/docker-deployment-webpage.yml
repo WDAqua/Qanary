@@ -33,5 +33,8 @@ jobs:
       - name: Trigger deployment
         uses: WSE-research/docker-service-updater@v0.2.1
         with:
+          # only the webpage: service_config.json also re-creates the pipeline, and without
+          # build_images.sh its .env would keep the placeholder SECRETS_VIRTUOSO_PASSWORD
+          config_file: service_config/service_config_webpage.json
           api_key: ${{ secrets.API_KEY }}
           updater_host: ${{ secrets.UPDATER_HOST }}
